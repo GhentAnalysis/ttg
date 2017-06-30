@@ -117,6 +117,8 @@ def makeInvariantMasses(t, n):
   photon = ROOT.TLorentzVector()
   photon.SetPtEtaPhiE(t._phPt[n.ph], t._phEta[n.ph], t._phPhi[n.ph], t._phE[n.ph])
   n.mllg = (first+second+photon).M()
+  n.ml1g = (first+photon).M()
+  n.ml2g = (second+photon).M()
 
 
 #
