@@ -93,7 +93,7 @@ triggerEff       = triggerEfficiency()
 # Define new branches
 #
 newBranches  = ['l1/I','l2/I','isEE/O','isMuMu/O','isEMu/O','ph/I','looseLeptonVeto/O']
-newBranches += ['mll/F','mllg/F','phL1DeltaR/F','phL2DeltaR/F','phJetDeltaR/F']
+newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F','phJetDeltaR/F']
 newBranches += ['njets/I','j1/I','j2/I','nbjets/I']
 
 if not sample.isData:
