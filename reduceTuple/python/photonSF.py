@@ -13,7 +13,7 @@ keys    = [("photonSF_CB_tight.root", "EGamma_SF2D")]
 
 class photonSF:
   def __init__(self):
-    self.pho  = [getObjFromFile(os.path.expandvars(os.path.join(self.dataDir, file)), key) for (file, key) in keys]
+    self.pho  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, file)), key) for (file, key) in keys]
     for effMap in self.pho: assert effMap
 
   def getPartialSF(self, effMap, pt, eta):
