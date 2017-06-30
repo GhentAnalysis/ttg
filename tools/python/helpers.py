@@ -1,4 +1,4 @@
-import ROOT, os
+import ROOT, os, shutil
 
 #
 # Get object (e.g. hist) from file using key
