@@ -1,0 +1,8 @@
+-- MC
+TTJets_Dilep               t#bar{t}_(#sigma_{i#etai#eta}_<_0.012)             fillStyle     kCyan                    _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+TTJets_Dilep               t#bar{t}_(#sigma_{i#etai#eta}_>_0.012)             fillStyle     kBlue                    _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
