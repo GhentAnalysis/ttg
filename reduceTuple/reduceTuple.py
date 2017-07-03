@@ -106,8 +106,8 @@ newVars = makeBranches(outputTree, newBranches)
 
 c.photonCutBasedTight = args.type.count('photonCBT')
 c.photonMva           = args.type.count('photonMva')
-c.eleMva              = args.type.count('electronMvaMedium')
-c.eleMvaTight         = args.type.count('electronMvaTight')
+c.eleMva              = args.type.count('eleMvaMedium')
+c.eleMvaTight         = args.type.count('eleMvaTight')
 
 #
 # Loop over the tree and make new vars
