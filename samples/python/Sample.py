@@ -65,9 +65,12 @@ class Sample:
       self.listOfFiles  = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
       self.listOfFiles += glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
     if shortDebug: self.listOfFiles = self.listOfFiles[:3]
+    if not len(self.listOfFiles): log.error('No tuples to run over for ' + self.name)
     for i in self.listOfFiles:
-      log.debug("Adding " + i)
-      self.chain.Add(i)
+      if i.count('pnfs'): path = 'dcap://maite.iihe.ac.be/' + i                         # Speed up read from pnfs
+      else:               path = i
+      log.debug("Adding " + path)
+      self.chain.Add(path)
     return self.chain
 
   # Helper function when sample is split in subjobs
@@ -86,7 +89,7 @@ class Sample:
   # Get iterator over entries
   def eventLoop(self, selectionString = None, totalJobs=1, subJob = 0):
     if self.selectionString and selectionString: selectionString += "&&" + self.selectionString
-    elif self.selectionString:                   selectionString += self.selectionString
+    elif self.selectionString:                   selectionString  = self.selectionString
     if selectionString: entries = self.getEventList(self.chain, selectionString, totalJobs, subJob)
     else:               entries = self.getEventRange(self.chain.GetEntries(), totalJobs, subJob)
     return progressbar(entries, self.name + ": ", 100)
