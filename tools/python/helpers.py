@@ -17,7 +17,7 @@ def getObjFromFile(fname, hname):
 #
 # Copy the index.php file to plotting directory
 #
-def copyIndexPHP(directory, topDir):
+def copyIndexPHP(directory):
   index_php = os.path.join(directory, 'index.php' )
   if not os.path.exists(directory): os.makedirs(directory)
   if not directory[-1] == '/': directory = directory+'/'
