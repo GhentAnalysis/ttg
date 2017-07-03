@@ -17,13 +17,14 @@ def getObjFromFile(fname, hname):
 #
 # Copy the index.php file to plotting directory
 #
-def copyIndexPHP(directory):
+def copyIndexPHP(directory, topDir):
   index_php = os.path.join(directory, 'index.php' )
   if not os.path.exists(directory): os.makedirs(directory)
   if not directory[-1] == '/': directory = directory+'/'
   subdirs = directory.split('/')
   for i in range(1,len(subdirs)):
     p = '/'.join(subdirs[:-i])
+    if not p.count('plots'): continue 
     index_php = os.path.join(p, 'index.php')
     shutil.copyfile(os.path.expandvars( '$CMSSW_BASE/src/ttg/tools/php/index.php'), index_php)
 
