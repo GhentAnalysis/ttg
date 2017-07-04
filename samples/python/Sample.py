@@ -152,7 +152,8 @@ def createStack(tuplesFile, styleFile, channel):
         else:                                   
           sample = getSampleFromList(sampleList, name)
         sample.addSelectionString(selectionString)
-        sample.addStyle(texName.replace('_',' '), style)
+        texName = texName.replace('_{','lower{').replace('_',' ').replace('lower{','_{')
+        sample.addStyle(texName, style)
         stack.append(sample)
   if len(stack): allStacks.append(stack)
   return allStacks
