@@ -12,7 +12,7 @@ import os, argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--sample',         action='store',      default=None)
-argParser.add_argument('--type',           action='store',      default='eleCutBased')
+argParser.add_argument('--type',           action='store',      default='eleCB-phoCB')
 argParser.add_argument('--subJob',         action='store',      default=None)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
@@ -105,6 +105,7 @@ from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
 
 c.photonCutBasedTight = args.type.count('photonCBT')
+c.photonCutBased      = args.type.count('phoCB')
 c.photonMva           = args.type.count('photonMva')
 c.eleMva              = args.type.count('eleMvaMedium')
 c.eleMvaTight         = args.type.count('eleMvaTight')
