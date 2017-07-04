@@ -84,17 +84,34 @@ def select2l(t, n):
   n.looseLeptonVeto = len([i for i in xrange(ord(t._nLight)) if looseLeptonSelector(t, i)]) <= 2
   return t._lPt[n.l1] > 25 and n.isOS
 
+
+def photonCutBasedReduced(c, index):
+  pt = c._phPt[index]
+  if abs(c._phEtaSC[index]) < 1.479:
+    if c._phHadronicOverEm[index] >  0.0396: return False
+    if c._phNeutralHadronIsolation[index] > 2.725+0.0148*pt+0.000017*pt*pt: return False
+    if c._phPhotonIsolation[index] >  2.571+0.0047*pt : return False
+  else:
+    if c._phHadronicOverEm[index] > 0.0219: return False
+    if c._phNeutralHadronIsolation[index] >  1.715+0.0163*pt+0.000014*pt*pt : return False
+    if c._phPhotonIsolation[index] >  3.863+0.0034*pt: return False
+  return True
+
+
+
+
 #
 # Select photon with pt > 20
 #
 def photonSelector(tree, index, n):
   if abs(tree._phEta[index]) > 2.5:                   return False
-  if tree._phPt[index] < 20:                          return False
+  if tree._phPt[index] < 15:                          return False
   if tree._phHasPixelSeed[index]:                     return False  # actually only one of the two recommended
   if not tree._phPassElectronVeto[index]:             return False
   for i in [n.l1, n.l2]:
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
   if tree.photonCutBasedTight:  return tree._phCutBasedTight[index]
+  if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
   if tree.photonMva:            return tree._phMva[index] > 0.20
   return True
 
