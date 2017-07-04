@@ -165,7 +165,7 @@ def goodJets(t, n):
   n.j2    = t.jets[1] if n.njets > 1 else -1
       
 def bJets(t, n):
-  btagWP = 0.800
+  btagWP = 0.8484
   bjets            = [i for i in t.jets         if t._jetCsvV2[i] > btagWP]
   bjets_JECUp      = [i for i in t.jets_JECUp   if t._jetCsvV2[i] > btagWP]
   bjets_JECDown    = [i for i in t.jets_JECDown if t._jetCsvV2[i] > btagWP]

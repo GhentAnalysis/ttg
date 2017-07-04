@@ -23,6 +23,7 @@ log = getLogger(args.logLevel)
 # Submit subjobs
 #
 if not args.isChild and args.selection is None:
+  if args.tag.count('sigmaIetaIeta'): args.channel = 'noData'
   from ttg.tools.jobSubmitter import submitJobs
   selections = ['llg',
                 'llg-looseLeptonVeto',
@@ -50,17 +51,19 @@ if not args.isChild and args.selection is None:
 import os, ROOT
 from ttg.plots.plot           import Plot
 from ttg.plots.cutInterpreter import cutInterpreter
+from ttg.reduceTuple.objectSelection import photonSelector
 from ttg.samples.Sample       import createStack
 from math import pi
 
 ROOT.gROOT.SetBatch(True)
 
-if args.tag.count('split'):   stackFile = 'stack-split'
-elif args.tag.count('ttbar'): stackFile = 'stack-onlyttbar'
-else:                         stackFile = 'stack'
+if args.tag.count('split'):           stackFile = 'split'
+elif args.tag.count('ttbar'):         stackFile = 'onlyttbar'
+elif args.tag.count('sigmaIetaIeta'): stackFile = 'sigmaIetaIeta'
+else:                                 stackFile = 'default'
 
 stack = createStack(tuplesFile = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data/tuples.conf'),
-                    styleFile  = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data', stackFile + '.conf'),
+                    styleFile  = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data', stackFile + '.stack'),
                     channel    = args.channel)
 
 
@@ -72,13 +75,15 @@ plots = []
 Plot.setDefaults(stack=stack)
 plots.append(Plot('yield',                  'yield',                           lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                  (3, 0.5, 3.5)))
 plots.append(Plot('nVertex',                'vertex multiplicity',             lambda c : ord(c._nVertex),                                                           (50, 0, 50)))
+plots.append(Plot('nphoton',                'number of photons',               lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),                (3, 0.5, 3.5)))
 plots.append(Plot('photon_pt',              'p_{T}(#gamma) (GeV)',             lambda c : c._phPt[c.ph],                                                             (10,20,220)))
 plots.append(Plot('photon_eta',             '|#eta|(#gamma)',                  lambda c : abs(c._phEta[c.ph]),                                                       (15,0,2.5)))
 plots.append(Plot('photon_phi',             '#phi(#gamma)',                    lambda c : c._phPhi[c.ph],                                                            (10,-pi,pi)))
 plots.append(Plot('photon_mva',             '#gamma-MVA',                      lambda c : c._phMva[c.ph],                                                            (20,-1,1)))
-plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma)',              lambda c : c._phChargedIsolation[c.ph],                                               (50,0,.5)))
-plots.append(Plot('photon_neutralIso',      'neutralIso(#gamma)',              lambda c : c._phNeutralHadronIsolation[c.ph],                                         (50,0,.5)))
-plots.append(Plot('photon_SigmaIetaIeta',   '#sigma_{i#eta i#eta}(#gamma)',    lambda c : c._phSigmaIetaIeta[c.ph],                                                  (20,0,0.3)))
+plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma)',              lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20)))
+plots.append(Plot('photon_neutralIso',      'neutralIso(#gamma)',              lambda c : c._phNeutralHadronIsolation[c.ph],                                         (25,0,5)))
+plots.append(Plot('photon_photonIso',       'photonIso(#gamma)',               lambda c : c._phPhotonIsolation[c.ph],                                                (32,0,8)))
+plots.append(Plot('photon_SigmaIetaIeta',   '#sigma_{i#eta i#eta}(#gamma)',    lambda c : c._phSigmaIetaIeta[c.ph],                                                  (20,0,0.04)))
 plots.append(Plot('photon_hadOverEm',       'hadronicOverEm(#gamma)',          lambda c : c._phHadronicOverEm[c.ph],                                                 (20,0,.025)))
 plots.append(Plot('l1_pt',                  'p_{T}(l_{1}) (GeV)',              lambda c : c._lPt[c.l1],                                                              (20,0,200)))
 plots.append(Plot('l1_eta',                 '|#eta|(l_{1})',                   lambda c : abs(c._lEta[c.l1]),                                                        (15,0,2.4)))
@@ -103,12 +108,12 @@ plots.append(Plot('j1_pt',                  'p_{T}(j_{1}) (GeV)',              l
 plots.append(Plot('j1_eta',                 '|#eta|(j_{1})',                   lambda c : abs(c._jetEta[c.j1])                           if c.njets > 0 else -1,     (15,0,2.5)))
 plots.append(Plot('j1_phi',                 '#phi(j_{1})',                     lambda c : c._jetPhi[c.j1]                                if c.njets > 0 else -10,    (10,-pi,pi)))
 plots.append(Plot('j1_csvV2',               'CSVv2(j_{1})',                    lambda c : c._jetCsvV2[c.j1]                              if c.njets > 0 else -10,    (20, 0, 1)))
-plots.append(Plot('j1_deepCSV',             'deepCSV(j_{1})',                  lambda c : c._jetDeepCsv_b[c.j1] + c._jetDeepCsv_bb[c.j1] if c.njets > 0 else -10,    (20, 0, 1)))
+#plots.append(Plot('j1_deepCSV',             'deepCSV(j_{1})',                  lambda c : c._jetDeepCsv_b[c.j1] + c._jetDeepCsv_bb[c.j1] if c.njets > 0 else -10,    (20, 0, 1)))  # still buggy
 plots.append(Plot('j2_pt',                  'p_{T}(j_{2}) (GeV)',              lambda c : c._jetPt[c.j2]                                 if c.njets > 1 else -1,     (30,0,300)))
 plots.append(Plot('j2_eta',                 '|#eta|(j_{2})',                   lambda c : abs(c._jetEta[c.j2])                           if c.njets > 1 else -1,     (15,0,2.5)))
 plots.append(Plot('j2_phi',                 '#phi(j_{2})',                     lambda c : c._jetPhi[c.j2]                                if c.njets > 1 else -10,    (10,-pi,pi)))
-plots.append(Plot('j2_csvV2',               'CSVv2(j_{2})',                    lambda c : c._jetCsvV2[c.j2]                              if c.njets > 0 else -10,    (20, 0, 1)))
-plots.append(Plot('j2_deepCSV',             'deepCSV(j_{2})',                  lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2] if c.njets > 0 else -10,    (20, 0, 1)))
+plots.append(Plot('j2_csvV2',               'CSVv2(j_{2})',                    lambda c : c._jetCsvV2[c.j2]                              if c.njets > 1 else -10,    (20, 0, 1)))
+#plots.append(Plot('j2_deepCSV',             'deepCSV(j_{2})',                  lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2] if c.njets > 1 else -10,    (20, 0, 1)))
 
 if args.channel=='noData':
   plots.append(Plot('eventType',            'eventType',                       lambda c : c._ttgEventType,                               (9, 0, 9)))
@@ -121,20 +126,28 @@ phoMva      = args.tag.count('phoMva')
 phoMvaTight = args.tag.count('phoMvaTight')
 eleCB       = args.tag.count('eleCB')
 eleMva      = args.tag.count('eleMva')
-
+sigmaieta   = args.tag.count('sigmaIetaIeta')
 
 cutString, passingFunctions = cutInterpreter.cutString(args.selection)
 if args.channel=="ee":   cutString += '&&isEE'
 if args.channel=="mumu": cutString += '&&isMuMu'
 if args.channel=="emu":  cutString += '&&isEMu'
 
+
+
+
 for sample in sum(stack, []):
-  c = sample.initTree(reducedType = 'eleCutBased' if eleCB else 'electronMvaMedium')
-  first = True
+  c = sample.initTree(reducedType = 'eleMvaMedium' if eleMva else 'eleCB-phoCB')
+  c.photonCutBased      = phoCB
+  c.photonCutBasedTight = False
+  c.photonMva           = phoMva
   for i in sample.eventLoop(cutString):
     c.GetEntry(i)
-    if phoCB and not c._phCutBasedTight[c.ph]: continue
     if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
+
+    if sigmaieta:
+      if   sample.texName.count('<') and c._phSigmaIetaIeta[c.ph] > 0.012: continue
+      elif sample.texName.count('>') and c._phSigmaIetaIeta[c.ph] < 0.012: continue
 
     if sample.name.count('DY') and args.selection.count('njet'): continue # statistics too low
     if not passingFunctions(c): continue
