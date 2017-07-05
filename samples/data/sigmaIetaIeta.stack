@@ -1,8 +1,22 @@
--- MC
-TTJets_Dilep               t#bar{t}_(#sigma_{i#etai#eta}_<_0.012)             fillStyle     kCyan                    _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+-- Data (pass sigmaIetaIeta)
+DoubleMuon                 data_(#sigma_{i#etai#eta}_pass):mumu,SF,all         lineStyle    kBlue                   isMuMu
++SingleMuon
 
-TTJets_Dilep               t#bar{t}_(#sigma_{i#etai#eta}_>_0.012)             fillStyle     kBlue                    _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+DoubleEG                   data_(#sigma_{i#etai#eta}_pass):ee,SF,all           lineStyle    kBlue                   isEE
++SingleElectron
+
+MuonEG                     data_(#sigma_{i#etai#eta}_pass):emu,all             lineStyle    kBlue                   isEMu
++SingleMuon
++SingleElectron
+
+
+-- Data (fail sigmaIetaIeta)
+DoubleMuon                 data_(#sigma_{i#etai#eta}_fail):mumu,SF,all         lineStyle    kRed                    isMuMu
++SingleMuon
+
+DoubleEG                   data_(#sigma_{i#etai#eta}_fail):ee,SF,all           lineStyle    kRed                    isEE
++SingleElectron
+
+MuonEG                     data_(#sigma_{i#etai#eta}_fail):emu,all             lineStyle    kRed                    isEMu
++SingleMuon
++SingleElectron
