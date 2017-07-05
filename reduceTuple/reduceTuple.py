@@ -95,6 +95,7 @@ triggerEff       = triggerEfficiency()
 newBranches  = ['l1/I','l2/I','isEE/O','isMuMu/O','isEMu/O','ph/I','looseLeptonVeto/O']
 newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F','phJetDeltaR/F']
 newBranches += ['njets/I','j1/I','j2/I','nbjets/I']
+newBranches += ['matchedGenPh/I', 'matchedGenEle/I']
 
 if not sample.isData:
   for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets' + sys + '/I', 'nbjets' + sys + '/I']
@@ -113,7 +114,7 @@ c.eleMvaTight         = args.type.count('eleMvaTight')
 #
 # Loop over the tree and make new vars
 #
-from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
+from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR, matchPhoton
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
   c.GetEntry(i)
   if not select2l(c, newVars):                                                             continue
@@ -137,6 +138,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
 
 
   if not sample.isData:
+    matchPhoton(c, newVars)
+
     l1 = newVars.l1
     l2 = newVars.l2
 

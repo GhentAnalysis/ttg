@@ -123,6 +123,31 @@ def selectPhoton(t, n):
 
 
 #
+# Find matched photon, similar as described in AN-2015/165 (but not perfectly, the text is a bit confusing, and we do not have all gen particles stored)
+#
+def matchPhoton(t, n):
+  match = None
+  for i in range(ord(t._gen_nPh)):
+    if deltaR(t._gen_phEta[i], t._phEta[n.ph], t._gen_phPhi[i], t._phPhi[n.ph]) > 0.01: continue
+    if abs(t._gen_phEta[i] - t._phEta[n.ph]) > 0.005: continue
+    if abs(t._gen_phPt[i]-t._phPt[n.ph]) > 0.1*t._gen_phPt[i]: continue
+    match = i
+    break
+  n.matchedGenPh = i if match else -1
+
+  match = None
+  for i in range(ord(t._gen_nL)):
+    if t._gen_lFlavor[i] > 0: continue
+    if deltaR(t._gen_lEta[i], t._phEta[n.ph], t._gen_lPhi[i], t._phPhi[n.ph]) > 0.04: continue
+    if abs(t._gen_lEta[i] - t._phEta[n.ph]) > 0.005: continue
+    if abs(t._gen_lPt[i]-t._phPt[n.ph]) > 0.1*t._gen_lPt[i]: continue
+    match = i
+    break
+  n.matchedGenEle = i if match else -1
+
+
+
+#
 # Add invariant masses to the tree
 # 
 def makeInvariantMasses(t, n):
