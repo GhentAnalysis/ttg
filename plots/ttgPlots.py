@@ -23,7 +23,6 @@ log = getLogger(args.logLevel)
 # Submit subjobs
 #
 if not args.isChild and args.selection is None:
-  if args.tag.count('sigmaIetaIeta'): args.channel = 'noData'
   from ttg.tools.jobSubmitter import submitJobs
   selections = ['llg',
                 'llg-looseLeptonVeto',
@@ -40,6 +39,7 @@ if not args.isChild and args.selection is None:
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR07-gJetdR07-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR07-gJetdR07-njet2p-btag1p']
   for c in ['ee','mumu','emu','SF','all','noData'] if not args.channel else [args.channel]:
+    if args.tag.count('sigmaIetaIeta') and c=='noData': continue
     args.channel = c
     submitJobs(__file__, 'selection', selections, args, subLog=c)
   exit(0)
@@ -83,7 +83,7 @@ plots.append(Plot('photon_mva',             '#gamma-MVA',                      l
 plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma)',              lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20)))
 plots.append(Plot('photon_neutralIso',      'neutralIso(#gamma)',              lambda c : c._phNeutralHadronIsolation[c.ph],                                         (25,0,5)))
 plots.append(Plot('photon_photonIso',       'photonIso(#gamma)',               lambda c : c._phPhotonIsolation[c.ph],                                                (32,0,8)))
-plots.append(Plot('photon_SigmaIetaIeta',   '#sigma_{i#eta i#eta}(#gamma)',    lambda c : c._phSigmaIetaIeta[c.ph],                                                  (20,0,0.04)))
+plots.append(Plot('photon_SigmaIetaIeta',   '#sigma_{i#etai#eta}(#gamma)',     lambda c : c._phSigmaIetaIeta[c.ph],                                                  (20,0,0.04)))
 plots.append(Plot('photon_hadOverEm',       'hadronicOverEm(#gamma)',          lambda c : c._phHadronicOverEm[c.ph],                                                 (20,0,.025)))
 plots.append(Plot('l1_pt',                  'p_{T}(l_{1}) (GeV)',              lambda c : c._lPt[c.l1],                                                              (20,0,200)))
 plots.append(Plot('l1_eta',                 '|#eta|(l_{1})',                   lambda c : abs(c._lEta[c.l1]),                                                        (15,0,2.4)))
@@ -122,13 +122,17 @@ if args.channel=='noData':
 lumiScale = 35.9
 
 phoCB       = args.tag.count('phoCB')
+phoCBfull   = args.tag.count('phoCBfull')
 phoMva      = args.tag.count('phoMva')
 phoMvaTight = args.tag.count('phoMvaTight')
 eleCB       = args.tag.count('eleCB')
 eleMva      = args.tag.count('eleMva')
 sigmaieta   = args.tag.count('sigmaIetaIeta')
+forward     = args.tag.count('forward')
+central     = args.tag.count('central')
 
 cutString, passingFunctions = cutInterpreter.cutString(args.selection)
+if not cutString: cutString = '(1)'
 if args.channel=="ee":   cutString += '&&isEE'
 if args.channel=="mumu": cutString += '&&isMuMu'
 if args.channel=="emu":  cutString += '&&isEMu'
@@ -144,10 +148,16 @@ for sample in sum(stack, []):
   for i in sample.eventLoop(cutString):
     c.GetEntry(i)
     if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
+    if phoCBfull and not c._phCutBasedMedium[c.ph]: continue
+
+    if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
+    if forward and abs(c._phEta[c.ph]) < 1.566: continue
+    if central and abs(c._phEta[c.ph]) > 1.4442: continue
 
     if sigmaieta:
-      if   sample.texName.count('<') and c._phSigmaIetaIeta[c.ph] > 0.012: continue
-      elif sample.texName.count('>') and c._phSigmaIetaIeta[c.ph] < 0.012: continue
+      cut = (0.01022 if abs(c._phEta[c.ph]) < 1.566 else  0.03001 )                      # forward region needs much higher cut
+      if   sample.texName.count('pass') and c._phSigmaIetaIeta[c.ph] > cut: continue
+      elif sample.texName.count('fail') and c._phSigmaIetaIeta[c.ph] < cut: continue
 
     if sample.name.count('DY') and args.selection.count('njet'): continue # statistics too low
     if not passingFunctions(c): continue
@@ -185,7 +195,7 @@ for plot in plots:
               ratio = None if args.channel=='noData' else {'yRange':(0.1,1.9)}, 
               logX = False, logY = log, sorting = True, 
               yRange = (0.003, "auto"),
-              scaling = {},
+              scaling = {1:0} if sigmaieta else {},
               drawObjects = drawObjects(None, lumiScale),
               histModifications = histModifications,
     )
