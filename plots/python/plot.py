@@ -5,9 +5,10 @@ log = getLogger()
 # Plot class
 # Still messy but it works reasonably 
 #
-import ROOT, os
+import ROOT, os, pickle, uuid
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP
+from ttg.tools.lock import waitForLock, removeLock
 
 def getLegendMaskedArea(legend_coordinates, pad):
   def constrain(x, interval=[0,1]):
@@ -77,8 +78,8 @@ class Plot:
       for j in range(i+1, len(histsToStack)):
         histsToStack[i].Add(histsToStack[j])
 
-    if hasattr(h, 'drawOption') and h.drawOption=='e1': return histsToStack[:1] # for data points: only show total stack
-    else:                                               return histsToStack
+    if h.legendStyle != 'f': return histsToStack[:1] # do not show sub-contributions when line or errorstyle
+    else:                    return histsToStack
 
 
   def scaleStacks(self, histos, scaling):
@@ -96,6 +97,25 @@ class Plot:
 
       factor = histos[target][0].Integral()/source_yield
       for h in histos[source]: h.Scale(factor)
+
+  def saveToCache(self, dir):
+    try:    os.makedirs(os.path.join(dir))
+    except: pass
+
+    resultFile = os.path.join(dir, 'results.pkl')
+
+    waitForLock(resultFile)
+    if os.path.exists(resultFile):
+      allPlots = pickle.load(file(resultFile))
+      allPlots.update({self.name : self.histos})
+    else:
+      allPlots = {self.name : self.histos}
+    pickle.dump(allPlots, file(resultFile, 'w'))
+    removeLock(resultFile)
+    log.info("Plot " + self.name + " saved to cache")
+
+
+
 
   #
   # Draw function roughly stolen from Robert's RootTools, might need some cleanup, very lengthy
@@ -168,7 +188,7 @@ class Plot:
 
     # delete canvas if it exists
     if hasattr("ROOT","c1"): del ROOT.c1 
-    c1 = ROOT.TCanvas(self.name, "drawHistos",200,10, default_widths['x_width'], default_widths['y_width'])
+    c1 = ROOT.TCanvas(self.name + str(uuid.uuid4()), "drawHistos",200,10, default_widths['x_width'], default_widths['y_width'])
 
     if ratio is not None:
         c1.Divide(1,2,0,0)
