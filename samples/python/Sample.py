@@ -134,11 +134,11 @@ def createStack(tuplesFile, styleFile, channel):
         elif style == 'lineStyle':  style = styles.lineStyle(color)
         else:                       raise('Unkown style')
 
-        if texName.count('data'):                                                           # If data, skip if not neede for this channel, fix texName
+        if texName.count('data'):                                                           # If data, skip if not needed for this channel, fix texName
           if not texName.count(channel):
             skip = True
             continue
-          texName = 'data'
+          texName = texName.split(':')[0]
           if channel == 'SF':   texName += ' (SF)'
           if channel == 'ee':   texName += ' (2e)'
           if channel == 'mumu': texName += ' (2#mu)'
