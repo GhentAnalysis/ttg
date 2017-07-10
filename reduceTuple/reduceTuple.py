@@ -115,7 +115,7 @@ c.eleMvaTight         = args.type.count('eleMvaTight')
 # Loop over the tree and make new vars
 #
 from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR, matchPhoton
-for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
+for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
   if not select2l(c, newVars):                                                             continue
   if not selectPhoton(c, newVars):                                                         continue
