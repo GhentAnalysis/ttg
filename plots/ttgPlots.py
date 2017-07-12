@@ -32,8 +32,15 @@ if not args.isChild and args.selection is None:
                 'llg-looseLeptonVeto-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet3',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet4',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p-photonPt20to40',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p-photonPt40to60',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p-photonPt60',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR07',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR07-gJetdR07',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR07-gJetdR07-njet2p',
@@ -57,26 +64,43 @@ from math import pi
 
 ROOT.gROOT.SetBatch(True)
 
-if args.tag.count('split'):           stackFile = 'split'
-elif args.tag.count('ttbar'):         stackFile = 'onlyttbar'
-elif args.tag.count('sigmaIetaIeta'): stackFile = 'sigmaIetaIeta'
-else:                                 stackFile = 'default'
+if args.tag.count('split'):                            stackFile = 'split'
+elif args.tag.count('ttbar'):                          stackFile = 'onlyttbar'
+elif args.tag.count('DYLO'):                           stackFile = 'DY_LO'
+elif args.tag.count('sigmaIetaIetaMC'):
+ if args.tag.count('nopion'):                          stackFile = 'sigmaIetaIeta-ttbar-nopion'
+ elif args.tag.count('pion'):                          stackFile = 'sigmaIetaIeta-ttbar-pion'
+ elif args.tag.count('overlapRemoved'):                stackFile = 'sigmaIetaIeta-ttbar'
+ else:                                                 stackFile = 'sigmaIetaIeta-ttbar-full'
+elif args.tag.count('sigmaIetaIeta'):                  stackFile = 'sigmaIetaIeta'
+else:                                                  stackFile = 'default'
 
 stack = createStack(tuplesFile = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data/tuples.conf'),
                     styleFile  = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data', stackFile + '.stack'),
                     channel    = args.channel)
 
-
 xAxisForYieldPlot = [lambda h : h.GetXaxis().SetBinLabel(1, "#mu#mu"),
                      lambda h : h.GetXaxis().SetBinLabel(2, "e#mu"),
                      lambda h : h.GetXaxis().SetBinLabel(3, "ee")]
 
+phoCB       = args.tag.count('phoCB')
+pt15        = args.tag.count('pt15')
+phoCBfull   = args.tag.count('phoCBfull')
+phoMva      = args.tag.count('phoMva')
+phoMvaTight = args.tag.count('phoMvaTight')
+eleCB       = args.tag.count('eleCB')
+eleMva      = args.tag.count('eleMva')
+sigmaieta   = args.tag.count('sigmaIetaIeta')
+forward     = args.tag.count('forward')
+central     = args.tag.count('central')
+
+
 plots = []
-Plot.setDefaults(stack=stack)
+Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta else 'Events')
 plots.append(Plot('yield',                  'yield',                           lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                  (3, 0.5, 3.5)))
 plots.append(Plot('nVertex',                'vertex multiplicity',             lambda c : ord(c._nVertex),                                                           (50, 0, 50)))
 plots.append(Plot('nphoton',                'number of photons',               lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),                (3, 0.5, 3.5)))
-plots.append(Plot('photon_pt',              'p_{T}(#gamma) (GeV)',             lambda c : c._phPt[c.ph],                                                             (10,20,220)))
+plots.append(Plot('photon_pt',              'p_{T}(#gamma) (GeV)',             lambda c : c._phPt[c.ph],                                                             (20,15,115) if args.tag.count('pt15') else (10,20,220)))
 plots.append(Plot('photon_eta',             '|#eta|(#gamma)',                  lambda c : abs(c._phEta[c.ph]),                                                       (15,0,2.5)))
 plots.append(Plot('photon_phi',             '#phi(#gamma)',                    lambda c : c._phPhi[c.ph],                                                            (10,-pi,pi)))
 plots.append(Plot('photon_mva',             '#gamma-MVA',                      lambda c : c._phMva[c.ph],                                                            (20,-1,1)))
@@ -121,16 +145,6 @@ if args.channel=='noData':
 
 lumiScale = 35.9
 
-phoCB       = args.tag.count('phoCB')
-phoCBfull   = args.tag.count('phoCBfull')
-phoMva      = args.tag.count('phoMva')
-phoMvaTight = args.tag.count('phoMvaTight')
-eleCB       = args.tag.count('eleCB')
-eleMva      = args.tag.count('eleMva')
-sigmaieta   = args.tag.count('sigmaIetaIeta')
-forward     = args.tag.count('forward')
-central     = args.tag.count('central')
-
 cutString, passingFunctions = cutInterpreter.cutString(args.selection)
 if not cutString: cutString = '(1)'
 if args.channel=="ee":   cutString += '&&isEE'
@@ -150,6 +164,7 @@ for sample in sum(stack, []):
     if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
     if phoCBfull and not c._phCutBasedMedium[c.ph]: continue
 
+    if not pt15 and c._phPt[c.ph] < 20: continue
     if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
     if forward and abs(c._phEta[c.ph]) < 1.566: continue
     if central and abs(c._phEta[c.ph]) > 1.4442: continue
@@ -159,10 +174,10 @@ for sample in sum(stack, []):
       if   sample.texName.count('pass') and c._phSigmaIetaIeta[c.ph] > cut: continue
       elif sample.texName.count('fail') and c._phSigmaIetaIeta[c.ph] < cut: continue
 
-    if sample.name.count('DY') and args.selection.count('njet'): continue # statistics too low
     if not passingFunctions(c): continue
 
-    eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.triggerWeight*lumiScale
+    # Note: photon SF is 0 when pt < 20 GeV
+    eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.triggerWeight*lumiScale
 
     for plot in plots: plot.fill(sample, eventWeight)
 
@@ -195,7 +210,7 @@ for plot in plots:
               ratio = None if args.channel=='noData' else {'yRange':(0.1,1.9)}, 
               logX = False, logY = log, sorting = True, 
               yRange = (0.003, "auto"),
-              scaling = {1:0} if sigmaieta else {},
+              scaling = 'unity' if sigmaieta else {},
               drawObjects = drawObjects(None, lumiScale),
               histModifications = histModifications,
     )
