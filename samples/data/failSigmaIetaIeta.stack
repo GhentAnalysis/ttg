@@ -1,0 +1,52 @@
+-- MC
+TTGamma                    t#bar{t}#gamma_(2l)_(#sigma_{i#etai#eta}_fail)   fillStyle     kRed
+TTGamma_t                  t#bar{t}#gamma_(1l)_(#sigma_{i#etai#eta}_fail)   fillStyle     46
++TTGamma_tbar
++TTGamma_had
+
+TTJets_Dilep               t#bar{t}_(#sigma_{i#etai#eta}_fail)              fillStyle     kBlue                    _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+ZG                         Z#gamma_(#sigma_{i#etai#eta}_fail)               fillStyle     kOrange
+
+DY_M10to50_NLO             Drell-Yan_(#sigma_{i#etai#eta}_fail)             fillStyle     kGreen                   _zgEventType<3
++DY_M50_NLO
+
+singleTop_tW_tbar          single-t_(#sigma_{i#etai#eta}_fail)              fillStyle     kGray
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
+
+VVTo2L2Nu                  multiboson_(#sigma_{i#etai#eta}_fail)            fillStyle     kYellow
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
+
+TTZ                        t#bar{t}+V_(#sigma_{i#etai#eta}_fail)            fillStyle     kViolet
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+-- Data
+DoubleMuon                 data_(#sigma_{i#etai#eta}_fail):mumu,SF,all      errorStyle    kBlack                   isMuMu
++SingleMuon
+
+DoubleEG                   data_(#sigma_{i#etai#eta}_fail):ee,SF,all        errorStyle    kBlack                   isEE
++SingleElectron
+
+MuonEG                     data_(#sigma_{i#etai#eta}_fail):emu,all          errorStyle    kBlack                   isEMu
++SingleMuon
++SingleElectron

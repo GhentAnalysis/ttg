@@ -1,0 +1,85 @@
+-- MC
+TTGamma                    t#bar{t}#gamma_(match,_#sigma_{i#etai#eta}_pass)        fillStyle     kRed                     matchedGenPh>=0
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
+
+TTJets_Dilep               t#bar{t}_(match,_#sigma_{i#etai#eta}_pass)              fillStyle     kBlue                    matchedGenPh>=0&&_ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+ZG                         other_(match,_#sigma_{i#etai#eta}_pass)                 fillStyle     kOrange                  matchedGenPh>=0
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+
+TTGamma                    t#bar{t}#gamma_(no_match,_#sigma_{i#etai#eta}_pass)        fillStyle     46                       matchedGenPh<0
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
+
+TTJets_Dilep               t#bar{t}_(no_match,_#sigma_{i#etai#eta}_pass)              fillStyle     kCyan                    matchedGenPh<0&&_ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+ZG                         other_(no_match,_#sigma_{i#etai#eta}_pass)                 fillStyle     kOrange                  matchedGenPh<0
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+
+
+
+-- Data
+DoubleMuon                 data_(#sigma_{i#etai#eta}_pass):mumu,SF,all      errorStyle    kBlack                   isMuMu
++SingleMuon
+
+DoubleEG                   data_(#sigma_{i#etai#eta}_pass):ee,SF,all        errorStyle    kBlack                   isEE
++SingleElectron
+
+MuonEG                     data_(#sigma_{i#etai#eta}_pass):emu,all          errorStyle    kBlack                   isEMu
++SingleMuon
++SingleElectron
