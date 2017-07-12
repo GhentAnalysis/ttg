@@ -83,20 +83,25 @@ class Plot:
 
 
   def scaleStacks(self, histos, scaling):
-    if not isinstance(scaling, dict): 
-      raise ValueError( "'scaling' must be of the form {0:1, 2:3} which normalizes stack[0] to stack[1] etc. Got '%r'" % scaling )
-    for source, target in scaling.iteritems():
-      if not (isinstance(source, int) and isinstance(target, int) ):
-        raise ValueError( "Scaling should be {0:1, 1:2, ...}. Expected ints, got %r %r"%( source, target ) ) 
+    if scaling=="unity":
+      for stack in histos:
+        factor = 1./stack[0].Integral()
+        for h in stack: h.Scale(factor)
+    else:
+      if not isinstance(scaling, dict):
+        raise ValueError( "'scaling' must be of the form {0:1, 2:3} which normalizes stack[0] to stack[1] etc. Got '%r'" % scaling )
+      for source, target in scaling.iteritems():
+        if not (isinstance(source, int) and isinstance(target, int) ):
+          raise ValueError( "Scaling should be {0:1, 1:2, ...}. Expected ints, got %r %r"%( source, target ) )
 
-      source_yield = histos[source][0].Integral()
+        source_yield = histos[source][0].Integral()
 
-      if source_yield == 0:
-        log.warning( "Requested to scale empty Stack? Do nothing." )
-        continue
+        if source_yield == 0:
+          log.warning( "Requested to scale empty Stack? Do nothing." )
+          continue
 
-      factor = histos[target][0].Integral()/source_yield
-      for h in histos[source]: h.Scale(factor)
+        factor = histos[target][0].Integral()/source_yield
+        for h in histos[source]: h.Scale(factor)
 
   def saveToCache(self, dir):
     try:    os.makedirs(os.path.join(dir))
