@@ -24,7 +24,7 @@ def photonPt(tree, min, max):
   if max and tree._phPt[tree.ph] > max: return False
   return True
 
-continous_variables = [("mll", "mll"),('photonPt',('(1)', photonPt))]
+continous_variables = [("mll", "mll"),('photonPt',(None, photonPt))]
 discrete_variables  = [("njet", "njets"), ("btag", "nbjets")]
 
 class cutInterpreter:
@@ -96,9 +96,9 @@ class cutInterpreter:
     functions = []
     for cut in cuts.split('-'):
       (string, function) = cutInterpreter.translate_cut(cut)
-      if string.count('||'):       string = '(' + string + ')'                                                 #protect
-      if string and string!='(1)': strings.append(string)
-      if function:                 functions.append(function)
+      if string and string.count('||'): string = '(' + string + ')'                                                 #protect
+      if string and string!='(1)':      strings.append(string)
+      if function:                      functions.append(function)
 
     cutString        = "&&".join(strings) if len(strings) else None
     passingFunctions = (lambda t: all(f(t) for f in functions)) if len(functions) else (lambda t : True)
