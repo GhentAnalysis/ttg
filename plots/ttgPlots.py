@@ -67,10 +67,12 @@ ROOT.gROOT.SetBatch(True)
 if args.tag.count('split'):                            stackFile = 'split'
 elif args.tag.count('ttbar'):                          stackFile = 'onlyttbar'
 elif args.tag.count('DYLO'):                           stackFile = 'DY_LO'
+elif args.tag.count('passSigmaIetaIetaMatch'):         stackFile = 'passSigmaIetaIetaMatch'
+elif args.tag.count('failSigmaIetaIetaMatch'):         stackFile = 'failSigmaIetaIetaMatch'
+elif args.tag.count('passSigmaIetaIeta'):              stackFile = 'passSigmaIetaIeta'
+elif args.tag.count('failSigmaIetaIeta'):              stackFile = 'failSigmaIetaIeta'
 elif args.tag.count('sigmaIetaIetaMC'):
- if args.tag.count('nopion'):                          stackFile = 'sigmaIetaIeta-ttbar-nopion'
- elif args.tag.count('pion'):                          stackFile = 'sigmaIetaIeta-ttbar-pion'
- elif args.tag.count('overlapRemoved'):                stackFile = 'sigmaIetaIeta-ttbar'
+ if args.tag.count('overlapRemoved'):                  stackFile = 'sigmaIetaIeta-ttbar'
  else:                                                 stackFile = 'sigmaIetaIeta-ttbar-full'
 elif args.tag.count('sigmaIetaIeta'):                  stackFile = 'sigmaIetaIeta'
 else:                                                  stackFile = 'default'
@@ -90,7 +92,7 @@ phoMva      = args.tag.count('phoMva')
 phoMvaTight = args.tag.count('phoMvaTight')
 eleCB       = args.tag.count('eleCB')
 eleMva      = args.tag.count('eleMva')
-sigmaieta   = args.tag.count('sigmaIetaIeta')
+sigmaieta   = args.tag.count('igmaIetaIeta')
 forward     = args.tag.count('forward')
 central     = args.tag.count('central')
 
