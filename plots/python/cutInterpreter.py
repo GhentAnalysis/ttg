@@ -19,7 +19,12 @@ special_cuts = {
     "gJetdR07":            "phJetDeltaR>0.7",
   }
 
-continous_variables = [("mll", "mll")]
+def photonPt(tree, min, max):
+  if tree._phPt[tree.ph] < min:         return False
+  if max and tree._phPt[tree.ph] > max: return False
+  return True
+
+continous_variables = [("mll", "mll"),('photonPt',('(1)', photonPt))]
 discrete_variables  = [("njet", "njets"), ("btag", "nbjets")]
 
 class cutInterpreter:
