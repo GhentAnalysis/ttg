@@ -144,13 +144,15 @@ def createStack(tuplesFile, styleFile, channel):
           if channel == 'mumu': texName += ' (2#mu)'
           if channel == 'emu':  texName += ' (1e, 1#mu)'
 
-        sample = getSampleFromStack(allStacks, name)
-        if not sample: sample = getSampleFromList(stack, name)
-        if sample:
+        sample = getSampleFromList(stack, name)                                             # Check if sample with same name already exists in this stack
+        if not sample: sample = getSampleFromStack(allStacks, name)                         # or other stack
+        if sample:                                                                          # if yes, take it from there and make a deepcopy with different name
           sample = copy.deepcopy(sample)
+          sample.addSamples = [sample.name]
           sample.name += '_' + str(uuid.uuid4())
         else:                                   
           sample = getSampleFromList(sampleList, name)
+        if not sample: log.error('Could not load sample ' + name + ' from ' + styleFile)
         sample.addSelectionString(selectionString)
         texName = texName.replace('_{','lower{').replace('_',' ').replace('lower{','_{')
         sample.addStyle(texName, style)
