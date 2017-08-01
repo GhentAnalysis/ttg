@@ -94,18 +94,18 @@ triggerEff       = triggerEfficiency()
 #
 newBranches  = ['l1/I','l2/I','isEE/O','isMuMu/O','isEMu/O','ph/I','looseLeptonVeto/O']
 newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F','phJetDeltaR/F']
-newBranches += ['njets/I','j1/I','j2/I','nbjets/I']
+newBranches += ['njets/I','j1/I','j2/I','nbjets/I','dbjets/I']
 newBranches += ['matchedGenPh/I', 'matchedGenEle/I']
 
 if not sample.isData:
-  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets' + sys + '/I', 'nbjets' + sys + '/I']
+  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets' + sys + '/I', 'nbjets' + sys + '/I', 'dbjets' + sys +'/I']
   for sys in ['', 'Up', 'Down']:                       newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
 
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
 
-c.photonCutBasedTight = args.type.count('photonCBT')
+doPhotonCut           = args.type.count('pho')
 c.photonCutBased      = args.type.count('phoCB')
 c.photonMva           = args.type.count('photonMva')
 c.eleMva              = args.type.count('eleMvaMedium')
@@ -114,11 +114,11 @@ c.eleMvaTight         = args.type.count('eleMvaTight')
 #
 # Loop over the tree and make new vars
 #
-from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR, matchPhoton
+from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
   if not select2l(c, newVars):                                                             continue
-  if not selectPhoton(c, newVars):                                                         continue
+  if not selectPhoton(c, newVars, doPhotonCut):                                            continue
   if sample.isData:
     if not c._passMETFilters:                                                              continue
     if sample.name.count('DoubleMuon') and not c._passTTG_mm:                              continue
@@ -138,8 +138,6 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
 
   if not sample.isData:
-    matchPhoton(c, newVars)
-
     l1 = newVars.l1
     l2 = newVars.l2
 
@@ -153,9 +151,9 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.lWeightDown        = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
     newVars.lTrackWeight       = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
 
-    newVars.phWeight           = photonSF.getSF(c, newVars.ph)
-    newVars.phWeightUp         = photonSF.getSF(c, newVars.ph)
-    newVars.phWeightDown       = photonSF.getSF(c, newVars.ph)
+    newVars.phWeight           = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.phWeightUp         = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.phWeightDown       = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
  
     trigWeight, trigErr        = triggerEff.getSF(c, l1, l2)
     newVars.triggerWeight      = trigWeight

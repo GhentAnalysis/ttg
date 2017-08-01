@@ -11,13 +11,13 @@ import ROOT
 #
 # Helper functions
 #
-def deltaPhi(phi1, phi2): 
-  dphi = phi2-phi1 
-  if dphi > pi:   dphi -= 2.0*pi 
-  if dphi <= -pi: dphi += 2.0*pi 
-  return abs(dphi) 
+def deltaPhi(phi1, phi2):
+  dphi = phi2-phi1
+  if dphi > pi:   dphi -= 2.0*pi
+  if dphi <= -pi: dphi += 2.0*pi
+  return abs(dphi)
 
-def deltaR(eta1, eta2, phi1, phi2): 
+def deltaR(eta1, eta2, phi1, phi2):
   return sqrt(deltaPhi(phi1, phi2)**2 + (eta1-eta2)**2)
 
 
@@ -106,61 +106,40 @@ def photonCutBasedReduced(c, index):
 def photonSelector(tree, index, n):
   if abs(tree._phEta[index]) > 2.5:                   return False
   if tree._phPt[index] < 15:                          return False
-  if tree._phHasPixelSeed[index]:                     return False  # actually only one of the two recommended
-  if not tree._phPassElectronVeto[index]:             return False
+  if tree._phHasPixelSeed[index]:                     return False
+# if not tree._phPassElectronVeto[index]:             return False # off because we require already pixelseed
   for i in [n.l1, n.l2]:
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
-  if tree.photonCutBasedTight:  return tree._phCutBasedTight[index]
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
   if tree.photonMva:            return tree._phMva[index] > 0.20
   return True
 
-def selectPhoton(t, n):
+def selectPhoton(t, n, doCut):
   t.photons = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n)]
-  if not len(t.photons): return False
-  n.ph = t.photons[0]
-  return True
-
-
-#
-# Find matched photon, similar as described in AN-2015/165 (but not perfectly, the text is a bit confusing, and we do not have all gen particles stored)
-#
-def matchPhoton(t, n):
-  match = None
-  for i in range(ord(t._gen_nPh)):
-    if deltaR(t._gen_phEta[i], t._phEta[n.ph], t._gen_phPhi[i], t._phPhi[n.ph]) > 0.01: continue
-    if abs(t._gen_phEta[i] - t._phEta[n.ph]) > 0.005: continue
-    if abs(t._gen_phPt[i]-t._phPt[n.ph]) > 0.1*t._gen_phPt[i]: continue
-    match = i
-    break
-  n.matchedGenPh = i if match else -1
-
-  match = None
-  for i in range(ord(t._gen_nL)):
-    if t._gen_lFlavor[i] > 0: continue
-    if deltaR(t._gen_lEta[i], t._phEta[n.ph], t._gen_lPhi[i], t._phPhi[n.ph]) > 0.04: continue
-    if abs(t._gen_lEta[i] - t._phEta[n.ph]) > 0.005: continue
-    if abs(t._gen_lPt[i]-t._phPt[n.ph]) > 0.1*t._gen_lPt[i]: continue
-    match = i
-    break
-  n.matchedGenEle = i if match else -1
-
+  if len(t.photons): n.ph = t.photons[0]
+  return (len(t.photons) > 0 or not doCut)
 
 
 #
 # Add invariant masses to the tree
-# 
+#
 def makeInvariantMasses(t, n):
   first  = ROOT.TLorentzVector()
   second = ROOT.TLorentzVector()
   first.SetPtEtaPhiE( t._lPt[n.l1], t._lEta[n.l1], t._lPhi[n.l1], t._lE[n.l1])
   second.SetPtEtaPhiE(t._lPt[n.l2], t._lEta[n.l2], t._lPhi[n.l2], t._lE[n.l2])
   n.mll = (first+second).M()
-  photon = ROOT.TLorentzVector()
-  photon.SetPtEtaPhiE(t._phPt[n.ph], t._phEta[n.ph], t._phPhi[n.ph], t._phE[n.ph])
-  n.mllg = (first+second+photon).M()
-  n.ml1g = (first+photon).M()
-  n.ml2g = (second+photon).M()
+
+  if len(t.photons) > 0:
+    photon = ROOT.TLorentzVector()
+    photon.SetPtEtaPhiE(t._phPt[n.ph], t._phEta[n.ph], t._phPhi[n.ph], t._phE[n.ph])
+    n.mllg = (first+second+photon).M()
+    n.ml1g = (first+photon).M()
+    n.ml2g = (second+photon).M()
+  else :
+    n.mllg = -1
+    n.ml1g = -1
+    n.ml2g = -1
 
 
 #
@@ -188,25 +167,42 @@ def goodJets(t, n):
   n.njets_JERDown = len(t.jets_JERDown)
   n.j1    = t.jets[0] if n.njets > 0 else -1
   n.j2    = t.jets[1] if n.njets > 1 else -1
-      
+
 def bJets(t, n):
   btagWP = 0.8484
   bjets            = [i for i in t.jets         if t._jetCsvV2[i] > btagWP]
   bjets_JECUp      = [i for i in t.jets_JECUp   if t._jetCsvV2[i] > btagWP]
   bjets_JECDown    = [i for i in t.jets_JECDown if t._jetCsvV2[i] > btagWP]
-  bjets_JERUp      = [i for i in t.jets_JECUp   if t._jetCsvV2[i] > btagWP]
-  bjets_JERDown    = [i for i in t.jets_JECDown if t._jetCsvV2[i] > btagWP]
+  bjets_JERUp      = [i for i in t.jets_JERUp   if t._jetCsvV2[i] > btagWP]
+  bjets_JERDown    = [i for i in t.jets_JERDown if t._jetCsvV2[i] > btagWP]
   n.nbjets         = len(bjets)
   n.nbjets_JECUp   = len(bjets_JECUp)
   n.nbjets_JECDown = len(bjets_JECDown)
   n.nbjets_JERUp   = len(bjets_JERUp)
   n.nbjets_JERDown = len(bjets_JERDown)
+  btagWP = 0.6324
+  dbjets           = [i for i in t.jets         if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
+  dbjets_JECUp     = [i for i in t.jets_JECUp   if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
+  dbjets_JECDown   = [i for i in t.jets_JECDown if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
+  dbjets_JERUp     = [i for i in t.jets_JERUp   if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
+  dbjets_JERDown   = [i for i in t.jets_JERDown if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
+  n.dbjets         = len(dbjets)
+  n.dbjets_JECUp   = len(dbjets_JECUp)
+  n.dbjets_JECDown = len(dbjets_JECDown)
+  n.dbjets_JERUp   = len(dbjets_JERUp)
+  n.dbjets_JERDown = len(dbjets_JERDown)
+
 
 
 #
 # delta R
 #
 def makeDeltaR(t, n):
-  n.phL1DeltaR  = deltaR(t._lEta[n.l1], t._phEta[n.ph], t._lPhi[n.l1], t._phPhi[n.ph])
-  n.phL2DeltaR  = deltaR(t._lEta[n.l2], t._phEta[n.ph], t._lPhi[n.l2], t._phPhi[n.ph])
-  n.phJetDeltaR = min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in t.jets] + [999])
+  if len(t.photons) > 0:
+    n.phL1DeltaR  = deltaR(t._lEta[n.l1], t._phEta[n.ph], t._lPhi[n.l1], t._phPhi[n.ph])
+    n.phL2DeltaR  = deltaR(t._lEta[n.l2], t._phEta[n.ph], t._lPhi[n.l2], t._phPhi[n.ph])
+    n.phJetDeltaR = min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in t.jets] + [999])
+  else:
+    n.phL1DeltaR  = -1
+    n.phL2DeltaR  = -1
+    n.phJetDeltaR = -1
