@@ -54,7 +54,7 @@ class Sample:
     return total
 
   # init the chain and return it
-  def initTree(self, skimType='ttg', shortDebug=False, reducedType=None):
+  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None):
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
