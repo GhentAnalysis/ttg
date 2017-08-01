@@ -15,8 +15,8 @@ special_cuts = {
     "offZ":                "abs(mll-91.1876)>15||isEMu",
     "llgNoZ":              "abs(mllg-91.1876)>15||isEMu",
 
-    "gLepdR07":            "phL1DeltaR>0.7&&phL2DeltaR>0.7",
-    "gJetdR07":            "phJetDeltaR>0.7",
+    "gLepdR04":            "phL1DeltaR>0.4&&phL2DeltaR>0.4",
+    "gJetdR04":            "phJetDeltaR>0.4",
   }
 
 def photonPt(tree, min, max):
@@ -25,7 +25,7 @@ def photonPt(tree, min, max):
   return True
 
 continous_variables = [("mll", "mll"),('photonPt',(None, photonPt))]
-discrete_variables  = [("njet", "njets"), ("btag", "nbjets")]
+discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","dbjets")]
 
 class cutInterpreter:
 
