@@ -1,0 +1,9 @@
+-- MC (sigmaIetaIeta pass)
+TTJets_Dilep               t#bar{t}_(#sigma_{i#etai#eta}_pass)             lineStyle     kCyan          _ttgEventType<2
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+-- MC (sigmaIetaIeta fail)
+TTJets_Dilep               t#bar{t}_(#sigma_{i#etai#eta}_fail)             lineStyle     kBlue          _ttgEventType<2
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
