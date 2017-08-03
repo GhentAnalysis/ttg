@@ -1,0 +1,18 @@
+-- MC (sigmaIetaIeta pass)
+QCD_Pt20to30_Em               t#bar{t}_(#sigma_{i#etai#eta}_pass)             errorStyle     kBlue
++QCD_Pt30to50_Em
++QCD_Pt50to80_Em
++QCD_Pt80to120_Em
+%+QCD_Pt120to170_Em
++QCD_Pt170to300_Em
++QCD_Pt300toInf_Em
+
+-- MC (sigmaIetaIeta fail)
+QCD_Pt20to30_Em               t#bar{t}_(#sigma_{i#etai#eta}_fail)             errorStyle     kRed
++QCD_Pt30to50_Em
++QCD_Pt50to80_Em
++QCD_Pt80to120_Em
+%+QCD_Pt120to170_Em
++QCD_Pt170to300_Em
++QCD_Pt300toInf_Em
+
