@@ -58,6 +58,9 @@ class Plot:
     self.histos[sample].Fill(self.varX(sample.chain), weight)
 
 
+  #
+  # Add an overflow bin, optionally called from the draw function
+  #
   def addOverFlowBin1D(self, histo, addOverFlowBin = None):
     if addOverFlowBin is not None and not hasattr(histo, 'overflowApplied'):
       if addOverFlowBin.lower() == "upper" or addOverFlowBin.lower() == "both":
@@ -70,6 +73,9 @@ class Plot:
       histo.overflowApplied = True
 
 
+  #
+  # Stacking the hist, called during the draw function
+  #
   def stackHists(self, histsToStack, sorting=True):
     if sorting: histsToStack.sort(key=lambda h  : -h.Integral())
 
@@ -82,6 +88,9 @@ class Plot:
     else:                    return histsToStack
 
 
+  #
+  # Scaling options, optionally called from the draw function
+  #
   def scaleStacks(self, histos, scaling):
     if scaling=="unity":
       for stack in histos:
@@ -103,6 +112,9 @@ class Plot:
         factor = histos[target][0].Integral()/source_yield
         for h in histos[source]: h.Scale(factor)
 
+  #
+  # Save the histogram to a results.cache file, useful when you need to to further operations on it later
+  #
   def saveToCache(self, dir):
     try:    os.makedirs(os.path.join(dir))
     except: pass
@@ -119,7 +131,9 @@ class Plot:
     removeLock(resultFile)
     log.info("Plot " + self.name + " saved to cache")
 
-
+  def getYields(self, bin=None):
+    if bin: return {s.name : h.GetBinContent(bin) for s,h in self.histos.iteritems()}
+    else:   return {s.name : h.Integral()         for s,h in self.histos.iteritems()}
 
 
   #
