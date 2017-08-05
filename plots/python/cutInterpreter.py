@@ -8,6 +8,7 @@ log = getLogger()
 import ROOT
 
 special_cuts = {
+    "pho":                 "(1)", # base string for QCD
     "llg":                 "(1)", # base string
     "looseLeptonVeto":     "looseLeptonVeto",
 
