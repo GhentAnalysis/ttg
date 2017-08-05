@@ -1,5 +1,5 @@
 -- MC (sigmaIetaIeta pass)
-QCD_Pt20to30_Em               QCD_(#sigma_{i#etai#eta}_pass)             errorStyle     kBlue
+QCD_Pt20to30_Em               QCD_(#sigma_{i#etai#eta}_pass)             errorStyle     kBlue    _ttgEventType==2
 +QCD_Pt30to50_Em
 +QCD_Pt50to80_Em
 +QCD_Pt80to120_Em
@@ -8,7 +8,7 @@ QCD_Pt20to30_Em               QCD_(#sigma_{i#etai#eta}_pass)             errorSt
 +QCD_Pt300toInf_Em
 
 -- MC (sigmaIetaIeta fail)
-QCD_Pt20to30_Em               QCD_(#sigma_{i#etai#eta}_fail)             errorStyle     kRed
+QCD_Pt20to30_Em               QCD_(#sigma_{i#etai#eta}_fail)             errorStyle     kRed     _ttgEventType==2
 +QCD_Pt30to50_Em
 +QCD_Pt50to80_Em
 +QCD_Pt80to120_Em
