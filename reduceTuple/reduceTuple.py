@@ -14,6 +14,7 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--sample',         action='store',      default=None)
 argParser.add_argument('--type',           action='store',      default='eleCB-phoCB')
 argParser.add_argument('--subJob',         action='store',      default=None)
+argParser.add_argument('--QCD',            action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
@@ -27,7 +28,7 @@ log = getLogger(args.logLevel)
 # Create sample list
 #
 from ttg.samples.Sample import createSampleList,getSampleFromList
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + ('tuplesQCD.conf' if args.QCD else 'tuples.conf')))
 
 #
 # Submit subjobs: for each sample split in args.splitJobs
@@ -48,7 +49,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 sample     = getSampleFromList(sampleList, args.sample)
-c          = sample.initTree()
+c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'))
 lumiWeight = float(sample.xsec)*1000/sample.getTotalEvents() if not sample.isData else 1
 
 #
@@ -83,10 +84,12 @@ from ttg.reduceTuple.leptonTrackingEfficiency import leptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import leptonSF as leptonSF_
 from ttg.reduceTuple.photonSF import photonSF as photonSF_
 from ttg.reduceTuple.triggerEfficiency import triggerEfficiency
+from ttg.reduceTuple.btagEfficiency import btagEfficiency
 leptonTrackingSF = leptonTrackingEfficiency()
 leptonSF         = leptonSF_()
 photonSF         = photonSF_()
 triggerEff       = triggerEfficiency()
+btagSF           = btagEfficiency()
 
 
 #
@@ -100,6 +103,10 @@ newBranches += ['matchedGenPh/I', 'matchedGenEle/I']
 if not sample.isData:
   for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets' + sys + '/I', 'nbjets' + sys + '/I', 'dbjets' + sys +'/I']
   for sys in ['', 'Up', 'Down']:                       newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
+  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:     newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
+# for bmult in ['0','1','2']:                  # if 1c is used
+#   for sys in ['', 'Up', 'Down']:
+#     newBranches += ['bTagWeightCSV' + bmult + sys + '/F', 'bTagWeight' + bmult + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -110,14 +117,14 @@ c.photonCutBased      = args.type.count('phoCB')
 c.photonMva           = args.type.count('photonMva')
 c.eleMva              = args.type.count('eleMvaMedium')
 c.eleMvaTight         = args.type.count('eleMvaTight')
-
+c.QCD                 = args.QCD
 #
 # Loop over the tree and make new vars
 #
 from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
-  if not select2l(c, newVars):                                                             continue
+  if not (select2l(c, newVars) or args.QCD):                                               continue
   if not selectPhoton(c, newVars, doPhotonCut):                                            continue
   if sample.isData:
     if not c._passMETFilters:                                                              continue
@@ -131,31 +138,53 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
       if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
       if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
 
-  makeInvariantMasses(c, newVars)
+  if not args.QCD: makeInvariantMasses(c, newVars)
   goodJets(c, newVars)
   bJets(c, newVars)
-  makeDeltaR(c, newVars)
+  if not args.QCD: makeDeltaR(c, newVars)
 
 
   if not sample.isData:
-    l1 = newVars.l1
-    l2 = newVars.l2
-
     newVars.genWeight          = c._weight*lumiWeight
     newVars.puWeight           = puReweighting(c._nTrueInt)
     newVars.puWeightUp         = puReweightingUp(c._nTrueInt)
     newVars.puWeightDown       = puReweightingDown(c._nTrueInt)
 
-    newVars.lWeight            = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
-    newVars.lWeightUp          = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
-    newVars.lWeightDown        = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
-    newVars.lTrackWeight       = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
+    if len(c.leptons) > 1:
+      l1 = newVars.l1
+      l2 = newVars.l2
+      newVars.lWeight            = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
+      newVars.lWeightUp          = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
+      newVars.lWeightDown        = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
+      newVars.lTrackWeight       = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
+    else:
+      newVars.lWeight            = 1.
+      newVars.lWeightUp          = 1.
+      newVars.lWeightDown        = 1.
+      newVars.lTrackWeight       = 1.
 
     newVars.phWeight           = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
     newVars.phWeightUp         = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
     newVars.phWeightDown       = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
  
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2)
+    # method 1a
+    for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
+      setattr(newVars, 'bTagWeightCSV' + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = True))
+      setattr(newVars, 'bTagWeight'    + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = False))
+
+    # method 1c
+    #for sys in ['','Up','Down']:
+    #  if sys == 'Up':   sysType = 'up'
+    #  if sys == 'Down': sysType = 'down'
+    #  else:             sysType = 'central'
+    #  btagWeightsCSV = btagSF.getBtagSF_1c(sysType, c, c.bjets, isCSV=True)    # returns (0j weight, 1j weight, 2j weight)
+    #  btagWeights    = btagSF.getBtagSF_1c(sysType, c, c.dbjets, isCSV=False)
+    #  print btagWeights, btagWeightsCSV
+    #  for bmult in range(3):
+    #    setattr(newVars, 'bTagWeightCSV' + str(bmult) + sys, btagWeightsCSV[bmult])
+    #    setattr(newVars, 'bTagWeight'    + str(bmult) + sys, btagWeights[bmult])
+
+    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2) if len(c.leptons) > 1 else (1., 0.)
     newVars.triggerWeight      = trigWeight
     newVars.triggerWeightUp    = trigWeight+trigErr
     newVars.triggerWeightDown  = trigWeight-trigErr
