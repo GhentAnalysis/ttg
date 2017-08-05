@@ -13,7 +13,7 @@ def progressbar(it, prefix="", size=60):
 
   def show(i):
       x = int(size*i/total)
-      sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), i, total))
+      sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix.ljust(25), "#"*x, "."*(size-x), i, total))
       sys.stdout.flush()
 
   if sys.stdout.isatty():
