@@ -108,7 +108,7 @@ def photonSelector(tree, index, n):
   if tree._phPt[index] < 15:                          return False
   if tree._phHasPixelSeed[index]:                     return False
 # if not tree._phPassElectronVeto[index]:             return False # off because we require already pixelseed
-  for i in [n.l1, n.l2]:
+  for i in ([] if tree.QCD else [n.l1, n.l2]):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
   if tree.photonMva:            return tree._phMva[index] > 0.20
@@ -149,7 +149,7 @@ def isGoodJet(tree, index):
   if not tree._jetId[index]: return False
   for ph in tree.photons:
     if deltaR(tree._jetEta[index], tree._phEta[ph], tree._jetPhi[index], tree._phPhi[ph]) < 0.1: return False
-  for lep in tree.leptons:
+  for lep in ([] if tree.QCD else tree.leptons):
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True
 
@@ -170,23 +170,23 @@ def goodJets(t, n):
 
 def bJets(t, n):
   btagWP = 0.8484
-  bjets            = [i for i in t.jets         if t._jetCsvV2[i] > btagWP]
+  t.bjets          = [i for i in t.jets         if t._jetCsvV2[i] > btagWP]
   bjets_JECUp      = [i for i in t.jets_JECUp   if t._jetCsvV2[i] > btagWP]
   bjets_JECDown    = [i for i in t.jets_JECDown if t._jetCsvV2[i] > btagWP]
   bjets_JERUp      = [i for i in t.jets_JERUp   if t._jetCsvV2[i] > btagWP]
   bjets_JERDown    = [i for i in t.jets_JERDown if t._jetCsvV2[i] > btagWP]
-  n.nbjets         = len(bjets)
+  n.nbjets         = len(t.bjets)
   n.nbjets_JECUp   = len(bjets_JECUp)
   n.nbjets_JECDown = len(bjets_JECDown)
   n.nbjets_JERUp   = len(bjets_JERUp)
   n.nbjets_JERDown = len(bjets_JERDown)
   btagWP = 0.6324
-  dbjets           = [i for i in t.jets         if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
+  t.dbjets         = [i for i in t.jets         if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
   dbjets_JECUp     = [i for i in t.jets_JECUp   if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
   dbjets_JECDown   = [i for i in t.jets_JECDown if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
   dbjets_JERUp     = [i for i in t.jets_JERUp   if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
   dbjets_JERDown   = [i for i in t.jets_JERDown if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP]
-  n.dbjets         = len(dbjets)
+  n.dbjets         = len(t.dbjets)
   n.dbjets_JECUp   = len(dbjets_JECUp)
   n.dbjets_JECDown = len(dbjets_JECDown)
   n.dbjets_JERUp   = len(dbjets_JERUp)
