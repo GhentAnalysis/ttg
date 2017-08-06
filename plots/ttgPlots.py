@@ -175,8 +175,8 @@ else:
   if args.channel=='noData':
     plots.append(Plot('eventType',            'eventType',                       lambda c : c._ttgEventType,                                                                 (9, 0, 9)))
     if not args.tag.count('QCD'):
-      plots.append(Plot('genPhoton_pt',         'p_{T}(gen #gamma) (GeV)',         lambda c : c._gen_phPt[c._phMatchMCPhotonAN15165] if c._phMatchMCPhotonAN15165 > -1 else -1,     (10,10,110)))
-      plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',              lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165]) if _phMatchMCPhotonAN15165 > -1 else -1, (15,0,2.5)))
+      plots.append(Plot('genPhoton_pt',         'p_{T}(gen #gamma) (GeV)',         lambda c : c._gen_phPt[c._phMatchMCPhotonAN15165[c.ph]] if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1,     (10,10,110)))
+      plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',              lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165[c.ph]]) if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1, (15,0,2.5)))
 
 
 lumiScale = 35.9
@@ -226,7 +226,7 @@ for sample in sum(stack, []):
       c.lWeight = 1.
       c.lTrackWeight = 1.
       c.triggerWeight = 1.
-    eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.triggerWeight*lumiScale
+    eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale
 
     for plot in plots: plot.fill(sample, eventWeight)
 
