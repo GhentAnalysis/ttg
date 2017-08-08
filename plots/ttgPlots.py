@@ -39,17 +39,22 @@ if not args.isChild and args.selection is None:
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p-photonPt20to40',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p-photonPt40to60',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p-photonPt60',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-btag1p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
 
+  selections = ['llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60']
+
   if args.tag.count('QCD'):
-    selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p']
+    selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
   if args.channel:            channels = [args.channel]
   elif args.tag.count('QCD'): channels = ['noData']
   else:                       channels = ['ee','mumu','emu','SF','all','noData']
@@ -157,7 +162,7 @@ else:
     plots.append(Plot('dlg_mass_zoom',          'm(ll#gamma) (GeV)',               lambda c : c.mllg,                                                                    (40,50,200)))
     plots.append(Plot('phL1DeltaR',             '#Delta R(#gamma, l_{1})',         lambda c : c.phL1DeltaR,                                                              (20,0,5)))
     plots.append(Plot('phL2DeltaR',             '#Delta R(#gamma, l_{2})',         lambda c : c.phL2DeltaR,                                                              (20,0,5)))
-  plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                           (20,0,5)))
+  plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',             lambda c : c.phLepDeltaR,                                                             (20,0,5)))
   plots.append(Plot('phJetDeltaR',            '#Delta R(#gamma, j)',             lambda c : c.phJetDeltaR,                                                             (20,0,5)))
   plots.append(Plot('njets',                  'number of jets',                  lambda c : c.njets,                                                                   (8,0,8)))
   plots.append(Plot('nbtag',                  'number of medium b-tags (CSVv2)', lambda c : c.nbjets,                                                                  (4,0,4)))
@@ -191,7 +196,7 @@ if eleMva:                  reduceType = 'eleMvaMedium'
 elif args.tag.count('QCD'): reduceType = 'phoCB'
 else:                       reduceType = 'eleCB-phoCB'
 
-from ttg.reduceTuple.objectSelection import deltaR
+from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
 for sample in sum(stack, []):
   c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep')
   c.QCD = args.tag.count('QCD')
@@ -208,6 +213,12 @@ for sample in sum(stack, []):
     if forward and abs(c._phEta[c.ph]) < 1.566: continue
     if central and abs(c._phEta[c.ph]) > 1.4442: continue
 
+    c.phLepDeltaR = 99
+    for i in xrange(ord(c._nLight)):
+      if not looseLeptonSelector(c, i): continue
+      deltaR_ = deltaR(c._lEta[i], c._phEta[c.ph], c._lPhi[i], c._phPhi[c.ph])
+      c.phLepDeltaR = min(c.phLepDeltaR, deltaR_)
+    if c.phLepDeltaR < 0.1: continue
 
     if sigmaieta:
       upperCut = (0.01022 if abs(c._phEta[c.ph]) < 1.566 else  0.03001 )                      # forward region needs much higher cut
@@ -255,12 +266,13 @@ for plot in plots:
                           lambda h : h.GetXaxis().SetBinLabel(2, "e#mu"),
                           lambda h : h.GetXaxis().SetBinLabel(3, "ee")]
 
-  baseDir = '/user/tomc/TTG/plots/' + args.tag
+  import socket
+  baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
   for log in [False, True]:
-    plot.draw(plot_directory = os.path.join(baseDir + '/' + args.channel + ('-log' if log else '') + '/' + args.selection),
-              ratio = None if (args.channel=='noData' and not args.tag.count('QCD')) else {'yRange':(0.1,1.9)},
+    plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if log else ''), args.selection),
+              ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
               logX = False, logY = log, sorting = True,
-              yRange = (0.003, "auto"),
+              yRange = (0.003, "auto") if log else (0.00001, "auto"),
               scaling = 'unity' if sigmaieta or randomCone else {},
               drawObjects = drawObjects(None, lumiScale),
               histModifications = histModifications,
