@@ -17,11 +17,11 @@ def progressbar(it, prefix="", size=60):
       sys.stdout.flush()
 
   if sys.stdout.isatty():
-    show(0)
+    if total > 0: show(0)
     for i, item in enumerate(it):
       yield item
       if i and i%(int(total/size/10)+1)==0: show(i)
-    show(total)
+    if total > 0: show(total)
     sys.stdout.write("\n")
     sys.stdout.flush()
   else:
