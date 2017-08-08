@@ -13,7 +13,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-import glob, os, copy, ROOT, uuid
+import glob, os, copy, ROOT, uuid, socket
 
 from ttg.tools.progressBar import progressbar
 import ttg.tools.style as styles
@@ -58,8 +58,9 @@ class Sample:
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
+      baseDir           = '/afs/cern.ch/work/t/tomc/public/reducedTuples/' if 'lxp' in socket.gethostname() else '/user/tomc/public/TTG/reducedTuples/'
       for s in self.addSamples:
-        self.listOfFiles += glob.glob(os.path.join('/user/tomc/public/TTG/reducedTuples/' + self.productionLabel, reducedType, s, '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(baseDir, self.productionLabel, reducedType, s, '*.root'))
     else:
       self.chain        = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
       self.listOfFiles  = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
