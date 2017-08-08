@@ -24,7 +24,7 @@ def copyIndexPHP(directory):
   subdirs = directory.split('/')
   for i in range(1,len(subdirs)):
     p = '/'.join(subdirs[:-i])
-    if not p.count('plots') or p.count('ttG'): continue
+    if not (p.count('plots') or p.count('ttG')): continue
     index_php = os.path.join(p, 'index.php')
     shutil.copyfile(os.path.expandvars( '$CMSSW_BASE/src/ttg/tools/php/index.php'), index_php)
 
