@@ -1,0 +1,9 @@
+-- MC (sigmaIetaIeta pass)
+TTJets_Dilep               t#bar{t}_(hadronicPhoton,#sigma_{i#etai#eta}_pass)             errorStyle     kBlue          _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+-- MC (sigmaIetaIeta fail)
+TTJets_Dilep               t#bar{t}_(hadronicPhoton,#sigma_{i#etai#eta}_fail)             errorStyle     kRed          _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
