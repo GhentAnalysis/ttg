@@ -79,6 +79,7 @@ ROOT.gROOT.SetBatch(True)
 
 if args.tag.count('split'):                            stackFile = 'split'
 elif args.tag.count('ttbar'):                          stackFile = 'onlyttbar'
+elif args.tag.count('match'):                          stackFile = 'match'
 elif args.tag.count('DYLO'):                           stackFile = 'DY_LO'
 elif args.tag.count('passSigmaIetaIetaMatch'):         stackFile = 'passSigmaIetaIetaMatch'
 elif args.tag.count('failSigmaIetaIetaMatch'):         stackFile = 'failSigmaIetaIetaMatch'
@@ -87,6 +88,7 @@ elif args.tag.count('failSigmaIetaIeta'):              stackFile = 'failSigmaIet
 elif args.tag.count('sigmaIetaIetaMC-evtType0'):       stackFile = 'sigmaIetaIeta-ttbar-eventType0'
 elif args.tag.count('sigmaIetaIetaMC-evtType1'):       stackFile = 'sigmaIetaIeta-ttbar-eventType1'
 elif args.tag.count('sigmaIetaIetaMC-evtType2'):       stackFile = 'sigmaIetaIeta-ttbar-eventType2'
+elif args.tag.count('sigmaIetaIetaMC-hadronicPhoton'): stackFile = 'sigmaIetaIeta-ttbar-hadronicPhoton'
 elif args.tag.count('sigmaIetaIetaMC'):
   if args.tag.count('powheg'):                         stackFile = 'sigmaIetaIeta-ttpow'
   else:                                                stackFile = 'sigmaIetaIeta-ttbar'
@@ -122,6 +124,7 @@ forward     = args.tag.count('forward')
 central     = args.tag.count('central')
 useGap      = args.tag.count('gap')
 randomCone  = args.tag.count('randomConeCheck')
+match       = args.tag.count('match') or args.tag.count('hadronicPhoton')
 
 plots = []
 Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
@@ -196,7 +199,9 @@ if eleMva:                  reduceType = 'eleMvaMedium'
 elif args.tag.count('QCD'): reduceType = 'phoCB'
 else:                       reduceType = 'eleCB-phoCB'
 
+
 from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
+from ttg.plots.photonCategories import isSignalPhoton, isHadronicPhoton, isGoodElectron, isHadronicFake
 for sample in sum(stack, []):
   c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep')
   c.QCD = args.tag.count('QCD')
@@ -229,6 +234,13 @@ for sample in sum(stack, []):
       if   sample.texName.count('pass') and c._phSigmaIetaIeta[c.ph] > lowerCut: continue
       elif sample.texName.count('fail') and c._phSigmaIetaIeta[c.ph] < upperCut: continue
       if c._phSigmaIetaIeta[c.ph] > (0.016 if abs(c._phEta[c.ph]) < 1.566 else 0.04): continue
+
+
+    if match:
+      if sample.texName.count('genuine')        and not isSignalPhoton(c, c.ph):   continue
+      if sample.texName.count('hadronicPhoton') and not isHadronicPhoton(c, c.ph): continue
+      if sample.texName.count('misIdEle')       and not isGoodElectron(c, c.ph):   continue
+      if sample.texName.count('hadronicFake')   and not isHadronicFake(c, c.ph):   continue
 
     if not passingFunctions(c): continue
 
@@ -272,7 +284,7 @@ for plot in plots:
     plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if log else ''), args.selection),
               ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
               logX = False, logY = log, sorting = True,
-              yRange = (0.003, "auto") if log else (0.00001, "auto"),
+              yRange = (0.003, "auto") if log else (0.0001, "auto"),
               scaling = 'unity' if sigmaieta or randomCone else {},
               drawObjects = drawObjects(None, lumiScale),
               histModifications = histModifications,
