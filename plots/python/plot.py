@@ -341,8 +341,9 @@ class Plot:
     if ratio is not None:
       bottomPad.cd()
       num = histos[ratio['num']][0]
+      den = histos[ratio['den']][0]
       h_ratio = num.Clone()
-      h_ratio.Divide(histos[ratio['den']][0])
+      h_ratio.Divide(den)
 
       if ratio['style'] is not None: ratio['style'](h_ratio) 
 
@@ -374,14 +375,15 @@ class Plot:
       if drawOption == "e1":                          # hacking to show error bars within panel when central value is off scale
         graph = ROOT.TGraphAsymmErrors(dataHist)      # cloning from datahist in order to get layout
         graph.Set(0)
-        for bin in range(1, h_ratio.GetNbinsX()+1):   # do not show error bars on hist
-          h_ratio.SetBinError(bin, 0.0001)
-          center  = h_ratio.GetBinCenter(bin)
-          val     = h_ratio.GetBinContent(bin)
-          errUp   = num.GetBinErrorUp(bin)/histos[ratio['den']][0].GetBinContent(bin) if val > 0 else 0
-          errDown = num.GetBinErrorLow(bin)/histos[ratio['den']][0].GetBinContent(bin) if val > 0 else 0
-          graph.SetPoint(bin, center, val)
-          graph.SetPointError(bin, 0, 0, errDown, errUp)
+        for bin in range(1, h_ratio.GetNbinsX()+1):
+          if den.GetBinContent(bin) > 0 and den.GetBinContent(bin) > 0:
+	    h_ratio.SetBinError(bin, 0.0001)          # do not show error bars on hist, those are taken overf by the TGraphAsymmErrors
+	    center  = h_ratio.GetBinCenter(bin)
+	    val     = h_ratio.GetBinContent(bin)
+	    errUp   = num.GetBinErrorUp(bin)/den.GetBinContent(bin) if val > 0 else 0
+	    errDown = num.GetBinErrorLow(bin)/den.GetBinContent(bin) if val > 0 else 0
+	    graph.SetPoint(bin, center, val)
+	    graph.SetPointError(bin, 0, 0, errDown, errUp)
         h_ratio.Draw("e0")
         graph.Draw("P0 same")
       else:
