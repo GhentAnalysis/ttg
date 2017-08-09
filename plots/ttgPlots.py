@@ -70,6 +70,7 @@ if not args.isChild and args.selection is None:
 #
 import os, ROOT
 from ttg.plots.plot           import Plot
+from ttg.plots.plot2D         import Plot2D
 from ttg.plots.cutInterpreter import cutInterpreter
 from ttg.reduceTuple.objectSelection import photonSelector
 from ttg.samples.Sample       import createStack
@@ -80,6 +81,7 @@ ROOT.gROOT.SetBatch(True)
 if args.tag.count('split'):                            stackFile = 'split'
 elif args.tag.count('ttbar'):                          stackFile = 'onlyttbar'
 elif args.tag.count('match'):                          stackFile = 'match'
+elif args.tag.count('prompt'):                         stackFile = 'prompt'
 elif args.tag.count('DYLO'):                           stackFile = 'DY_LO'
 elif args.tag.count('passSigmaIetaIetaMatch'):         stackFile = 'passSigmaIetaIetaMatch'
 elif args.tag.count('failSigmaIetaIetaMatch'):         stackFile = 'failSigmaIetaIetaMatch'
@@ -125,15 +127,21 @@ central     = args.tag.count('central')
 useGap      = args.tag.count('gap')
 randomCone  = args.tag.count('randomConeCheck')
 match       = args.tag.count('match') or args.tag.count('hadronicPhoton')
+promptCheck = args.tag.count('prompt')
 
 plots = []
 Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
+
+plots2D = []
+Plot2D.setDefaults(stack=stack)
 
 if randomCone:
   plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma)',              lambda c : c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph],                  (20,0,20)))
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)',lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph],  (20,0,20)))
 
 else:
+  plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
+
   plots.append(Plot('yield',                  'yield',                           lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                  (3, 0.5, 3.5)))
   plots.append(Plot('nVertex',                'vertex multiplicity',             lambda c : ord(c._nVertex),                                                           (50, 0, 50)))
   plots.append(Plot('nphoton',                'number of photons',               lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),                (3, 0.5, 3.5)))
@@ -242,6 +250,12 @@ for sample in sum(stack, []):
       if sample.texName.count('misIdEle')       and not isGoodElectron(c, c.ph):   continue
       if sample.texName.count('hadronicFake')   and not isHadronicFake(c, c.ph):   continue
 
+    if promptCheck:
+      if sample.texName.count('non-prompt'):
+        if c._phIsPrompt[c.ph]: continue
+      elif sample.texName.count('prompt'):
+        if not c._phIsPrompt[c.ph]: continue
+
     if not passingFunctions(c): continue
 
     # Note: photon SF is 0 when pt < 20 GeV
@@ -251,7 +265,7 @@ for sample in sum(stack, []):
       c.triggerWeight = 1.
     eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale
 
-    for plot in plots: plot.fill(sample, eventWeight)
+    for plot in plots+plots2D: plot.fill(sample, eventWeight)
 
 
 def drawObjects(dataMCScale, lumiScale):
@@ -267,6 +281,17 @@ def drawObjects(dataMCScale, lumiScale):
     (31,(0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
   ]
   return [drawTex(align, l) for align, l in lines]
+
+import socket
+baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
+
+for plot in plots2D:
+  for log in [False, True]:
+    for option in ['SCAT', 'COLZ']:
+      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if log else ''), args.selection, option),
+		logZ = False,
+                drawOption = option,
+		drawObjects = drawObjects(None, lumiScale))
 
 
 for plot in plots:
