@@ -21,6 +21,8 @@ def isHadronicPhoton(tree, index):
   return True
 
 def isGoodElectron(tree, index):
+  if isSignalPhoton(tree, index):   return False
+  if isHadronicPhoton(tree, index): return False
   mcIndex = tree._phMatchMCLeptonAN15165[index]
   if mcIndex < 0:                                                                                return False
   if (tree._gen_lPt[mcIndex] - tree._phPt[index])/tree._gen_lPt[mcIndex] > 0.1:                  return False
