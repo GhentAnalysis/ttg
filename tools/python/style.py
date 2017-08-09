@@ -9,15 +9,18 @@ def setDefault():
   ROOT.setTDRStyle()
   ROOT.gROOT.SetStyle('tdrStyle')
   ROOT.gStyle.SetPaintTextFormat("3.2f")
+  ROOT.gStyle.SetPadTopMargin(0.07)
+  ROOT.gStyle.SetPadLeftMargin(0.15)
+  ROOT.gStyle.SetPadRightMargin(0.05)
+  ROOT.gStyle.SetPadBottomMargin(0.13)
   ROOT.gROOT.ForceStyle()
  
-def setDefault2D():
+def setDefault2D(isColZ=False):
   setDefault()
-  ROOT.gStyle.SetPadRightMargin(0.12)
-  ROOT.gStyle.SetPadTopMargin(0.15)
+  if isColZ: ROOT.gStyle.SetPadRightMargin(0.15)
   ROOT.gStyle.SetTitleX(0.005)
   ROOT.gStyle.SetTitleY(0.985)
-  ROOT.gStyle.SetOptTitle(1)
+  ROOT.gStyle.SetPalette(1)
   ROOT.gROOT.ForceStyle()
 
 
