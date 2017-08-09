@@ -225,10 +225,6 @@ class Plot:
         bottomPad.SetPad(bottomPad.GetX1(), bottomPad.GetY1(), bottomPad.GetX2(), y_border)
     else:
         topPad = c1
-        topPad.SetBottomMargin(0.13)
-        topPad.SetLeftMargin(0.15)
-        topPad.SetTopMargin(0.07)
-        topPad.SetRightMargin(0.05)
 
     for modification in canvasModifications: modification(c1)
 
