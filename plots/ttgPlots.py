@@ -120,10 +120,7 @@ eleMva      = args.tag.count('eleMva')
 sigmaieta   = args.tag.count('igmaIetaIeta')
 forward     = args.tag.count('forward')
 central     = args.tag.count('central')
-useGap      = args.tag.count('gap')
 randomCone  = args.tag.count('randomConeCheck')
-match       = args.tag.count('match') or args.tag.count('hadronicPhoton') or args.tag.count('MatchMC')
-promptCheck = args.tag.count('prompt')
 
 plots = []
 Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
@@ -211,8 +208,21 @@ from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
 from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
 for sample in sum(stack, []):
   c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep')
-  c.QCD = args.tag.count('QCD')
-  c.data = sample.texName.count('data')
+
+  c.QCD  = args.tag.count('QCD')
+  c.data    = sample.texName.count('data')
+
+  # Filter booleans
+  c.genuine           = sample.texName.count('genuine')
+  c.hadronicPhoton    = sample.texName.count('hadronicPhoton')
+  c.misIdEle          = sample.texName.count('misIdEle')
+  c.hadronicFake      = sample.texName.count('hadronicFake')
+  c.nonprompt         = sample.texName.count('non-prompt')
+  c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
+  c.failSigmaIetaIeta = sample.texName.count('fail')
+  c.passSigmaIetaIeta = sample.texName.count('pass')
+
+
   c.photonCutBased      = phoCB
   c.photonCutBasedTight = False
   c.photonMva           = phoMva
@@ -225,9 +235,9 @@ for sample in sum(stack, []):
     if forward and abs(c._phEta[c.ph]) < 1.566: continue
     if central and abs(c._phEta[c.ph]) > 1.4442: continue
 
-    if sigmaieta and not checkSigmaIetaIeta(c, c.ph, sample.texName): continue  # filter for sigmaIetaIeta sideband based on texName (pass or fail)
-    if match and not checkMatch(c, c.ph, sample.texName):             continue  # filter using AN15-165 definitions based on texName (genuine, hadronicPhoton, misIdEle or hadronicFake)
-    if promptCheck and not checkPrompt(c, c.ph, sample.texName):      continue  # filter using PAT matching definitions based on texName (prompt or non-prompt)
+    if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+    if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
+    if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
     if not passingFunctions(c): continue
 
