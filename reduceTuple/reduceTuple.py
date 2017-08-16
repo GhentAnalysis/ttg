@@ -66,7 +66,6 @@ outputFile.cd()
 # Switch off unneeded branches
 #
 sample.chain.SetBranchStatus("*HLT*", 0)
-sample.chain.SetBranchStatus("*HN*", 0)
 outputTree = sample.chain.CloneTree(0)
 
 
@@ -115,6 +114,7 @@ newVars = makeBranches(outputTree, newBranches)
 doPhotonCut           = args.type.count('pho')
 c.photonCutBased      = args.type.count('phoCB')
 c.photonMva           = args.type.count('photonMva')
+c.hnTight             = args.type.count('eleHN')
 c.eleMva              = args.type.count('eleMvaMedium')
 c.eleMvaTight         = args.type.count('eleMvaTight')
 c.QCD                 = args.QCD
