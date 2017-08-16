@@ -36,13 +36,14 @@ class Plot:
       Plot.defaultTexY         = texY
       Plot.defaultOverflowBin  = overflowBin
 
-  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin=None):
-    self.stack       = stack       if stack else Plot.defaultStack
-    self.texY        = texY        if texY else Plot.defaultTexY
-    self.overflowBin = overflowBin if overflowBin else Plot.defaultOverflowBin
-    self.name        = name
-    self.texX        = texX
-    self.varX        = varX
+  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin=None, histModifications=None):
+    self.stack             = stack       if stack else Plot.defaultStack
+    self.texY              = texY        if texY else Plot.defaultTexY
+    self.overflowBin       = overflowBin if overflowBin else Plot.defaultOverflowBin
+    self.name              = name
+    self.texX              = texX
+    self.varX              = varX
+    self.histModifications = histModifications
 
 
     if type(binning)==type([]):   self.binning = (len(binning)-1, numpy.array(binning))
@@ -312,7 +313,7 @@ class Plot:
       if ratio is None: h.GetYaxis().SetTitleOffset(1.3)
       else:             h.GetYaxis().SetTitleOffset(1.6)
 
-      for modification in histModifications: modification(h)
+      for modification in histModifications+self.histModifications: modification(h)
 
       if drawOption=="e1": dataHist = h
       h.Draw(drawOption+same)
