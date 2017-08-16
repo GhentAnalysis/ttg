@@ -48,11 +48,6 @@ if not args.isChild and args.selection is None:
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-btag1p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
 
-  selections = ['llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60']
-
   if args.tag.count('QCD'):
     selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
   if args.channel:            channels = [args.channel]
@@ -205,6 +200,7 @@ if args.channel=="emu":  cutString += '&&isEMu'
 
 if eleMva:                  reduceType = 'eleMvaMedium'
 elif args.tag.count('QCD'): reduceType = 'phoCB'
+elif args.tag.count('HN'):  reduceType = 'eleHN-phoCB'
 else:                       reduceType = 'eleCB-phoCB'
 
 
@@ -286,12 +282,12 @@ import socket
 baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
 
 for plot in plots2D:
-  for log in [False, True]:
+  for logY in [False, True]:
     for option in ['SCAT', 'COLZ']:
-      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if log else ''), args.selection, option),
-		logZ = False,
+      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection, option),
+                logZ = False,
                 drawOption = option,
-		drawObjects = drawObjects(None, lumiScale))
+                drawObjects = drawObjects(None, lumiScale))
 
 
 for plot in plots:
@@ -305,11 +301,11 @@ for plot in plots:
 
   import socket
   baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
-  for log in [False, True]:
-    plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if log else ''), args.selection),
+  for logY in [False, True]:
+    plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection),
               ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
-              logX = False, logY = log, sorting = True,
-              yRange = (0.003, "auto") if log else (0.0001, "auto"),
+              logX = False, logY = logY, sorting = True,
+              yRange = (0.003, "auto") if logY else (0.0001, "auto"),
               scaling = 'unity' if sigmaieta or randomCone else {},
               drawObjects = drawObjects(None, lumiScale),
               histModifications = histModifications,
