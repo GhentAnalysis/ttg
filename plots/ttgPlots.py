@@ -133,7 +133,8 @@ Plot2D.setDefaults(stack=stack)
 
 if randomCone:
   plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma) (GeV)',         lambda c : c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph],                  (20,0,20)))
-  plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)',lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph],  (20,0,20)))
+  plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',         lambda c : c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph],                  (80,0,20)))
+  plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)',lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph],   (20,0,2)))
 
 else:
   plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
@@ -146,6 +147,7 @@ else:
   plots.append(Plot('photon_phi',             '#phi(#gamma)',                            lambda c : c._phPhi[c.ph],                                                            (10,-pi,pi)))
   plots.append(Plot('photon_mva',             '#gamma-MVA',                              lambda c : c._phMva[c.ph],                                                            (20,-1,1)))
   plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma) (GeV)',                lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20)))
+  plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',                lambda c : c._phChargedIsolation[c.ph],                                               (80,0,20)))
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)',        lambda c : c._phChargedIsolation[c.ph]/c._phPt[c.ph],                                 (20,0,2)))
   plots.append(Plot('photon_neutralIso',      'neutralIso(#gamma) (GeV)',                lambda c : c._phNeutralHadronIsolation[c.ph],                                         (25,0,5)))
   plots.append(Plot('photon_photonIso',       'photonIso(#gamma) (GeV)',                 lambda c : c._phPhotonIsolation[c.ph],                                                (32,0,8)))
