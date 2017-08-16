@@ -45,8 +45,9 @@ def electronSelector(tree, index):
   for i in xrange(ord(tree._nMu)): # cleaning electrons around muons
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
-  if tree.eleMva: return electronMva(tree, index)
-  else:           return tree._lPOGTight[index]
+  if   tree.eleMva:  return electronMva(tree, index)
+  elif tree.hnTight: return tree._lHNTight[index]
+  else:              return tree._lPOGTight[index]
 
 def muonSelector(tree, index):
   return tree._lPOGMedium[index]
@@ -104,10 +105,10 @@ def photonCutBasedReduced(c, index):
 # Select photon with pt > 20
 #
 def photonSelector(tree, index, n):
-  if abs(tree._phEta[index]) > 2.5:                   return False
-  if tree._phPt[index] < 15:                          return False
-  if tree._phHasPixelSeed[index]:                     return False
-# if not tree._phPassElectronVeto[index]:             return False # off because we require already pixelseed
+  if abs(tree._phEta[index]) > 2.5:                    return False
+  if tree._phPt[index] < 15:                           return False
+  if not n.isMuMu and tree._phHasPixelSeed[index]:     return False # For dimuon channel
+  if n.isMuMu and not tree._phPassElectronVeto[index]: return False # For other channels
   for i in ([] if tree.QCD else [n.l1, n.l2]):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
