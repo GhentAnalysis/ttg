@@ -82,6 +82,7 @@ elif args.tag.count('passSigmaIetaIetaMatch'):         stackFile = 'passSigmaIet
 elif args.tag.count('failSigmaIetaIetaMatch'):         stackFile = 'failSigmaIetaIetaMatch'
 elif args.tag.count('passSigmaIetaIeta'):              stackFile = 'passSigmaIetaIeta'
 elif args.tag.count('failSigmaIetaIeta'):              stackFile = 'failSigmaIetaIeta'
+elif args.tag.count('sigmaIetaIetaMatchMC'):           stackFile = 'sigmaIetaIetaMatchMC'
 elif args.tag.count('sigmaIetaIetaMC-evtType0'):       stackFile = 'sigmaIetaIeta-ttbar-eventType0'
 elif args.tag.count('sigmaIetaIetaMC-evtType1'):       stackFile = 'sigmaIetaIeta-ttbar-eventType1'
 elif args.tag.count('sigmaIetaIetaMC-evtType2'):       stackFile = 'sigmaIetaIeta-ttbar-eventType2'
@@ -94,7 +95,7 @@ elif args.tag.count('sigmaIetaIetaQCD-evtType0'):      stackFile = 'sigmaIetaIet
 elif args.tag.count('sigmaIetaIetaQCD-evtType1'):      stackFile = 'sigmaIetaIeta-QCD-eventType1'
 elif args.tag.count('sigmaIetaIetaQCD-evtType2'):      stackFile = 'sigmaIetaIeta-QCD-eventType2'
 elif args.tag.count('sigmaIetaIetaQCD'):               stackFile = 'sigmaIetaIeta-QCD'
-elif args.tag.count('randomConeCheck'):                stackFile = 'randomConeCheck'
+elif args.tag.count('randomConeCheckMatchMC'):         stackFile = 'randomConeCheckMatchMC'
 elif args.tag.count('randomConeCheck'):                stackFile = 'randomConeCheck'
 elif args.tag.count('sigmaIetaIeta'):                  stackFile = 'sigmaIetaIeta'
 elif args.tag.count('powheg'):                         stackFile = 'powheg'
@@ -121,7 +122,7 @@ forward     = args.tag.count('forward')
 central     = args.tag.count('central')
 useGap      = args.tag.count('gap')
 randomCone  = args.tag.count('randomConeCheck')
-match       = args.tag.count('match') or args.tag.count('hadronicPhoton')
+match       = args.tag.count('match') or args.tag.count('hadronicPhoton') or args.tag.count('MatchMC')
 promptCheck = args.tag.count('prompt')
 
 plots = []
@@ -168,7 +169,7 @@ else:
     plots.append(Plot('dlg_mass_zoom',          'm(ll#gamma) (GeV)',               lambda c : c.mllg,                                                                    (40,50,200)))
     plots.append(Plot('phL1DeltaR',             '#Delta R(#gamma, l_{1})',         lambda c : c.phL1DeltaR,                                                              (20,0,5)))
     plots.append(Plot('phL2DeltaR',             '#Delta R(#gamma, l_{2})',         lambda c : c.phL2DeltaR,                                                              (20,0,5)))
-  plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',             lambda c : c.phLepDeltaR,                                                             (20,0,5)))
+    plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                           (20,0,5)))
   plots.append(Plot('phJetDeltaR',            '#Delta R(#gamma, j)',             lambda c : c.phJetDeltaR,                                                             (20,0,5)))
   plots.append(Plot('njets',                  'number of jets',                  lambda c : c.njets,                                                                   (8,0,8)))
   plots.append(Plot('nbtag',                  'number of medium b-tags (CSVv2)', lambda c : c.nbjets,                                                                  (4,0,4)))
@@ -221,13 +222,6 @@ for sample in sum(stack, []):
     if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
     if forward and abs(c._phEta[c.ph]) < 1.566: continue
     if central and abs(c._phEta[c.ph]) > 1.4442: continue
-
-    c.phLepDeltaR = 99
-    for i in xrange(ord(c._nLight)):
-      if not looseLeptonSelector(c, i): continue
-      deltaR_ = deltaR(c._lEta[i], c._phEta[c.ph], c._lPhi[i], c._phPhi[c.ph])
-      c.phLepDeltaR = min(c.phLepDeltaR, deltaR_)
-    if c.phLepDeltaR < 0.1: continue
 
     if sigmaieta:
       upperCut = (0.01022 if abs(c._phEta[c.ph]) < 1.566 else  0.03001 )                      # forward region needs much higher cut
