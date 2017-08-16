@@ -208,7 +208,7 @@ else:                       reduceType = 'eleCB-phoCB'
 
 
 from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
-from ttg.plots.photonCategories import isSignalPhoton, isHadronicPhoton, isGoodElectron, isHadronicFake
+from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
 for sample in sum(stack, []):
   c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep')
   c.QCD = args.tag.count('QCD')
@@ -225,28 +225,9 @@ for sample in sum(stack, []):
     if forward and abs(c._phEta[c.ph]) < 1.566: continue
     if central and abs(c._phEta[c.ph]) > 1.4442: continue
 
-    if sigmaieta:
-      upperCut = (0.01022 if abs(c._phEta[c.ph]) < 1.566 else  0.03001 )                      # forward region needs much higher cut
-      lowerCut = (0.01022 if abs(c._phEta[c.ph]) < 1.566 else  0.03001 )                      # forward region needs much higher cut
-      if useGap:
-        upperCut = (0.01122 if abs(c._phEta[c.ph]) < 1.566 else  0.03201 )                      # forward region needs much higher cut
-        lowerCut = (0.00922 if abs(c._phEta[c.ph]) < 1.566 else  0.03001 )                      # forward region needs much higher cut
-      if   sample.texName.count('pass') and c._phSigmaIetaIeta[c.ph] > lowerCut: continue
-      elif sample.texName.count('fail') and c._phSigmaIetaIeta[c.ph] < upperCut: continue
-      if c._phSigmaIetaIeta[c.ph] > (0.016 if abs(c._phEta[c.ph]) < 1.566 else 0.04): continue
-
-
-    if match:
-      if sample.texName.count('genuine')        and not isSignalPhoton(c, c.ph):   continue
-      if sample.texName.count('hadronicPhoton') and not isHadronicPhoton(c, c.ph): continue
-      if sample.texName.count('misIdEle')       and not isGoodElectron(c, c.ph):   continue
-      if sample.texName.count('hadronicFake')   and not isHadronicFake(c, c.ph):   continue
-
-    if promptCheck:
-      if sample.texName.count('non-prompt'):
-        if c._phIsPrompt[c.ph]: continue
-      elif sample.texName.count('prompt'):
-        if not c._phIsPrompt[c.ph]: continue
+    if sigmaieta and not checkSigmaIetaIeta(c, c.ph, sample.texName): continue  # filter for sigmaIetaIeta sideband based on texName (pass or fail)
+    if match and not checkMatch(c, c.ph, sample.texName):             continue  # filter using AN15-165 definitions based on texName (genuine, hadronicPhoton, misIdEle or hadronicFake)
+    if promptCheck and not checkPrompt(c, c.ph, sample.texName):      continue  # filter using PAT matching definitions based on texName (prompt or non-prompt)
 
     if not passingFunctions(c): continue
 

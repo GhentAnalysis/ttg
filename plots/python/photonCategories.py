@@ -6,12 +6,12 @@ from ttg.reduceTuple.objectSelection import deltaR
 
 def isSignalPhoton(tree, index):
   mcIndex = tree._phMatchMCPhotonAN15165[index]
-  if mcIndex < 0:                                                                                  return False
-  if not tree._gen_phPassParentage[mcIndex]:                                                       return False
-  if (tree._gen_phPt[mcIndex] - tree._phPt[index])/tree._gen_phPt[mcIndex] > 0.1:                  return False
-  if c._gen_phMinDeltaR[mcIndex] < 0.2:                                                            return False
-  if deltaR(c._gen_phEta[mcIndex], c._phEta[index], c._gen_phPhi[mcIndex], c._phPhi[c.ph]) > 0.01: return False
-  if (c._gen_phEta[mcIndex] - c._phEta[index])/c._gen_phEta[mcIndex] > 0.005:                      return False
+  if mcIndex < 0:                                                                                               return False
+  if not tree._gen_phPassParentage[mcIndex]:                                                                    return False
+  if (tree._gen_phPt[mcIndex] - tree._phPt[index])/tree._gen_phPt[mcIndex] > 0.1:                               return False
+  if tree._gen_phMinDeltaR[mcIndex] < 0.2:                                                                      return False
+  if deltaR(tree._gen_phEta[mcIndex], tree._phEta[index], tree._gen_phPhi[mcIndex], tree._phPhi[index]) > 0.01: return False
+  if (tree._gen_phEta[mcIndex] - tree._phEta[index])/tree._gen_phEta[mcIndex] > 0.005:                          return False
   return True
 
 def isHadronicPhoton(tree, index):
@@ -24,12 +24,12 @@ def isGoodElectron(tree, index):
   if isSignalPhoton(tree, index):   return False
   if isHadronicPhoton(tree, index): return False
   mcIndex = tree._phMatchMCLeptonAN15165[index]
-  if mcIndex < 0:                                                                                return False
-  if (tree._gen_lPt[mcIndex] - tree._phPt[index])/tree._gen_lPt[mcIndex] > 0.1:                  return False
-# if not tree._gen_lPassParentage[mcIndex]                                                       return False # To be added to tuples
-# if c._gen_lMinDeltaR[mcIndex] < 0.2:                                                           return False # To be added to tuples
-  if deltaR(c._gen_lEta[mcIndex], c._phEta[index], c._gen_lPhi[mcIndex], c._phPhi[c.ph]) > 0.04: return False
-  if (c._gen_lEta[mcIndex] - c._phEta[index])/c._gen_lEta[mcIndex] > 0.005:                      return False
+  if mcIndex < 0:                                                                                             return False
+  if (tree._gen_lPt[mcIndex] - tree._phPt[index])/tree._gen_lPt[mcIndex] > 0.1:                               return False
+# if not tree._gen_lPassParentage[mcIndex]                                                                    return False # To be added to tuples
+# if tree._gen_lMinDeltaR[mcIndex] < 0.2:                                                                     return False # To be added to tuples
+  if deltaR(tree._gen_lEta[mcIndex], tree._phEta[index], tree._gen_lPhi[mcIndex], tree._phPhi[index]) > 0.04: return False
+  if (tree._gen_lEta[mcIndex] - tree._phEta[index])/tree._gen_lEta[mcIndex] > 0.005:                          return False
   return True;
 
 def isHadronicFake(tree, index):
@@ -38,5 +38,24 @@ def isHadronicFake(tree, index):
   if isGoodElectron(tree, index):   return False
   return True
 
+def checkMatch(tree, index, texName):
+  if texName.count('genuine')        and not isSignalPhoton(tree, index):   return False
+  if texName.count('hadronicPhoton') and not isHadronicPhoton(tree, index): return False
+  if texName.count('misIdEle')       and not isGoodElectron(tree, index):   return False
+  if texName.count('hadronicFake')   and not isHadronicFake(tree, index):   return False
+  return True
 
+def checkPrompt(tree, index, texName):
+  if texName.count('non-prompt'):
+    if tree._phIsPrompt[index]:     return False
+  elif texName.count('prompt'):
+    if not tree._phIsPrompt[index]: return False
+  return True
 
+def checkSigmaIetaIeta(tree, index, texName):
+  upperCut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                      # forward region needs much higher cut
+  lowerCut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                      # forward region needs much higher cut
+  if   texName.count('pass') and tree._phSigmaIetaIeta[index] > lowerCut:                 return False
+  elif texName.count('fail') and tree._phSigmaIetaIeta[index] < upperCut:                 return False
+  if tree._phSigmaIetaIeta[index] > (0.016 if abs(tree._phEta[index]) < 1.566 else 0.04): return False
+  return True
