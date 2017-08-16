@@ -61,7 +61,7 @@ if not args.isChild and args.selection is None:
 
 
 #
-# Still very messy
+# Initializing
 #
 import os, ROOT
 from ttg.plots.plot           import Plot
@@ -73,6 +73,22 @@ from math import pi
 
 ROOT.gROOT.SetBatch(True)
 
+phoCB       = args.tag.count('phoCB')
+phoCBfull   = args.tag.count('phoCBfull')
+phoMva      = args.tag.count('phoMva')
+phoMvaTight = args.tag.count('phoMvaTight')
+eleCB       = args.tag.count('eleCB')
+eleMva      = args.tag.count('eleMva')
+sigmaieta   = args.tag.count('igmaIetaIeta')
+forward     = args.tag.count('forward')
+central     = args.tag.count('central')
+randomCone  = args.tag.count('randomConeCheck')
+
+
+
+#
+# Create stack
+#
 if args.tag.count('split'):                            stackFile = 'split'
 elif args.tag.count('ttbar'):                          stackFile = 'onlyttbar'
 elif args.tag.count('match'):                          stackFile = 'match'
@@ -107,20 +123,13 @@ stack = createStack(tuplesFile = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg
                     styleFile  = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data', stackFile + '.stack'),
                     channel    = args.channel)
 
+
+#
+# Define plots
+#
 xAxisForYieldPlot = [lambda h : h.GetXaxis().SetBinLabel(1, "#mu#mu"),
                      lambda h : h.GetXaxis().SetBinLabel(2, "e#mu"),
                      lambda h : h.GetXaxis().SetBinLabel(3, "ee")]
-
-phoCB       = args.tag.count('phoCB')
-phoCBfull   = args.tag.count('phoCBfull')
-phoMva      = args.tag.count('phoMva')
-phoMvaTight = args.tag.count('phoMvaTight')
-eleCB       = args.tag.count('eleCB')
-eleMva      = args.tag.count('eleMva')
-sigmaieta   = args.tag.count('igmaIetaIeta')
-forward     = args.tag.count('forward')
-central     = args.tag.count('central')
-randomCone  = args.tag.count('randomConeCheck')
 
 plots = []
 Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
@@ -136,7 +145,7 @@ if randomCone:
 else:
   plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
 
-  plots.append(Plot('yield',                  'yield',                                   lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                  (3, 0.5, 3.5)))
+  plots.append(Plot('yield',                  'yield',                                   lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                  (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
   plots.append(Plot('nVertex',                'vertex multiplicity',                     lambda c : ord(c._nVertex),                                                           (50, 0, 50)))
   plots.append(Plot('nphoton',                'number of photons',                       lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),                (3, 0.5, 3.5)))
   plots.append(Plot('photon_pt',              'p_{T}(#gamma) (GeV)',                     lambda c : c._phPt[c.ph],                                                             (20,15,115)))
@@ -190,6 +199,9 @@ else:
       plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',              lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165[c.ph]]) if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1, (15,0,2.5)))
 
 
+#
+# Prepare looper
+#
 lumiScale = 35.9
 
 cutString, passingFunctions = cutInterpreter.cutString(args.selection)
@@ -198,12 +210,15 @@ if args.channel=="ee":   cutString += '&&isEE'
 if args.channel=="mumu": cutString += '&&isMuMu'
 if args.channel=="emu":  cutString += '&&isEMu'
 
-if eleMva:                  reduceType = 'eleMvaMedium'
-elif args.tag.count('QCD'): reduceType = 'phoCB'
+if   args.tag.count('QCD'): reduceType = 'phoCB'
 elif args.tag.count('HN'):  reduceType = 'eleHN-phoCB'
 else:                       reduceType = 'eleCB-phoCB'
 
 
+
+#
+# Looping
+#
 from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
 from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
 for sample in sum(stack, []):
@@ -251,6 +266,10 @@ for sample in sum(stack, []):
     for plot in plots+plots2D: plot.fill(sample, eventWeight)
 
 
+
+#
+# Drawing the plots
+#
 def drawObjects(dataMCScale, lumiScale):
   def drawTex(align, line):
     tex = ROOT.TLatex()
@@ -265,6 +284,7 @@ def drawObjects(dataMCScale, lumiScale):
   ]
   return [drawTex(align, l) for align, l in lines]
 
+
 import socket
 baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
 
@@ -276,18 +296,12 @@ for plot in plots2D:
                 drawOption = option,
                 drawObjects = drawObjects(None, lumiScale))
 
-
 for plot in plots:
   histModifications = []
   if plot.name == "yield":
     log.info("Yields: ")
     for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
-    histModifications += [lambda h : h.GetXaxis().SetBinLabel(1, "#mu#mu"),
-                          lambda h : h.GetXaxis().SetBinLabel(2, "e#mu"),
-                          lambda h : h.GetXaxis().SetBinLabel(3, "ee")]
 
-  import socket
-  baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
   for logY in [False, True]:
     plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection),
               ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
