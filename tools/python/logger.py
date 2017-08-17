@@ -43,3 +43,6 @@ def getLogger(logLevel='INFO', logFile=None):
 
   sys.excepthook = excepthook
   return logger
+
+def logLevel(logger, level):
+  return logger.getEffectiveLevel() <= logging.getLevelName(level)
