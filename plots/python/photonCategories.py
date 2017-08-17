@@ -38,19 +38,19 @@ def isHadronicFake(tree, index):
   if isGoodElectron(tree, index):   return False
   return True
 
-def checkMatch(tree, index, texName):
+def checkMatch(tree, index):
   if tree.genuine        and not isSignalPhoton(tree, index):   return False
   if tree.hadronicPhoton and not isHadronicPhoton(tree, index): return False
   if tree.misIdEle       and not isGoodElectron(tree, index):   return False
   if tree.hadronicFake   and not isHadronicFake(tree, index):   return False
   return True
 
-def checkPrompt(tree, index, texName):
+def checkPrompt(tree, index):
   if tree.nonprompt and tree._phIsPrompt[index]:     return False
   if tree.prompt    and not tree._phIsPrompt[index]: return False
   return True
 
-def checkSigmaIetaIeta(tree, index, texName):
+def checkSigmaIetaIeta(tree, index):
   upperCut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                      # forward region needs much higher cut
   lowerCut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                      # forward region needs much higher cut
   if   tree.passSigmaIetaIeta and tree._phSigmaIetaIeta[index] > lowerCut:                return False
