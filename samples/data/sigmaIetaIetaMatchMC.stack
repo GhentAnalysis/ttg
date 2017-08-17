@@ -1,0 +1,48 @@
+-- Data
+DoubleMuon                 data_(#sigma_{i#etai#eta}_fail):mumu,SF,all         errorStyle    kBlue                   isMuMu
++SingleMuon
+
+DoubleEG                   data_(#sigma_{i#etai#eta}_fail):ee,SF,all           errorStyle    kBlue                   isEE
++SingleElectron
+
+MuonEG                     data_(#sigma_{i#etai#eta}_fail):emu,all             errorStyle    kBlue                   isEMu
++SingleMuon
++SingleElectron
+
+-- MC (match hadronicFake)
+TTJets_Dilep               MC_(hadronicPhoton)                                 errorStyle    kRed                    _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+DY_M10to50_NLO             MC_(hadronicPhoton)                                 errorStyle    kRed                    _zgEventType<3
++DY_M50_NLO
+
+TTGamma                    MC_(hadronicPhoton)                                 errorStyle    kRed
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq

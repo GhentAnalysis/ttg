@@ -1,0 +1,164 @@
+-- MC
+TTGamma                    MC_(genuine)                 fillStyle     kRed
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+
+TTGamma                    MC_(hadronicPhoton)          fillStyle     46
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+
+TTGamma                    MC_(misIdEle)                fillStyle     49
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+
+TTGamma                    MC_(hadronicFake)            fillStyle     6
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+
+TTJets_Dilep               MC_(genuine)                             fillStyle     kBlue                    _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+TTJets_Dilep               MC_(hadronicPhoton)                      fillStyle     9                        _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+TTJets_Dilep               MC_(misIdEle)                            fillStyle     38                       _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+TTJets_Dilep               MC_(hadronicFake)                        fillStyle     35                       _ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+
+DY_M10to50_NLO             MC_(genuine)                             fillStyle     kRed                     _zgEventType<3
++DY_M50_NLO
+
+DY_M10to50_NLO             MC_(hadronicPhoton)                      fillStyle     46                       _zgEventType<3
++DY_M50_NLO
+
+DY_M10to50_NLO             MC_(misIdEle)                            fillStyle     49                       _zgEventType<3
++DY_M50_NLO
+
+DY_M10to50_NLO             MC_(hadronicFake)                        fillStyle     6                        _zgEventType<3
++DY_M50_NLO
+
+-- Data
+DoubleMuon                 data:mumu,SF,all                         errorStyle    kBlack                   isMuMu
++SingleMuon
+
+DoubleEG                   data:ee,SF,all                           errorStyle    kBlack                   isEE
++SingleElectron
+
+MuonEG                     data:emu,all                             errorStyle    kBlack                   isEMu
++SingleMuon
++SingleElectron
