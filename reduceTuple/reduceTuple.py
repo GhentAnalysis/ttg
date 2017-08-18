@@ -115,8 +115,12 @@ doPhotonCut           = args.type.count('pho')
 c.photonCutBased      = args.type.count('phoCB')
 c.photonMva           = args.type.count('photonMva')
 c.hnTight             = args.type.count('eleHN')
-c.eleMva              = args.type.count('eleMvaMedium')
-c.eleMvaTight         = args.type.count('eleMvaTight')
+c.hnFO                = args.type.count('eleFO')
+c.eleMva              = args.type.count('eleMva')
+c.cbLoose             = args.type.count('eleCBLoose')
+c.cbMedium            = args.type.count('eleCBMedium')
+c.cbVeto              = args.type.count('eleCBVeto')
+c.susyLoose           = args.type.count('eleSusyLoose')
 c.QCD                 = args.QCD
 #
 # Loop over the tree and make new vars

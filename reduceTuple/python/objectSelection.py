@@ -20,7 +20,9 @@ def deltaPhi(phi1, phi2):
 def deltaR(eta1, eta2, phi1, phi2):
   return sqrt(deltaPhi(phi1, phi2)**2 + (eta1-eta2)**2)
 
-
+def slidingCut(pt, low, high):
+  slope = (high - low)/10.;
+  return min(low, max(high, low + slope*(pt-15)))
 
 
 #
@@ -41,13 +43,24 @@ def electronMva(tree, index):
   if tree._lEta[index] < 0.8: return tree._lElectronMva[index] > (0.941 if tree.eleMvaTight else 0.837)
   else:                       return tree._lElectronMva[index] > (0.899 if tree.eleMvaTight else 0.715)
 
+def electronSusyLoose(tree, index):
+  if(abs(tree._lEta[index]) < 0.8):     return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.48, -0.85)
+  elif(abs(tree._lEta[index]) < 1.479): return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.67, -0.91)
+  else:                                 return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.49, -0.83)
+ 
+
 def electronSelector(tree, index):
   for i in xrange(ord(tree._nMu)): # cleaning electrons around muons
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
-  if   tree.eleMva:  return electronMva(tree, index)
-  elif tree.hnTight: return tree._lHNTight[index]
-  else:              return tree._lPOGTight[index]
+  if   tree.eleMva:    return electronMva(tree, index)
+  elif tree.cbVeto:    return tree._lPOGVeto[index]
+  elif tree.cbLoose:   return tree._lPOGLoose[index]
+  elif tree.cbMedium:  return tree._lPOGMedium[index]
+  elif tree.hnTight:   return tree._lHNTight[index]
+  elif tree.hnFO:      return tree._lHNFO[index]
+  elif tree.susyLoose: return electronSusyLoose(tree, index)
+  else:                return tree._lPOGTight[index]
 
 def muonSelector(tree, index):
   return tree._lPOGMedium[index]
