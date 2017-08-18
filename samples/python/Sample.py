@@ -93,7 +93,7 @@ class Sample:
     elif self.selectionString:                   selectionString  = self.selectionString
     if selectionString: entries = self.getEventList(self.chain, selectionString, totalJobs, subJob)
     else:               entries = self.getEventRange(self.chain.GetEntries(), totalJobs, subJob)
-    return progressbar(entries, self.name + ": ", 100)
+    return progressbar(entries, self.name, 100)
 
 
 #
@@ -150,7 +150,7 @@ def createStack(tuplesFile, styleFile, channel):
         if sample:                                                                          # if yes, take it from there and make a deepcopy with different name
           sample = copy.deepcopy(sample)
           sample.addSamples = [sample.name]
-          sample.name += '_' + str(uuid.uuid4())
+          sample.name += '_' + texName
         else:                                   
           sample = getSampleFromList(sampleList, name)
         if not sample: log.error('Could not load sample ' + name + ' from ' + styleFile)
