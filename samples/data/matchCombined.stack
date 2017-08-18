@@ -123,19 +123,19 @@ TTGamma                    MC_(hadronicFake)            fillStyle     6
 +tZq
 
 
-TTJets_Dilep               MC_(genuine)                             fillStyle     kBlue                    _ttgEventType<3
+TTJets_Dilep               MC_(genuine)                             fillStyle     kRed                     _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               MC_(hadronicPhoton)                      fillStyle     9                        _ttgEventType<3
+TTJets_Dilep               MC_(hadronicPhoton)                      fillStyle     46                       _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               MC_(misIdEle)                            fillStyle     38                       _ttgEventType<3
+TTJets_Dilep               MC_(misIdEle)                            fillStyle     9                        _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               MC_(hadronicFake)                        fillStyle     35                       _ttgEventType<3
+TTJets_Dilep               MC_(hadronicFake)                        fillStyle     6                        _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
