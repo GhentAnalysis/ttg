@@ -1,4 +1,5 @@
 import ROOT
+ROOT.TH1.SetDefaultSumw2()
 
 #
 # Set default ROOT style script
