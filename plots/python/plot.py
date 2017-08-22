@@ -36,10 +36,10 @@ class Plot:
       Plot.defaultTexY         = texY
       Plot.defaultOverflowBin  = overflowBin
 
-  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin=None, histModifications=None):
+  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', histModifications=[]):
     self.stack             = stack       if stack else Plot.defaultStack
     self.texY              = texY        if texY else Plot.defaultTexY
-    self.overflowBin       = overflowBin if overflowBin else Plot.defaultOverflowBin
+    self.overflowBin       = overflowBin if overflowBin!='default' else Plot.defaultOverflowBin
     self.name              = name
     self.texX              = texX
     self.varX              = varX
@@ -78,6 +78,16 @@ class Plot:
   # Stacking the hist, called during the draw function
   #
   def stackHists(self, histsToStack, sorting=True):
+    # Merge if texName is the same
+    for i in range(len(histsToStack)):
+      if not histsToStack[i]: continue
+      for j in range(i+1, len(histsToStack)):
+        if not histsToStack[j]: continue
+        if histsToStack[i].texName == histsToStack[j].texName:
+          histsToStack[i].Add(histsToStack[j])
+          histsToStack[j] = None
+    histsToStack = [h for h in histsToStack if h]
+
     if sorting: histsToStack.sort(key=lambda h  : -h.Integral())
 
     # Add up stacks
@@ -121,13 +131,14 @@ class Plot:
     except: pass
 
     resultFile = os.path.join(dir, 'results.pkl')
+    histos     = {s.name+s.texName: h for s, h in self.histos.iteritems()}
 
     waitForLock(resultFile)
     if os.path.exists(resultFile):
       allPlots = pickle.load(file(resultFile))
-      allPlots.update({self.name : self.histos})
+      allPlots.update({self.name : histos})
     else:
-      allPlots = {self.name : self.histos}
+      allPlots = {self.name : histos}
     pickle.dump(allPlots, file(resultFile, 'w'))
     removeLock(resultFile)
     log.info("Plot " + self.name + " saved to cache")
@@ -374,14 +385,26 @@ class Plot:
         graph.Set(0)
         for bin in range(1, h_ratio.GetNbinsX()+1):
           if den.GetBinContent(bin) > 0 and den.GetBinContent(bin) > 0:
-	    h_ratio.SetBinError(bin, 0.0001)          # do not show error bars on hist, those are taken overf by the TGraphAsymmErrors
-	    center  = h_ratio.GetBinCenter(bin)
-	    val     = h_ratio.GetBinContent(bin)
-	    errUp   = num.GetBinErrorUp(bin)/den.GetBinContent(bin) if val > 0 else 0
-	    errDown = num.GetBinErrorLow(bin)/den.GetBinContent(bin) if val > 0 else 0
-	    graph.SetPoint(bin, center, val)
-	    graph.SetPointError(bin, 0, 0, errDown, errUp)
+            h_ratio.SetBinError(bin, 0.0001)          # do not show error bars on hist, those are taken overf by the TGraphAsymmErrors
+            center  = h_ratio.GetBinCenter(bin)
+            val     = h_ratio.GetBinContent(bin)
+            errUp   = num.GetBinErrorUp(bin)/den.GetBinContent(bin) if val > 0 else 0
+            errDown = num.GetBinErrorLow(bin)/den.GetBinContent(bin) if val > 0 else 0
+            graph.SetPoint(bin, center, val)
+            graph.SetPointError(bin, 0, 0, errDown, errUp)
         h_ratio.Draw("e0")
+        if hasattr(den, "drawOption") and den.drawOption == "e1":                        # show error bars from denominator
+          graph2 = ROOT.TGraphAsymmErrors(den)
+          graph2.Set(0)
+          for bin in range(1, den.GetNbinsX()+1):
+            if den.GetBinContent(bin) > 0 and den.GetBinContent(bin) > 0:
+              center  = den.GetBinCenter(bin)
+              val     = den.GetBinContent(bin)
+              errUp   = den.GetBinErrorUp(bin)/den.GetBinContent(bin) if val > 0 else 0
+              errDown = den.GetBinErrorLow(bin)/den.GetBinContent(bin) if val > 0 else 0
+              graph2.SetPoint(bin, center, 1.)
+              graph2.SetPointError(bin, 0, 0, errDown, errUp)
+          graph2.Draw("0 same")
         graph.Draw("P0 same")
       else:
         h_ratio.Draw(drawOption)
