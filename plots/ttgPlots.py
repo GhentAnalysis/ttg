@@ -27,9 +27,6 @@ if not args.isChild and args.selection is None:
   selections = ['llg',
                 'llg-looseLeptonVeto',
                 'llg-looseLeptonVeto-mll40',
-                'llg-looseLeptonVeto-offZ',
-                'llg-looseLeptonVeto-offZ-llgNoZ',
-                'llg-looseLeptonVeto-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1',
@@ -91,7 +88,9 @@ randomCone  = args.tag.count('randomConeCheck')
 #
 if args.tag.count('split'):                            stackFile = 'split'
 elif args.tag.count('ttbar'):                          stackFile = 'onlyttbar'
+elif args.tag.count('matchCombine'):                   stackFile = 'matchCombined'
 elif args.tag.count('match'):                          stackFile = 'match'
+elif args.tag.count('promptCombine'):                  stackFile = 'promptCombined'
 elif args.tag.count('prompt'):                         stackFile = 'prompt'
 elif args.tag.count('DYLO'):                           stackFile = 'DY_LO'
 elif args.tag.count('passSigmaIetaIetaMatch'):         stackFile = 'passSigmaIetaIetaMatch'
@@ -145,58 +144,60 @@ if randomCone:
 else:
   plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
 
-  plots.append(Plot('yield',                  'yield',                                   lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                  (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
-  plots.append(Plot('nVertex',                'vertex multiplicity',                     lambda c : ord(c._nVertex),                                                           (50, 0, 50)))
-  plots.append(Plot('nphoton',                'number of photons',                       lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),                (3, 0.5, 3.5)))
-  plots.append(Plot('photon_pt',              'p_{T}(#gamma) (GeV)',                     lambda c : c._phPt[c.ph],                                                             (20,15,115)))
-  plots.append(Plot('photon_eta',             '|#eta|(#gamma)',                          lambda c : abs(c._phEta[c.ph]),                                                       (15,0,2.5)))
-  plots.append(Plot('photon_phi',             '#phi(#gamma)',                            lambda c : c._phPhi[c.ph],                                                            (10,-pi,pi)))
-  plots.append(Plot('photon_mva',             '#gamma-MVA',                              lambda c : c._phMva[c.ph],                                                            (20,-1,1)))
-  plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma) (GeV)',                lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20)))
-  plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',                lambda c : c._phChargedIsolation[c.ph],                                               (80,0,20)))
-  plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)',        lambda c : c._phChargedIsolation[c.ph]/c._phPt[c.ph],                                 (20,0,2)))
-  plots.append(Plot('photon_neutralIso',      'neutralIso(#gamma) (GeV)',                lambda c : c._phNeutralHadronIsolation[c.ph],                                         (25,0,5)))
-  plots.append(Plot('photon_photonIso',       'photonIso(#gamma) (GeV)',                 lambda c : c._phPhotonIsolation[c.ph],                                                (32,0,8)))
-  plots.append(Plot('photon_SigmaIetaIeta',   '#sigma_{i#etai#eta}(#gamma)',             lambda c : c._phSigmaIetaIeta[c.ph],                                                  (20,0,0.04)))
-  plots.append(Plot('photon_hadOverEm',       'hadronicOverEm(#gamma)',                  lambda c : c._phHadronicOverEm[c.ph],                                                 (20,0,.025)))
+  plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                  (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
+  plots.append(Plot('nVertex',                  'vertex multiplicity',                  lambda c : ord(c._nVertex),                                                           (50, 0, 50)))
+  plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),                (3, 0.5, 3.5)))
+  plots.append(Plot('photon_pt',                'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                                             (20,15,115)))
+  plots.append(Plot('photon_eta',               '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                                       (15,0,2.5)))
+  plots.append(Plot('photon_phi',               '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                                            (10,-pi,pi)))
+  plots.append(Plot('photon_mva',               '#gamma-MVA',                           lambda c : c._phMva[c.ph],                                                            (20,-1,1)))
+  plots.append(Plot('photon_chargedIso',        'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20)))
+  plots.append(Plot('photon_chargedIso_NO',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_small_NO','chargedIso(#gamma) (GeV)',            lambda c : c._phChargedIsolation[c.ph],                                               (80,0,20), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_small',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               (80,0,20)))
+  plots.append(Plot('photon_relChargedIso',     'chargedIso(#gamma)/p_{T}(#gamma)',     lambda c : c._phChargedIsolation[c.ph]/c._phPt[c.ph],                                 (20,0,2)))
+  plots.append(Plot('photon_neutralIso',        'neutralIso(#gamma) (GeV)',             lambda c : c._phNeutralHadronIsolation[c.ph],                                         (25,0,5)))
+  plots.append(Plot('photon_photonIso',         'photonIso(#gamma) (GeV)',              lambda c : c._phPhotonIsolation[c.ph],                                                (32,0,8)))
+  plots.append(Plot('photon_SigmaIetaIeta',     '#sigma_{i#etai#eta}(#gamma)',          lambda c : c._phSigmaIetaIeta[c.ph],                                                  (20,0,0.04)))
+  plots.append(Plot('photon_hadOverEm',         'hadronicOverEm(#gamma)',               lambda c : c._phHadronicOverEm[c.ph],                                                 (20,0,.025)))
   if not args.tag.count('QCD'):
-    plots.append(Plot('photon_randomConeIso', 'random cone chargedIso(#gamma) (Gev)',    lambda c : c._phRandomConeChargedIsolation[c.ph],                                     (20,0,20)))
-    plots.append(Plot('l1_pt',                'p_{T}(l_{1}) (GeV)',                      lambda c : c._lPt[c.l1],                                                              (20,0,200)))
-    plots.append(Plot('l1_eta',               '|#eta|(l_{1})',                           lambda c : abs(c._lEta[c.l1]),                                                        (15,0,2.4)))
-    plots.append(Plot('l1_phi',               '#phi(l_{1})',                             lambda c : c._lPhi[c.l1],                                                             (10,-pi,pi)))
-    plots.append(Plot('l1_relIso',            'relIso(l_{1})',                           lambda c : c._relIso[c.l1],                                                           (10,0,0.12)))
-    plots.append(Plot('l2_pt',                'p_{T}(l_{2}) (GeV)',                      lambda c : c._lPt[c.l2],                                                              (20,0,200)))
-    plots.append(Plot('l2_eta',               '|#eta|(l_{2})',                           lambda c : abs(c._lEta[c.l2]),                                                        (15,0,2.4)))
-    plots.append(Plot('l2_phi',               '#phi(l_{2})',                             lambda c : c._lPhi[c.l2],                                                             (10,-pi,pi)))
-    plots.append(Plot('l2_relIso',            'relIso(l_{2})',                           lambda c : c._relIso[c.l2],                                                           (10,0,0.12)))
-    plots.append(Plot('dl_mass',              'm(ll) (GeV)',                             lambda c : c.mll,                                                                     (40,0,200)))
-    plots.append(Plot('l1g_mass',             'm(l_{1}#gamma) (GeV)',                    lambda c : c.ml1g,                                                                    (40,0,200)))
-    plots.append(Plot('l2g_mass',             'm(l_{2}#gamma) (GeV)',                    lambda c : c.ml2g,                                                                    (40,0,200)))
-    plots.append(Plot('phoPt_over_dlg_mass',  'p_{T}(#gamma)/m(ll#gamma)',               lambda c : c._phPt[c.ph]/c.mllg,                                                      (40,0,2)))
-    plots.append(Plot('dlg_mass',             'm(ll#gamma) (GeV)',                       lambda c : c.mllg,                                                                    (40,0,500)))
-    plots.append(Plot('dlg_mass_zoom',        'm(ll#gamma) (GeV)',                       lambda c : c.mllg,                                                                    (40,50,200)))
-    plots.append(Plot('phL1DeltaR',           '#Delta R(#gamma, l_{1})',                 lambda c : c.phL1DeltaR,                                                              (20,0,5)))
-    plots.append(Plot('phL2DeltaR',           '#Delta R(#gamma, l_{2})',                 lambda c : c.phL2DeltaR,                                                              (20,0,5)))
-    plots.append(Plot('phLepDeltaR',          '#Delta R(#gamma, l)',                     lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                           (20,0,5)))
-  plots.append(Plot('phJetDeltaR',            '#Delta R(#gamma, j)',                     lambda c : c.phJetDeltaR,                                                             (20,0,5)))
-  plots.append(Plot('njets',                  'number of jets',                          lambda c : c.njets,                                                                   (8,0,8)))
-  plots.append(Plot('nbtag',                  'number of medium b-tags (CSVv2)',         lambda c : c.nbjets,                                                                  (4,0,4)))
-  plots.append(Plot('j1_pt',                  'p_{T}(j_{1}) (GeV)',                      lambda c : c._jetPt[c.j1]                                 if c.njets > 0 else -1,     (30,0,300)))
-  plots.append(Plot('j1_eta',                 '|#eta|(j_{1})',                           lambda c : abs(c._jetEta[c.j1])                           if c.njets > 0 else -1,     (15,0,2.5)))
-  plots.append(Plot('j1_phi',                 '#phi(j_{1})',                             lambda c : c._jetPhi[c.j1]                                if c.njets > 0 else -10,    (10,-pi,pi)))
-  plots.append(Plot('j1_csvV2',               'CSVv2(j_{1})',                            lambda c : c._jetCsvV2[c.j1]                              if c.njets > 0 else -10,    (20, 0, 1)))
-  plots.append(Plot('j1_deepCSV',             'deepCSV(j_{1})',                          lambda c : c._jetDeepCsv_b[c.j1] + c._jetDeepCsv_bb[c.j1] if c.njets > 0 else -10,    (20, 0, 1)))  # still buggy
-  plots.append(Plot('j2_pt',                  'p_{T}(j_{2}) (GeV)',                      lambda c : c._jetPt[c.j2]                                 if c.njets > 1 else -1,     (30,0,300)))
-  plots.append(Plot('j2_eta',                 '|#eta|(j_{2})',                           lambda c : abs(c._jetEta[c.j2])                           if c.njets > 1 else -1,     (15,0,2.5)))
-  plots.append(Plot('j2_phi',                 '#phi(j_{2})',                             lambda c : c._jetPhi[c.j2]                                if c.njets > 1 else -10,    (10,-pi,pi)))
-  plots.append(Plot('j2_csvV2',               'CSVv2(j_{2})',                            lambda c : c._jetCsvV2[c.j2]                              if c.njets > 1 else -10,    (20, 0, 1)))
-  plots.append(Plot('j2_deepCSV',             'deepCSV(j_{2})',                          lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2] if c.njets > 1 else -10,    (20, 0, 1)))
+    plots.append(Plot('photon_randomConeIso',   'random cone chargedIso(#gamma) (Gev)', lambda c : c._phRandomConeChargedIsolation[c.ph],                                     (20,0,20)))
+    plots.append(Plot('l1_pt',                  'p_{T}(l_{1}) (GeV)',                   lambda c : c._lPt[c.l1],                                                              (20,0,200)))
+    plots.append(Plot('l1_eta',                 '|#eta|(l_{1})',                        lambda c : abs(c._lEta[c.l1]),                                                        (15,0,2.4)))
+    plots.append(Plot('l1_phi',                 '#phi(l_{1})',                          lambda c : c._lPhi[c.l1],                                                             (10,-pi,pi)))
+    plots.append(Plot('l1_relIso',              'relIso(l_{1})',                        lambda c : c._relIso[c.l1],                                                           (10,0,0.12)))
+    plots.append(Plot('l2_pt',                  'p_{T}(l_{2}) (GeV)',                   lambda c : c._lPt[c.l2],                                                              (20,0,200)))
+    plots.append(Plot('l2_eta',                 '|#eta|(l_{2})',                        lambda c : abs(c._lEta[c.l2]),                                                        (15,0,2.4)))
+    plots.append(Plot('l2_phi',                 '#phi(l_{2})',                          lambda c : c._lPhi[c.l2],                                                             (10,-pi,pi)))
+    plots.append(Plot('l2_relIso',              'relIso(l_{2})',                        lambda c : c._relIso[c.l2],                                                           (10,0,0.12)))
+    plots.append(Plot('dl_mass',                'm(ll) (GeV)',                          lambda c : c.mll,                                                                     (40,0,200)))
+    plots.append(Plot('l1g_mass',               'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                                                    (40,0,200)))
+    plots.append(Plot('l2g_mass',               'm(l_{2}#gamma) (GeV)',                 lambda c : c.ml2g,                                                                    (40,0,200)))
+    plots.append(Plot('phoPt_over_dlg_mass',    'p_{T}(#gamma)/m(ll#gamma)',            lambda c : c._phPt[c.ph]/c.mllg,                                                      (40,0,2)))
+    plots.append(Plot('dlg_mass',               'm(ll#gamma) (GeV)',                    lambda c : c.mllg,                                                                    (40,0,500)))
+    plots.append(Plot('dlg_mass_zoom',          'm(ll#gamma) (GeV)',                    lambda c : c.mllg,                                                                    (40,50,200)))
+    plots.append(Plot('phL1DeltaR',             '#Delta R(#gamma, l_{1})',              lambda c : c.phL1DeltaR,                                                              (20,0,5)))
+    plots.append(Plot('phL2DeltaR',             '#Delta R(#gamma, l_{2})',              lambda c : c.phL2DeltaR,                                                              (20,0,5)))
+    plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',                  lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                           (20,0,5)))
+  plots.append(Plot('phJetDeltaR',              '#Delta R(#gamma, j)',                  lambda c : c.phJetDeltaR,                                                             (20,0,5)))
+  plots.append(Plot('njets',                    'number of jets',                       lambda c : c.njets,                                                                   (8,0,8)))
+  plots.append(Plot('nbtag',                    'number of medium b-tags (CSVv2)',      lambda c : c.nbjets,                                                                  (4,0,4)))
+  plots.append(Plot('j1_pt',                    'p_{T}(j_{1}) (GeV)',                   lambda c : c._jetPt[c.j1]                                 if c.njets > 0 else -1,     (30,0,300)))
+  plots.append(Plot('j1_eta',                   '|#eta|(j_{1})',                        lambda c : abs(c._jetEta[c.j1])                           if c.njets > 0 else -1,     (15,0,2.5)))
+  plots.append(Plot('j1_phi',                   '#phi(j_{1})',                          lambda c : c._jetPhi[c.j1]                                if c.njets > 0 else -10,    (10,-pi,pi)))
+  plots.append(Plot('j1_csvV2',                 'CSVv2(j_{1})',                         lambda c : c._jetCsvV2[c.j1]                              if c.njets > 0 else -10,    (20, 0, 1)))
+  plots.append(Plot('j1_deepCSV',               'deepCSV(j_{1})',                       lambda c : c._jetDeepCsv_b[c.j1] + c._jetDeepCsv_bb[c.j1] if c.njets > 0 else -10,    (20, 0, 1)))  # still buggy
+  plots.append(Plot('j2_pt',                    'p_{T}(j_{2}) (GeV)',                   lambda c : c._jetPt[c.j2]                                 if c.njets > 1 else -1,     (30,0,300)))
+  plots.append(Plot('j2_eta',                   '|#eta|(j_{2})',                        lambda c : abs(c._jetEta[c.j2])                           if c.njets > 1 else -1,     (15,0,2.5)))
+  plots.append(Plot('j2_phi',                   '#phi(j_{2})',                          lambda c : c._jetPhi[c.j2]                                if c.njets > 1 else -10,    (10,-pi,pi)))
+  plots.append(Plot('j2_csvV2',                 'CSVv2(j_{2})',                         lambda c : c._jetCsvV2[c.j2]                              if c.njets > 1 else -10,    (20, 0, 1)))
+  plots.append(Plot('j2_deepCSV',               'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2] if c.njets > 1 else -10,    (20, 0, 1)))
 
   if args.channel=='noData':
-    plots.append(Plot('eventType',            'eventType',                       lambda c : c._ttgEventType,                                                                 (9, 0, 9)))
+    plots.append(Plot('eventType',              'eventType',                            lambda c : c._ttgEventType,                                                           (9, 0, 9)))
     if not args.tag.count('QCD'):
-      plots.append(Plot('genPhoton_pt',         'p_{T}(gen #gamma) (GeV)',         lambda c : c._gen_phPt[c._phMatchMCPhotonAN15165[c.ph]] if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1,     (10,10,110)))
-      plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',              lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165[c.ph]]) if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1, (15,0,2.5)))
+      plots.append(Plot('genPhoton_pt',         'p_{T}(gen #gamma) (GeV)',              lambda c : c._gen_phPt[c._phMatchMCPhotonAN15165[c.ph]] if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1,     (10,10,110)))
+      plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',                   lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165[c.ph]]) if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1, (15,0,2.5)))
 
 
 #
@@ -210,9 +211,14 @@ if args.channel=="ee":   cutString += '&&isEE'
 if args.channel=="mumu": cutString += '&&isMuMu'
 if args.channel=="emu":  cutString += '&&isEMu'
 
-if   args.tag.count('QCD'): reduceType = 'phoCB'
-elif args.tag.count('HN'):  reduceType = 'eleHN-phoCB'
-else:                       reduceType = 'eleCB-phoCB'
+if   args.tag.count('QCD'):       reduceType = 'phoCB'
+elif args.tag.count('HN'):        reduceType = 'eleHN-phoCB'
+elif args.tag.count('FO'):        reduceType = 'eleFO-phoCB'
+elif args.tag.count('CBVeto'):    reduceType = 'eleCBVeto-phoCB'
+elif args.tag.count('CBLoose'):   reduceType = 'eleCBLoose-phoCB'
+elif args.tag.count('CBMedium'):  reduceType = 'eleCBMedium-phoCB'
+elif args.tag.count('SusyLoose'): reduceType = 'eleSusyLoose-phoCB'
+else:                             reduceType = 'eleCB-phoCB'
 
 
 
@@ -235,7 +241,7 @@ for sample in sum(stack, []):
   c.nonprompt         = sample.texName.count('non-prompt')
   c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
   c.failSigmaIetaIeta = sample.texName.count('fail')
-  c.passSigmaIetaIeta = sample.texName.count('pass')
+  c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
 
 
   c.photonCutBased      = phoCB
@@ -243,18 +249,17 @@ for sample in sum(stack, []):
   c.photonMva           = phoMva
   for i in sample.eventLoop(cutString):
     c.GetEntry(i)
+    if not passingFunctions(c):                                     continue
     if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
-    if phoCBfull and not c._phCutBasedMedium[c.ph]: continue
+    if phoCBfull and not c._phCutBasedMedium[c.ph]:                 continue
 
     if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
-    if forward and abs(c._phEta[c.ph]) < 1.566: continue
-    if central and abs(c._phEta[c.ph]) > 1.4442: continue
+    if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
+    if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
 
     if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
     if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
     if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
-
-    if not passingFunctions(c): continue
 
     # Note: photon SF is 0 when pt < 20 GeV
     if c.QCD:
@@ -302,6 +307,7 @@ for plot in plots:
     log.info("Yields: ")
     for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
+  plot.saveToCache(os.path.join(baseDir, args.channel, args.selection))
   for logY in [False, True]:
     plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection),
               ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
