@@ -1,14 +1,3 @@
--- Data
-DoubleMuon                 data_(randomCone):mumu,SF,all         errorStyle    kBlue                   isMuMu
-+SingleMuon
-
-DoubleEG                   data_(randomCone):ee,SF,all           errorStyle    kBlue                   isEE
-+SingleElectron
-
-MuonEG                     data_(randomCone):emu,all             errorStyle    kBlue                   isEMu
-+SingleMuon
-+SingleElectron
-
 -- MC (match genuine)
 TTJets_Dilep               MC_(genuine)                          errorStyle    kRed                    _ttgEventType<3
 +TTJets_SingleLepFromTbar
@@ -46,3 +35,15 @@ TTGamma                    MC_(genuine)                          errorStyle    k
 +TTWToLNu
 +TTWToQQ
 +tZq
+
+
+-- Data
+DoubleMuon                 data_(randomCone):mumu,SF,all         errorStyle    kBlue                   isMuMu
++SingleMuon
+
+DoubleEG                   data_(randomCone):ee,SF,all           errorStyle    kBlue                   isEE
++SingleElectron
+
+MuonEG                     data_(randomCone):emu,all             errorStyle    kBlue                   isEMu
++SingleMuon
++SingleElectron
