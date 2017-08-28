@@ -47,9 +47,10 @@ if not args.isChild and args.selection is None:
 
   if args.tag.count('QCD'):
     selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
-  if args.channel:            channels = [args.channel]
-  elif args.tag.count('QCD'): channels = ['noData']
-  else:                       channels = ['ee','mumu','emu','SF','all','noData']
+  if args.channel:                        channels = [args.channel]
+  elif args.tag.count('compareChannels'): channels = ['all']
+  elif args.tag.count('QCD'):             channels = ['noData']
+  else:                                   channels = ['ee','mumu','emu','SF','all','noData']
   for c in channels:
     if args.tag.count('sigmaIetaIeta') and (c=='noData' and not args.tag.count('QCD')): continue
     args.channel = c
@@ -93,6 +94,10 @@ elif args.tag.count('match'):                          stackFile = 'match'
 elif args.tag.count('promptCombine'):                  stackFile = 'promptCombined'
 elif args.tag.count('prompt'):                         stackFile = 'prompt'
 elif args.tag.count('DYLO'):                           stackFile = 'DY_LO'
+elif args.tag.count('sigmaIetaIeta-compareChannels'):  stackFile = 'sigmaIetaIeta-compareChannels'
+elif args.tag.count('randomConeCheck-compareChannels'):stackFile = 'randomConeCheck-compareChannels'
+elif args.tag.count('hadronicPhoton-compareChannels'): stackFile = 'hadronicPhoton-compareChannels'
+elif args.tag.count('genuinePhoton-compareChannels'):  stackFile = 'genuinePhoton-compareChannels'
 elif args.tag.count('passSigmaIetaIetaMatch'):         stackFile = 'passSigmaIetaIetaMatch'
 elif args.tag.count('failSigmaIetaIetaMatch'):         stackFile = 'failSigmaIetaIetaMatch'
 elif args.tag.count('passSigmaIetaIeta'):              stackFile = 'passSigmaIetaIeta'
@@ -153,8 +158,10 @@ else:
   plots.append(Plot('photon_mva',               '#gamma-MVA',                           lambda c : c._phMva[c.ph],                                                            (20,-1,1)))
   plots.append(Plot('photon_chargedIso',        'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20)))
   plots.append(Plot('photon_chargedIso_NO',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               (20,0,20), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_small_NO','chargedIso(#gamma) (GeV)',            lambda c : c._phChargedIsolation[c.ph],                                               (80,0,20), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_bins',   'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               [0, 0.441,1,2,3,5,10,20]))
+  plots.append(Plot('photon_chargedIso_bins_NO','chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               [0, 0.441,1,2,3,5,10,20], overflowBin=None))
   plots.append(Plot('photon_chargedIso_small',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                               (80,0,20)))
+  plots.append(Plot('photon_chargedIso_small_NO','chargedIso(#gamma) (GeV)',            lambda c : c._phChargedIsolation[c.ph],                                               (80,0,20), overflowBin=None))
   plots.append(Plot('photon_relChargedIso',     'chargedIso(#gamma)/p_{T}(#gamma)',     lambda c : c._phChargedIsolation[c.ph]/c._phPt[c.ph],                                 (20,0,2)))
   plots.append(Plot('photon_neutralIso',        'neutralIso(#gamma) (GeV)',             lambda c : c._phNeutralHadronIsolation[c.ph],                                         (25,0,5)))
   plots.append(Plot('photon_photonIso',         'photonIso(#gamma) (GeV)',              lambda c : c._phPhotonIsolation[c.ph],                                                (32,0,8)))
@@ -313,7 +320,7 @@ for plot in plots:
               ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
               logX = False, logY = logY, sorting = True,
               yRange = (0.003, "auto") if logY else (0.0001, "auto"),
-              scaling = 'unity' if sigmaieta or randomCone else {},
+              scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
               drawObjects = drawObjects(None, lumiScale),
               histModifications = histModifications,
     )
