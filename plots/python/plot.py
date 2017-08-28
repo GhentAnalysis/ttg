@@ -5,7 +5,7 @@ log = getLogger()
 # Plot class
 # Still messy but it works reasonably 
 #
-import ROOT, os, pickle, uuid
+import ROOT, os, pickle, uuid, numpy
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP
 from ttg.tools.lock import waitForLock, removeLock
