@@ -291,15 +291,6 @@ class Plot:
       h.GetYaxis().SetRangeUser(yMin_, yMax_)
       h.GetXaxis().SetTitle(self.texX)
       h.GetYaxis().SetTitle(self.texY)
-      # precision 3 fonts. see https://root.cern.ch/root/htmldoc//TAttText.html#T5
-#      h.GetXaxis().SetTitleFont(43)
-#      h.GetYaxis().SetTitleFont(43)
-#      h.GetXaxis().SetLabelFont(43)
-#      h.GetYaxis().SetLabelFont(43)
-#      h.GetXaxis().SetTitleSize(24)
-#      h.GetYaxis().SetTitleSize(24)
-#      h.GetXaxis().SetLabelSize(20)
-#      h.GetYaxis().SetLabelSize(20)
 
       if ratio is None: h.GetYaxis().SetTitleOffset(1.3)
       else:             h.GetYaxis().SetTitleOffset(1.6)
@@ -338,21 +329,11 @@ class Plot:
       h_ratio.GetXaxis().SetTitle(self.texX)
       h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
-      h_ratio.GetXaxis().SetTitleFont(43)
-      h_ratio.GetYaxis().SetTitleFont(43)
-      h_ratio.GetXaxis().SetLabelFont(43)
-      h_ratio.GetYaxis().SetLabelFont(43)
-      h_ratio.GetXaxis().SetTitleSize(24)
-      h_ratio.GetYaxis().SetTitleSize(24)
-      h_ratio.GetXaxis().SetLabelSize(20)
-      h_ratio.GetYaxis().SetLabelSize(20)
-
       h_ratio.GetXaxis().SetTitleOffset( 3.2 )
       h_ratio.GetYaxis().SetTitleOffset( 1.6 )
 
       h_ratio.GetXaxis().SetTickLength( 0.03*3 )
       h_ratio.GetYaxis().SetTickLength( 0.03*2 )
-
 
       h_ratio.GetYaxis().SetRangeUser( *ratio['yRange'] )
       h_ratio.GetYaxis().SetNdivisions(505)
