@@ -3,7 +3,7 @@ log = getLogger()
 
 #
 # Plot class
-# Still messy but it works reasonably 
+# Still messy but it works reasonably
 #
 import ROOT, os, pickle, uuid, numpy
 from math import sqrt
@@ -29,6 +29,7 @@ class Plot:
   defaultStack        = None
   defaultTexY         = None
   defaultOverflowBin  = None
+  defaultNormBinWidth = None
 
   @staticmethod
   def setDefaults(stack = None, texY="Events", overflowBin='upper'):
@@ -36,10 +37,11 @@ class Plot:
       Plot.defaultTexY         = texY
       Plot.defaultOverflowBin  = overflowBin
 
-  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', histModifications=[]):
-    self.stack             = stack       if stack else Plot.defaultStack
-    self.texY              = texY        if texY else Plot.defaultTexY
-    self.overflowBin       = overflowBin if overflowBin!='default' else Plot.defaultOverflowBin
+  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[]):
+    self.stack             = stack        if stack else Plot.defaultStack
+    self.texY              = texY         if texY else Plot.defaultTexY
+    self.overflowBin       = overflowBin  if overflowBin!='default'  else Plot.defaultOverflowBin
+    self.normBinWidth      = normBinWidth if normBinWidth!='default' else Plot.defaultNormBinWidth
     self.name              = name
     self.texX              = texX
     self.varX              = varX
@@ -149,17 +151,30 @@ class Plot:
 
 
   #
+  # Normalize binwidth when non-unifor bin width is used
+  #
+  def normalizeBinWidth(self, hist, norm=None):
+    if norm:
+      for i in range(hist.GetXaxis().GetNbins()+1):
+        val   = hist.GetBinContent(i)
+        err   = hist.GetBinError(i)
+        width = hist.GetBinWidth(i)
+        hist.SetBinContent(i, val/(width/norm))
+        hist.SetBinError(i, err/(width/norm))
+
+
+  #
   # Draw function roughly stolen from Robert's RootTools, might need some cleanup, very lengthy
   #
   def draw(self, \
-          yRange = "auto", 
+          yRange = "auto",
           extensions = ["pdf", "png", "root","C"],
-          plot_directory = ".", 
-          logX = False, logY = True, 
-          ratio = None, 
-          scaling = {}, 
-          sorting = False, 
-          legend = "auto", 
+          plot_directory = ".",
+          logX = False, logY = True,
+          ratio = None,
+          scaling = {},
+          sorting = False,
+          legend = "auto",
           drawObjects = [],
           widths = {},
           canvasModifications = [],
@@ -172,33 +187,34 @@ class Plot:
         ratio: 'auto'(default) corresponds to {'num':1, 'den':0, 'logY':False, 'style':None, 'texY': 'Data / MC', 'yRange': (0.5, 1.5), 'drawObjects': []}
         scaling: {} (default). Scaling the i-th stack to the j-th is done by scaling = {i:j} with i,j integers
         sorting: True/False(default) Whether or not to sort the components of a stack wrt Integral
-        legend: "auto" (default) or [x_low, y_low, x_high, y_high] or None. ([<legend_coordinates>], n) divides the legend into n columns. 
-        drawObjects = [] Additional ROOT objects that are called by .Draw() 
+        legend: "auto" (default) or [x_low, y_low, x_high, y_high] or None. ([<legend_coordinates>], n) divides the legend into n columns.
+        drawObjects = [] Additional ROOT objects that are called by .Draw()
         widths = {} (default) to update the widths. Values are {'y_width':500, 'x_width':500, 'y_ratio_width':200}
         canvasModifications = [] could be used to pass on lambdas to modify the canvas
     '''
 
     import ttg.tools.style as style
     style.setDefault()
-    defaultRatioStyle = {'num':1, 'den':0, 'logY':False, 'style':None, 'texY': 'Data / MC', 'yRange': (0.5, 1.5), 'drawObjects':[]}
 
-    # default_widths    
+    # default_widths
     default_widths = {'y_width':500, 'x_width':500, 'y_ratio_width':200}
     if ratio is not None: default_widths['x_width'] = 520
     default_widths.update(widths)
 
     # Make sure ratio dict has all the keys by updating the default
     if ratio is not None:
+      defaultRatioStyle = {'num':1, 'den':0, 'logY':False, 'style':None, 'texY': 'obs./exp.', 'yRange': (0.5, 1.5), 'drawObjects':[]}
       if type(ratio)!=type({}): raise ValueError( "'ratio' must be dict (default: {}). General form is '%r'." % defaultRatioStyle)
       defaultRatioStyle.update(ratio)
       ratio = defaultRatioStyle
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
-    # Apply style to histograms and add overflow bin
+    # Apply style to histograms + normalize bin width + add overflow bin
     for s, h in histDict.iteritems():
       if hasattr(s, 'style'): s.style(h)
       h.texName = s.texName
+      self.normalizeBinWidth(h, self.normBinWidth)
       self.addOverFlowBin1D(h, self.overflowBin)
 
     # Transform histDict --> histos where the stacks are added up
@@ -207,7 +223,6 @@ class Plot:
     for stack in self.stack:
       histsToStack = [histDict[s] for s in stack]
       histos.append(self.stackHists(histsToStack))
-
 
     self.scaleStacks(histos, scaling)
 
@@ -218,7 +233,7 @@ class Plot:
       y_border                   = default_widths['y_ratio_width']/float(default_widths['y_width'])
 
     # delete canvas if it exists
-    if hasattr("ROOT","c1"): del ROOT.c1 
+    if hasattr("ROOT","c1"): del ROOT.c1
     c1 = ROOT.TCanvas(self.name + str(uuid.uuid4()), "drawHistos",200,10, default_widths['x_width'], default_widths['y_width'])
 
     if ratio is not None:
@@ -258,7 +273,7 @@ class Plot:
     #Calculate legend coordinates in gPad coordinates
     if legend is not None:
       if legend=="auto": legendCoordinates = (0.50,0.9-0.05*sum(map(len, histos)),0.92,0.9)
-      else:              legendCoordinates = legend 
+      else:              legendCoordinates = legend
 
     if logY:
       yMax_ = 10**0.5*max_
@@ -279,7 +294,7 @@ class Plot:
         for i in range(1, 1 + histo.GetNbinsX()):
           # low/high bin edge in the units of the x axis
           xLowerEdge_axis = histo.GetBinLowEdge(i)
-          xUpperEdge_axis = histo.GetBinLowEdge(i)+histo.GetBinWidth(i) 
+          xUpperEdge_axis = histo.GetBinLowEdge(i)+histo.GetBinWidth(i)
           # linear transformation to gPad system
           xLowerEdge  = (xLowerEdge_axis - histo.GetXaxis().GetXmin())/(histo.GetXaxis().GetXmax() - histo.GetXaxis().GetXmin())
           xUpperEdge  = (xUpperEdge_axis - histo.GetXaxis().GetXmin())/(histo.GetXaxis().GetXmax() - histo.GetXaxis().GetXmin())
@@ -289,15 +304,15 @@ class Plot:
           else:                                                                                       maxFraction = 1
           maxFraction *=0.8
 
-          # Use: (y - yMin_) / (sf*yMax_ - yMin_) = maxFraction (and y->log(y) in log case). 
-          # Compute the maximum required scale factor s. 
+          # Use: (y - yMin_) / (sf*yMax_ - yMin_) = maxFraction (and y->log(y) in log case).
+          # Compute the maximum required scale factor s.
           y = histo.GetBinContent(i)
           try:
-            if logY: new_sf = yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1 
-            else:    new_sf = 1./yMax_*(yMin_ + (y-yMin_)/maxFraction ) 
+            if logY: new_sf = yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1
+            else:    new_sf = 1./yMax_*(yMin_ + (y-yMin_)/maxFraction )
             scaleFactor = new_sf if new_sf>scaleFactor else scaleFactor
           except ZeroDivisionError:
-            pass 
+            pass
 
       # Apply scale factor to avoid legend
       yMax_ = scaleFactor*yMax_
@@ -353,7 +368,7 @@ class Plot:
       h_ratio = num.Clone()
       h_ratio.Divide(den)
 
-      if ratio['style'] is not None: ratio['style'](h_ratio) 
+      if ratio['style'] is not None: ratio['style'](h_ratio)
 
       h_ratio.GetXaxis().SetTitle(self.texX)
       h_ratio.GetYaxis().SetTitle(ratio['texY'])
