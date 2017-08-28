@@ -1,0 +1,113 @@
+-- MC (match genuine)
+TTJets_Dilep               MC_(genuine,ee)                              errorStyle    kRed                    isEE&&_ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+DY_M10to50_NLO             MC_(genuine,ee)                              errorStyle    kRed                    isEE&&_zgEventType<3
++DY_M50_NLO
+
+TTGamma                    MC_(genuine,ee)                              errorStyle    kRed                    isEE
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+-- MC (match genuine, mumu)
+TTJets_Dilep               MC_(genuine,#mu#mu)                          errorStyle    kBlue                   isMuMu&&_ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+DY_M10to50_NLO             MC_(genuine,#mu#mu)                          errorStyle    kBlue                   isMuMu&&_zgEventType<3
++DY_M50_NLO
+
+TTGamma                    MC_(genuine,#mu#mu)                          errorStyle    kBlue                   isMuMu
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
+
+-- MC (match genuine, emu)
+TTJets_Dilep               MC_(genuine,e#mu)                            errorStyle    kGreen                  isEMu&&_ttgEventType<3
++TTJets_SingleLepFromTbar
++TTJets_SingleLepFromT
+
+DY_M10to50_NLO             MC_(genuine,e#mu)                            errorStyle    kGreen                  isEMu&&_zgEventType<3
++DY_M50_NLO
+
+TTGamma                    MC_(genuine,e#mu)                            errorStyle    kGreen                  isEMu
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
++ZG
++singleTop_tW_tbar
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
