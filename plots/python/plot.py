@@ -193,12 +193,8 @@ class Plot:
         canvasModifications = [] could be used to pass on lambdas to modify the canvas
     '''
 
-    import ttg.tools.style as style
-    style.setDefault()
-
-    # default_widths
-    default_widths = {'y_width':500, 'x_width':500, 'y_ratio_width':200}
-    if ratio is not None: default_widths['x_width'] = 520
+    # Canvas widths
+    default_widths = {'y_width':500, 'x_width': 520, 'y_ratio_width': (200 if ratio else None)}
     default_widths.update(widths)
 
     # Make sure ratio dict has all the keys by updating the default
@@ -226,70 +222,39 @@ class Plot:
 
     self.scaleStacks(histos, scaling)
 
-    # Make canvas and if there is a ratio plot adjust the size of the pads
-    if ratio is not None:
-      default_widths['y_width'] += default_widths['y_ratio_width']
-      scaleFacRatioPad           = default_widths['y_width']/float(default_widths['y_ratio_width'])
-      y_border                   = default_widths['y_ratio_width']/float(default_widths['y_width'])
+    # Get the canvas, which includes canvas.topPad and canvas.bottomPad
+    import ttg.tools.style as style
+    canvas = style.getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
+    for modification in canvasModifications: modification(canvas)
 
-    # delete canvas if it exists
-    if hasattr("ROOT","c1"): del ROOT.c1
-    c1 = ROOT.TCanvas(self.name + str(uuid.uuid4()), "drawHistos",200,10, default_widths['x_width'], default_widths['y_width'])
+    canvas.topPad.cd()
 
-    if ratio is not None:
-        c1.Divide(1,2,0,0)
-        topPad = c1.cd(1)
-        topPad.SetBottomMargin(0)
-        topPad.SetLeftMargin(0.15)
-        topPad.SetTopMargin(0.07)
-        topPad.SetRightMargin(0.05)
-        topPad.SetPad(topPad.GetX1(), y_border, topPad.GetX2(), topPad.GetY2())
-        bottomPad = c1.cd(2)
-        bottomPad.SetTopMargin(0)
-        bottomPad.SetRightMargin(0.05)
-        bottomPad.SetLeftMargin(0.15)
-        bottomPad.SetBottomMargin(scaleFacRatioPad*0.13)
-        bottomPad.SetPad(bottomPad.GetX1(), bottomPad.GetY1(), bottomPad.GetX2(), y_border)
-    else:
-        topPad = c1
-
-    for modification in canvasModifications: modification(c1)
-
-    topPad.cd()
-
-    # Range on y axis: Start with default
-    if not yRange=="auto" and not (type(yRange)==type(()) and len(yRange)==2):
-      raise ValueError( "'yRange' must bei either 'auto' or (yMin, yMax) where yMin/Max can be 'auto'. Got: %r"%yRange )
-
+    # Range on y axis
     max_ = max(l[0].GetMaximum() for l in histos)
     min_ = min(l[0].GetMinimum() for l in histos)
 
+    if logY: (yMin_, yMax_) = (0.7, 10**0.5*max_)
+    else:    (yMin_, yMax_) = (0 if min_>0 else 1.2*min_, 1.2*max_)
+
+    if type(yRange)==type(()) and len(yRange)==2:
+      yMin_ = yRange[0] if not yRange[0]=="auto" else yMin_
+      yMax_ = yRange[1] if not yRange[1]=="auto" else yMax_
+
+
     # If legend is in the form (tuple, int) then the number of columns is provided
-    legendColumns = 1
-    if len(legend) == 2:
-      legendColumns = legend[1]
-      legend        = legend[0]
+    if len(legend) == 2: legendColumns, legend = legend[1], legend[0]
+    else:                legendColumns, legend = 1, legend
 
     #Calculate legend coordinates in gPad coordinates
     if legend is not None:
       if legend=="auto": legendCoordinates = (0.50,0.9-0.05*sum(map(len, histos)),0.92,0.9)
       else:              legendCoordinates = legend
 
-    if logY:
-      yMax_ = 10**0.5*max_
-      yMin_ = 0.7
-    else:
-      yMax_ = 1.2*max_
-      yMin_ = 0 if min_>0 else 1.2*min_
-    if type(yRange)==type(()) and len(yRange)==2:
-      yMin_ = yRange[0] if not yRange[0]=="auto" else yMin_
-      yMax_ = yRange[1] if not yRange[1]=="auto" else yMax_
-
     #Avoid overlap with the legend
     if (yRange=="auto" or yRange[1]=="auto") and (legend is not None):
       scaleFactor = 1
       # Get x-range and y
-      legendMaskedArea = getLegendMaskedArea(legendCoordinates, topPad)
+      legendMaskedArea = getLegendMaskedArea(legendCoordinates, canvas.topPad)
       for histo in [h[0] for h in histos]:
         for i in range(1, 1 + histo.GetNbinsX()):
           # low/high bin edge in the units of the x axis
@@ -321,20 +286,20 @@ class Plot:
     same = ""
     for h in sum(histos, []):
       drawOption = h.drawOption if hasattr(h, "drawOption") else "hist"
-      topPad.SetLogy(logY)
-      topPad.SetLogx(logX)
+      canvas.topPad.SetLogy(logY)
+      canvas.topPad.SetLogx(logX)
       h.GetYaxis().SetRangeUser(yMin_, yMax_)
       h.GetXaxis().SetTitle(self.texX)
       h.GetYaxis().SetTitle(self.texY)
       # precision 3 fonts. see https://root.cern.ch/root/htmldoc//TAttText.html#T5
-      h.GetXaxis().SetTitleFont(43)
-      h.GetYaxis().SetTitleFont(43)
-      h.GetXaxis().SetLabelFont(43)
-      h.GetYaxis().SetLabelFont(43)
-      h.GetXaxis().SetTitleSize(24)
-      h.GetYaxis().SetTitleSize(24)
-      h.GetXaxis().SetLabelSize(20)
-      h.GetYaxis().SetLabelSize(20)
+#      h.GetXaxis().SetTitleFont(43)
+#      h.GetYaxis().SetTitleFont(43)
+#      h.GetXaxis().SetLabelFont(43)
+#      h.GetYaxis().SetLabelFont(43)
+#      h.GetXaxis().SetTitleSize(24)
+#      h.GetYaxis().SetTitleSize(24)
+#      h.GetXaxis().SetLabelSize(20)
+#      h.GetYaxis().SetLabelSize(20)
 
       if ratio is None: h.GetYaxis().SetTitleOffset(1.3)
       else:             h.GetYaxis().SetTitleOffset(1.6)
@@ -345,7 +310,7 @@ class Plot:
       h.Draw(drawOption+same)
       same = "same"
 
-    topPad.RedrawAxis()
+    canvas.topPad.RedrawAxis()
     # Make the legend
     if legend is not None:
       legend_ = ROOT.TLegend(*legendCoordinates)
@@ -362,7 +327,7 @@ class Plot:
 
     # Make a ratio plot
     if ratio is not None:
-      bottomPad.cd()
+      canvas.bottomPad.cd()
       num = histos[ratio['num']][0]
       den = histos[ratio['den']][0]
       h_ratio = num.Clone()
@@ -424,8 +389,8 @@ class Plot:
       else:
         h_ratio.Draw(drawOption)
 
-      bottomPad.SetLogx(logX)
-      bottomPad.SetLogy(ratio['logY'])
+      canvas.bottomPad.SetLogx(logX)
+      canvas.bottomPad.SetLogy(ratio['logY'])
 
       line = ROOT.TPolyLine(2)
       line.SetPoint(0, h_ratio.GetXaxis().GetXmin(), 1.)
@@ -441,10 +406,10 @@ class Plot:
     except: pass
     copyIndexPHP(plot_directory)
 
-    c1.cd()
+    canvas.cd()
 
     log.info('Creating output files for ' + self.name)
     for extension in extensions:
       ofile = os.path.join( plot_directory, "%s.%s"%(self.name, extension) )
-      c1.Print( ofile )
-    del c1
+      canvas.Print( ofile )
+    del canvas
