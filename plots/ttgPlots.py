@@ -9,6 +9,8 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='eleCB-phoCB')
+argParser.add_argument('--sys',            action='store',      default=None)
+argParser.add_argument('--runSys',         action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
@@ -17,6 +19,33 @@ args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
+
+
+#
+# Defining systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
+#
+systematics = {}
+for i in ('Up', 'Down'):
+  systematics['pu'+i]       = [('puWeight',      'puWeight'+i)]
+  systematics['phSF'+i]     = [('phWeight',      'phWeight'+i)]
+  systematics['lSF'+i]      = [('lWeight',       'lWeight'+i)]
+  systematics['lTrackSF'+i] = [('lTrackWeight',  'lTrackWeight'+i)]
+  systematics['trigger'+i]  = [('triggerWeight', 'triggerWeight'+i)]
+  systematics['bTagl'+i]    = [('bTagWeight',    'bTagWeightl'+i)]
+  systematics['bTagb'+i]    = [('bTagWeight',    'bTagWeightb'+i)]
+#  systematics['JEC'+i]      = [('njets',         'njets_JEC'+i),     ('dbjets',    'dbjets_JEC'+i)]
+#  systematics['JER'+i]      = [('njets',         'njets_JER'+i),     ('dbjets',    'dbjets_JER'+i)]
+
+if args.sys=='None': args.sys=None
+if not args.runSys:  systematics = {}
+
+
+# Function to apply the systematic to the tre
+def applySys(sys, tree):
+  for i in systematics[sys]:
+    var, sysVar = i
+    setattr(tree, var, getattr(tree, sysVar))
+
 
 
 #
@@ -29,20 +58,14 @@ if not args.isChild and args.selection is None:
                 'llg-looseLeptonVeto-mll40',
                 'llg-looseLeptonVeto-mll40-offZ',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet3',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet4',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-btag1p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-btag1p',
+                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
+                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
+                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
+                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04',
+                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04',
+                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
 
   if args.tag.count('QCD'):
@@ -51,10 +74,12 @@ if not args.isChild and args.selection is None:
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('QCD'):             channels = ['noData']
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
-  for c in channels:
-    if args.tag.count('sigmaIetaIeta') and (c=='noData' and not args.tag.count('QCD')): continue
-    args.channel = c
-    submitJobs(__file__, 'selection', selections, args, subLog=os.path.join(args.tag,c))
+  for s in ['None'] + systematics.keys():
+    for c in channels:
+      if args.tag.count('sigmaIetaIeta') and (c=='noData' and not args.tag.count('QCD')): continue
+      args.channel = c
+      args.sys     = s
+      submitJobs(__file__, 'selection', selections, args, subLog=os.path.join(args.tag,c,s))
   exit(0)
 
 
@@ -81,6 +106,10 @@ sigmaieta   = args.tag.count('igmaIetaIeta')
 forward     = args.tag.count('forward')
 central     = args.tag.count('central')
 randomCone  = args.tag.count('randomConeCheck')
+
+
+
+
 
 
 
@@ -188,7 +217,7 @@ else:
     plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',                  lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                           (20,0,5)))
   plots.append(Plot('phJetDeltaR',              '#Delta R(#gamma, j)',                  lambda c : c.phJetDeltaR,                                                             (20,0,5)))
   plots.append(Plot('njets',                    'number of jets',                       lambda c : c.njets,                                                                   (8,0,8)))
-  plots.append(Plot('nbtag',                    'number of medium b-tags (CSVv2)',      lambda c : c.nbjets,                                                                  (4,0,4)))
+  plots.append(Plot('nbtag',                    'number of medium b-tags (deepCSV)',    lambda c : c.dbjets,                                                                  (4,0,4)))
   plots.append(Plot('j1_pt',                    'p_{T}(j_{1}) (GeV)',                   lambda c : c._jetPt[c.j1]                                 if c.njets > 0 else -1,     (30,0,300)))
   plots.append(Plot('j1_eta',                   '|#eta|(j_{1})',                        lambda c : abs(c._jetEta[c.j1])                           if c.njets > 0 else -1,     (15,0,2.5)))
   plots.append(Plot('j1_phi',                   '#phi(j_{1})',                          lambda c : c._jetPhi[c.j1]                                if c.njets > 0 else -10,    (10,-pi,pi)))
@@ -273,6 +302,9 @@ for sample in sum(stack, []):
       c.lWeight = 1.
       c.lTrackWeight = 1.
       c.triggerWeight = 1.
+    elif not sample.isData:
+      if args.sys: applySys(args.sys, c)
+
     eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale
 
     for plot in plots+plots2D: plot.fill(sample, eventWeight)
@@ -296,17 +328,8 @@ def drawObjects(dataMCScale, lumiScale):
   ]
   return [drawTex(align, l) for align, l in lines]
 
-
 import socket
 baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
-
-for plot in plots2D:
-  for logY in [False, True]:
-    for option in ['SCAT', 'COLZ']:
-      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection, option),
-                logZ = False,
-                drawOption = option,
-                drawObjects = drawObjects(None, lumiScale))
 
 for plot in plots:
   histModifications = []
@@ -314,13 +337,23 @@ for plot in plots:
     log.info("Yields: ")
     for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
-  plot.saveToCache(os.path.join(baseDir, args.channel, args.selection))
-  for logY in [False, True]:
-    plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection),
-              ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
-              logX = False, logY = logY, sorting = True,
-              yRange = (0.003, "auto") if logY else (0.0001, "auto"),
-              scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
-              drawObjects = drawObjects(None, lumiScale),
-              histModifications = histModifications,
-    )
+  plot.saveToCache(os.path.join(baseDir, args.channel, args.selection), args.sys)
+  if not args.sys:
+    for logY in [False, True]:
+      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection),
+                ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
+                logX = False, logY = logY, sorting = True,
+                yRange = (0.003, "auto") if logY else (0.0001, "auto"),
+                scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
+                drawObjects = drawObjects(None, lumiScale),
+                histModifications = histModifications,
+      )
+
+if not args.sys:
+  for plot in plots2D:
+    for logY in [False, True]:
+      for option in ['SCAT', 'COLZ']:
+        plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection, option),
+                  logZ = False,
+                  drawOption = option,
+                  drawObjects = drawObjects(None, lumiScale))

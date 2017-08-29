@@ -128,22 +128,23 @@ class Plot:
   #
   # Save the histogram to a results.cache file, useful when you need to to further operations on it later
   #
-  def saveToCache(self, dir):
+  def saveToCache(self, dir, sys):
     try:    os.makedirs(os.path.join(dir))
     except: pass
 
     resultFile = os.path.join(dir, 'results.pkl')
     histos     = {s.name+s.texName: h for s, h in self.histos.iteritems()}
+    plotName   = self.name+(sys if sys else '')
 
     waitForLock(resultFile)
     if os.path.exists(resultFile):
       allPlots = pickle.load(file(resultFile))
-      allPlots.update({self.name : histos})
+      allPlots.update({plotName : histos})
     else:
-      allPlots = {self.name : histos}
+      allPlots = {plotName : histos}
     pickle.dump(allPlots, file(resultFile, 'w'))
     removeLock(resultFile)
-    log.info("Plot " + self.name + " saved to cache")
+    log.info("Plot " + plotName + " saved to cache")
 
   def getYields(self, bin=None):
     if bin: return {s.name : h.GetBinContent(bin) for s,h in self.histos.iteritems()}
