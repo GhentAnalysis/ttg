@@ -164,7 +164,47 @@ class Plot:
 
 
   #
-  # Draw function roughly stolen from Robert's RootTools, might need some cleanup, very lengthy
+  # Make a correct ratio graph (also working for poisson errors, and showing error bars for points outside of y-axis range)
+  # 
+  def makeRatioGraph(self, num, den):
+    graph = ROOT.TGraphAsymmErrors(num)
+    graph.Set(0)
+    for bin in range(1, num.GetNbinsX()+1):
+      if den.GetBinContent(bin) > 0:
+        center  = num.GetBinCenter(bin)
+        val     = num.GetBinContent(bin)/den.GetBinContent(bin)
+        errUp   = num.GetBinErrorUp(bin)/den.GetBinContent(bin)  if val > 0 else 0
+        errDown = num.GetBinErrorLow(bin)/den.GetBinContent(bin) if val > 0 else 0
+        graph.SetPoint(bin, center, val)
+        graph.SetPointError(bin, 0, 0, errDown, errUp)
+    return graph
+
+
+
+  #
+  # Get ratio line
+  #
+  def getRatioLine(self, min, max):
+    line = ROOT.TPolyLine(2)
+    line.SetPoint(0, min, 1.)
+    line.SetPoint(1, max, 1.)
+    line.SetLineWidth(1)
+    return line
+
+  #
+  # Get legend
+  #
+  def getLegend(self, columns, coordinates, histos):
+    legend_ = ROOT.TLegend(*coordinates)
+    legend_.SetNColumns(columns)
+    legend_.SetFillStyle(0)
+    legend_.SetShadowColor(ROOT.kWhite)
+    legend_.SetBorderSize(0)
+    for h in sum(histos, []): legend_.AddEntry(h, h.texName, h.legendStyle)
+
+
+  #
+  # Draw function
   #
   def draw(self, \
           yRange = "auto",
@@ -297,21 +337,12 @@ class Plot:
 
       for modification in histModifications+self.histModifications: modification(h)
 
-      if drawOption=="e1": dataHist = h
       h.Draw(drawOption+same)
       same = "same"
 
     canvas.topPad.RedrawAxis()
-    # Make the legend
-    if legend is not None:
-      legend_ = ROOT.TLegend(*legendCoordinates)
-      legend_.SetNColumns(legendColumns)
-      legend_.SetFillStyle(0)
-      legend_.SetShadowColor(ROOT.kWhite)
-      legend_.SetBorderSize(0)
-      for h in sum(histos, []): legend_.AddEntry(h, h.texName, h.legendStyle)
-      legend_.Draw()
 
+    if legend is not None: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
     for o in drawObjects:
       try:    o.Draw()
       except: log.debug( "drawObjects has something I can't Draw(): %r", o)
@@ -321,6 +352,7 @@ class Plot:
       canvas.bottomPad.cd()
       num = histos[ratio['num']][0]
       den = histos[ratio['den']][0]
+
       h_ratio = num.Clone()
       h_ratio.Divide(den)
 
@@ -340,45 +372,21 @@ class Plot:
 
       for modification in ratioModifications: modification(h_ratio)
 
-      drawOption = num.drawOption if hasattr(num, "drawOption") else "hist"
-      if drawOption == "e1":                          # hacking to show error bars within panel when central value is off scale
-        graph = ROOT.TGraphAsymmErrors(dataHist)      # cloning from datahist in order to get layout
-        graph.Set(0)
-        for bin in range(1, h_ratio.GetNbinsX()+1):
-          if den.GetBinContent(bin) > 0 and den.GetBinContent(bin) > 0:
-            h_ratio.SetBinError(bin, 0.0001)          # do not show error bars on hist, those are taken overf by the TGraphAsymmErrors
-            center  = h_ratio.GetBinCenter(bin)
-            val     = h_ratio.GetBinContent(bin)
-            errUp   = num.GetBinErrorUp(bin)/den.GetBinContent(bin) if val > 0 else 0
-            errDown = num.GetBinErrorLow(bin)/den.GetBinContent(bin) if val > 0 else 0
-            graph.SetPoint(bin, center, val)
-            graph.SetPointError(bin, 0, 0, errDown, errUp)
+      if num.drawOption == "e1":
+        for bin in range(1, h_ratio.GetNbinsX()+1): h_ratio.SetBinError(bin, 0.0001)     # do not show error bars on hist, those are taken overf by the TGraphAsymmErrors
         h_ratio.Draw("e0")
-        if hasattr(den, "drawOption") and den.drawOption == "e1":                        # show error bars from denominator
-          graph2 = ROOT.TGraphAsymmErrors(den)
-          graph2.Set(0)
-          for bin in range(1, den.GetNbinsX()+1):
-            if den.GetBinContent(bin) > 0 and den.GetBinContent(bin) > 0:
-              center  = den.GetBinCenter(bin)
-              val     = den.GetBinContent(bin)
-              errUp   = den.GetBinErrorUp(bin)/den.GetBinContent(bin) if val > 0 else 0
-              errDown = den.GetBinErrorLow(bin)/den.GetBinContent(bin) if val > 0 else 0
-              graph2.SetPoint(bin, center, 1.)
-              graph2.SetPointError(bin, 0, 0, errDown, errUp)
+        graph = self.makeRatioGraph(num, den)
+        if den.drawOption == "e1":                                                       # show error bars from denominator
+          graph2 = self.makeRatioGraph(den, den)
           graph2.Draw("0 same")
         graph.Draw("P0 same")
       else:
-        h_ratio.Draw(drawOption)
+        h_ratio.Draw(num.drawOption)
 
       canvas.bottomPad.SetLogx(logX)
       canvas.bottomPad.SetLogy(ratio['logY'])
 
-      line = ROOT.TPolyLine(2)
-      line.SetPoint(0, h_ratio.GetXaxis().GetXmin(), 1.)
-      line.SetPoint(1, h_ratio.GetXaxis().GetXmax(), 1.)
-      line.SetLineWidth(1)
-      line.Draw()
-
+      ratio['drawObjects'] += [self.getRatioLine(h_ratio.GetXaxis().GetXmin(), h_ratio.GetXaxis().GetXmax())]
       for o in ratio['drawObjects']:
         try:    o.Draw()
         except: log.debug( "ratio['drawObjects'] has something I can't Draw(): %r", o)
@@ -391,6 +399,5 @@ class Plot:
 
     log.info('Creating output files for ' + self.name)
     for extension in extensions:
-      ofile = os.path.join( plot_directory, "%s.%s"%(self.name, extension) )
-      canvas.Print( ofile )
-    del canvas
+      ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
+      canvas.Print(ofile)
