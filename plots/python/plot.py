@@ -204,6 +204,85 @@ class Plot:
     for h in sum(histos, []): legend_.AddEntry(h, h.texName, h.legendStyle)
 
 
+
+
+
+
+  #
+  # Adding systematics to MC (assuming MC is first in the stack list)
+  #
+  def getSystematicBand(self, dir, systematics):
+    allPlots = pickle.load(file(os.path.join(dir, 'results.pkl')))
+
+    def sumHistos(list):
+      sum = list[0].Clone()
+      for h in list[1:]: sum.Add(h)
+      return sum
+
+    histNames = [s.name+s.texName for s in self.stack[0]]
+
+    for s in self.histos.keys():
+      self.histos[s] = allPlots[self.name][s.name+s.texName]
+
+    histos_summed = {}
+    for sys in systematics.keys() + [None]:
+      plotName = self.name+(sys if sys else '')
+      if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
+      for histName in histNames:
+        h = allPlots[plotName][histName]
+        if h.Integral()==0: log.warning("Found empty histogram %s in %s/results.pkl", h.GetName(), dir)
+        self.addOverFlowBin1D(h, self.overflowBin)
+
+      histos_summed[sys] = sumHistos([allPlots[plotName][histName] for histName in histNames])
+      # TODO: need to scale something?
+
+    sysList = [sys.replace('Up','') for sys in systematics if sys.count('Up')]
+
+    h_sys = {}
+    for sys in sysList:
+      h_sys[sys] = histos_summed[sys+'Up'].Clone()
+      h_sys[sys].Scale(-1)
+      h_sys[sys].Add(histos_summed[sys+'Down'])
+
+    h_rel_err = histos_summed[None].Clone()
+    h_rel_err.Reset()
+
+    # Adding the systematics in quadrature
+    for k in h_sys.keys():
+      for ib in range( 1 + h_rel_err.GetNbinsX() ):
+        h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + (h_sys[k].GetBinContent(ib)/2)**2 )
+
+    for ib in range( 1 + h_rel_err.GetNbinsX() ):
+      h_rel_err.SetBinContent(ib, sqrt( h_rel_err.GetBinContent(ib) ) )
+
+    # Divide by the summed hist to get relative errors
+    h_rel_err.Divide(histos_summed[None])
+
+    boxes = []
+    ratio_boxes = []
+    for ib in range(1, 1 + h_rel_err.GetNbinsX() ):
+      val = histos_summed[None].GetBinContent(ib)
+      if val<0: continue
+      sys = h_rel_err.GetBinContent(ib)
+      box = ROOT.TBox( h_rel_err.GetXaxis().GetBinLowEdge(ib),  max([0.003, (1-sys)*val]), h_rel_err.GetXaxis().GetBinUpEdge(ib), max([0.003, (1+sys)*val]) )
+      box.SetLineColor(ROOT.kBlack)
+      box.SetFillStyle(3444)
+      box.SetFillColor(ROOT.kBlack)
+      r_box = ROOT.TBox( h_rel_err.GetXaxis().GetBinLowEdge(ib),  max(0.1, 1-sys), h_rel_err.GetXaxis().GetBinUpEdge(ib), min(1.9, 1+sys) )
+      r_box.SetLineColor(ROOT.kBlack)
+      r_box.SetFillStyle(3444)
+      r_box.SetFillColor(ROOT.kBlack)
+      boxes.append( box )
+      ratio_boxes.append( r_box )
+
+    return boxes, ratio_boxes
+
+
+
+
+
+
+
   #
   # Draw function
   #

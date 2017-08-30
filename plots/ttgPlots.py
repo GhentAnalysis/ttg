@@ -11,6 +11,7 @@ argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='eleCB-phoCB')
 argParser.add_argument('--sys',            action='store',      default=None)
 argParser.add_argument('--runSys',         action='store_true', default=False)
+argParser.add_argument('--showSys',        action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
@@ -20,6 +21,8 @@ args = argParser.parse_args()
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
+import socket
+baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
 
 #
 # Defining systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
@@ -29,15 +32,14 @@ for i in ('Up', 'Down'):
   systematics['pu'+i]       = [('puWeight',      'puWeight'+i)]
   systematics['phSF'+i]     = [('phWeight',      'phWeight'+i)]
   systematics['lSF'+i]      = [('lWeight',       'lWeight'+i)]
-  systematics['lTrackSF'+i] = [('lTrackWeight',  'lTrackWeight'+i)]
   systematics['trigger'+i]  = [('triggerWeight', 'triggerWeight'+i)]
   systematics['bTagl'+i]    = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]    = [('bTagWeight',    'bTagWeightb'+i)]
-#  systematics['JEC'+i]      = [('njets',         'njets_JEC'+i),     ('dbjets',    'dbjets_JEC'+i)]
-#  systematics['JER'+i]      = [('njets',         'njets_JER'+i),     ('dbjets',    'dbjets_JER'+i)]
+  systematics['JEC'+i]      = [('njets',         'njets_JEC'+i),     ('dbjets',    'dbjets_JEC'+i)]
+  systematics['JER'+i]      = [('njets',         'njets_JER'+i),     ('dbjets',    'dbjets_JER'+i)]
 
 if args.sys=='None': args.sys=None
-if not args.runSys:  systematics = {}
+if not (args.runSys or args.showSys): systematics = {}
 
 
 # Function to apply the systematic to the tre
@@ -236,10 +238,58 @@ else:
       plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',                   lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165[c.ph]]) if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1, (15,0,2.5)))
 
 
+lumiScale = 35.9
+
+
+def drawObjects(dataMCScale, lumiScale):
+  def drawTex(align, line):
+    tex = ROOT.TLatex()
+    tex.SetNDC()
+    tex.SetTextSize(0.04)
+    tex.SetTextAlign(align)
+    return tex.DrawLatex(*line)
+
+  lines =[
+    (11,(0.15, 0.95, 'CMS Preliminary')),
+    (31,(0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
+  ]
+  return [drawTex(align, l) for align, l in lines]
+
+
+
+if args.showSys:
+  for plot in plots:
+    # TODO: maybe call this within the draw function
+    boxes, ratioBoxes = plot.getSystematicBand(os.path.join(baseDir, args.channel, args.selection), systematics)
+
+    histModifications = []
+    if plot.name == "yield":
+      log.info("Yields: ")
+      for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+
+    for logY in [False, True]:
+      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else '') + '_sys', args.selection),
+          ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC'),'drawObjects':ratioBoxes},
+                logX = False, logY = logY, sorting = True,
+                yRange = (0.003, "auto") if logY else (0.0001, "auto"),
+                scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
+                drawObjects = drawObjects(None, lumiScale)+boxes,
+                histModifications = histModifications,
+      )
+
+  exit(0)
+
+
+
+
+
+
+
+
+
 #
 # Prepare looper
 #
-lumiScale = 35.9
 
 cutString, passingFunctions = cutInterpreter.cutString(args.selection)
 if not cutString: cutString = '(1)'
@@ -314,22 +364,6 @@ for sample in sum(stack, []):
 #
 # Drawing the plots
 #
-def drawObjects(dataMCScale, lumiScale):
-  def drawTex(align, line):
-    tex = ROOT.TLatex()
-    tex.SetNDC()
-    tex.SetTextSize(0.04)
-    tex.SetTextAlign(align)
-    return tex.DrawLatex(*line)
-
-  lines =[
-    (11,(0.15, 0.95, 'CMS Preliminary')),
-    (31,(0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
-  ]
-  return [drawTex(align, l) for align, l in lines]
-
-import socket
-baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
 
 for plot in plots:
   histModifications = []
