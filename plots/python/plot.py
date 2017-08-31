@@ -196,13 +196,13 @@ class Plot:
   # Get legend
   #
   def getLegend(self, columns, coordinates, histos):
-    legend_ = ROOT.TLegend(*coordinates)
-    legend_.SetNColumns(columns)
-    legend_.SetFillStyle(0)
-    legend_.SetShadowColor(ROOT.kWhite)
-    legend_.SetBorderSize(0)
-    for h in sum(histos, []): legend_.AddEntry(h, h.texName, h.legendStyle)
-
+    legend = ROOT.TLegend(*coordinates)
+    legend.SetNColumns(columns)
+    legend.SetFillStyle(0)
+    legend.SetShadowColor(ROOT.kWhite)
+    legend.SetBorderSize(0)
+    for h in sum(histos, []): legend.AddEntry(h, h.texName, h.legendStyle)
+    return legend
 
 
 
@@ -221,8 +221,8 @@ class Plot:
 
     histNames = [s.name+s.texName for s in self.stack[0]]
 
-    for s in self.histos.keys():
-      self.histos[s] = allPlots[self.name][s.name+s.texName]
+#    for s in self.histos.keys():
+#      self.histos[s] = allPlots[self.name][s.name+s.texName]
 
     histos_summed = {}
     for sys in systematics.keys() + [None]:
@@ -300,6 +300,7 @@ class Plot:
           canvasModifications = [],
           histModifications = [],
           ratioModifications = [],
+          addSys = False,
           ):
     ''' yRange: 'auto' (default) or [low, high] where low/high can be 'auto'
         extensions: ["pdf", "png", "root"] (default)
@@ -421,6 +422,11 @@ class Plot:
       same = "same"
 
     canvas.topPad.RedrawAxis()
+
+    if addSys:
+      boxes, ratioBoxes      = plot.getSystematicBand(os.path.join(baseDir, args.channel, args.selection), systematics)
+      drawObjects           += boxes
+      ratio['drawObjects']  += ratioBoxes
 
     if legend is not None: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
     for o in drawObjects:

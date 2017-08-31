@@ -256,12 +256,9 @@ def drawObjects(dataMCScale, lumiScale):
   return [drawTex(align, l) for align, l in lines]
 
 
-
+# todo: cleanup, merge with code below
 if args.showSys:
   for plot in plots:
-    # TODO: maybe call this within the draw function
-    boxes, ratioBoxes = plot.getSystematicBand(os.path.join(baseDir, args.channel, args.selection), systematics)
-
     histModifications = []
     if plot.name == "yield":
       log.info("Yields: ")
@@ -269,12 +266,13 @@ if args.showSys:
 
     for logY in [False, True]:
       plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else '') + '_sys', args.selection),
-          ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC'),'drawObjects':ratioBoxes},
+          ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
                 logX = False, logY = logY, sorting = True,
                 yRange = (0.003, "auto") if logY else (0.0001, "auto"),
                 scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
-                drawObjects = drawObjects(None, lumiScale)+boxes,
+                drawObjects = drawObjects(None, lumiScale),
                 histModifications = histModifications,
+                addSys = True,
       )
 
   exit(0)
