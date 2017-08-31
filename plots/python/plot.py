@@ -211,7 +211,7 @@ class Plot:
   #
   # Adding systematics to MC (assuming MC is first in the stack list)
   #
-  def getSystematicBand(self, dir, systematics):
+  def getSystematicBand(self, dir, systematics, linearSystematics):
     allPlots = pickle.load(file(os.path.join(dir, 'results.pkl')))
 
     def sumHistos(list):
@@ -220,9 +220,6 @@ class Plot:
       return sum
 
     histNames = [s.name+s.texName for s in self.stack[0]]
-
-#    for s in self.histos.keys():
-#      self.histos[s] = allPlots[self.name][s.name+s.texName]
 
     histos_summed = {}
     for sys in systematics.keys() + [None]:
@@ -251,6 +248,10 @@ class Plot:
     for k in h_sys.keys():
       for ib in range( 1 + h_rel_err.GetNbinsX() ):
         h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + (h_sys[k].GetBinContent(ib)/2)**2 )
+
+    for k in linearSystematics:
+      for ib in range( 1 + h_rel_err.GetNbinsX() ):
+        h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + (linearSystematics[k])**2 )
 
     for ib in range( 1 + h_rel_err.GetNbinsX() ):
       h_rel_err.SetBinContent(ib, sqrt( h_rel_err.GetBinContent(ib) ) )
@@ -300,7 +301,8 @@ class Plot:
           canvasModifications = [],
           histModifications = [],
           ratioModifications = [],
-          addSys = False,
+          systematics = {},
+          linearSystematics = {},
           ):
     ''' yRange: 'auto' (default) or [low, high] where low/high can be 'auto'
         extensions: ["pdf", "png", "root"] (default)
@@ -423,10 +425,9 @@ class Plot:
 
     canvas.topPad.RedrawAxis()
 
-    if addSys:
-      boxes, ratioBoxes      = plot.getSystematicBand(os.path.join(baseDir, args.channel, args.selection), systematics)
-      drawObjects           += boxes
-      ratio['drawObjects']  += ratioBoxes
+    boxes, ratioBoxes      = plot.getSystematicBand(os.path.join(baseDir, args.channel, args.selection), systematics, linearSystematics)
+    drawObjects           += boxes
+    ratio['drawObjects']  += ratioBoxes
 
     if legend is not None: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
     for o in drawObjects:

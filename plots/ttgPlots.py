@@ -38,6 +38,9 @@ for i in ('Up', 'Down'):
   systematics['JEC'+i]      = [('njets',         'njets_JEC'+i),     ('dbjets',    'dbjets_JEC'+i)]
   systematics['JER'+i]      = [('njets',         'njets_JER'+i),     ('dbjets',    'dbjets_JER'+i)]
 
+linearSystematics = {}:
+  linearSystematics['lumi'] = [('all', 2.5)]
+
 if args.sys=='None': args.sys=None
 if not (args.runSys or args.showSys): systematics = {}
 
@@ -272,7 +275,8 @@ if args.showSys:
                 scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
                 drawObjects = drawObjects(None, lumiScale),
                 histModifications = histModifications,
-                addSys = True,
+                systematics = systematics,
+                linearSystematics = linearSystematics,
       )
 
   exit(0)
