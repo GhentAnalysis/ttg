@@ -24,12 +24,13 @@ linearSystematics['lumi'] = (None, 2.5)
 #
 # Function to apply the systematic to the cutstring or tree
 #
-def applySysToString(string):
-  for i in systematics[args.sys]:
+def applySysToString(sys, string):
+  for i in systematics[sys]:
     var, sysVar = i
     string = string.replace(var, sysVar)
+  return string
 
-def applySysToTree(tree):
-  for i in systematics[args.sys]:
+def applySysToTree(sys, tree):
+  for i in systematics[sys]:
     var, sysVar = i
     setattr(tree, var, getattr(tree, sysVar))
