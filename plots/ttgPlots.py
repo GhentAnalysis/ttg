@@ -199,156 +199,124 @@ else:
 lumiScale = 35.9
 
 
-def drawObjects(dataMCScale, lumiScale):
-  def drawTex(align, line):
-    tex = ROOT.TLatex()
-    tex.SetNDC()
-    tex.SetTextSize(0.04)
-    tex.SetTextAlign(align)
-    return tex.DrawLatex(*line)
-
-  lines =[
-    (11,(0.15, 0.95, 'CMS Preliminary')),
-    (31,(0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
-  ]
-  return [drawTex(align, l) for align, l in lines]
-
-
-# todo: cleanup, merge with code below
-if args.showSys:
-  for plot in plots:
-    histModifications = []
-    if plot.name == "yield":
-      log.info("Yields: ")
-      for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
-
-    for logY in [False, True]:
-      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else '') + '_sys', args.selection),
-          ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
-                logX = False, logY = logY, sorting = True,
-                yRange = (0.003, "auto") if logY else (0.0001, "auto"),
-                scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
-                drawObjects = drawObjects(None, lumiScale),
-                histModifications = histModifications,
-                systematics = systematics,
-                linearSystematics = linearSystematics,
-                resultsDir =  os.path.join(baseDir, args.channel, args.selection),
-      )
-
-  exit(0)
-
-
-
-
 
 
 
 
 
 #
-# Prepare looper
+# Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
 #
+if not args.showSys:
+  cutString, passingFunctions = cutInterpreter.cutString(args.selection)
+  if not cutString: cutString = '(1)'
+  if args.sys:      cutString = applySysToString(cutString)
 
-cutString, passingFunctions = cutInterpreter.cutString(args.selection)
-if not cutString: cutString = '(1)'
-if args.sys:      cutString = applySysToString(cutString)
+  if args.channel=="ee":   cutString += '&&isEE'
+  if args.channel=="mumu": cutString += '&&isMuMu'
+  if args.channel=="emu":  cutString += '&&isEMu'
 
-if args.channel=="ee":   cutString += '&&isEE'
-if args.channel=="mumu": cutString += '&&isMuMu'
-if args.channel=="emu":  cutString += '&&isEMu'
+  if   args.tag.count('QCD'):       reduceType = 'phoCB'
+  elif args.tag.count('HN'):        reduceType = 'eleHN-phoCB'
+  elif args.tag.count('FO'):        reduceType = 'eleFO-phoCB'
+  elif args.tag.count('CBVeto'):    reduceType = 'eleCBVeto-phoCB'
+  elif args.tag.count('CBLoose'):   reduceType = 'eleCBLoose-phoCB'
+  elif args.tag.count('CBMedium'):  reduceType = 'eleCBMedium-phoCB'
+  elif args.tag.count('SusyLoose'): reduceType = 'eleSusyLoose-phoCB'
+  else:                             reduceType = 'eleCB-phoCB'
 
-if   args.tag.count('QCD'):       reduceType = 'phoCB'
-elif args.tag.count('HN'):        reduceType = 'eleHN-phoCB'
-elif args.tag.count('FO'):        reduceType = 'eleFO-phoCB'
-elif args.tag.count('CBVeto'):    reduceType = 'eleCBVeto-phoCB'
-elif args.tag.count('CBLoose'):   reduceType = 'eleCBLoose-phoCB'
-elif args.tag.count('CBMedium'):  reduceType = 'eleCBMedium-phoCB'
-elif args.tag.count('SusyLoose'): reduceType = 'eleSusyLoose-phoCB'
-else:                             reduceType = 'eleCB-phoCB'
+  from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
+  from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
+  for sample in sum(stack, []):
+    c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep')
 
+    c.QCD  = args.tag.count('QCD')
+    c.data = sample.texName.count('data')
 
-
-#
-# Looping
-#
-from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
-from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
-for sample in sum(stack, []):
-  c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep')
-
-  c.QCD  = args.tag.count('QCD')
-  c.data    = sample.texName.count('data')
-
-  # Filter booleans
-  c.genuine           = sample.texName.count('genuine')
-  c.hadronicPhoton    = sample.texName.count('hadronicPhoton')
-  c.misIdEle          = sample.texName.count('misIdEle')
-  c.hadronicFake      = sample.texName.count('hadronicFake')
-  c.nonprompt         = sample.texName.count('non-prompt')
-  c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
-  c.failSigmaIetaIeta = sample.texName.count('fail')
-  c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
+    # Filter booleans
+    c.genuine           = sample.texName.count('genuine')
+    c.hadronicPhoton    = sample.texName.count('hadronicPhoton')
+    c.misIdEle          = sample.texName.count('misIdEle')
+    c.hadronicFake      = sample.texName.count('hadronicFake')
+    c.nonprompt         = sample.texName.count('non-prompt')
+    c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
+    c.failSigmaIetaIeta = sample.texName.count('fail')
+    c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
 
 
-  c.photonCutBased      = phoCB
-  c.photonCutBasedTight = False
-  c.photonMva           = phoMva
-  for i in sample.eventLoop(cutString):
-    c.GetEntry(i)
+    c.photonCutBased      = phoCB
+    c.photonCutBasedTight = False
+    c.photonMva           = phoMva
+    for i in sample.eventLoop(cutString):
+      c.GetEntry(i)
 
-    # Note: photon SF is 0 when pt < 20 GeV
-    if c.QCD:
-      c.lWeight = 1.
-      c.lTrackWeight = 1.
-      c.triggerWeight = 1.
-    elif not sample.isData:
-      if args.sys: applySysToTree(c)
+      # Note: photon SF is 0 when pt < 20 GeV
+      if c.QCD:
+        c.lWeight = 1.
+        c.lTrackWeight = 1.
+        c.triggerWeight = 1.
+      elif not sample.isData:
+        if args.sys: applySysToTree(c)
 
-    if not passingFunctions(c):                                     continue
-    if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
-    if phoCBfull and not c._phCutBasedMedium[c.ph]:                 continue
+      if not passingFunctions(c):                                     continue
+      if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
+      if phoCBfull and not c._phCutBasedMedium[c.ph]:                 continue
 
-    if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
-    if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
-    if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
+      if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
+      if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
+      if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
 
-    if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
-    if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
-    if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
+      if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+      if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
+      if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
-    eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale
+      eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale
 
-    for plot in plots+plots2D: plot.fill(sample, eventWeight)
+      for plot in plots+plots2D: plot.fill(sample, eventWeight)
 
 
 
 #
 # Drawing the plots
 #
-
+from ttg.tools.style import drawLumi
 for plot in plots:
-  histModifications = []
-  if plot.name == "yield":
+  if not args.showSys:
+   plot.saveToCache(os.path.join(baseDir, args.channel, args.selection), args.sys)
+   if plot.name == "yield":
     log.info("Yields: ")
     for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
-  plot.saveToCache(os.path.join(baseDir, args.channel, args.selection), args.sys)
-  if not args.sys:
-    for logY in [False, True]:
-      plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection),
-                ratio = None if (args.channel=='noData' and not (sigmaieta or randomCone)) else {'yRange':(0.1,1.9),'texY':('ratio' if sigmaieta or randomCone else 'data/MC')},
-                logX = False, logY = logY, sorting = True,
-                yRange = (0.003, "auto") if logY else (0.0001, "auto"),
-                scaling = 'unity' if (sigmaieta or randomCone or args.tag.count('compareChannels')) else {},
-                drawObjects = drawObjects(None, lumiScale),
-                histModifications = histModifications,
-      )
+  extraArgs = {}
+  if args.showSys:
+    extraArgs['systematics']       = systematics
+    extraArgs['linearSystematics'] = linearSystematics
+    extraArgs['resultsDir']        = os.path.join(baseDir, args.channel, args.selection)
+
+  if args.channel!='noData'::
+    extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
+
+  if (sigmaieta or randomCone or args.tag.count('compareChannels')):
+    extraArgs['scaling'] = 'unity'
+    extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY':'ratio'}
+
+  for logY in [False, True]:
+    logTag = '-log' if logY else ''
+    sysTag = '-sys' if args.showSys else ''
+    plot.draw(plot_directory    = os.path.join(baseDir, args.channel + logTag + sysTag, args.selection),
+              logX              = False,
+              logY              = logY,
+              sorting           = True,
+              yRange            = (0.003 if logY else 0.0001, "auto"),
+              drawObjects       = drawLumi(None, lumiScale),
+              **extraArgs
+    )
 
 if not args.sys:
   for plot in plots2D:
     for logY in [False, True]:
       for option in ['SCAT', 'COLZ']:
         plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection, option),
-                  logZ = False,
-                  drawOption = option,
-                  drawObjects = drawObjects(None, lumiScale))
+                  logZ           = False,
+                  drawOption     = option,
+                  drawObjects    = drawLumi(None, lumiScale))

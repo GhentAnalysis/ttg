@@ -117,3 +117,21 @@ def fillStyle(color, lineColor = None):
     histo.legendStyle = "f"
     return
   return func
+
+
+#
+# Common CMS information
+#
+def drawLumi(dataMCScale, lumiScale):
+  def drawTex(align, line):
+    tex = ROOT.TLatex()
+    tex.SetNDC()
+    tex.SetTextSize(0.04)
+    tex.SetTextAlign(align)
+    return tex.DrawLatex(*line)
+
+  lines =[
+    (11,(0.15, 0.95, 'CMS Preliminary')),
+    (31,(0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
+  ]
+  return [drawTex(align, l) for align, l in lines]
