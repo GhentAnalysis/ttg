@@ -445,8 +445,8 @@ class Plot:
 
     canvas.topPad.RedrawAxis()
 
-    boxes, ratioBoxes      = self.getSystematicBand(systematics, linearSystematics, resultsDir)
     if len(systematics) or len(linearSystematics):
+      boxes, ratioBoxes                = self.getSystematicBand(systematics, linearSystematics, resultsDir)
       drawObjects                     += boxes
       if ratio: ratio['drawObjects']  += ratioBoxes
 
