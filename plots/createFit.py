@@ -58,22 +58,6 @@ def writeStatVariation(hist, prefix):
     up.Write(prefix + str(i) + 'Up')
     down.Write(prefix + str(i) + 'Down')
 
-def drawObjects(dataMCScale, lumiScale):
-  def drawTex(align, line):
-    tex = ROOT.TLatex()
-    tex.SetNDC()
-    tex.SetTextSize(0.04)
-    tex.SetTextAlign(align)
-    return tex.DrawLatex(*line)
-
-  lines =[
-    (11,(0.15, 0.95, 'CMS Preliminary')),
-    (31,(0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
-  ]
-  return [drawTex(align, l) for align, l in lines]
-
-
-
 for channel in ['ee', 'emu', 'mumu']:
   mcPurities = []
   for pseudoData in [True, False]:
@@ -165,12 +149,13 @@ for channel in ['ee', 'emu', 'mumu']:
       fit.histos = {i:i for i in sum(fit.stack, [])}
 
       if j==0:
+        from ttg.tools.style import drawLumi
         for plot in [fit, prefit]:
           plot.draw(plot_directory = './fitPlots/' + channel + ('_pseudoData' if pseudoData else ''),
                    ratio   = {'yRange':(0.1,1.9),'texY': 'ratio'},
                    logX    = False, logY = False, sorting = False,
                    yRange  = (0.0001, "auto"),
-                   drawObjects = drawObjects(None, 35.9),
+                   drawObjects = drawLumi(None, 35.9),
           )
 
       if pseudoData:
