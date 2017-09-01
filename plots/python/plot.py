@@ -65,7 +65,7 @@ class Plot:
   # Add an overflow bin, optionally called from the draw function
   #
   def addOverFlowBin1D(self, histo, addOverFlowBin = None):
-    if addOverFlowBin is not None and not hasattr(histo, 'overflowApplied'):
+    if addOverFlowBin and not hasattr(histo, 'overflowApplied'):
       if addOverFlowBin.lower() == "upper" or addOverFlowBin.lower() == "both":
           nbins = histo.GetNbinsX()
           histo.SetBinContent(nbins, histo.GetBinContent(nbins) + histo.GetBinContent(nbins + 1))
@@ -146,6 +146,18 @@ class Plot:
     removeLock(resultFile)
     log.info("Plot " + plotName + " saved to cache")
 
+
+  #
+  # Load from cache
+  #
+  def loadFromCache(self, resultsDir):
+    allPlots = pickle.load(file(os.path.join(resultsDir, 'results.pkl')))
+    for s in self.histos.keys():
+      self.histos[s] = allPlots[self.name][s.name+s.texName]
+
+  #
+  # Get Yields
+  #
   def getYields(self, bin=None):
     if bin: return {s.name : h.GetBinContent(bin) for s,h in self.histos.iteritems()}
     else:   return {s.name : h.Integral()         for s,h in self.histos.iteritems()}
@@ -211,8 +223,8 @@ class Plot:
   #
   # Adding systematics to MC (assuming MC is first in the stack list)
   #
-  def getSystematicBand(self, dir, systematics, linearSystematics):
-    allPlots = pickle.load(file(os.path.join(dir, 'results.pkl')))
+  def getSystematicBand(self, systematics, linearSystematics, resultsDir):
+    allPlots = pickle.load(file(os.path.join(resultsDir, 'results.pkl')))
 
     def sumHistos(list):
       sum = list[0].Clone()
@@ -227,8 +239,9 @@ class Plot:
       if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
         h = allPlots[plotName][histName]
-        if h.Integral()==0: log.warning("Found empty histogram %s in %s/results.pkl", h.GetName(), dir)
+        if h.Integral()==0: log.warning("Found empty histogram %s in %s/results.pkl. Please rerun with --runSys option first.", h.GetName(), resultsDir)
         self.addOverFlowBin1D(h, self.overflowBin)
+        self.normalizeBinWidth(h, self.normBinWidth)
 
       histos_summed[sys] = sumHistos([allPlots[plotName][histName] for histName in histNames])
       # TODO: need to scale something?
@@ -246,15 +259,18 @@ class Plot:
 
     # Adding the systematics in quadrature
     for k in h_sys.keys():
-      for ib in range( 1 + h_rel_err.GetNbinsX() ):
+      for ib in range(h_rel_err.GetNbinsX()+1):
+        if ib==1 and histos_summed[None].GetBinContent(ib): print k, (h_sys[k].GetBinContent(ib)/2)/histos_summed[None].GetBinContent(ib)
         h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + (h_sys[k].GetBinContent(ib)/2)**2 )
 
-    for k in linearSystematics:
-      for ib in range( 1 + h_rel_err.GetNbinsX() ):
-        h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + (linearSystematics[k])**2 )
+    for sampleFilter, unc in linearSystematics.values():
+      for ib in range(h_rel_err.GetNbinsX()+1):
+        if sampleFilter: uncertainty = unc*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
+        else:            uncertainty = unc*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems()])
+        h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + uncertainty**2)
 
-    for ib in range( 1 + h_rel_err.GetNbinsX() ):
-      h_rel_err.SetBinContent(ib, sqrt( h_rel_err.GetBinContent(ib) ) )
+    for ib in range(h_rel_err.GetNbinsX()+1):
+      h_rel_err.SetBinContent(ib, sqrt(h_rel_err.GetBinContent(ib)))
 
     # Divide by the summed hist to get relative errors
     h_rel_err.Divide(histos_summed[None])
@@ -303,6 +319,7 @@ class Plot:
           ratioModifications = [],
           systematics = {},
           linearSystematics = {},
+          resultsDir = None,
           ):
     ''' yRange: 'auto' (default) or [low, high] where low/high can be 'auto'
         extensions: ["pdf", "png", "root"] (default)
@@ -321,11 +338,14 @@ class Plot:
     default_widths.update(widths)
 
     # Make sure ratio dict has all the keys by updating the default
-    if ratio is not None:
+    if ratio:
       defaultRatioStyle = {'num':1, 'den':0, 'logY':False, 'style':None, 'texY': 'obs./exp.', 'yRange': (0.5, 1.5), 'drawObjects':[]}
       if type(ratio)!=type({}): raise ValueError( "'ratio' must be dict (default: {}). General form is '%r'." % defaultRatioStyle)
       defaultRatioStyle.update(ratio)
       ratio = defaultRatioStyle
+
+    # If a results directory is given, we can load the histograms from former runs
+    if resultsDir: self.loadFromCache(resultsDir)
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
@@ -369,12 +389,12 @@ class Plot:
     else:                legendColumns, legend = 1, legend
 
     #Calculate legend coordinates in gPad coordinates
-    if legend is not None:
+    if legend:
       if legend=="auto": legendCoordinates = (0.50,0.9-0.05*sum(map(len, histos)),0.92,0.9)
       else:              legendCoordinates = legend
 
     #Avoid overlap with the legend
-    if (yRange=="auto" or yRange[1]=="auto") and (legend is not None):
+    if (yRange=="auto" or yRange[1]=="auto") and legend:
       scaleFactor = 1
       # Get x-range and y
       legendMaskedArea = getLegendMaskedArea(legendCoordinates, canvas.topPad)
@@ -425,17 +445,18 @@ class Plot:
 
     canvas.topPad.RedrawAxis()
 
-    boxes, ratioBoxes      = plot.getSystematicBand(os.path.join(baseDir, args.channel, args.selection), systematics, linearSystematics)
-    drawObjects           += boxes
-    ratio['drawObjects']  += ratioBoxes
+    boxes, ratioBoxes      = self.getSystematicBand(systematics, linearSystematics, resultsDir)
+    if len(systematics) or len(linearSystematics):
+      drawObjects                     += boxes
+      if ratio: ratio['drawObjects']  += ratioBoxes
 
-    if legend is not None: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
+    if legend: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
     for o in drawObjects:
       try:    o.Draw()
       except: log.debug( "drawObjects has something I can't Draw(): %r", o)
 
     # Make a ratio plot
-    if ratio is not None:
+    if ratio:
       canvas.bottomPad.cd()
       num = histos[ratio['num']][0]
       den = histos[ratio['den']][0]
@@ -443,7 +464,7 @@ class Plot:
       h_ratio = num.Clone()
       h_ratio.Divide(den)
 
-      if ratio['style'] is not None: ratio['style'](h_ratio)
+      if ratio['style']: ratio['style'](h_ratio)
 
       h_ratio.GetXaxis().SetTitle(self.texX)
       h_ratio.GetYaxis().SetTitle(ratio['texY'])
