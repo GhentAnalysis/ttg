@@ -24,38 +24,13 @@ log = getLogger(args.logLevel)
 import socket
 baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
 
-#
-# Defining systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
-#
-systematics = {}
-for i in ('Up', 'Down'):
-  systematics['pu'+i]       = [('puWeight',      'puWeight'+i)]
-  systematics['phSF'+i]     = [('phWeight',      'phWeight'+i)]
-  systematics['lSF'+i]      = [('lWeight',       'lWeight'+i)]
-  systematics['trigger'+i]  = [('triggerWeight', 'triggerWeight'+i)]
-  systematics['bTagl'+i]    = [('bTagWeight',    'bTagWeightl'+i)]
-  systematics['bTagb'+i]    = [('bTagWeight',    'bTagWeightb'+i)]
-  systematics['JEC'+i]      = [('njets',         'njets_JEC'+i),     ('dbjets',    'dbjets_JEC'+i)]
-  systematics['JER'+i]      = [('njets',         'njets_JER'+i),     ('dbjets',    'dbjets_JER'+i)]
 
-linearSystematics = {}
-linearSystematics['lumi'] = (None, 2.5)
-#linearSystematics['TTGamma'] = (['TTGamma'], 2.5)]
-
+#
+# Systematics
+#
+from ttg.plots.systematics import systematics, linearSystematics, applySysToTree, applySysToString
 if args.sys=='None': args.sys=None
 if not (args.runSys or args.showSys): systematics = {}
-
-
-# Function to apply the systematic to the tre
-def applySysToString(string):
-  for i in systematics[args.sys]:
-    var, sysVar = i
-    string = string.replace(var, sysVar)
-
-def applySysToTree(tree):
-  for i in systematics[args.sys]:
-    var, sysVar = i
-    setattr(tree, var, getattr(tree, sysVar))
 
 
 
@@ -127,39 +102,13 @@ randomCone  = args.tag.count('randomConeCheck')
 #
 # Create stack
 #
-if args.tag.count('split'):                            stackFile = 'split'
-elif args.tag.count('ttbar'):                          stackFile = 'onlyttbar'
-elif args.tag.count('matchCombine'):                   stackFile = 'matchCombined'
-elif args.tag.count('match'):                          stackFile = 'match'
-elif args.tag.count('promptCombine'):                  stackFile = 'promptCombined'
-elif args.tag.count('prompt'):                         stackFile = 'prompt'
-elif args.tag.count('DYLO'):                           stackFile = 'DY_LO'
-elif args.tag.count('sigmaIetaIeta-compareChannels'):  stackFile = 'sigmaIetaIeta-compareChannels'
-elif args.tag.count('randomConeCheck-compareChannels'):stackFile = 'randomConeCheck-compareChannels'
-elif args.tag.count('hadronicPhoton-compareChannels'): stackFile = 'hadronicPhoton-compareChannels'
-elif args.tag.count('genuinePhoton-compareChannels'):  stackFile = 'genuinePhoton-compareChannels'
-elif args.tag.count('passSigmaIetaIetaMatch'):         stackFile = 'passSigmaIetaIetaMatch'
-elif args.tag.count('failSigmaIetaIetaMatch'):         stackFile = 'failSigmaIetaIetaMatch'
-elif args.tag.count('passSigmaIetaIeta'):              stackFile = 'passSigmaIetaIeta'
-elif args.tag.count('failSigmaIetaIeta'):              stackFile = 'failSigmaIetaIeta'
-elif args.tag.count('sigmaIetaIetaMatchMC'):           stackFile = 'sigmaIetaIetaMatchMC'
-elif args.tag.count('sigmaIetaIetaMC-evtType0'):       stackFile = 'sigmaIetaIeta-ttbar-eventType0'
-elif args.tag.count('sigmaIetaIetaMC-evtType1'):       stackFile = 'sigmaIetaIeta-ttbar-eventType1'
-elif args.tag.count('sigmaIetaIetaMC-evtType2'):       stackFile = 'sigmaIetaIeta-ttbar-eventType2'
-elif args.tag.count('sigmaIetaIetaMC-hadronicPhoton'): stackFile = 'sigmaIetaIeta-ttbar-hadronicPhoton'
-elif args.tag.count('sigmaIetaIetaMC'):
-  if args.tag.count('powheg'):                         stackFile = 'sigmaIetaIeta-ttpow'
-  else:                                                stackFile = 'sigmaIetaIeta-ttbar'
-elif args.tag.count('sigmaIetaIetaQCD-nonprompt'):     stackFile = 'sigmaIetaIeta-QCD-nonprompt'
-elif args.tag.count('sigmaIetaIetaQCD-evtType0'):      stackFile = 'sigmaIetaIeta-QCD-eventType0'
-elif args.tag.count('sigmaIetaIetaQCD-evtType1'):      stackFile = 'sigmaIetaIeta-QCD-eventType1'
-elif args.tag.count('sigmaIetaIetaQCD-evtType2'):      stackFile = 'sigmaIetaIeta-QCD-eventType2'
-elif args.tag.count('sigmaIetaIetaQCD'):               stackFile = 'sigmaIetaIeta-QCD'
-elif args.tag.count('randomConeCheckMatchMC'):         stackFile = 'randomConeCheckMatchMC'
-elif args.tag.count('randomConeCheck'):                stackFile = 'randomConeCheck'
-elif args.tag.count('sigmaIetaIeta'):                  stackFile = 'sigmaIetaIeta'
-elif args.tag.count('powheg'):                         stackFile = 'powheg'
-else:                                                  stackFile = 'default'
+import glob
+stackFile = 'default'
+for f in sorted(glob.glob("../samples/data/*.stack")):
+  stackName = os.path.basename(f).split('.')[0]
+  if args.tag.count(stackName):
+    stackFile = stackName
+    break
 
 log.info('Using stackFile ' + stackFile)
 
