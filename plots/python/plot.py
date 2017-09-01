@@ -151,9 +151,12 @@ class Plot:
   # Load from cache
   #
   def loadFromCache(self, resultsDir):
-    allPlots = pickle.load(file(os.path.join(resultsDir, 'results.pkl')))
+    resultsFile = os.path.join(resultsDir, 'results.pkl')
+    waitForLock(resultsFile)
+    allPlots = pickle.load(file(resultsFile))
     for s in self.histos.keys():
       self.histos[s] = allPlots[self.name][s.name+s.texName]
+    removeLock(resultsFile)
 
   #
   # Get Yields
@@ -224,7 +227,10 @@ class Plot:
   # Adding systematics to MC (assuming MC is first in the stack list)
   #
   def getSystematicBand(self, systematics, linearSystematics, resultsDir):
-    allPlots = pickle.load(file(os.path.join(resultsDir, 'results.pkl')))
+    resultsFile = os.path.join(resultsDir, 'results.pkl')
+    waitForLock(resultsFile)
+    allPlots = pickle.load(file(resutsFile))
+    removeLock(resultsFile)
 
     def sumHistos(list):
       sum = list[0].Clone()
@@ -260,7 +266,13 @@ class Plot:
     # Adding the systematics in quadrature
     for k in h_sys.keys():
       for ib in range(h_rel_err.GetNbinsX()+1):
-        if ib==1 and histos_summed[None].GetBinContent(ib): print k, (h_sys[k].GetBinContent(ib)/2)/histos_summed[None].GetBinContent(ib)
+        if ib==1 and histos_summed[None].GetBinContent(ib): 
+          print k
+          print h_sys[k].GetBinContent(ib)
+          print histos_summed[None].GetBinContent(ib)
+          print histos_summed[k+'Up'].GetBinContent(ib)
+          print histos_summed[k+'Down'].GetBinContent(ib)
+          print
         h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + (h_sys[k].GetBinContent(ib)/2)**2 )
 
     for sampleFilter, unc in linearSystematics.values():
