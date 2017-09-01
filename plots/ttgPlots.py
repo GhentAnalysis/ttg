@@ -38,16 +38,22 @@ for i in ('Up', 'Down'):
   systematics['JEC'+i]      = [('njets',         'njets_JEC'+i),     ('dbjets',    'dbjets_JEC'+i)]
   systematics['JER'+i]      = [('njets',         'njets_JER'+i),     ('dbjets',    'dbjets_JER'+i)]
 
-linearSystematics = {}:
-  linearSystematics['lumi'] = [('all', 2.5)]
+linearSystematics = {}
+linearSystematics['lumi'] = (None, 2.5)
+#linearSystematics['TTGamma'] = (['TTGamma'], 2.5)]
 
 if args.sys=='None': args.sys=None
 if not (args.runSys or args.showSys): systematics = {}
 
 
 # Function to apply the systematic to the tre
-def applySys(sys, tree):
-  for i in systematics[sys]:
+def applySysToString(string):
+  for i in systematics[args.sys]:
+    var, sysVar = i
+    string = string.replace(var, sysVar)
+
+def applySysToTree(tree):
+  for i in systematics[args.sys]:
     var, sysVar = i
     setattr(tree, var, getattr(tree, sysVar))
 
@@ -277,6 +283,7 @@ if args.showSys:
                 histModifications = histModifications,
                 systematics = systematics,
                 linearSystematics = linearSystematics,
+                resultsDir =  os.path.join(baseDir, args.channel, args.selection),
       )
 
   exit(0)
@@ -295,6 +302,8 @@ if args.showSys:
 
 cutString, passingFunctions = cutInterpreter.cutString(args.selection)
 if not cutString: cutString = '(1)'
+if args.sys:      cutString = applySysToString(cutString)
+
 if args.channel=="ee":   cutString += '&&isEE'
 if args.channel=="mumu": cutString += '&&isMuMu'
 if args.channel=="emu":  cutString += '&&isEMu'
@@ -337,6 +346,15 @@ for sample in sum(stack, []):
   c.photonMva           = phoMva
   for i in sample.eventLoop(cutString):
     c.GetEntry(i)
+
+    # Note: photon SF is 0 when pt < 20 GeV
+    if c.QCD:
+      c.lWeight = 1.
+      c.lTrackWeight = 1.
+      c.triggerWeight = 1.
+    elif not sample.isData:
+      if args.sys: applySysToTree(c)
+
     if not passingFunctions(c):                                     continue
     if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
     if phoCBfull and not c._phCutBasedMedium[c.ph]:                 continue
@@ -348,14 +366,6 @@ for sample in sum(stack, []):
     if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
     if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
     if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
-
-    # Note: photon SF is 0 when pt < 20 GeV
-    if c.QCD:
-      c.lWeight = 1.
-      c.lTrackWeight = 1.
-      c.triggerWeight = 1.
-    elif not sample.isData:
-      if args.sys: applySys(args.sys, c)
 
     eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale
 
