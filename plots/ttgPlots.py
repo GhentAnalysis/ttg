@@ -293,7 +293,7 @@ for plot in plots:
     extraArgs['linearSystematics'] = linearSystematics
     extraArgs['resultsDir']        = os.path.join(baseDir, args.channel, args.selection)
 
-  if args.channel!='noData'::
+  if args.channel!='noData':
     extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
 
   if (sigmaieta or randomCone or args.tag.count('compareChannels')):
