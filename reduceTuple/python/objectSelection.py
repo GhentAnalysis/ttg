@@ -168,19 +168,27 @@ def isGoodJet(tree, index):
   return True
 
 def goodJets(t, n):
-  allGoodJets    = [i for i in xrange(ord(t._nJets)) if isGoodJet(t, i)]
-  t.jets         = [i for i in allGoodJets if t._jetPt[i] > 30]
-  t.jets_JECUp   = [i for i in allGoodJets if t._jetPt_JECUp[i] > 30]
-  t.jets_JECDown = [i for i in allGoodJets if t._jetPt_JECDown[i] > 30]
-  t.jets_JERUp   = [i for i in allGoodJets if t._jetPt_JERUp[i] > 30]
-  t.jets_JERDown = [i for i in allGoodJets if t._jetPt_JERDown[i] > 30]
+  allGoodJets     = [i for i in xrange(ord(t._nJets)) if isGoodJet(t, i)]
+  t.jets          = [i for i in allGoodJets if t._jetPt[i] > 30]
+  t.jets_JECUp    = [i for i in allGoodJets if t._jetPt_JECUp[i] > 30]
+  t.jets_JECDown  = [i for i in allGoodJets if t._jetPt_JECDown[i] > 30]
+  t.jets_JERUp    = [i for i in allGoodJets if t._jetPt_JERUp[i] > 30]
+  t.jets_JERDown  = [i for i in allGoodJets if t._jetPt_JERDown[i] > 30]
   n.njets         = len(t.jets)
   n.njets_JECUp   = len(t.jets_JECUp)
   n.njets_JECDown = len(t.jets_JECDown)
   n.njets_JERUp   = len(t.jets_JERUp)
   n.njets_JERDown = len(t.jets_JERDown)
-  n.j1    = t.jets[0] if n.njets > 0 else -1
-  n.j2    = t.jets[1] if n.njets > 1 else -1
+  n.j1            = t.jets[0]         if n.njets > 0         else -1
+  n.j1_JECUp      = t.jets_JECUp[0]   if n.njets_JECUp > 0   else -1
+  n.j1_JECDown    = t.jets_JECDown[0] if n.njets_JECDown > 0 else -1
+  n.j1_JERUp      = t.jets_JERUp[0]   if n.njets_JERUp > 0   else -1
+  n.j1_JERDown    = t.jets_JERDown[0] if n.njets_JERDown > 0 else -1
+  n.j2            = t.jets[1]         if n.njets > 1         else -1
+  n.j2_JECUp      = t.jets_JECUp[1]   if n.njets_JECUp > 1   else -1
+  n.j2_JECDown    = t.jets_JECDown[1] if n.njets_JECDown > 1 else -1
+  n.j2_JERUp      = t.jets_JERUp[1]   if n.njets_JERUp > 1   else -1
+  n.j2_JERDown    = t.jets_JERDown[1] if n.njets_JERDown > 1 else -1
 
 def bJets(t, n):
   btagWP = 0.8484

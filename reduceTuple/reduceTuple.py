@@ -100,7 +100,7 @@ newBranches += ['njets/I','j1/I','j2/I','nbjets/I','dbjets/I']
 newBranches += ['matchedGenPh/I', 'matchedGenEle/I']
 
 if not sample.isData:
-  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'dbjets_' + sys +'/I']
+  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'dbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
   for sys in ['', 'Up', 'Down']:                       newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
   for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:     newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
 # for bmult in ['0','1','2']:                  # if 1c is used
