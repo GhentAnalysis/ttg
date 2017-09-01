@@ -265,8 +265,8 @@ class Plot:
 
     for sampleFilter, unc in linearSystematics.values():
       for ib in range(h_rel_err.GetNbinsX()+1):
-        if sampleFilter: uncertainty = unc*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
-        else:            uncertainty = unc*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems()])
+        if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
+        else:            uncertainty = unc/100*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems()])
         h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + uncertainty**2)
 
     for ib in range(h_rel_err.GetNbinsX()+1):
