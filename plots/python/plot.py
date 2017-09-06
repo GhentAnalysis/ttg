@@ -258,8 +258,8 @@ class Plot:
     for sys in sysList:
       print sys
       print histos_summed[None].GetBinContent(1)
-      print histos_summed[k+'Up'].GetBinContent(1)
-      print histos_summed[k+'Down'].GetBinContent(1)
+      print histos_summed[sys+'Up'].GetBinContent(1)
+      print histos_summed[sys+'Down'].GetBinContent(1)
       print
       h_sys[sys] = histos_summed[sys+'Up'].Clone()
       h_sys[sys].Scale(-1)
