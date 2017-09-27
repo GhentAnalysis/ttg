@@ -217,13 +217,9 @@ if not args.showSys:
   if args.channel=="emu":  cutString += '&&isEMu'
 
   if   args.tag.count('QCD'):       reduceType = 'phoCB'
-  elif args.tag.count('HN'):        reduceType = 'eleHN-phoCB'
-  elif args.tag.count('FO'):        reduceType = 'eleFO-phoCB'
-  elif args.tag.count('CBVeto'):    reduceType = 'eleCBVeto-phoCB'
   elif args.tag.count('CBLoose'):   reduceType = 'eleCBLoose-phoCB'
-  elif args.tag.count('CBMedium'):  reduceType = 'eleCBMedium-phoCB'
-  elif args.tag.count('SusyLoose'): reduceType = 'eleSusyLoose-phoCB'
-  else:                             reduceType = 'eleCB-phoCB'
+  elif args.tag.count('CBTight'):   reduceType = 'eleCB-phoCB'
+  else:                             reduceType = 'eleSusyLoose-phoCB'
 
   from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
   from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
