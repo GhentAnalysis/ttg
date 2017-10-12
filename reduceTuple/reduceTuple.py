@@ -12,7 +12,7 @@ import os, argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--sample',         action='store',      default=None)
-argParser.add_argument('--type',           action='store',      default='eleCB-phoCB')
+argParser.add_argument('--type',           action='store',      default='eleSusyLoose-phoCB')
 argParser.add_argument('--subJob',         action='store',      default=None)
 argParser.add_argument('--QCD',            action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
@@ -103,9 +103,6 @@ if not sample.isData:
   for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'dbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
   for sys in ['', 'Up', 'Down']:                       newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
   for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:     newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
-# for bmult in ['0','1','2']:                  # if 1c is used
-#   for sys in ['', 'Up', 'Down']:
-#     newBranches += ['bTagWeightCSV' + bmult + sys + '/F', 'bTagWeight' + bmult + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -122,6 +119,7 @@ c.cbMedium            = args.type.count('eleCBMedium')
 c.cbVeto              = args.type.count('eleCBVeto')
 c.susyLoose           = args.type.count('eleSusyLoose')
 c.QCD                 = args.QCD
+
 #
 # Loop over the tree and make new vars
 #
@@ -175,18 +173,6 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
       setattr(newVars, 'bTagWeightCSV' + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = True))
       setattr(newVars, 'bTagWeight'    + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = False))
-
-    # method 1c
-    #for sys in ['','Up','Down']:
-    #  if sys == 'Up':   sysType = 'up'
-    #  if sys == 'Down': sysType = 'down'
-    #  else:             sysType = 'central'
-    #  btagWeightsCSV = btagSF.getBtagSF_1c(sysType, c, c.bjets, isCSV=True)    # returns (0j weight, 1j weight, 2j weight)
-    #  btagWeights    = btagSF.getBtagSF_1c(sysType, c, c.dbjets, isCSV=False)
-    #  print btagWeights, btagWeightsCSV
-    #  for bmult in range(3):
-    #    setattr(newVars, 'bTagWeightCSV' + str(bmult) + sys, btagWeightsCSV[bmult])
-    #    setattr(newVars, 'bTagWeight'    + str(bmult) + sys, btagWeights[bmult])
 
     trigWeight, trigErr        = triggerEff.getSF(c, l1, l2) if len(c.leptons) > 1 else (1., 0.)
     newVars.triggerWeight      = trigWeight
