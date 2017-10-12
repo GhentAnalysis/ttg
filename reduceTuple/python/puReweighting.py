@@ -9,40 +9,33 @@ from ttg.tools.helpers import getObjFromFile
 
 dataDir = '$CMSSW_BASE/src/ttg/reduceTuple/data/puReweightingData/'
 
-def extendHistoTo(h, hc):
-  "Extend histo h to nbins of hc"
-  res = ROOT.TH1D(h.GetName()+"_extended",h.GetTitle(), hc.GetNbinsX(),hc.GetXaxis().GetXmin(),hc.GetXaxis().GetXmax())
-  assert  hc.GetXaxis().GetXmin()==h.GetXaxis().GetXmin() \
-          and hc.GetNbinsX()==hc.GetXaxis().GetXmax()-hc.GetXaxis().GetXmin() \
-          and h.GetNbinsX()==h.GetXaxis().GetXmax()-h.GetXaxis().GetXmin(), \
-          "Error extending histogram! Check axis ranges!"
-  res.Reset()
-  for i in range(min(hc.GetNbinsX(), h.GetNbinsX())):
-      res.SetBinContent(i, h.GetBinContent(i))
-  return res
-
-#Define a functor that returns a reweighting-function according to the era
-def getReweightingFunction(data="PU_2100_XSecCentral", mc="Summer16"):
+#Define a functio that returns a reweighting-function according to the data 
+def getReweightingFunction(data="PU_2016_36000_XSecCentral", useWillem=False):
 
   # Data
-  fileNameData = dataDir + "%s.root" % data
-
-  histoData = getObjFromFile(fileNameData, 'pileup')
+  histoData = getObjFromFile(dataDir + data + '.root', 'pileup')
   histoData.Scale(1./histoData.Integral())
-  log.info("Loaded 'pileup' from data file %s", fileNameData )
 
   # MC
-  if mc=='Summer16': mcProfile = extendHistoTo(getObjFromFile(dataDir + "MCProfile_Summer16.root", 'pileup'), histoData)
-  else:              raise ValueError( "Don't know about MC PU profile %s" %mc )
-
+  mcProfile = ROOT.TH1D('mc', 'mc', 100, 0, 100)
+  import sys, os
+  sys.stdout = open(os.devnull, 'w')
+  from SimGeneral.MixingModule.mix_2016_25ns_Moriond17MC_PoissonOOTPU_cfi import mix
+  sys.stdout = sys.__stdout__
+  for i,value in enumerate(mix.input.nbPileupEvents.probValue): mcProfile.SetBinContent(i, value)
   mcProfile.Scale(1./mcProfile.Integral())
 
   # Create reweighting histo
-  reweightingHisto = histoData.Clone( '_'.join(['reweightingHisto', data, mc]) )
+  reweightingHisto = histoData.Clone('reweightingHisto')
   reweightingHisto.Divide(mcProfile)
+  if useWillem: reweightingHisto = getObjFromFile(dataDir+'puw_nTrueInt_Moriond2017_36p5fb_Summer16_69mb_central.root' , 'puw') # temporary debug
+
+#  for i in range(100):
+#    print i+.3, reweightingHisto.GetBinContent(reweightingHisto.FindBin(i))
 
   # Define reweightingFunc
-  def reweightingFunc(nvtx):
-      return reweightingHisto.GetBinContent(reweightingHisto.FindBin(nvtx))
-
+  def reweightingFunc(nTrueInt):
+    return reweightingHisto.GetBinContent(reweightingHisto.FindBin(nTrueInt))
   return reweightingFunc
+
+#puReweighting =  getReweightingFunction(data="PU_2016_36000_XSecCentral", mc="Moriond2017", useWillem=False)
