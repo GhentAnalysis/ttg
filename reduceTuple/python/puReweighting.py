@@ -22,7 +22,7 @@ def getReweightingFunction(data="PU_2016_36000_XSecCentral", useWillem=False):
   sys.stdout = open(os.devnull, 'w')
   from SimGeneral.MixingModule.mix_2016_25ns_Moriond17MC_PoissonOOTPU_cfi import mix
   sys.stdout = sys.__stdout__
-  for i,value in enumerate(mix.input.nbPileupEvents.probValue): mcProfile.SetBinContent(i, value)
+  for i,value in enumerate(mix.input.nbPileupEvents.probValue): mcProfile.SetBinContent(i+1, value)
   mcProfile.Scale(1./mcProfile.Integral())
 
   # Create reweighting histo
@@ -30,12 +30,7 @@ def getReweightingFunction(data="PU_2016_36000_XSecCentral", useWillem=False):
   reweightingHisto.Divide(mcProfile)
   if useWillem: reweightingHisto = getObjFromFile(dataDir+'puw_nTrueInt_Moriond2017_36p5fb_Summer16_69mb_central.root' , 'puw') # temporary debug
 
-#  for i in range(100):
-#    print i+.3, reweightingHisto.GetBinContent(reweightingHisto.FindBin(i))
-
   # Define reweightingFunc
   def reweightingFunc(nTrueInt):
     return reweightingHisto.GetBinContent(reweightingHisto.FindBin(nTrueInt))
   return reweightingFunc
-
-#puReweighting =  getReweightingFunction(data="PU_2016_36000_XSecCentral", mc="Moriond2017", useWillem=False)
