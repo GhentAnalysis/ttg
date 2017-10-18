@@ -14,6 +14,9 @@ argParser.add_argument('--runSys',         action='store_true', default=False)
 argParser.add_argument('--showSys',        action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
+argParser.add_argument('--runWillem',      action='store_true', default=False)
+argParser.add_argument('--noPU',      action='store_true', default=False)
+argParser.add_argument('--onlyPU',      action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
 args = argParser.parse_args()
 
@@ -56,6 +59,8 @@ if not args.isChild and args.selection is None:
 
   if args.tag.count('QCD'):
     selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
+  if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
+    selections = ['ll-looseLeptonVeto-mll40', 'll-looseLeptonVeto-mll40-offZ', 'll-looseLeptonVeto-mll40-offZ-njet2p', 'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p']
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('QCD'):             channels = ['noData']
@@ -96,6 +101,8 @@ randomCone  = args.tag.count('randomConeCheck')
 
 
 
+from ttg.reduceTuple.puReweighting import getReweightingFunction
+puReweighting = getReweightingFunction(data="PU_2016_36000_XSecCentral", useWillem=args.runWillem)
 
 
 
@@ -136,28 +143,31 @@ if randomCone:
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)',lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph],   (20,0,2)))
 
 else:
-  plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
+  if args.selection.count('llg') or args.selection.count('pho'):
+    plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
 
   plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
   plots.append(Plot('nVertex',                  'vertex multiplicity',                  lambda c : ord(c._nVertex),                                                         (50, 0, 50)))
+  plots.append(Plot('nTrueInt',                 'nTrueInt',                             lambda c : c._nTrueInt,                                                             (50, 0, 50)))
   plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),              (3, 0.5, 3.5)))
-  plots.append(Plot('photon_pt',                'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                                           (20,15,115)))
-  plots.append(Plot('photon_eta',               '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                                     (15,0,2.5)))
-  plots.append(Plot('photon_phi',               '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                                          (10,-pi,pi)))
-  plots.append(Plot('photon_mva',               '#gamma-MVA',                           lambda c : c._phMva[c.ph],                                                          (20,-1,1)))
-  plots.append(Plot('photon_chargedIso',        'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             (20,0,20)))
-  plots.append(Plot('photon_chargedIso_NO',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             (20,0,20), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_bins',   'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if sigmaieta or randomCone else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_bins_NO','chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if sigmaieta or randomCone else 'Events / GeV'), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_small',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             (80,0,20)))
-  plots.append(Plot('photon_chargedIso_small_NO','chargedIso(#gamma) (GeV)',            lambda c : c._phChargedIsolation[c.ph],                                             (80,0,20), overflowBin=None))
-  plots.append(Plot('photon_relChargedIso',     'chargedIso(#gamma)/p_{T}(#gamma)',     lambda c : c._phChargedIsolation[c.ph]/c._phPt[c.ph],                               (20,0,2)))
-  plots.append(Plot('photon_neutralIso',        'neutralIso(#gamma) (GeV)',             lambda c : c._phNeutralHadronIsolation[c.ph],                                       (25,0,5)))
-  plots.append(Plot('photon_photonIso',         'photonIso(#gamma) (GeV)',              lambda c : c._phPhotonIsolation[c.ph],                                              (32,0,8)))
-  plots.append(Plot('photon_SigmaIetaIeta',     '#sigma_{i#etai#eta}(#gamma)',          lambda c : c._phSigmaIetaIeta[c.ph],                                                (20,0,0.04)))
-  plots.append(Plot('photon_hadOverEm',         'hadronicOverEm(#gamma)',               lambda c : c._phHadronicOverEm[c.ph],                                               (20,0,.025)))
-  if not args.tag.count('QCD'):
-    plots.append(Plot('photon_randomConeIso',   'random cone chargedIso(#gamma) (Gev)', lambda c : c._phRandomConeChargedIsolation[c.ph],                                   (20,0,20)))
+  if args.selection.count('llg') or args.selection.count('pho'):
+    plots.append(Plot('photon_pt',                'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                                           (20,15,115)))
+    plots.append(Plot('photon_eta',               '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                                     (15,0,2.5)))
+    plots.append(Plot('photon_phi',               '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                                          (10,-pi,pi)))
+    plots.append(Plot('photon_mva',               '#gamma-MVA',                           lambda c : c._phMva[c.ph],                                                          (20,-1,1)))
+    plots.append(Plot('photon_chargedIso',        'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             (20,0,20)))
+    plots.append(Plot('photon_chargedIso_NO',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             (20,0,20), overflowBin=None))
+    plots.append(Plot('photon_chargedIso_bins',   'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if sigmaieta or randomCone else 'Events / GeV')))
+    plots.append(Plot('photon_chargedIso_bins_NO','chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if sigmaieta or randomCone else 'Events / GeV'), overflowBin=None))
+    plots.append(Plot('photon_chargedIso_small',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                                             (80,0,20)))
+    plots.append(Plot('photon_chargedIso_small_NO','chargedIso(#gamma) (GeV)',            lambda c : c._phChargedIsolation[c.ph],                                             (80,0,20), overflowBin=None))
+    plots.append(Plot('photon_relChargedIso',     'chargedIso(#gamma)/p_{T}(#gamma)',     lambda c : c._phChargedIsolation[c.ph]/c._phPt[c.ph],                               (20,0,2)))
+    plots.append(Plot('photon_neutralIso',        'neutralIso(#gamma) (GeV)',             lambda c : c._phNeutralHadronIsolation[c.ph],                                       (25,0,5)))
+    plots.append(Plot('photon_photonIso',         'photonIso(#gamma) (GeV)',              lambda c : c._phPhotonIsolation[c.ph],                                              (32,0,8)))
+    plots.append(Plot('photon_SigmaIetaIeta',     '#sigma_{i#etai#eta}(#gamma)',          lambda c : c._phSigmaIetaIeta[c.ph],                                                (20,0,0.04)))
+    plots.append(Plot('photon_hadOverEm',         'hadronicOverEm(#gamma)',               lambda c : c._phHadronicOverEm[c.ph],                                               (20,0,.025)))
+    plots.append(Plot('phJetDeltaR',              '#Delta R(#gamma, j)',                  lambda c : c.phJetDeltaR,                                                           (20,0,5)))
+  if args.selection.count('ll'):
     plots.append(Plot('l1_pt',                  'p_{T}(l_{1}) (GeV)',                   lambda c : c._lPt[c.l1],                                                            (20,0,200)))
     plots.append(Plot('l1_eta',                 '|#eta|(l_{1})',                        lambda c : abs(c._lEta[c.l1]),                                                      (15,0,2.4)))
     plots.append(Plot('l1_phi',                 '#phi(l_{1})',                          lambda c : c._lPhi[c.l1],                                                           (10,-pi,pi)))
@@ -167,6 +177,8 @@ else:
     plots.append(Plot('l2_phi',                 '#phi(l_{2})',                          lambda c : c._lPhi[c.l2],                                                           (10,-pi,pi)))
     plots.append(Plot('l2_relIso',              'relIso(l_{2})',                        lambda c : c._relIso[c.l2],                                                         (10,0,0.12)))
     plots.append(Plot('dl_mass',                'm(ll) (GeV)',                          lambda c : c.mll,                                                                   (40,0,200)))
+  if args.selection.count('llg'):
+    plots.append(Plot('photon_randomConeIso',   'random cone chargedIso(#gamma) (Gev)', lambda c : c._phRandomConeChargedIsolation[c.ph],                                   (20,0,20)))
     plots.append(Plot('l1g_mass',               'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                                                  (40,0,200)))
     plots.append(Plot('l2g_mass',               'm(l_{2}#gamma) (GeV)',                 lambda c : c.ml2g,                                                                  (40,0,200)))
     plots.append(Plot('phoPt_over_dlg_mass',    'p_{T}(#gamma)/m(ll#gamma)',            lambda c : c._phPt[c.ph]/c.mllg,                                                    (40,0,2)))
@@ -175,7 +187,6 @@ else:
     plots.append(Plot('phL1DeltaR',             '#Delta R(#gamma, l_{1})',              lambda c : c.phL1DeltaR,                                                            (20,0,5)))
     plots.append(Plot('phL2DeltaR',             '#Delta R(#gamma, l_{2})',              lambda c : c.phL2DeltaR,                                                            (20,0,5)))
     plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',                  lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                         (20,0,5)))
-  plots.append(Plot('phJetDeltaR',              '#Delta R(#gamma, j)',                  lambda c : c.phJetDeltaR,                                                           (20,0,5)))
   plots.append(Plot('njets',                    'number of jets',                       lambda c : c.njets,                                                                 (8,0,8)))
   plots.append(Plot('nbtag',                    'number of medium b-tags (deepCSV)',    lambda c : c.dbjets,                                                                (4,0,4)))
   plots.append(Plot('j1_pt',                    'p_{T}(j_{1}) (GeV)',                   lambda c : c._jetPt[c.j1]                                 if c.j1 >= 0 else -1,     (30,0,300)))
@@ -191,7 +202,7 @@ else:
 
   if args.channel=='noData':
     plots.append(Plot('eventType',              'eventType',                            lambda c : c._ttgEventType,                                                           (9, 0, 9)))
-    if not args.tag.count('QCD'):
+    if args.tag.count('llg'):
       plots.append(Plot('genPhoton_pt',         'p_{T}(gen #gamma) (GeV)',              lambda c : c._gen_phPt[c._phMatchMCPhotonAN15165[c.ph]] if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1,     (10,10,110)))
       plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',                   lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165[c.ph]]) if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1, (15,0,2.5)))
 
@@ -216,10 +227,11 @@ if not args.showSys:
   if args.channel=="mumu": cutString += '&&isMuMu'
   if args.channel=="emu":  cutString += '&&isEMu'
 
-  if   args.tag.count('QCD'):       reduceType = 'phoCB'
-  elif args.tag.count('CBLoose'):   reduceType = 'eleCBLoose-phoCB'
-  elif args.tag.count('CBTight'):   reduceType = 'eleCB-phoCB'
-  else:                             reduceType = 'eleSusyLoose-phoCB'
+  if   args.tag.count('QCD'):                reduceType = 'phoCB'
+  elif args.tag.count('CBLoose'):            reduceType = 'eleCBLoose-phoCB'
+  elif args.tag.count('CBTight'):            reduceType = 'eleCB-phoCB'
+  elif args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose-phoCB'
+  elif args.tag.count('eleSusyLoose'):       reduceType = 'eleSusyLoose'
 
   from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
   from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
@@ -240,7 +252,7 @@ if not args.showSys:
     c.failSigmaIetaIeta = sample.texName.count('fail')
     c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
 
-
+    c.selectPhoton        = args.selection.count('llg')
     c.photonCutBased      = phoCB
     c.photonCutBasedTight = False
     c.photonMva           = phoMva
@@ -253,20 +265,25 @@ if not args.showSys:
       elif not sample.isData:
         if args.sys: applySysToTree(args.sys, c)
 
-      if not passingFunctions(c):                                     continue
-      if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20): continue
-      if phoCBfull and not c._phCutBasedMedium[c.ph]:                 continue
+      if not passingFunctions(c): continue
 
-      if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
-      if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
-      if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
+      if c.selectPhoton:
+        if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20):  continue
+        if phoCBfull and not c._phCutBasedMedium[c.ph]:                  continue
+        if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
+        if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
+        if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
 
-      if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
-      if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
-      if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
+        if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+        if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
+        if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
       # Note: photon SF is 0 when pt < 20 GeV
-      eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale
+      if not sample.isData: c.puWeight = puReweighting(c._nTrueInt)
+      else: c._nTrueInt = -1
+      if args.noPU: c.puWeight = 1.
+      eventWeight = 1. if sample.isData else (c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c.selectPhoton and c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale)
+      if args.onlyPU: eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*lumiScale
 
       for plot in plots+plots2D: plot.fill(sample, eventWeight)
 
