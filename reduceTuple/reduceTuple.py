@@ -17,6 +17,7 @@ argParser.add_argument('--subJob',         action='store',      default=None)
 argParser.add_argument('--QCD',            action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
+argParser.add_argument('--debug',          action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
 args = argParser.parse_args()
 
@@ -49,7 +50,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 sample     = getSampleFromList(sampleList, args.sample)
-c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'))
+c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug)
 lumiWeight = float(sample.xsec)*1000/sample.getTotalEvents() if not sample.isData else 1
 
 #
@@ -75,9 +76,9 @@ outputTree = sample.chain.CloneTree(0)
 # Initialize reweighting functions
 #
 from ttg.reduceTuple.puReweighting import getReweightingFunction
-puReweighting     = getReweightingFunction(data="PU_2016_36000_XSecCentral", mc="Summer16")
-puReweightingUp   = getReweightingFunction(data="PU_2016_36000_XSecUp",      mc="Summer16")
-puReweightingDown = getReweightingFunction(data="PU_2016_36000_XSecDown",    mc="Summer16")
+puReweighting     = getReweightingFunction(data="PU_2016_36000_XSecCentral")
+puReweightingUp   = getReweightingFunction(data="PU_2016_36000_XSecUp")
+puReweightingDown = getReweightingFunction(data="PU_2016_36000_XSecDown")
 
 from ttg.reduceTuple.leptonTrackingEfficiency import leptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import leptonSF as leptonSF_
