@@ -9,7 +9,8 @@ import ROOT
 
 special_cuts = {
     "pho":                 "(1)", # base string for QCD
-    "llg":                 "(1)", # base string
+    "ll":                  "(1)", # base string for dilep
+    "llg":                 "(1)", # base string for dilep+photon
     "looseLeptonVeto":     "looseLeptonVeto",
 
     "onZ":                 "abs(mll-91.1876)<15||!isEMu",
