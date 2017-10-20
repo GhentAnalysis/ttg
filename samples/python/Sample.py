@@ -53,6 +53,15 @@ class Sample:
       total += f.Get('blackJackAndHookers/hCounter').GetBinContent(1)
     return total
 
+  def getTrueInteractions(self):
+    trueInteractions = None
+    for f in self.listOfFiles:
+      f = ROOT.TFile(f)
+      if not trueInteractions: trueInteractions   = f.Get('blackJackAndHookers/nTrue')
+      else:                    trueInteractions.Add(f.Get('blackJackAndHookers/nTrue'))
+      trueInteractions.SetDirectory(0)
+    return trueInteractions
+
   # init the chain and return it
   def initTree(self, skimType='dilep', shortDebug=False, reducedType=None):
     if reducedType:
