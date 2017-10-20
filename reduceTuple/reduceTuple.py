@@ -182,4 +182,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   outputTree.Fill()
 outputTree.AutoSave()
+
+trueIntHist = sample.getTrueInteractions()
+outputFile.cd()
+trueIntHist.Write('nTrue')
 outputFile.Close()
