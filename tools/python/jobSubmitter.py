@@ -15,7 +15,10 @@ import os
 
 def launch(command, logfile, runLocal):
     if runLocal: os.system(command + ' &> ' + logfile + ' &')
-    else:        os.system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=10:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh")
+    else:        os.system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=10:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh &> .qsub.log")
+    with open('.qsub.log','r') as qsublog:
+      for l in qsublog:
+        if 'Invalid credential' in l: launch(command, logfile, runLocal)
 
 def submitJobs(script, subJobArg, subJobList, args, dropArgs = [], subLog=''):
   os.system("mkdir -p log")
