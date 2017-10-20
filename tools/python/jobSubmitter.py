@@ -1,7 +1,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-import os
+import os, time
 
 #
 # Job submitter for T2_BE_IIHE
@@ -18,7 +18,9 @@ def launch(command, logfile, runLocal):
     else:        os.system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=10:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh &> .qsub.log")
     with open('.qsub.log','r') as qsublog:
       for l in qsublog:
-        if 'Invalid credential' in l: launch(command, logfile, runLocal)
+        if 'Invalid credential' in l:
+          time.sleep(10)
+          launch(command, logfile, runLocal)
 
 def submitJobs(script, subJobArg, subJobList, args, dropArgs = [], subLog=''):
   os.system("mkdir -p log")
