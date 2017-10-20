@@ -14,7 +14,7 @@ ptBins.append([ptBorders[-1], -1])
 
 
 
-def toFlavourKey(pdgId):
+def toFlavorKey(pdgId):
   if abs(pdgId)==5:   return ROOT.BTagEntry.FLAV_B
   elif abs(pdgId)==4: return ROOT.BTagEntry.FLAV_C
   else:               return ROOT.BTagEntry.FLAV_UDSG
@@ -36,7 +36,7 @@ class btagEfficiency:
     self.calibCSV = ROOT.BTagCalibration("csvv2",   os.path.expandvars(self.scaleFactorFileCSV))
 
     # Get readers
-    #recommended measurements for different jet flavours given here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X#Data_MC_Scale_Factors
+    #recommended measurements for different jet flavors given here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X#Data_MC_Scale_Factors
     v_sys = getattr(ROOT, 'vector<string>')()
     v_sys.push_back('up')
     v_sys.push_back('down')
@@ -56,7 +56,7 @@ class btagEfficiency:
   def getMCEff(self, tree, index, isCSV):
     pt     = tree._jetPt[index]
     eta    = abs(tree._jetEta[index])
-    flavor = abs(tree._jetHadronFlavour[index])
+    flavor = abs(tree._jetHadronFlavor[index])
     for ptBin in ptBins:
       if pt>=ptBin[0] and (pt<ptBin[1] or ptBin[1]<0):
         for etaBin in etaBins:
@@ -72,15 +72,15 @@ class btagEfficiency:
   def getJetSF(self, tree, index, sys, isCSV):
     pt      = tree._jetPt[index]
     eta     = abs(tree._jetEta[index])
-    flavor  = abs(tree._jetHadronFlavour[index])
+    flavor  = abs(tree._jetHadronFlavor[index])
     if   sys == 'bUp'   and flavor>=4: sysType = 'up'
     elif sys == 'bDown' and flavor>=4: sysType = 'down'
     elif sys == 'lUp'   and flavor<=3: sysType = 'up'
     elif sys == 'lDown' and flavor<=3: sysType = 'down'
     elif sys == '':                    sysType = 'central'
     else:                              return 1.
-    if isCSV: return self.readerCSV.eval_auto_bounds(sysType, toFlavourKey(flavor), eta, pt)
-    else:     return self.reader.eval_auto_bounds(sysType, toFlavourKey(flavor), eta, pt)
+    if isCSV: return self.readerCSV.eval_auto_bounds(sysType, toFlavorKey(flavor), eta, pt)
+    else:     return self.reader.eval_auto_bounds(sysType, toFlavorKey(flavor), eta, pt)
  
 
   def mult(self, list):
