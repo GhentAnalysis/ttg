@@ -148,7 +148,7 @@ else:
   plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
   plots.append(Plot('nVertex',                  'vertex multiplicity',                  lambda c : ord(c._nVertex),                                                         (50, 0, 50)))
   plots.append(Plot('nTrueInt',                 'nTrueInt',                             lambda c : c._nTrueInt,                                                             (50, 0, 50)))
-  plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([photonSelector(c, i, c) for i in range(ord(c._nPh))]),              (4, -0.5, 3.5)))
+  plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([c._phCutBasedMedium[i] for i in range(ord(c._nPh))]),               (4, -0.5, 3.5)))
   if args.selection.count('llg') or args.selection.count('pho'):
     plots.append(Plot('photon_pt',                'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                                           (20,15,115)))
     plots.append(Plot('photon_eta',               '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                                     (15,0,2.5)))
