@@ -40,10 +40,12 @@ def looseLeptonSelector(tree, index):
 
 
 def electronMva(tree, index):
+  if not tree._lElectronPassEmu[index]: return False
   if tree._lEta[index] < 0.8: return tree._lElectronMva[index] > (0.941 if tree.eleMvaTight else 0.837)
   else:                       return tree._lElectronMva[index] > (0.899 if tree.eleMvaTight else 0.715)
 
 def electronSusyLoose(tree, index):
+  if not tree._lElectronPassEmu[index]: return False
   if(abs(tree._lEta[index]) < 0.8):     return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.48, -0.85)
   elif(abs(tree._lEta[index]) < 1.479): return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.67, -0.91)
   else:                                 return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.49, -0.83)
