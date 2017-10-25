@@ -16,6 +16,8 @@ argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--runWillem',      action='store_true', default=False)
 argParser.add_argument('--noPU',      action='store_true', default=False)
+argParser.add_argument('--puDown',      action='store_true', default=False)
+argParser.add_argument('--puUp',      action='store_true', default=False)
 argParser.add_argument('--onlyPU',      action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
 args = argParser.parse_args()
@@ -100,9 +102,6 @@ randomCone  = args.tag.count('randomConeCheck')
 
 
 
-
-from ttg.reduceTuple.puReweighting import getReweightingFunction
-puReweighting = getReweightingFunction(data="PU_2016_36000_XSecCentral", useWillem=args.runWillem)
 
 
 
@@ -238,6 +237,14 @@ if not args.showSys:
   for sample in sum(stack, []):
     if args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep')
+
+    if not sample.isData:
+      from ttg.reduceTuple.puReweighting import getReweightingFunction
+      if args.puDown: puWeights = 'PU_2016_36000_XSecDown'
+      elif args.puUp: puWeights = 'PU_2016_36000_XSecUp'
+      else:           puWeights = 'PU_2016_36000_XSecCentral'
+      puReweighting = getReweightingFunction(data=puWeights, useWillem=args.runWillem, useMC=sample.getTrueInteractions(reduced=True))
+
 
     c.QCD  = args.tag.count('QCD')
     c.data = sample.isData
