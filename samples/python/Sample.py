@@ -53,17 +53,17 @@ class Sample:
       total += f.Get('blackJackAndHookers/hCounter').GetBinContent(1)
     return total
 
-  def getTrueInteractions(self):
+  def getTrueInteractions(self, reduced=False):
     trueInteractions = None
     for f in self.listOfFiles:
       f = ROOT.TFile(f)
-      if not trueInteractions: trueInteractions   = f.Get('blackJackAndHookers/nTrue')
-      else:                    trueInteractions.Add(f.Get('blackJackAndHookers/nTrue'))
+      if not trueInteractions: trueInteractions   = f.Get('nTrue' if reduced else 'blackJackAndHookers/nTrue')
+      else:                    trueInteractions.Add(f.Get('nTrue' if reduced else 'blackJackAndHookers/nTrue'))
       trueInteractions.SetDirectory(0)
     return trueInteractions
 
   # init the chain and return it
-  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None):
+  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None):
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
@@ -71,9 +71,12 @@ class Sample:
       for s in self.addSamples:
         self.listOfFiles += glob.glob(os.path.join(baseDir, self.productionLabel, reducedType, s, '*.root'))
     else:
-      self.chain        = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
-      self.listOfFiles  = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
-      self.listOfFiles += glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
+      self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
+      if self.isData:
+        if splitData: self.listOfFiles = glob.glob(os.path.join(self.path, '*2016' + splitData + '*' + self.productionLabel, '*', '*', '*.root'))
+        else:         self.listOfFiles = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
+      else:
+        self.listOfFiles = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
     if shortDebug: self.listOfFiles = self.listOfFiles[:3]
     if not len(self.listOfFiles): log.error('No tuples to run over for ' + self.name)
     for i in self.listOfFiles:
