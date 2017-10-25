@@ -14,6 +14,7 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--sample',         action='store',      default=None)
 argParser.add_argument('--type',           action='store',      default='eleSusyLoose-phoCB')
 argParser.add_argument('--subJob',         action='store',      default=None)
+argParser.add_argument('--splitData',      action='store',      default=None)
 argParser.add_argument('--QCD',            action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
@@ -39,7 +40,13 @@ if not args.isChild and not args.subJob:
   if args.sample: sampleList = filter(lambda s: s.name == args.sample, sampleList)
   for sample in sampleList:
     args.sample = sample.name
-    submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name)
+    if args.splitData:                                                                                # Chains become very slow for data, so we split them
+      for splitData in (['B','C','D','E','F','G','H'] if args.splitData not in ['B','C','D','E','F','G','H'] else [args.splitData]):
+        args.splitData = splitData
+        import time
+        submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name+args.splitData)
+    else:
+      submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name)
   exit(0)
 
 #
@@ -50,8 +57,9 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 sample     = getSampleFromList(sampleList, args.sample)
-c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug)
+c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData)
 lumiWeight = float(sample.xsec)*1000/sample.getTotalEvents() if not sample.isData else 1
+
 
 #
 # Create new reduced tree
@@ -60,7 +68,8 @@ reducedTupleDir = os.path.join('/user/tomc/public/TTG/reducedTuples', sample.pro
 try:    os.makedirs(reducedTupleDir)
 except: pass
 
-outputFile = ROOT.TFile(os.path.join(reducedTupleDir, sample.name + '_' + str(args.subJob) + '.root'),"RECREATE")
+outputId   = (args.splitData if args.splitData else '') + str(args.subJob)
+outputFile = ROOT.TFile(os.path.join(reducedTupleDir, sample.name + '_' + outputId + '.root'),"RECREATE")
 outputFile.cd()
 
 #
@@ -68,7 +77,6 @@ outputFile.cd()
 #
 sample.chain.SetBranchStatus("*HLT*", 0)
 outputTree = sample.chain.CloneTree(0)
-
 
 
 
@@ -183,7 +191,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   outputTree.Fill()
 outputTree.AutoSave()
 
-trueIntHist = sample.getTrueInteractions()
-outputFile.cd()
-trueIntHist.Write('nTrue')
+if not sample.isData:
+  trueIntHist = sample.getTrueInteractions()
+  outputFile.cd()
+  trueIntHist.Write('nTrue')
 outputFile.Close()
