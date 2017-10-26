@@ -15,7 +15,9 @@ argParser.add_argument('--sample',         action='store',      default=None)
 argParser.add_argument('--type',           action='store',      default='eleSusyLoose-phoCB')
 argParser.add_argument('--subJob',         action='store',      default=None)
 argParser.add_argument('--splitData',      action='store',      default=None)
+argParser.add_argument('--subProdLabel',   action='store',      default=None)
 argParser.add_argument('--QCD',            action='store_true', default=False)
+argParser.add_argument('--singleLep',      action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--debug',          action='store_true', default=False)
@@ -30,7 +32,10 @@ log = getLogger(args.logLevel)
 # Create sample list
 #
 from ttg.samples.Sample import createSampleList,getSampleFromList
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + ('tuplesQCD.conf' if args.QCD else 'tuples.conf')))
+if args.QCD:         tuples = 'tuplesQCD.conf'
+elif args.singleLep: tuples = 'tuplesSingleLep.conf'
+else:                tuples = 'tuples.conf'
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + tuples))
 
 #
 # Submit subjobs: for each sample split in args.splitJobs
@@ -43,6 +48,8 @@ if not args.isChild and not args.subJob:
     if args.splitData:                                                                                # Chains become very slow for data, so we split them
       for splitData in (['B','C','D','E','F','G','H'] if args.splitData not in ['B','C','D','E','F','G','H'] else [args.splitData]):
         args.splitData = splitData
+        if sample.name == 'DoubleMuon' and splitData == 'C': args.subProdLabel='a'
+        if sample.name == 'MuonEG'     and splitData == 'H': args.subProdLabel='a'
         import time
         submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name+args.splitData)
     else:
@@ -57,7 +64,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 sample     = getSampleFromList(sampleList, args.sample)
-c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData)
+c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
 lumiWeight = float(sample.xsec)*1000/sample.getTotalEvents() if not sample.isData else 1
 
 
@@ -135,7 +142,8 @@ c.QCD                 = args.QCD
 from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
-  if not (select2l(c, newVars) or args.QCD):                                               continue
+  if not (args.QCD or args.singleLep or select2l(c, newVars)):                             continue
+  if args.singleLep and not select1l(c, newVars)):                                         continue
   if not selectPhoton(c, newVars, doPhotonCut):                                            continue
   if sample.isData:
     if not c._passMETFilters:                                                              continue
@@ -149,10 +157,11 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
       if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
       if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
 
-  if not args.QCD: makeInvariantMasses(c, newVars)
   goodJets(c, newVars)
   bJets(c, newVars)
-  if not args.QCD: makeDeltaR(c, newVars)
+  if not (args.QCD or args.singleLep):
+    makeInvariantMasses(c, newVars)
+    makeDeltaR(c, newVars)
 
 
   if not sample.isData:
