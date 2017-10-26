@@ -101,6 +101,12 @@ def select2l(t, n):
   return t._lPt[n.l1] > 25 and n.isOS
 
 
+def select1l(t, n):
+  t.leptons         = [i for i in xrange(ord(t._nLight)) if leptonSelector(t, i)]
+  ptAndIndex        = [(t._lPt[i], i) for i in t.leptons]
+  if len(ptAndIndex) < 1: return False
+
+
 def photonCutBasedReduced(c, index):
   pt = c._phPt[index]
   if abs(c._phEtaSC[index]) < 1.479:
