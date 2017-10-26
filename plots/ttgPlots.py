@@ -15,10 +15,6 @@ argParser.add_argument('--showSys',        action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--runWillem',      action='store_true', default=False)
-argParser.add_argument('--noPU',           action='store_true', default=False)
-argParser.add_argument('--puDown',         action='store_true', default=False)
-argParser.add_argument('--puUp',           action='store_true', default=False)
-argParser.add_argument('--onlyPU',         action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
 args = argParser.parse_args()
 
@@ -240,9 +236,9 @@ if not args.showSys:
 
     if not sample.isData:
       from ttg.reduceTuple.puReweighting import getReweightingFunction
-      if args.puDown: puWeights = 'PU_2016_36000_XSecDown'
-      elif args.puUp: puWeights = 'PU_2016_36000_XSecUp'
-      else:           puWeights = 'PU_2016_36000_XSecCentral'
+      if args.tag.count('puDown'): puWeights = 'PU_2016_36000_XSecDown'
+      elif args.tag.count('puUp'): puWeights = 'PU_2016_36000_XSecUp'
+      else:                        puWeights = 'PU_2016_36000_XSecCentral'
       puReweighting = getReweightingFunction(data=puWeights, useWillem=args.runWillem, useMC=sample.getTrueInteractions(reduced=True))
 
 
@@ -288,9 +284,7 @@ if not args.showSys:
       # Note: photon SF is 0 when pt < 20 GeV
       if not sample.isData: c.puWeight = puReweighting(c._nTrueInt)
       else: c._nTrueInt = -1
-      if args.noPU: c.puWeight = 1.
       eventWeight = 1. if sample.isData else (c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*(c.phWeight if c.selectPhoton and c._phPt[c.ph] > 20 else 1.)*c.bTagWeight*c.triggerWeight*lumiScale)
-      if args.onlyPU: eventWeight = 1. if sample.isData else c.genWeight*c.puWeight*lumiScale
 
       for plot in plots+plots2D: plot.fill(sample, eventWeight)
 
