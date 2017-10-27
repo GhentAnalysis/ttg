@@ -113,10 +113,13 @@ btagSF           = btagEfficiency()
 #
 # Define new branches
 #
-newBranches  = ['l1/I','l2/I','isEE/O','isMuMu/O','isEMu/O','ph/I','looseLeptonVeto/O']
-newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F','phJetDeltaR/F']
+newBranches  = ['ph/I','phJetDeltaR/F','matchedGenPh/I', 'matchedGenEle/I']
 newBranches += ['njets/I','j1/I','j2/I','nbjets/I','dbjets/I']
-newBranches += ['matchedGenPh/I', 'matchedGenEle/I']
+newBranches += ['l1/I','l2/I','looseLeptonVeto/O']
+newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F']
+
+if args.singleLep: newBranches += ['isE/O','isMu/O']
+elif not args.QCD: newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
   for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'dbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
@@ -127,6 +130,7 @@ if not sample.isData:
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
 
+minLeptons            = 0 if args.QCD else (1 if args.singleLep else 2)
 doPhotonCut           = args.type.count('pho')
 c.photonCutBased      = args.type.count('phoCB')
 c.photonMva           = args.type.count('photonMva')
@@ -137,17 +141,16 @@ c.cbLoose             = args.type.count('eleCBLoose')
 c.cbMedium            = args.type.count('eleCBMedium')
 c.cbVeto              = args.type.count('eleCBVeto')
 c.susyLoose           = args.type.count('eleSusyLoose')
-c.QCD                 = args.QCD
 
 #
 # Loop over the tree and make new vars
 #
-from ttg.reduceTuple.objectSelection import select2l, select1l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
+from ttg.reduceTuple.objectSelection import selectLeptons, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
-  if not (args.QCD or args.singleLep or select2l(c, newVars)):                             continue
-  if args.singleLep and not select1l(c, newVars):                                          continue
-  if not selectPhoton(c, newVars, doPhotonCut):                                            continue
+  if not selectLeptons(c, newVars, minLeptons):                                            continue
+  if not selectPhoton(c, newVars, doPhotonCut, minLeptons):                                continue
+
   if sample.isData:
     if not c._passMETFilters:                                                              continue
     if sample.name.count('DoubleMuon') and not c._passTTG_mm:                              continue
@@ -162,10 +165,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   goodJets(c, newVars)
   bJets(c, newVars)
-  if not (args.QCD or args.singleLep):
-    makeInvariantMasses(c, newVars)
-    makeDeltaR(c, newVars)
-
+  makeInvariantMasses(c, newVars)
+  makeDeltaR(c, newVars)
 
   if not sample.isData:
     newVars.genWeight          = c._weight*lumiWeight
@@ -173,18 +174,24 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.puWeightUp         = puReweightingUp(c._nTrueInt)
     newVars.puWeightDown       = puReweightingDown(c._nTrueInt)
 
-    if len(c.leptons) > 1:
+    if minLeptons > 1:
       l1 = newVars.l1
       l2 = newVars.l2
-      newVars.lWeight            = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
-      newVars.lWeightUp          = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
-      newVars.lWeightDown        = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
-      newVars.lTrackWeight       = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
+      newVars.lWeight          = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
+      newVars.lWeightUp        = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
+      newVars.lWeightDown      = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
+      newVars.lTrackWeight     = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
+    elif minLeptons > 0:
+      l1 = newVars.l1
+      newVars.lWeight          = leptonSF.getSF(c, l1)
+      newVars.lWeightUp        = leptonSF.getSF(c, l1, sigma=+1)
+      newVars.lWeightDown      = leptonSF.getSF(c, l1, sigma=-1)
+      newVars.lTrackWeight     = leptonTrackingSF.getSF(c, l1)
     else:
-      newVars.lWeight            = 1.
-      newVars.lWeightUp          = 1.
-      newVars.lWeightDown        = 1.
-      newVars.lTrackWeight       = 1.
+      newVars.lWeight          = 1.
+      newVars.lWeightUp        = 1.
+      newVars.lWeightDown      = 1.
+      newVars.lTrackWeight     = 1.
 
     newVars.phWeight           = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
     newVars.phWeightUp         = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
