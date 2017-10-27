@@ -141,7 +141,7 @@ c.QCD                 = args.QCD
 #
 # Loop over the tree and make new vars
 #
-from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
+from ttg.reduceTuple.objectSelection import select2l, select1l, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
   if not (args.QCD or args.singleLep or select2l(c, newVars)):                             continue
