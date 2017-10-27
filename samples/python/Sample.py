@@ -63,7 +63,7 @@ class Sample:
     return trueInteractions
 
   # init the chain and return it
-  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None):
+  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None):
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
@@ -72,11 +72,14 @@ class Sample:
         self.listOfFiles += glob.glob(os.path.join(baseDir, self.productionLabel, reducedType, s, '*.root'))
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
-      if self.isData:
-        if splitData: self.listOfFiles = glob.glob(os.path.join(self.path, '*2016' + splitData + '*' + self.productionLabel, '*', '*', '*.root'))
-        else:         self.listOfFiles = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
+      if self.isData and splitData:
+        label = self.productionLabel + (subProductionLabel if subProductionLabel else '')
+        print os.path.join(self.path, '*2016' + splitData + '*' + label, '*', '*', '*.root')
+        self.listOfFiles  = glob.glob(os.path.join(self.path, '*2016' + splitData + '*' + label, '*', '*', '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(self.path, '*2016' + splitData + '*' + label, '*', '*.root'))
       else:
-        self.listOfFiles = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
+        self.listOfFiles  = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
     if shortDebug: self.listOfFiles = self.listOfFiles[:3]
     if not len(self.listOfFiles): log.error('No tuples to run over for ' + self.name)
     for i in self.listOfFiles:
