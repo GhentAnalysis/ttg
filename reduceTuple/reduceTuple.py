@@ -45,13 +45,15 @@ if not args.isChild and not args.subJob:
   if args.sample: sampleList = filter(lambda s: s.name == args.sample, sampleList)
   for sample in sampleList:
     args.sample = sample.name
-    if args.splitData:                                                                                # Chains become very slow for data, so we split them
+    if args.splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
       for splitData in (['B','C','D','E','F','G','H'] if args.splitData not in ['B','C','D','E','F','G','H'] else [args.splitData]):
         args.splitData = splitData
         if sample.name == 'DoubleMuon' and splitData == 'C': args.subProdLabel='a'
         if sample.name == 'MuonEG'     and splitData == 'H': args.subProdLabel='a'
         import time
         submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name+args.splitData)
+        args.subProdLabel=None
+        args.splitData = 'splitData'
     else:
       submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name)
   exit(0)
@@ -75,7 +77,7 @@ reducedTupleDir = os.path.join('/user/tomc/public/TTG/reducedTuples', sample.pro
 try:    os.makedirs(reducedTupleDir)
 except: pass
 
-outputId   = (args.splitData if args.splitData else '') + str(args.subJob)
+outputId   = (args.splitData if args.splitData in ['B','C','D','E','F','G','H'] else '') + str(args.subJob)
 outputFile = ROOT.TFile(os.path.join(reducedTupleDir, sample.name + '_' + outputId + '.root'),"RECREATE")
 outputFile.cd()
 
@@ -143,7 +145,7 @@ from ttg.reduceTuple.objectSelection import select2l, selectPhoton, makeInvarian
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
   if not (args.QCD or args.singleLep or select2l(c, newVars)):                             continue
-  if args.singleLep and not select1l(c, newVars)):                                         continue
+  if args.singleLep and not select1l(c, newVars):                                          continue
   if not selectPhoton(c, newVars, doPhotonCut):                                            continue
   if sample.isData:
     if not c._passMETFilters:                                                              continue
