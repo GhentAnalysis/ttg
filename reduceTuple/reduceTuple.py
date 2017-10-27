@@ -207,3 +207,4 @@ if not sample.isData:
   outputFile.cd()
   trueIntHist.Write('nTrue')
 outputFile.Close()
+log.info('Finished')

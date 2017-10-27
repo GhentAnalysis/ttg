@@ -333,3 +333,4 @@ if not args.sys:
                   logZ           = False,
                   drawOption     = option,
                   drawObjects    = drawLumi(None, lumiScale))
+log.info('Finished')

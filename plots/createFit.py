@@ -196,3 +196,4 @@ for channel in ['ee', 'emu', 'mumu']:
     line.Draw()
     c.Print('./fitPlots/' + channel + '/purityComparison.pdf')
     c.Print('./fitPlots/' + channel + '/purityComparison.png')
+log.info('Finished')
