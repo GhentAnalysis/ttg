@@ -59,9 +59,13 @@ if not args.isChild and args.selection is None:
     selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
   if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
     selections = ['ll-looseLeptonVeto-mll40', 'll-looseLeptonVeto-mll40-offZ', 'll-looseLeptonVeto-mll40-offZ-njet2p', 'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p']
+  if args.tag.count('singleLep'):
+    selections = ['l-looseLeptonVeto', 'l-looseLeptonVeto-njet3p', 'l-looseLeptonVeto-njet4p', 'l-looseLeptonVeto-njet4p-deepbtag1p', 'l-looseLeptonVeto-njet4p-deepbtag2p']
+
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('QCD'):             channels = ['noData']
+  elif args.tag.count('singleLep'):       channels = ['noData']
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
   for s in ['None'] + systematics.keys():
     for c in channels:
@@ -114,8 +118,11 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
 
 log.info('Using stackFile ' + stackFile)
 
-stack = createStack(tuplesFile = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data/' + ('tuplesQCD.conf' if args.tag.count('QCD') else 'tuples.conf')),
-                    styleFile  = os.path.join(os.environ['CMSSW_BASE'], 'src/ttg/samples/data', stackFile + '.stack'),
+if args.QCD:         tuples = 'tuplesQCD.conf'
+elif args.singleLep: tuples = 'tuplesSingleLep.conf'
+else:                tuples = 'tuples.conf'
+stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + tuples),
+                    styleFile  = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '.stack'),
                     channel    = args.channel)
 
 

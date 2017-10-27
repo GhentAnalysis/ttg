@@ -11,6 +11,7 @@ special_cuts = {
     "pho":                 "(1)", # base string for QCD
     "ll":                  "(1)", # base string for dilep
     "llg":                 "(1)", # base string for dilep+photon
+    "l":                   "(1)", # base string for singlelep
     "looseLeptonVeto":     "looseLeptonVeto",
 
     "onZ":                 "abs(mll-91.1876)<15||!isEMu",
