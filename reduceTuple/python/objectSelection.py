@@ -139,12 +139,12 @@ def photonCutBasedReduced(c, index):
   return True
 
 
-def photonSelector(tree, index, n, pixelSeed):
+def photonSelector(tree, index, n, pixelSeed, minLeptons):
   if abs(tree._phEta[index]) > 2.5:                                             return False
   if tree._phPt[index] < 15:                                                    return False
   if pixelSeed and tree._phHasPixelSeed[index]:                                 return False
   if not pixelSeed and not tree._phPassElectronVeto[index]:                     return False
-  for i in ([] if tree.QCD else ([n.l1] if tree.singleLep else [n.l1, n.l2])):
+  for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
   if tree.photonMva:            return tree._phMva[index] > 0.20
@@ -154,7 +154,7 @@ def selectPhoton(t, n, doCut, minLeptons):
   if   minLeptons > 1 and n.isMuMu: pixelSeed = False
   elif minLeptons > 0 and n.isMu:   pixelSeed = False
   else:                             pixelSeed = True
-  t.photons = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, pixelSeed)]
+  t.photons = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, pixelSeed, minLeptons)]
   if len(t.photons): n.ph = t.photons[0]
   return (len(t.photons) > 0 or not doCut)
 
@@ -190,7 +190,7 @@ def goodJets(t, n):
     setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > 30])
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
     setattr(n, 'j1'+var,    getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
-    setattr(n, 'j2'+var,    getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 0 else -1)
+    setattr(n, 'j2'+var,    getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)
 
 def bJets(t, n):
   btagWP = 0.8484
