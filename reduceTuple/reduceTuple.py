@@ -202,7 +202,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
       setattr(newVars, 'bTagWeightCSV' + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = True))
       setattr(newVars, 'bTagWeight'    + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = False))
 
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2) if len(c.leptons) > 1 else (1., 0.)
+    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2) if minLeptons > 1 else (1., 0.)
     newVars.triggerWeight      = trigWeight
     newVars.triggerWeightUp    = trigWeight+trigErr
     newVars.triggerWeightDown  = trigWeight-trigErr
