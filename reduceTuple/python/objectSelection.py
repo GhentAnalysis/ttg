@@ -89,7 +89,6 @@ def leptonSelector(tree, index):
 def getSortKey(item): return item[0]
 
 def select2l(t, n):
-  t.leptons         = [i for i in xrange(ord(t._nLight)) if leptonSelector(t, i)]
   ptAndIndex        = [(t._lPt[i], i) for i in t.leptons]
   if len(ptAndIndex) < 2: return False
 
@@ -105,7 +104,6 @@ def select2l(t, n):
 
 
 def select1l(t, n):
-  t.leptons         = [i for i in xrange(ord(t._nLight)) if leptonSelector(t, i)]
   ptAndIndex        = [(t._lPt[i], i) for i in t.leptons]
   if len(ptAndIndex) < 1: return False
 
@@ -117,6 +115,7 @@ def select1l(t, n):
   return True
 
 def selectLeptons(t, n, minLeptons):
+  t.leptons = [i for i in xrange(ord(t._nLight)) if leptonSelector(t, i)]
   if   minLeptons == 2: return select2l(t, n)
   elif minLeptons == 1: return select1l(t, n)
   elif minLeptons == 0: return True
@@ -177,16 +176,16 @@ def makeInvariantMasses(t, n):
 #
 # Jets (filter those within 0.4 from lepton or photon)
 #
-def isGoodJet(tree, index):
+def isGoodJet(tree, index, minLeptons):
   if not tree._jetId[index]: return False
   for ph in tree.photons:
     if deltaR(tree._jetEta[index], tree._phEta[ph], tree._jetPhi[index], tree._phPhi[ph]) < 0.1: return False
-  for lep in ([] if tree.QCD else tree.leptons):
+  for lep in tree.leptons:
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True
 
 def goodJets(t, n):
-  allGoodJets     = [i for i in xrange(ord(t._nJets)) if isGoodJet(t, i)]
+  allGoodJets = [i for i in xrange(ord(t._nJets)) if isGoodJet(t, i)]
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
     setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > 30])
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
@@ -196,11 +195,11 @@ def goodJets(t, n):
 def bJets(t, n):
   btagWP = 0.8484
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
-    setattr(t, 'bjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetCsvV2[i] > btagWP])
+    setattr(t, 'bjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetCsvV2[i] > 0.8484])
     setattr(n, 'nbjets'+var, len(getattr(t, 'bjets'+var)))
   btagWP = 0.6324
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
-    setattr(t, 'dbjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > btagWP])
+    setattr(t, 'dbjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > 0.6324])
     setattr(n, 'ndbjets'+var, len(getattr(t, 'dbjets'+var)))
 
 
