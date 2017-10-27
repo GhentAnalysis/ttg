@@ -25,7 +25,7 @@ def launch(command, logfile, runLocal):
 def submitJobs(script, subJobArg, subJobList, args, dropArgs = [], subLog=''):
   os.system("mkdir -p log")
 
-  submitArgs = {arg: getattr(args, arg) for arg in vars(args) if arg not in dropArgs and arg!=subJobArg}
+  submitArgs = {arg: getattr(args, arg) for arg in vars(args) if arg not in dropArgs and arg!=subJobArg and getattr(args, arg)}
   for subJob in subJobList:
     submitArgs[subJobArg] = str(subJob)
     submitArgs['isChild'] = True

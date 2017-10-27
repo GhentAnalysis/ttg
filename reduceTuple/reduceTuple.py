@@ -43,17 +43,18 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/da
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample: sampleList = filter(lambda s: s.name == args.sample, sampleList)
+  splitData = args.splitData
   for sample in sampleList:
     args.sample = sample.name
     if args.splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
-      for splitData in (['B','C','D','E','F','G','H'] if args.splitData not in ['B','C','D','E','F','G','H'] else [args.splitData]):
-        args.splitData = splitData
-        if sample.name == 'DoubleMuon' and splitData == 'C': args.subProdLabel='a'
-        if sample.name == 'MuonEG'     and splitData == 'H': args.subProdLabel='a'
+      for dataRun in (['B','C','D','E','F','G','H'] if splitData not in ['B','C','D','E','F','G','H'] else [splitData]):
+        args.splitData = dataRun
+        if sample.name == 'DoubleMuon' and dataRun == 'C': args.subProdLabel='a'
+        if sample.name == 'MuonEG'     and dataRun == 'H': args.subProdLabel='a'
         import time
         submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name+args.splitData)
         args.subProdLabel=None
-        args.splitData = 'splitData'
+        args.splitData=None
     else:
       submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name)
   exit(0)
