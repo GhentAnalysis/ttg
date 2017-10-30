@@ -60,12 +60,12 @@ if not args.isChild and args.selection is None:
   if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
     selections = ['ll-looseLeptonVeto-mll40', 'll-looseLeptonVeto-mll40-offZ', 'll-looseLeptonVeto-mll40-offZ-njet2p', 'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p']
   if args.tag.count('singleLep'):
-    selections = ['l-looseLeptonVeto', 'l-looseLeptonVeto-njet3p', 'l-looseLeptonVeto-njet4p', 'l-looseLeptonVeto-njet4p-deepbtag1p', 'l-looseLeptonVeto-njet4p-deepbtag2p']
+    selections = ['lg-looseLeptonVeto', 'lg-looseLeptonVeto-njet3p', 'lg-looseLeptonVeto-njet4p', 'lg-looseLeptonVeto-njet4p-deepbtag1p', 'lg-looseLeptonVeto-njet4p-deepbtag2p']
 
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('QCD'):             channels = ['noData']
-  elif args.tag.count('singleLep'):       channels = ['noData']
+  elif args.tag.count('singleLep'):       channels = ['e','mu','noData']
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
   for s in ['None'] + systematics.keys():
     for c in channels:
@@ -118,9 +118,9 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
 
 log.info('Using stackFile ' + stackFile)
 
-if args.QCD:         tuples = 'tuplesQCD.conf'
-elif args.singleLep: tuples = 'tuplesSingleLep.conf'
-else:                tuples = 'tuples.conf'
+if args.tag.count('QCD'):         tuples = 'tuplesQCD.conf'
+elif args.tag.count('singleLep'): tuples = 'tuplesSingleLep.conf'
+else:                             tuples = 'tuples.conf'
 stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + tuples),
                     styleFile  = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '.stack'),
                     channel    = args.channel)
@@ -132,6 +132,8 @@ stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples
 xAxisForYieldPlot = [lambda h : h.GetXaxis().SetBinLabel(1, "#mu#mu"),
                      lambda h : h.GetXaxis().SetBinLabel(2, "e#mu"),
                      lambda h : h.GetXaxis().SetBinLabel(3, "ee")]
+xAxisForYieldPlotSingleLep = [lambda h : h.GetXaxis().SetBinLabel(1, "#mu"),
+                              lambda h : h.GetXaxis().SetBinLabel(2, "e")]
 
 plots = []
 Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
@@ -145,14 +147,17 @@ if randomCone:
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)',lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph],   (20,0,2)))
 
 else:
-  if args.selection.count('llg') or args.selection.count('pho'):
+  if args.selection.count('lg') or args.selection.count('pho'):
     plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
 
-  plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
+  if args.selection.count('ll'):
+    plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
+  elif args.selection.count('lg'):
+    plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMu else 2,                                                    (3, 0.5, 3.5), histModifications=xAxisForYieldPlotSingleLep))
   plots.append(Plot('nVertex',                  'vertex multiplicity',                  lambda c : ord(c._nVertex),                                                         (50, 0, 50)))
   plots.append(Plot('nTrueInt',                 'nTrueInt',                             lambda c : c._nTrueInt,                                                             (50, 0, 50)))
   plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([c._phCutBasedMedium[i] for i in range(ord(c._nPh))]),               (4, -0.5, 3.5)))
-  if args.selection.count('llg') or args.selection.count('pho'):
+  if args.selection.count('lg') or args.selection.count('pho'):
     plots.append(Plot('photon_pt',                'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                                           (20,15,115)))
     plots.append(Plot('photon_eta',               '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                                     (15,0,2.5)))
     plots.append(Plot('photon_phi',               '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                                          (10,-pi,pi)))
@@ -169,28 +174,30 @@ else:
     plots.append(Plot('photon_SigmaIetaIeta',     '#sigma_{i#etai#eta}(#gamma)',          lambda c : c._phSigmaIetaIeta[c.ph],                                                (20,0,0.04)))
     plots.append(Plot('photon_hadOverEm',         'hadronicOverEm(#gamma)',               lambda c : c._phHadronicOverEm[c.ph],                                               (20,0,.025)))
     plots.append(Plot('phJetDeltaR',              '#Delta R(#gamma, j)',                  lambda c : c.phJetDeltaR,                                                           (20,0,5)))
-  if args.selection.count('ll'):
+  if args.selection.count('lg') or args.selection.count('ll'):
     plots.append(Plot('l1_pt',                  'p_{T}(l_{1}) (GeV)',                   lambda c : c._lPt[c.l1],                                                            (20,0,200)))
     plots.append(Plot('l1_eta',                 '|#eta|(l_{1})',                        lambda c : abs(c._lEta[c.l1]),                                                      (15,0,2.4)))
     plots.append(Plot('l1_phi',                 '#phi(l_{1})',                          lambda c : c._lPhi[c.l1],                                                           (10,-pi,pi)))
     plots.append(Plot('l1_relIso',              'relIso(l_{1})',                        lambda c : c._relIso[c.l1],                                                         (10,0,0.12)))
+  if args.selection.count('ll'):
     plots.append(Plot('l2_pt',                  'p_{T}(l_{2}) (GeV)',                   lambda c : c._lPt[c.l2],                                                            (20,0,200)))
     plots.append(Plot('l2_eta',                 '|#eta|(l_{2})',                        lambda c : abs(c._lEta[c.l2]),                                                      (15,0,2.4)))
     plots.append(Plot('l2_phi',                 '#phi(l_{2})',                          lambda c : c._lPhi[c.l2],                                                           (10,-pi,pi)))
     plots.append(Plot('l2_relIso',              'relIso(l_{2})',                        lambda c : c._relIso[c.l2],                                                         (10,0,0.12)))
     plots.append(Plot('dl_mass',                'm(ll) (GeV)',                          lambda c : c.mll,                                                                   (40,0,200)))
-  if args.selection.count('llg'):
+  if args.selection.count('lg'):
     plots.append(Plot('photon_randomConeIso',   'random cone chargedIso(#gamma) (Gev)', lambda c : c._phRandomConeChargedIsolation[c.ph],                                   (20,0,20)))
     plots.append(Plot('l1g_mass',               'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                                                  (40,0,200)))
+    plots.append(Plot('phL1DeltaR',             '#Delta R(#gamma, l_{1})',              lambda c : c.phL1DeltaR,                                                            (20,0,5)))
+  if args.selection.count('llg'):
     plots.append(Plot('l2g_mass',               'm(l_{2}#gamma) (GeV)',                 lambda c : c.ml2g,                                                                  (40,0,200)))
+    plots.append(Plot('phL2DeltaR',             '#Delta R(#gamma, l_{2})',              lambda c : c.phL2DeltaR,                                                            (20,0,5)))
     plots.append(Plot('phoPt_over_dlg_mass',    'p_{T}(#gamma)/m(ll#gamma)',            lambda c : c._phPt[c.ph]/c.mllg,                                                    (40,0,2)))
     plots.append(Plot('dlg_mass',               'm(ll#gamma) (GeV)',                    lambda c : c.mllg,                                                                  (40,0,500)))
     plots.append(Plot('dlg_mass_zoom',          'm(ll#gamma) (GeV)',                    lambda c : c.mllg,                                                                  (40,50,200)))
-    plots.append(Plot('phL1DeltaR',             '#Delta R(#gamma, l_{1})',              lambda c : c.phL1DeltaR,                                                            (20,0,5)))
-    plots.append(Plot('phL2DeltaR',             '#Delta R(#gamma, l_{2})',              lambda c : c.phL2DeltaR,                                                            (20,0,5)))
     plots.append(Plot('phLepDeltaR',            '#Delta R(#gamma, l)',                  lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                         (20,0,5)))
   plots.append(Plot('njets',                    'number of jets',                       lambda c : c.njets,                                                                 (8,0,8)))
-  plots.append(Plot('nbtag',                    'number of medium b-tags (deepCSV)',    lambda c : c.dbjets,                                                                (4,0,4)))
+  plots.append(Plot('nbtag',                    'number of medium b-tags (deepCSV)',    lambda c : c.ndbjets,                                                               (4,0,4)))
   plots.append(Plot('j1_pt',                    'p_{T}(j_{1}) (GeV)',                   lambda c : c._jetPt[c.j1]                                 if c.j1 >= 0 else -1,     (30,0,300)))
   plots.append(Plot('j1_eta',                   '|#eta|(j_{1})',                        lambda c : abs(c._jetEta[c.j1])                           if c.j1 >= 0 else -1,     (15,0,2.5)))
   plots.append(Plot('j1_phi',                   '#phi(j_{1})',                          lambda c : c._jetPhi[c.j1]                                if c.j1 >= 0 else -10,    (10,-pi,pi)))
@@ -228,6 +235,8 @@ if not args.showSys:
   if args.channel=="ee":   cutString += '&&isEE'
   if args.channel=="mumu": cutString += '&&isMuMu'
   if args.channel=="emu":  cutString += '&&isEMu'
+  if args.channel=="e":    cutString += '&&isE'
+  if args.channel=="mu":   cutString += '&&isMu'
 
   if   args.tag.count('QCD'):                reduceType = 'phoCB'
   elif args.tag.count('CBLoose'):            reduceType = 'eleCBLoose-phoCB'
@@ -313,7 +322,7 @@ for plot in plots:
     extraArgs['linearSystematics'] = linearSystematics
     extraArgs['resultsDir']        = os.path.join(baseDir, args.channel, args.selection)
 
-  if args.channel!='noData':
+  if args.channel!='noData' and not args.tag.count('singleLep'):
     extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
 
   if (sigmaieta or randomCone or args.tag.count('compareChannels')):
