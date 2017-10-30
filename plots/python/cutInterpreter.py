@@ -11,7 +11,7 @@ special_cuts = {
     "pho":                 "(1)", # base string for QCD
     "ll":                  "(1)", # base string for dilep
     "llg":                 "(1)", # base string for dilep+photon
-    "l":                   "(1)", # base string for singlelep
+    "lg":                  "(1)", # base string for singlelep
     "looseLeptonVeto":     "looseLeptonVeto",
 
     "onZ":                 "abs(mll-91.1876)<15||!isEMu",
@@ -28,7 +28,7 @@ def photonPt(tree, min, max):
   return True
 
 continous_variables = [("mll", "mll"),('photonPt',(None, photonPt))]
-discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","dbjets")]
+discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets")]
 
 class cutInterpreter:
 
