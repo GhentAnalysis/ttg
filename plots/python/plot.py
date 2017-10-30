@@ -20,13 +20,12 @@ def getLegendMaskedArea(legend_coordinates, pad):
           'xLowerEdge': constrain( (legend_coordinates[0] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] ),
           'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
-def getHistFromPkl(tag, channel, selection, plotName, selector):
-  resultsFile = os.path.join(plotDir, tag, channel, selection, 'results.pkl')
+def getHistFromPkl(resultsFile, plotName, selector):
   allPlots    = pickle.load(file(resultsFile))
   filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
   if   len(filtered) == 1: return filtered[filtered.keys()[0]]
   elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
-  else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' +  resultsFile)
+  else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultsFile)
 
 
 

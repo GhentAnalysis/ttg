@@ -1,8 +1,15 @@
-import ROOT, os, shutil
+#
+# Get plot directory
+#
+import socket, os
+plotDir = os.path.expandvars('/afs/cern.ch/work/t/$USER/public/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/TTG/plots')
+def getResultsFile(*args):
+  return os.path.join(plotDir, *args, 'results.pkl')
 
 #
 # Get object (e.g. hist) from file using key
 #
+import ROOT
 def getObjFromFile(fname, hname):
     f = ROOT.TFile(fname)
     assert not f.IsZombie()
@@ -17,6 +24,7 @@ def getObjFromFile(fname, hname):
 #
 # Copy the index.php file to plotting directory
 #
+import os, shutil
 def copyIndexPHP(directory):
   index_php = os.path.join(directory, 'index.php' )
   if not os.path.exists(directory): os.makedirs(directory)

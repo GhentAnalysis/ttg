@@ -22,8 +22,7 @@ args = argParser.parse_args()
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
-import socket
-baseDir = os.path.join('/afs/cern.ch/work/t/tomc/public/ttG/' if 'lxp' in socket.gethostname() else '/user/tomc/TTG/plots', args.tag)
+from ttg.tools.helpers import plotDir
 
 
 #
@@ -311,7 +310,7 @@ if not args.showSys:
 from ttg.tools.style import drawLumi
 for plot in plots:
   if not args.showSys:
-   plot.saveToCache(os.path.join(baseDir, args.channel, args.selection), args.sys)
+   plot.saveToCache(os.path.join(plotDir, args.channel, args.selection), args.sys)
    if plot.name == "yield":
     log.info("Yields: ")
     for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -320,7 +319,7 @@ for plot in plots:
   if args.showSys:
     extraArgs['systematics']       = systematics
     extraArgs['linearSystematics'] = linearSystematics
-    extraArgs['resultsDir']        = os.path.join(baseDir, args.channel, args.selection)
+    extraArgs['resultsDir']        = os.path.join(plotDir, args.channel, args.selection)
 
   if args.channel!='noData' and not args.tag.count('singleLep'):
     extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
@@ -332,7 +331,7 @@ for plot in plots:
   for logY in [False, True]:
     logTag = '-log' if logY else ''
     sysTag = '-sys' if args.showSys else ''
-    plot.draw(plot_directory    = os.path.join(baseDir, args.channel + logTag + sysTag, args.selection),
+    plot.draw(plot_directory    = os.path.join(plotDir, args.channel + logTag + sysTag, args.selection),
               logX              = False,
               logY              = logY,
               sorting           = True,
@@ -345,7 +344,7 @@ if not args.sys:
   for plot in plots2D:
     for logY in [False, True]:
       for option in ['SCAT', 'COLZ']:
-        plot.draw(plot_directory = os.path.join(baseDir, args.channel + ('-log' if logY else ''), args.selection, option),
+        plot.draw(plot_directory = os.path.join(plotDir, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,
                   drawObjects    = drawLumi(None, lumiScale))
