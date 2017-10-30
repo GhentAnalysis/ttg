@@ -46,7 +46,7 @@ if not args.isChild and not args.subJob:
   splitData = args.splitData
   for sample in sampleList:
     args.sample = sample.name
-    if args.splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
+    if splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
       for dataRun in (['B','C','D','E','F','G','H'] if splitData not in ['B','C','D','E','F','G','H'] else [splitData]):
         args.splitData = dataRun
         if sample.name == 'DoubleMuon' and dataRun == 'C': args.subProdLabel='a'
@@ -114,7 +114,7 @@ btagSF           = btagEfficiency()
 # Define new branches
 #
 newBranches  = ['ph/I','phJetDeltaR/F','matchedGenPh/I', 'matchedGenEle/I']
-newBranches += ['njets/I','j1/I','j2/I','nbjets/I','dbjets/I']
+newBranches += ['njets/I','j1/I','j2/I','nbjets/I','ndbjets/I']
 newBranches += ['l1/I','l2/I','looseLeptonVeto/O']
 newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F']
 
