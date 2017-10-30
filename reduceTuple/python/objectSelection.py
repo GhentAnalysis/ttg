@@ -151,9 +151,9 @@ def photonSelector(tree, index, n, pixelSeed, minLeptons):
   return True
 
 def selectPhoton(t, n, doCut, minLeptons):
-  if   minLeptons > 1 and n.isMuMu: pixelSeed = False
-  elif minLeptons > 0 and n.isMu:   pixelSeed = False
-  else:                             pixelSeed = True
+  if   minLeptons == 2 and n.isMuMu: pixelSeed = False
+  elif minLeptons == 1 and n.isMu:   pixelSeed = False
+  else:                              pixelSeed = True
   t.photons = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, pixelSeed, minLeptons)]
   if len(t.photons): n.ph = t.photons[0]
   return (len(t.photons) > 0 or not doCut)
@@ -193,11 +193,9 @@ def goodJets(t, n):
     setattr(n, 'j2'+var,    getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)
 
 def bJets(t, n):
-  btagWP = 0.8484
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
     setattr(t, 'bjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetCsvV2[i] > 0.8484])
     setattr(n, 'nbjets'+var, len(getattr(t, 'bjets'+var)))
-  btagWP = 0.6324
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
     setattr(t, 'dbjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > 0.6324])
     setattr(n, 'ndbjets'+var, len(getattr(t, 'dbjets'+var)))
