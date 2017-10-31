@@ -155,7 +155,7 @@ else:
     plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMu else 2,                                                    (3, 0.5, 3.5), histModifications=xAxisForYieldPlotSingleLep))
   plots.append(Plot('nVertex',                  'vertex multiplicity',                  lambda c : ord(c._nVertex),                                                         (50, 0, 50)))
   plots.append(Plot('nTrueInt',                 'nTrueInt',                             lambda c : c._nTrueInt,                                                             (50, 0, 50)))
-  plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([c._phCutBasedMedium[i] for i in range(ord(c._nPh))]),               (4, -0.5, 3.5)))
+  plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([c._phCutBasedMedium[i] for i in c.photons]),                        (4, -0.5, 3.5)))
   if args.selection.count('lg') or args.selection.count('pho'):
     plots.append(Plot('photon_pt',                'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                                           (20,15,115)))
     plots.append(Plot('photon_eta',               '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                                     (15,0,2.5)))
@@ -244,7 +244,7 @@ if not args.showSys:
   elif args.tag.count('eleSusyLoose'):       reduceType = 'eleSusyLoose'
   elif args.tag.count('sigmaIetaIeta'):      reduceType = 'eleSusyLoose-phoCB'
 
-  from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
+  from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector, selectPhotons
   from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
   for sample in sum(stack, []):
     if args.sys and sample.isData: continue
@@ -286,6 +286,7 @@ if not args.showSys:
 
       if not passingFunctions(c): continue
 
+      selectPhotons(c, c, False, (2 if args.selection.count('ll') else (1 if args.selection.count('lg') else 0)))
       if c.selectPhoton:
         if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20):  continue
         if phoCBfull and not c._phCutBasedMedium[c.ph]:                  continue
@@ -296,6 +297,7 @@ if not args.showSys:
         if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
         if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
         if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
+
 
       # Note: photon SF is 0 when pt < 20 GeV
       if not sample.isData: c.puWeight = puReweighting(c._nTrueInt)
