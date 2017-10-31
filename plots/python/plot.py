@@ -114,6 +114,7 @@ class Plot:
   def scaleStacks(self, histos, scaling):
     if scaling=="unity":
       for stack in histos:
+        if not stack[0].Integral() > 0: continue
         factor = 1./stack[0].Integral()
         for h in stack: h.Scale(factor)
     else:
