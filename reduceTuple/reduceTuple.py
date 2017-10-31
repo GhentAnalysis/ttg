@@ -49,9 +49,6 @@ if not args.isChild and not args.subJob:
     if splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
       for dataRun in (['B','C','D','E','F','G','H'] if splitData not in ['B','C','D','E','F','G','H'] else [splitData]):
         args.splitData = dataRun
-        if sample.name == 'DoubleMuon' and dataRun == 'C': args.subProdLabel='a'
-        if sample.name == 'MuonEG'     and dataRun == 'H': args.subProdLabel='a'
-        import time
         submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name+args.splitData)
         args.subProdLabel=None
         args.splitData=None
