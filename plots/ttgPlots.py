@@ -68,7 +68,7 @@ if not args.isChild and args.selection is None:
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
   for s in ['None'] + systematics.keys():
     for c in channels:
-      if args.tag.count('sigmaIetaIeta') and (c=='noData' and not args.tag.count('QCD')): continue
+    #  if args.tag.count('sigmaIetaIeta') and (c=='noData' and not args.tag.count('QCD') and not args.tag.count('singleLep')): continue
       args.channel = c
       args.sys     = s
       submitJobs(__file__, 'selection', selections, args, subLog=os.path.join(args.tag,c,s))
@@ -242,6 +242,7 @@ if not args.showSys:
   elif args.tag.count('CBTight'):            reduceType = 'eleCB-phoCB'
   elif args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose-phoCB'
   elif args.tag.count('eleSusyLoose'):       reduceType = 'eleSusyLoose'
+  elif args.tag.count('sigmaIetaIeta'):      reduceType = 'eleSusyLoose-phoCB'
 
   from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector
   from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
@@ -310,7 +311,7 @@ if not args.showSys:
 from ttg.tools.style import drawLumi
 for plot in plots:
   if not args.showSys:
-   plot.saveToCache(os.path.join(plotDir, args.channel, args.selection), args.sys)
+   plot.saveToCache(os.path.join(plotDir, args.tag, args.channel, args.selection), args.sys)
    if plot.name == "yield":
     log.info("Yields: ")
     for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -319,7 +320,7 @@ for plot in plots:
   if args.showSys:
     extraArgs['systematics']       = systematics
     extraArgs['linearSystematics'] = linearSystematics
-    extraArgs['resultsDir']        = os.path.join(plotDir, args.channel, args.selection)
+    extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
 
   if args.channel!='noData' and not args.tag.count('singleLep'):
     extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
@@ -331,7 +332,7 @@ for plot in plots:
   for logY in [False, True]:
     logTag = '-log' if logY else ''
     sysTag = '-sys' if args.showSys else ''
-    plot.draw(plot_directory    = os.path.join(plotDir, args.channel + logTag + sysTag, args.selection),
+    plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + logTag + sysTag, args.selection),
               logX              = False,
               logY              = logY,
               sorting           = True,
@@ -344,7 +345,7 @@ if not args.sys:
   for plot in plots2D:
     for logY in [False, True]:
       for option in ['SCAT', 'COLZ']:
-        plot.draw(plot_directory = os.path.join(plotDir, args.channel + ('-log' if logY else ''), args.selection, option),
+        plot.draw(plot_directory = os.path.join(plotDir, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,
                   drawObjects    = drawLumi(None, lumiScale))
