@@ -72,7 +72,7 @@ def muonSelector(tree, index):
 
 def leptonSelector(tree, index):
   if tree._relIso[index] > 0.12:       return False
-  if tree._lPt[index] < 20:            return False
+  if tree._lPt[index] < 15:            return False
   if abs(tree._lEta[index]) > 2.4:     return False
   if abs(tree._3dIPSig[index]) > 4:    return False
   if abs(tree._dxy[index]) > 0.05:     return False
