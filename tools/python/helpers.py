@@ -4,7 +4,7 @@
 import socket, os
 plotDir = os.path.expandvars('/afs/cern.ch/work/t/$USER/public/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/TTG/plots')
 def getResultsFile(*args):
-  return os.path.join(plotDir, args, 'results.pkl')
+  return os.path.join(*((plotDir,)+args+('results.pkl',)))
 
 #
 # Get object (e.g. hist) from file using key
