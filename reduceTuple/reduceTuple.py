@@ -145,11 +145,11 @@ c.susyLoose           = args.type.count('eleSusyLoose')
 #
 # Loop over the tree and make new vars
 #
-from ttg.reduceTuple.objectSelection import selectLeptons, selectPhoton, makeInvariantMasses, goodJets, bJets, makeDeltaR
+from ttg.reduceTuple.objectSelection import selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
   if not selectLeptons(c, newVars, minLeptons):                                            continue
-  if not selectPhoton(c, newVars, doPhotonCut, minLeptons):                                continue
+  if not selectPhotons(c, newVars, doPhotonCut, minLeptons):                               continue
 
   if sample.isData:
     if not c._passMETFilters:                                                              continue

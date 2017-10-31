@@ -150,7 +150,7 @@ def photonSelector(tree, index, n, pixelSeed, minLeptons):
   if tree.photonMva:            return tree._phMva[index] > 0.20
   return True
 
-def selectPhoton(t, n, doCut, minLeptons):
+def selectPhotons(t, n, doCut, minLeptons):
   if   minLeptons == 2 and n.isMuMu: pixelSeed = False
   elif minLeptons == 1 and n.isMu:   pixelSeed = False
   else:                              pixelSeed = True
