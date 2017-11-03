@@ -114,6 +114,7 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
   if args.tag.count(stackName):
     stackFile = stackName
     break
+if args.tag.count('sigmaIetaIetaMatchMC'): stackFile = 'sigmaIetaIetaMatchMC'  # for some strange reason the glob.glob does noet always find this
 
 log.info('Using stackFile ' + stackFile)
 
