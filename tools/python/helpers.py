@@ -2,7 +2,7 @@
 # Get plot directory
 #
 import socket, os
-plotDir = os.path.expandvars('/afs/cern.ch/work/t/$USER/public/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/TTG/plots')
+plotDir = os.path.expandvars('/eos/user/t/tomc/www/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/www/ttG/')
 def getResultsFile(*args):
   return os.path.join(*((plotDir,)+args+('results.pkl',)))
 
