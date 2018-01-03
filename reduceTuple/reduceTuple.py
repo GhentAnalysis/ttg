@@ -148,7 +148,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   if not selectLeptons(c, newVars, minLeptons):                                            continue
   if not selectPhotons(c, newVars, doPhotonCut, minLeptons):                               continue
 
-  if sample.isData:
+  if sample.isData and minLeptons > 1:
     if not c._passMETFilters:                                                              continue
     if sample.name.count('DoubleMuon') and not c._passTTG_mm:                              continue
     if sample.name.count('DoubleEG')   and not c._passTTG_ee:                              continue
@@ -159,6 +159,11 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     if sample.name.count('SingleElectron'):
       if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
       if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
+
+  if sample.isData and minLeptons > 0:
+    if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m: continue
+    if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e: continue
+
 
   goodJets(c, newVars)
   bJets(c, newVars)
