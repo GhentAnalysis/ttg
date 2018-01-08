@@ -79,11 +79,12 @@ if not args.isChild and args.selection is None:
 # Initializing
 #
 import os, ROOT
-from ttg.plots.plot           import Plot
+from ttg.plots.plot           import Plot, xAxisLabels
 from ttg.plots.plot2D         import Plot2D
 from ttg.plots.cutInterpreter import cutInterpreter
 from ttg.reduceTuple.objectSelection import photonSelector
 from ttg.samples.Sample       import createStack
+from ttg.plots.photonCategories import photonCategoryNumber
 from math import pi
 
 ROOT.gROOT.SetBatch(True)
@@ -129,11 +130,6 @@ stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples
 #
 # Define plots
 #
-xAxisForYieldPlot = [lambda h : h.GetXaxis().SetBinLabel(1, "#mu#mu"),
-                     lambda h : h.GetXaxis().SetBinLabel(2, "e#mu"),
-                     lambda h : h.GetXaxis().SetBinLabel(3, "ee")]
-xAxisForYieldPlotSingleLep = [lambda h : h.GetXaxis().SetBinLabel(1, "#mu"),
-                              lambda h : h.GetXaxis().SetBinLabel(2, "e")]
 
 plots = []
 Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
@@ -151,9 +147,9 @@ else:
     plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
 
   if args.selection.count('ll'):
-    plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                (3, 0.5, 3.5), histModifications=xAxisForYieldPlot))
+    plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMuMu else (2 if c.isEMu else 3),                                (3, 0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
   elif args.selection.count('lg'):
-    plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMu else 2,                                                    (3, 0.5, 3.5), histModifications=xAxisForYieldPlotSingleLep))
+    plots.append(Plot('yield',                    'yield',                                lambda c : 1 if c.isMu else 2,                                                    (3, 0.5, 3.5), histModifications=xAxisLabels(['#mu', 'e'])))
   plots.append(Plot('nVertex',                  'vertex multiplicity',                  lambda c : ord(c._nVertex),                                                         (50, 0, 50)))
   plots.append(Plot('nTrueInt',                 'nTrueInt',                             lambda c : c._nTrueInt,                                                             (50, 0, 50)))
   plots.append(Plot('nphoton',                  'number of photons',                    lambda c : sum([c._phCutBasedMedium[i] for i in c.photons]),                        (4, -0.5, 3.5)))
@@ -214,6 +210,7 @@ else:
     if args.tag.count('llg'):
       plots.append(Plot('genPhoton_pt',         'p_{T}(gen #gamma) (GeV)',              lambda c : c._gen_phPt[c._phMatchMCPhotonAN15165[c.ph]] if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1,     (10,10,110)))
       plots.append(Plot('genPhoton_eta',        '|#eta|(gen #gamma)',                   lambda c : abs(c._gen_phEta[c._phMatchMCPhotonAN15165[c.ph]]) if c._phMatchMCPhotonAN15165[c.ph] > -1 else -1, (15,0,2.5)))
+      plots.append(Plot('photonCategory',       'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph, oldDefinition),                                                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
 
 lumiScale = 35.9
