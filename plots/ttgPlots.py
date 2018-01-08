@@ -28,6 +28,8 @@ log = getLogger(args.logLevel)
 #
 from ttg.tools.helpers import editInfo, plotDir, updateGitInfo
 if args.editInfo:
+  try:    os.makedirs(os.path.join(plotDir, args.tag))
+  except: pass
   editInfo(os.path.join(plotDir, args.tag))
 
 #
@@ -270,7 +272,7 @@ if not args.showSys:
     c.data = sample.isData
 
     # Filter booleans
-    oldDefinition       = args.tag.count('oldMatching')
+    oldDefinition       = args.tag.count('oldMatch')
     c.genuine           = sample.texName.count('genuine')
     c.hadronicPhoton    = sample.texName.count('hadronicPhoton')
     c.misIdEle          = sample.texName.count('misIdEle')
