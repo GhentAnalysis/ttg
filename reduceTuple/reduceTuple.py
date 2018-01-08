@@ -160,7 +160,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
       if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
       if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
 
-  if sample.isData and minLeptons > 0:
+  if sample.isData and minLeptons == 1:
     if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m: continue
     if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e: continue
 
