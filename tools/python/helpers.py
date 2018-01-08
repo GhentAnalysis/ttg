@@ -9,8 +9,8 @@ def getResultsFile(*args):
 #
 # Get object (e.g. hist) from file using key
 #
-import ROOT
 def getObjFromFile(fname, hname):
+    import ROOT
     f = ROOT.TFile(fname)
     assert not f.IsZombie()
     f.cd()
@@ -24,8 +24,8 @@ def getObjFromFile(fname, hname):
 #
 # Copy the index.php file to plotting directory
 #
-import os, shutil
 def copyIndexPHP(directory):
+  import os, shutil
   index_php = os.path.join(directory, 'index.php' )
   if not os.path.exists(directory): os.makedirs(directory)
   if not directory[-1] == '/': directory = directory+'/'
@@ -35,5 +35,19 @@ def copyIndexPHP(directory):
     if not (p.count('plots') or p.count('ttG')): continue
     index_php = os.path.join(p, 'index.php')
     shutil.copyfile(os.path.expandvars( '$CMSSW_BASE/src/ttg/tools/php/index.php'), index_php)
+  if os.path.isfile('git.txt'):
+    shutil.copyfile('git.txt', os.path.join(directory, 'git.txt'))
 
+#
+# Update the latest git information
+#
+def updateGitInfo():
+  os.system('(git log -n 1;git diff) &> git.txt')
 
+#
+# Edit the info file in a given path
+#
+def editInfo(path):
+  import subprocess,os
+  editor = os.getenv('EDITOR', 'vi')
+  subprocess.call('%s %s' % (editor, os.path.join(path, info.txt)), shell=True)
