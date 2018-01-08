@@ -28,7 +28,7 @@ def getHistFromPkl(resultsFile, plotName, selector):
   else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultsFile)
 
 def xAxisLabels(labels):
-  return [lambda h : h.GetXaxis().SetBinLabel(i, l) for i,l in enumerate(labels)]
+  return [lambda h : h.GetXaxis().SetBinLabel(i+1, l) for i,l in enumerate(labels)]
 
 #
 # Plot class
