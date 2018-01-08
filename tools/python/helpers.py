@@ -50,4 +50,4 @@ def updateGitInfo():
 def editInfo(path):
   import subprocess,os
   editor = os.getenv('EDITOR', 'vi')
-  subprocess.call('%s %s' % (editor, os.path.join(path, info.txt)), shell=True)
+  subprocess.call('%s %s' % (editor, os.path.join(path, 'info.txt')), shell=True)
