@@ -98,8 +98,6 @@ ROOT.gROOT.SetBatch(True)
 # reduce string comparisons in loop --> store as booleans
 phoCB       = args.tag.count('phoCB')
 phoCBfull   = args.tag.count('phoCBfull')
-phoMva      = args.tag.count('phoMva')
-phoMvaTight = args.tag.count('phoMvaTight')
 eleCB       = args.tag.count('eleCB')
 eleMva      = args.tag.count('eleMva')
 sigmaieta   = args.tag.count('igmaIetaIeta')
@@ -173,7 +171,7 @@ else:
   plots.append(Plot('yield',                      'yield',                                lambda c : channelNumbering(c),                                (3, 0.5, 2.5 if singleLep else 3.5), histModifications=xAxisLabels(['#mu','e'] if singleLep else ['#mu#mu', 'e#mu', 'ee'])))
   plots.append(Plot('nVertex',                    'vertex multiplicity',                  lambda c : ord(c._nVertex),                                    (50, 0, 50)))
   plots.append(Plot('nTrueInt',                   'nTrueInt',                             lambda c : c._nTrueInt,                                        (50, 0, 50)))
-  plots.append(Plot('nphoton',                    'number of photons',                    lambda c : sum([c._phCutBasedMedium[i] for i in c.photons]),   (4, -0.5, 3.5)))
+# plots.append(Plot('nphoton',                    'number of photons',                    lambda c : c.nphotons,                                         (4, -0.5, 3.5)))
   plots.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                      (20,15,115)))
   plots.append(Plot('photon_eta',                 '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                (15,0,2.5)))
   plots.append(Plot('photon_phi',                 '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                     (10,-pi,pi)))
@@ -282,26 +280,21 @@ if not args.showSys:
     c.failSigmaIetaIeta = sample.texName.count('fail')
     c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
 
-    c.selectPhoton        = args.selection.count('llg')
-    c.photonCutBased      = phoCB
-    c.photonCutBasedTight = False
-    c.photonMva           = phoMva
+    c.selectPhoton        = args.selection.count('llg') or args.tag.selection('lg')
+
     for i in sample.eventLoop(cutString):
       c.GetEntry(i)
       if zeroLep:
         c.lWeight = 1.
         c.lTrackWeight = 1.
         c.triggerWeight = 1.
-      elif not sample.isData:
-        if args.sys: applySysToTree(args.sys, c)
+      elif not sample.isData and args.sys:
+        applySysToTree(args.sys, c)
 
       if not passingFunctions(c): continue
 
-      selectPhotons(c, c, False, (0 if zeroLep else (1 if singleLep else 2)))
       if c.selectPhoton:
-        if phoMva and c._phMva[c.ph] < (0.90 if phoMvaTight else 0.20):  continue
         if phoCBfull and not c._phCutBasedMedium[c.ph]:                  continue
-        if abs(c._phEta[c.ph]) > 1.4442 and abs(c._phEta[c.ph]) < 1.566: continue
         if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
         if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
 

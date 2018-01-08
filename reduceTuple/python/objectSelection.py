@@ -140,6 +140,7 @@ def photonCutBasedReduced(c, index):
 
 
 def photonSelector(tree, index, n, pixelSeed, minLeptons):
+  if abs(tree._phEta[index]) > 1.4442 and abs(tree._phEta[index]) < 1.566:      return False
   if abs(tree._phEta[index]) > 2.5:                                             return False
   if tree._phPt[index] < 15:                                                    return False
   if pixelSeed and tree._phHasPixelSeed[index]:                                 return False
@@ -154,7 +155,8 @@ def selectPhotons(t, n, doCut, minLeptons):
   if   minLeptons == 2 and n.isMuMu: pixelSeed = False
   elif minLeptons == 1 and n.isMu:   pixelSeed = False
   else:                              pixelSeed = True
-  t.photons = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, pixelSeed, minLeptons)]
+  t.photons  = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, pixelSeed, minLeptons)]
+  n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
   if len(t.photons): n.ph = t.photons[0]
   return (len(t.photons) > 0 or not doCut)
 
