@@ -242,6 +242,7 @@ if not args.showSys:
   elif args.tag.count('CBLoose'):            reduceType = 'eleCBLoose-phoCB'
   elif args.tag.count('CBTight'):            reduceType = 'eleCB-phoCB'
   elif args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose-phoCB'
+  elif args.tag.count('match'):              reduceType = 'eleSusyLoose-phoCB'
   elif args.tag.count('eleSusyLoose'):       reduceType = 'eleSusyLoose'
   elif args.tag.count('sigmaIetaIeta'):      reduceType = 'eleSusyLoose-phoCB'
 
@@ -263,6 +264,7 @@ if not args.showSys:
     c.data = sample.isData
 
     # Filter booleans
+    oldDefinition       = args.tag.count('oldMatching')
     c.genuine           = sample.texName.count('genuine')
     c.hadronicPhoton    = sample.texName.count('hadronicPhoton')
     c.misIdEle          = sample.texName.count('misIdEle')
@@ -295,9 +297,9 @@ if not args.showSys:
         if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
         if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
 
-        if not checkSigmaIetaIeta(c, c.ph): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
-        if not checkMatch(c, c.ph):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
-        if not checkPrompt(c, c.ph):        continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
+        if not checkSigmaIetaIeta(c, c.ph):        continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+        if not checkMatch(c, c.ph, oldDefinition): continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
+        if not checkPrompt(c, c.ph):               continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
 
       # Note: photon SF is 0 when pt < 20 GeV
