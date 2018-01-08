@@ -51,11 +51,11 @@ def isHadronicFake(tree, index, oldDefinition=False):
     return True
 
 def photonCategoryNumber(tree, index, oldDefinition=False):
-  if isSignalPhoton(tree, index, oldDefinition):   return 1
-  if isGoodElectron(tree, index, oldDefinition):   return 2
-  if isHadronicPhoton(tree, index, oldDefinition): return 3
-  if isHadronicFake(tree, index, oldDefinition):   return 4
-  else:                                            return 5 # should not happen # need more debugging
+  if not oldDefinition:                              return tree._phMatchCategoryTTG[index]
+  if isSignalPhoton(tree, index, oldDefinition):     return 1
+  elif isGoodElectron(tree, index, oldDefinition):   return 2
+  elif isHadronicPhoton(tree, index, oldDefinition): return 3
+  else:                                              return 4
 
 def checkMatch(tree, index, oldDefinition=False):
   if tree.genuine        and not isSignalPhoton(tree, index, oldDefinition):   return False
