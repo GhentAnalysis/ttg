@@ -280,7 +280,7 @@ if not args.showSys:
     c.failSigmaIetaIeta = sample.texName.count('fail')
     c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
 
-    c.selectPhoton        = args.selection.count('llg') or args.tag.selection('lg')
+    selectPhoton        = args.selection.count('llg') or args.tag.selection('lg')
 
     for i in sample.eventLoop(cutString):
       c.GetEntry(i)
@@ -293,7 +293,7 @@ if not args.showSys:
 
       if not passingFunctions(c): continue
 
-      if c.selectPhoton:
+      if selectPhoton:
         if phoCBfull and not c._phCutBasedMedium[c.ph]:                  continue
         if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
         if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
@@ -302,9 +302,9 @@ if not args.showSys:
         if not checkMatch(c, c.ph, oldDefinition): continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
         if not checkPrompt(c, c.ph):               continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
-      if not (c.selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
-      if not sample.isData:                           c.puWeight  = puReweighting(c._nTrueInt)
-      else:                                           c._nTrueInt = -1
+      if not selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
+      if not sample.isData:                        c.puWeight  = puReweighting(c._nTrueInt)
+      else:                                        c._nTrueInt = -1
 
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
