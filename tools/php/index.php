@@ -56,7 +56,6 @@ print "<h3><a class=\"file\" href=\"$parent\">Parent Directory</a></h3>"
 <div>
 <pre style="font-size:80%">
 <?php
-  $infoFile='info.txt';
   if(file_exists('info.txt')){
     echo file_get_contents('info.txt');
   }
@@ -103,7 +102,7 @@ foreach (glob("*") as $filename) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
         if (is_dir($filename)) {
             print "<li>[DIR] <a href=\"$filename\">$filename</a></li>";
-        } else if ($filename != "index.php" and $filename != "info.txt") {
+        } else if ($filename != "index.php" and $filename != "info.txt" and $filename != "git.txt") {
             array_push($nondirs,"<li><a href=\"$filename\">$filename</a></li>");
         }
     }
@@ -114,5 +113,12 @@ foreach ($nondirs as $file) {
 ?>
 </ul>
 </div>
+<pre style="font-size:50%">
+<?php
+  if(file_exists('git.txt')){
+    print "<h3><a class=\"file\" href=git.txt>gitInfo</a></h3>";
+  }
+?>
+</pre>
 </body>
 </html>
