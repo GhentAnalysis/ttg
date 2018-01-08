@@ -302,9 +302,9 @@ if not args.showSys:
         if not checkMatch(c, c.ph, oldDefinition): continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
         if not checkPrompt(c, c.ph):               continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
-      if not selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
-      if not sample.isData:                        c.puWeight  = puReweighting(c._nTrueInt)
-      else:                                        c._nTrueInt = -1
+      if not selectPhoton and c._phPt[c.ph] > 20: c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
+      if not sample.isData:                       c.puWeight  = puReweighting(c._nTrueInt)
+      else:                                       c._nTrueInt = -1
 
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
