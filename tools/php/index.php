@@ -1,6 +1,6 @@
 <html>
 <head>
-<title><?php echo getcwd(); ?></title>
+<title><?php echo str_replace('/eos/user/t/tomc/www','',getcwd()); ?></title>
 <style type='text/css'>
 body {
     font-family: "Helvetica", sans-serif;
@@ -54,42 +54,30 @@ print "<h3><a class=\"file\" href=\"$parent\">Parent Directory</a></h3>"
 ?>
 </div>
 <div>
+<pre style="font-size:80%">
+<?php
+  $infoFile='info.txt';
+  if(file_exists('info.txt')){
+    echo file_get_contents('info.txt');
+  }
+?>
+</pre>
+</div>
+<div>
 <?php
 $displayed = array();
 if ($_GET['noplots']) {
     print "Plots will not be displayed.\n";
 } else {
-    $other_exts = array('log.png', 'lin.pdf', 'lin.cxx', 'lin.eps', 'lin.root', 'lin.txt', 'log.pdf', 'log.cxx', 'log.eps', 'log.root', 'log.txt');
-    $filenames = glob("*lin.png"); sort($filenames);
-    $used = array();
-    foreach ($filenames as $filename) {
-        if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
-        array_push($displayed, $filename);
-        array_push($used,$filename);
-        print "<div class='pic'>\n";
-        print "<h3><a href=\"$filename\">$filename</a></h3>";
-        print "<a href=\"$filename\"><img src=\"$filename\" style=\"border: none; width: 300px; \"></a>";
-        $others = array();
-        foreach ($other_exts as $ex) {
-            $other_filename = str_replace('lin.png', $ex, $filename);
-            if (file_exists($other_filename)) {
-                array_push($used,$other_filename);
-                array_push($others, "<a class=\"file\" href=\"$other_filename\">[" . $ex . "]</a>");
-                if ($ex != '.txt') array_push($displayed, $other_filename);
-            }
-        }
-        print "<p> Last changed: " . date ("F d Y H:i:s.", filemtime($filename)) . " </p>";
-        if ($others) print "<p>Also as ".implode(', ',$others)."</p>";
-        print "</div>";
-    }
     $other_exts = array('.pdf', '.cxx', '.eps', '.root', '.txt', '.C');
     $filenames = glob("*.png"); sort($filenames);
     foreach ($filenames as $filename) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
         if (in_array($filename,$used)) continue;
         array_push($displayed, $filename);
+        $name=str_replace('.png', '', $filename);
         print "<div class='pic'>\n";
-        print "<h3><a href=\"$filename\">$filename</a></h3>";
+        print "<h3><a href=\"$filename\">$name</a></h3>";
         print "<a href=\"$filename\"><img src=\"$filename\" style=\"border: none; width: 300px; \"></a>";
         $others = array();
         foreach ($other_exts as $ex) {
@@ -99,8 +87,8 @@ if ($_GET['noplots']) {
                 if ($ex != '.txt') array_push($displayed, $other_filename);
             }
         }
-        print "<p> Last changed: " . date ("F d Y H:i:s.", filemtime($filename)) . " </p>";
-        if ($others) print "<p>Also as ".implode(', ',$others)."</p>";
+        print "<p style='font-size:80%'>Modified: ".date ("F d Y H:i:s", filemtime($filename)) . " </p>";
+        if ($others) print "<p style='font-size:80%'>Also as ".implode(', ',$others)."</p>";
         print "</div>";
     }
 }
@@ -115,7 +103,7 @@ foreach (glob("*") as $filename) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
         if (is_dir($filename)) {
             print "<li>[DIR] <a href=\"$filename\">$filename</a></li>";
-        } else if ($filename != "index.php") {
+        } else if ($filename != "index.php" and $filename != "info.txt") {
             array_push($nondirs,"<li><a href=\"$filename\">$filename</a></li>");
         }
     }
@@ -126,12 +114,5 @@ foreach ($nondirs as $file) {
 ?>
 </ul>
 </div>
-<div>
-<?php
-$parent  = "../";
-print "<h3><a class=\"file\" href=\"$parent\">Parent Directory</a></h3>"
-?>
-</div>
-<h3>a gp production</h3>
 </body>
 </html>
