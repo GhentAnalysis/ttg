@@ -108,7 +108,7 @@ if ($_GET['noplots']) {
         if      (time()-filemtime($filename)             > 3  *3600)  { print "<div class='pic'>\n"; }
         else if (filemtime($newest)-filemtime($filename) > 5  *3600)  { print "<div class='picAging'>\n"; }
         else if (filemtime($newest)-filemtime($filename) > 240*3600)  { print "<div class='picOld'>\n"; }
-        else                                              { print "<div class='picRecent'>\n"; }
+        else                                                          { print "<div class='picRecent'>\n"; }
         print "<h3><a href=\"$filename\">$name</a></h3>";
         print "<a href=\"$filename\"><img src=\"$filename\" style=\"border: none; width: 300px; \"></a>";
         $others = array();
