@@ -7,7 +7,7 @@ log = getLogger()
 #
 import ROOT, os, pickle, uuid, numpy
 from math import sqrt
-from ttg.tools.helpers import copyIndexPHP
+from ttg.tools.helpers import copyIndexPHP, copyGitInfo
 from ttg.tools.lock import waitForLock, removeLock
 
 def getLegendMaskedArea(legend_coordinates, pad):
@@ -28,7 +28,10 @@ def getHistFromPkl(resultsFile, plotName, selector):
   else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultsFile)
 
 def xAxisLabels(labels):
-  return [lambda h : h.GetXaxis().SetBinLabel(i+1, l) for i,l in enumerate(labels)]
+  def applyLabels(h):
+    for i,l in enumerate(labels):
+      h.GetXaxis().SetBinLabel(i+1, l)
+  return [applyLabels]
 
 #
 # Plot class
@@ -524,6 +527,7 @@ class Plot:
 
     canvas.cd()
 
+    copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
     log.info('Creating output files for ' + self.name)
     for extension in extensions:
       ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
