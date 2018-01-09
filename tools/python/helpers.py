@@ -35,14 +35,22 @@ def copyIndexPHP(directory):
     if not (p.count('plots') or p.count('ttG')): continue
     index_php = os.path.join(p, 'index.php')
     shutil.copyfile(os.path.expandvars( '$CMSSW_BASE/src/ttg/tools/php/index.php'), index_php)
-  if os.path.isfile('git.txt'):
-    shutil.copyfile('git.txt', os.path.join(directory, 'git.txt'))
 
 #
 # Update the latest git information
 #
 def updateGitInfo():
+  import os
   os.system('(git log -n 1;git diff) &> git.txt')
+
+#
+# Copy git info for plot
+#
+def copyGitInfo(path):
+  import shutil
+  if os.path.isfile('git.txt'):
+    shutil.copyfile('git.txt', path)
+
 
 #
 # Edit the info file in a given path
