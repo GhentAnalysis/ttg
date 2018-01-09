@@ -10,6 +10,7 @@ argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='eleSusyLoose-phoCB')
 argParser.add_argument('--sys',            action='store',      default=None)
+argParser.add_argument('--filterPlot',     action='store',      default=None)
 argParser.add_argument('--runSys',         action='store_true', default=False)
 argParser.add_argument('--showSys',        action='store_true', default=False)
 argParser.add_argument('--editInfo',       action='store_true', default=False)
@@ -142,8 +143,6 @@ stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples
 
 plots = []
 Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
-
-plots2D = []
 Plot2D.setDefaults(stack=stack)
 
 def channelNumbering(c):
@@ -168,7 +167,7 @@ if randomCone:
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph], (20,0,2)))
 
 else:
-  plots2D.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
+  plots.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
 
   plots.append(Plot('yield',                      'yield',                                lambda c : channelNumbering(c),                                (3, 0.5, 2.5 if singleLep else 3.5), histModifications=xAxisLabels(['#mu','e'] if singleLep else ['#mu#mu', 'e#mu', 'ee'])))
   plots.append(Plot('nVertex',                    'vertex multiplicity',                  lambda c : ord(c._nVertex),                                    (50, 0, 50)))
@@ -230,12 +229,10 @@ else:
     plots.append(Plot('photonCategoryOld',        'photonCategory (AN-15-165 def)',       lambda c : photonCategoryNumber(c, c.ph, oldDefinition=True),  (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
 
+if args.filterPlot:
+  plots[:] = [p for p in plots if args.filterPlot in p.name]
+
 lumiScale = 35.9
-
-
-
-
-
 
 #
 # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
@@ -311,20 +308,22 @@ if not args.showSys:
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
 
-      for plot in plots+plots2D:
+      toRemove = []
+      for plot in plots:
         try:
           plot.fill(sample, eventWeight)
         except:
-          plots.remove(plot)
+          toRemove.append(plot)
           log.info('Not considering plot ' + plot.name + ' for this selection')
-
+      for p in toRemove: plots.remove(p)
 
 
 #
 # Drawing the plots
 #
 from ttg.tools.style import drawLumi
-for plot in plots:
+for plot in plots: # 1D plots
+  if isinstance(plot, Plot2D): continue
   if not args.showSys:
    plot.saveToCache(os.path.join(plotDir, args.tag, args.channel, args.selection), args.sys)
    if plot.name == "yield":
@@ -357,7 +356,8 @@ for plot in plots:
     )
 
 if not args.sys:
-  for plot in plots2D:
+  for plot in plots: # 2D plots
+    if isinstance(plot, Plot): continue
     for logY in [False, True]:
       for option in ['SCAT', 'COLZ']:
         plot.draw(plot_directory = os.path.join(plotDir, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
