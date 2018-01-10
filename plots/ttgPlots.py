@@ -55,12 +55,8 @@ if not args.isChild and args.selection is None:
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
-                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
-                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
-                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04',
-                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04',
-                #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
+                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
                 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
 
   if args.tag.count('QCD'):

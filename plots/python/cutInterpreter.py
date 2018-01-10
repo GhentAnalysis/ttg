@@ -20,6 +20,7 @@ special_cuts = {
 
     "gLepdR04":            "phL1DeltaR>0.4&&phL2DeltaR>0.4",
     "gJetdR04":            "phJetDeltaR>0.4",
+    "gJetdR02":            "phJetDeltaR>0.2",
   }
 
 def photonPt(tree, min, max):
