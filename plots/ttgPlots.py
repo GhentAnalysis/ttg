@@ -168,7 +168,7 @@ else:
   plots.append(Plot('yield',                      'yield',                                lambda c : channelNumbering(c),                                (3, 0.5, 2.5 if singleLep else 3.5), histModifications=xAxisLabels(['#mu','e'] if singleLep else ['#mu#mu', 'e#mu', 'ee'])))
   plots.append(Plot('nVertex',                    'vertex multiplicity',                  lambda c : ord(c._nVertex),                                    (50, 0, 50)))
   plots.append(Plot('nTrueInt',                   'nTrueInt',                             lambda c : c._nTrueInt,                                        (50, 0, 50)))
-# plots.append(Plot('nphoton',                    'number of photons',                    lambda c : c.nphotons,                                         (4, -0.5, 3.5)))
+  plots.append(Plot('nphoton',                    'number of photons',                    lambda c : c.nphotons,                                         (4, -0.5, 3.5)))
   plots.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                  lambda c : c._phPt[c.ph],                                      (20,15,115)))
   plots.append(Plot('photon_eta',                 '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                (15,0,2.5)))
   plots.append(Plot('photon_phi',                 '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                     (10,-pi,pi)))
@@ -205,12 +205,12 @@ else:
   plots.append(Plot('phLepDeltaR',                '#Delta R(#gamma, l)',                  lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                    (20,0,5)))
   plots.append(Plot('njets',                      'number of jets',                       lambda c : c.njets,                                            (8,0,8)))
   plots.append(Plot('nbtag',                      'number of medium b-tags (deepCSV)',    lambda c : c.ndbjets,                                          (4,0,4)))
-  plots.append(Plot('j1_pt',                      'p_{T}(j_{1}) (GeV)',                   lambda c : c._jetPt[c.j1],                                     (30,0,300)))
+  plots.append(Plot('j1_pt',                      'p_{T}(j_{1}) (GeV)',                   lambda c : c._jetPt[c.j1],                                     (30,30,330)))
   plots.append(Plot('j1_eta',                     '|#eta|(j_{1})',                        lambda c : abs(c._jetEta[c.j1]),                               (15,0,2.5)))
   plots.append(Plot('j1_phi',                     '#phi(j_{1})',                          lambda c : c._jetPhi[c.j1],                                    (10,-pi,pi)))
   plots.append(Plot('j1_csvV2',                   'CSVv2(j_{1})',                         lambda c : c._jetCsvV2[c.j1],                                  (20, 0, 1)))
   plots.append(Plot('j1_deepCSV',                 'deepCSV(j_{1})',                       lambda c : c._jetDeepCsv_b[c.j1] + c._jetDeepCsv_bb[c.j1],     (20, 0, 1)))
-  plots.append(Plot('j2_pt',                      'p_{T}(j_{2}) (GeV)',                   lambda c : c._jetPt[c.j2],                                     (30,0,300)))
+  plots.append(Plot('j2_pt',                      'p_{T}(j_{2}) (GeV)',                   lambda c : c._jetPt[c.j2],                                     (30,30,330)))
   plots.append(Plot('j2_eta',                     '|#eta|(j_{2})',                        lambda c : abs(c._jetEta[c.j2]),                               (15,0,2.5)))
   plots.append(Plot('j2_phi',                     '#phi(j_{2})',                          lambda c : c._jetPhi[c.j2],                                    (10,-pi,pi)))
   plots.append(Plot('j2_csvV2',                   'CSVv2(j_{2})',                         lambda c : c._jetCsvV2[c.j2],                                  (20, 0, 1)))
@@ -218,7 +218,6 @@ else:
 
   if args.channel=='noData':
     plots.append(Plot('eventType',                'eventType',                            lambda c : c._ttgEventType,                                    (9, 0, 9)))
-#    if args.tag.count('llg') or True:
     plots.append(Plot('genPhoton_pt',             'p_{T}(gen #gamma) (GeV)',              lambda c : genPt(c),                                           (10,10,110)))
     plots.append(Plot('genPhoton_eta',            '|#eta|(gen #gamma)',                   lambda c : genEta(c),                                          (15,0,2.5)))
     plots.append(Plot('photonCategory',           'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
