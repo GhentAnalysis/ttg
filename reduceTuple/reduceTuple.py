@@ -45,6 +45,7 @@ if not args.isChild and not args.subJob:
   if args.sample: sampleList = filter(lambda s: s.name == args.sample, sampleList)
   splitData = args.splitData
   for sample in sampleList:
+    if sample.isData: continue
     args.sample = sample.name
     if splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
       for dataRun in (['B','C','D','E','F','G','H'] if splitData not in ['B','C','D','E','F','G','H'] else [splitData]):
@@ -142,6 +143,7 @@ c.susyLoose           = args.type.count('eleSusyLoose')
 #
 # Loop over the tree and make new vars
 #
+log.info('Starting event loop')
 from ttg.reduceTuple.objectSelection import selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
