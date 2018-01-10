@@ -13,6 +13,17 @@ h1 {
     text-align: left;
     float: right;
 }
+div.bar {
+    display: block;
+    float: left;
+    margin: 0.5em 1em 0.2em 1em;
+    padding: 10px;
+    color: #29407C;
+    background: white;
+    text-align: center;
+    border: 1px solid #29407C;
+    border-radius: 5px;
+}
 a.bar {
     display: block;
     float: left;
@@ -93,9 +104,13 @@ a:hover { text-decoration: underline; color: #D08504; }
 <div>
 <?php
   function showIfExists($path, $name){
-    if(file_exists($path) and realpath('./')!=realpath($path)){
-      $webPath = str_replace('eos/user/t/tomc/www', 'tomc', $path);
-      print "<div><a class=\"bar\" href=\"$webPath\">$name</a></div>";
+    if(file_exists($path)){
+      if(realpath('./')!=realpath($path)){
+        $webPath = str_replace('eos/user/t/tomc/www', 'tomc', $path);
+	print "<div><a class=\"bar\" href=\"$webPath\">$name</a></div>";
+      } else {
+	print "<div><div class=\"bar\">$name</div></div>";
+      }
     }
   }
   $parent  = "../";
@@ -105,7 +120,7 @@ a:hover { text-decoration: underline; color: #D08504; }
   $logPath=str_replace('/mumu/',  '/mumu-log/',   $logPath);
   $logPath=str_replace('/SF/',    '/SF-log/',     $logPath);
   $logPath=str_replace('/noData/','/noData-log/', $logPath);
-  $linPath=str_replace('-log/',   '',             $fullPath);
+  $linPath=str_replace('-log/',   '/',            $fullPath);
 
   $noChannelPath=str_replace('/all',       '/noChannel', $fullPath);
   $noChannelPath=str_replace('/ee',        '/noChannel', $noChannelPath);
@@ -148,15 +163,16 @@ $displayed = array();
 if ($_GET['noplots']) {
     print "Plots will not be displayed.\n";
 } else {
+  function displayFigures($figExt, $displayed){
     $other_exts = array('.pdf', '.cxx', '.eps', '.root', '.txt', '.tex', '.C');
-    $filenames = glob("*.png"); sort($filenames);
-    $files = scandir('*.png', SCANDIR_SORT_DESCENDING);
+    $filenames = glob('*.'.$figExt); sort($filenames);
+    $files = scandir('*.'.$figExt, SCANDIR_SORT_DESCENDING);
     $newest_file = $files[0];
     foreach ($filenames as $filename) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
         if (in_array($filename,$used)) continue;
         array_push($displayed, $filename);
-        $name=str_replace('.png', '', $filename);
+        $name=str_replace('.'.$figExt, '', $filename);
         if      (time()-filemtime($filename)             > 3  *3600)  { print "<div class='pic'>\n"; }
         else if (filemtime($newest)-filemtime($filename) > 5  *3600)  { print "<div class='picAging'>\n"; }
         else if (filemtime($newest)-filemtime($filename) > 240*3600)  { print "<div class='picOld'>\n"; }
@@ -167,14 +183,14 @@ if ($_GET['noplots']) {
         $others = array();
         foreach ($other_exts as $ex) {
             $exNoDot=str_replace('.','',$ex);
-            $other_filename = str_replace('.png', $ex, $filename);
+            $other_filename = str_replace('.'.$figExt, $ex, $filename);
             if (file_exists($other_filename)) {
                 array_push($others, "<a class=\"file\" href=\"$other_filename\">[" . $exNoDot . "]</a>");
                 array_push($displayed, $other_filename);
             }
         }
 
-        $gitInfo = str_replace('.png', '.gitInfo', $filename);
+        $gitInfo = str_replace('.'.$figExt, '.gitInfo', $filename);
         if(file_exists($gitInfo)){
           print "<p style='font-size:80%'>Modified: <a class=\"file\" href=\"$gitInfo\">".date ("F d Y H:i:s", filemtime($filename)) . "</a></p>";
           array_push($displayed, $gitInfo);
@@ -184,6 +200,10 @@ if ($_GET['noplots']) {
         if ($others) print "<p>Also as ".implode(', ',$others)."</p>";
         print "</div>";
     }
+    return $displayed;
+  }
+  $displayed = displayFigures('png', $displayed);
+  $displayed = displayFigures('jpg', $displayed);
 }
 ?>
 </div>
