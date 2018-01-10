@@ -84,7 +84,7 @@ outputFile.cd()
 # Switch off unneeded branches
 #
 for i in ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay","heWeight",
-          "gen*Charge","gen*Flavor","gen_met","gen*Phi","gen*E","gen*Status","gen*Pdg"]:
+          "gen*Charge","gen*Flavor","gen_met","gen*Status","gen*Pdg"]:
   sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
 
