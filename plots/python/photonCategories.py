@@ -6,7 +6,7 @@ from ttg.reduceTuple.objectSelection import deltaR
 
 def isSignalPhoton(tree, index, oldDefinition=False):
   if not oldDefinition:
-    return tree._phMatchCategoryTTG[index]==1
+    return tree._phTTGMatchCategory[index]==1
   else:
     mcIndex = tree._phMatchMCPhotonAN15165[index]
     if mcIndex < 0:                                                                                               return False
@@ -19,7 +19,7 @@ def isSignalPhoton(tree, index, oldDefinition=False):
 
 def isHadronicPhoton(tree, index, oldDefinition=False):
   if not oldDefinition:
-    return tree._phMatchCategoryTTG[index]==3
+    return tree._phTTGMatchCategory[index]==3
   else:
     mcIndex = tree._phMatchMCPhotonAN15165[index]
     if mcIndex < -1:                return False
@@ -28,7 +28,7 @@ def isHadronicPhoton(tree, index, oldDefinition=False):
 
 def isGoodElectron(tree, index, oldDefinition=False):
   if not oldDefinition:
-    return tree._phMatchCategoryTTG[index]==2
+    return tree._phTTGMatchCategory[index]==2
   else:
     if isSignalPhoton(tree, index):   return False
     if isHadronicPhoton(tree, index): return False
@@ -43,7 +43,7 @@ def isGoodElectron(tree, index, oldDefinition=False):
 
 def isHadronicFake(tree, index, oldDefinition=False):
   if not oldDefinition:
-    return tree._phMatchCategoryTTG[index]==4
+    return tree._phTTGMatchCategory[index]==4
   else:
     if isSignalPhoton(tree, index):   return False
     if isHadronicPhoton(tree, index): return False
@@ -51,7 +51,7 @@ def isHadronicFake(tree, index, oldDefinition=False):
     return True
 
 def photonCategoryNumber(tree, index, oldDefinition=False):
-  if not oldDefinition:                              return tree._phMatchCategoryTTG[index]
+  if not oldDefinition:                              return tree._phTTGMatchCategory[index]
   if isSignalPhoton(tree, index, oldDefinition):     return 1
   elif isGoodElectron(tree, index, oldDefinition):   return 2
   elif isHadronicPhoton(tree, index, oldDefinition): return 3
