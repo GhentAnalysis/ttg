@@ -62,8 +62,6 @@ def electronSelector(tree, index):
   elif tree.cbVeto:    return tree._lPOGVeto[index]
   elif tree.cbLoose:   return tree._lPOGLoose[index]
   elif tree.cbMedium:  return tree._lPOGMedium[index]
-  elif tree.hnTight:   return tree._lHNTight[index]
-  elif tree.hnFO:      return tree._lHNFO[index]
   elif tree.susyLoose: return electronSusyLoose(tree, index)
   else:                return tree._lPOGTight[index]
 

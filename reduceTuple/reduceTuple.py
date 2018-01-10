@@ -82,7 +82,9 @@ outputFile.cd()
 #
 # Switch off unneeded branches
 #
-sample.chain.SetBranchStatus("*HLT*", 0)
+for i in ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay","heWeight",
+          "gen*Charge","gen*Flavor","gen_met","gen*Phi","gen*E","gen*Status","gen*Pdg"]:
+  sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
 
 
@@ -131,8 +133,6 @@ minLeptons            = 0 if args.QCD else (1 if args.singleLep else 2)
 doPhotonCut           = args.type.count('pho')
 c.photonCutBased      = args.type.count('phoCB')
 c.photonMva           = args.type.count('photonMva')
-c.hnTight             = args.type.count('eleHN')
-c.hnFO                = args.type.count('eleFO')
 c.eleMva              = args.type.count('eleMva')
 c.cbLoose             = args.type.count('eleCBLoose')
 c.cbMedium            = args.type.count('eleCBMedium')
