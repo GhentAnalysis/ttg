@@ -113,37 +113,50 @@ a:hover { text-decoration: underline; color: #D08504; }
       }
     }
   }
-  $parent  = "../";
+  showIfExists('..', 'parent');
+
   $fullPath=realpath("./");
-  $logPath=str_replace('/all/',   '/all-log/',    $fullPath);
-  $logPath=str_replace('/ee/',    '/ee-log/',     $logPath);
-  $logPath=str_replace('/mumu/',  '/mumu-log/',   $logPath);
-  $logPath=str_replace('/SF/',    '/SF-log/',     $logPath);
-  $logPath=str_replace('/noData/','/noData-log/', $logPath);
-  $linPath=str_replace('-log/',   '/',            $fullPath);
+  $channels=array('all','ee','mumu','SF','all','noData');
+  $myChannel=NULL;
+  foreach($channels as $c){
+    if(strpos($fullPath, '/'.$c)!==false){
+      $myChannel=$c;
+    }
+  }
 
-  $noChannelPath=str_replace('/all',       '/noChannel', $fullPath);
-  $noChannelPath=str_replace('/ee',        '/noChannel', $noChannelPath);
-  $noChannelPath=str_replace('/mumu',      '/noChannel', $noChannelPath);
-  $noChannelPath=str_replace('/emu',       '/noChannel', $noChannelPath);
-  $noChannelPath=str_replace('/SF',        '/noChannel', $noChannelPath);
-  $noChannelPath=str_replace('/noData',    '/noChannel', $noChannelPath);
-  $eePath       =str_replace('/noChannel', '/ee',        $noChannelPath);
-  $mumuPath     =str_replace('/noChannel', '/mumu',      $noChannelPath);
-  $allPath      =str_replace('/noChannel', '/all',       $noChannelPath);
-  $emuPath      =str_replace('/noChannel', '/emu',       $noChannelPath);
-  $SFPath       =str_replace('/noChannel', '/SF',        $noChannelPath);
-  $noDataPath   =str_replace('/noChannel', '/noData',    $noChannelPath);
+  if(!is_null($myChannel)){
+    $logPath    =str_replace('/'.$myChannel.'/',     '/'.$myChannel.'-log/', $fullPath);
+    $linPath    =str_replace('/'.$myChannel.'-log/', '/'.$myChannel.'/',     $fullPath);
+    $eePath     =str_replace('/'.$myChannel,         '/ee',        $fullPath);
+    $mumuPath   =str_replace('/'.$myChannel,         '/mumu',      $fullPath);
+    $allPath    =str_replace('/'.$myChannel,         '/all',       $fullPath);
+    $emuPath    =str_replace('/'.$myChannel,         '/emu',       $fullPath);
+    $SFPath     =str_replace('/'.$myChannel,         '/SF',        $fullPath);
+    $noDataPath =str_replace('/'.$myChannel,         '/noData',    $fullPath);
 
-  showIfExists($parent,    'parent');
-  showIfExists($logPath,   'logarithmic');
-  showIfExists($linPath,   'linear');
-  showIfExists($eePath,    'ee');
-  showIfExists($emuPath,   'e&#956');
-  showIfExists($mumuPath,  '&#956&#956');
-  showIfExists($allPath,   'all');
-  showIfExists($SFPath,    'SF');
-  showIfExists($noDataPath,'no data');
+    function multipleOptions($options){
+      $counter = 0;
+      foreach($options as $o){
+	if(file_exists($o) and $o!=$fullPath){
+	  $counter +=1;
+	}
+      }
+      return ($counter > 0);
+    }
+
+    if(multipleOptions(array($logPath,$linPath))){
+      showIfExists($logPath,   'logarithmic');
+      showIfExists($linPath,   'linear');
+    }
+    if(multipleOptions(array($eePath,$emuPath,$mumuPath,$allPath,$SFPath,$noDataPath))){
+      showIfExists($eePath,    'ee');
+      showIfExists($emuPath,   'e&#956');
+      showIfExists($mumuPath,  '&#956&#956');
+      showIfExists($allPath,   'all');
+      showIfExists($SFPath,    'SF');
+      showIfExists($noDataPath,'no data');
+    }
+  }
 ?>
 </div>
 <h1><form>filter  <input type="text" name="match" size="30" value="<?php if (isset($_GET['match'])) print htmlspecialchars($_GET['match']);  ?>" /><input type="Submit" value="Go" /></form></h1>
