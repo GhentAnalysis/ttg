@@ -107,9 +107,9 @@ a:hover { text-decoration: underline; color: #D08504; }
     if(file_exists($path)){
       if(realpath('./')!=realpath($path)){
         $webPath = str_replace('eos/user/t/tomc/www', 'tomc', $path);
-	print "<div><a class=\"bar\" href=\"$webPath\">$name</a></div>";
+        print "<div><a class=\"bar\" href=\"$webPath\">$name</a></div>";
       } else {
-	print "<div><div class=\"bar\">$name</div></div>";
+        print "<div><div class=\"bar\">$name</div></div>";
       }
     }
   }
@@ -137,9 +137,9 @@ a:hover { text-decoration: underline; color: #D08504; }
     function multipleOptions($options){
       $counter = 0;
       foreach($options as $o){
-	if(file_exists($o) and $o!=$fullPath){
-	  $counter +=1;
-	}
+        if(file_exists($o) and $o!=$fullPath){
+          $counter +=1;
+        }
       }
       return ($counter > 0);
     }
