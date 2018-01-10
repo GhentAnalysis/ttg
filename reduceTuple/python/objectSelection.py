@@ -177,8 +177,8 @@ def makeInvariantMasses(t, n):
 # Jets (filter those within 0.4 from lepton or 0.1 from photon)
 #
 def isGoodJet(tree, index):
-  if not tree._jetId[index]:        return False
-  if not tree._jetEta[index] < 2.4: return False
+  if not tree._jetId[index]:             return False
+  if not abs(tree._jetEta[index] < 2.4): return False
   for ph in tree.photons:
     if deltaR(tree._jetEta[index], tree._phEta[ph], tree._jetPhi[index], tree._phPhi[ph]) < 0.1: return False
   for lep in tree.leptons:
