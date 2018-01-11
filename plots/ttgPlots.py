@@ -180,7 +180,7 @@ else:
   plots.append(Plot('l2_phi',                     '#phi(l_{2})',                          lambda c : c._lPhi[c.l2],                                      (10,-pi,pi)))
   plots.append(Plot('l2_relIso',                  'relIso(l_{2})',                        lambda c : c._relIso[c.l2],                                    (10,0,0.12)))
   plots.append(Plot('dl_mass',                    'm(ll) (GeV)',                          lambda c : c.mll,                                              (40,0,200)))
-  plots.append(Plot('ll_deltaPhi',                '#Delta#phi(ll)',                       lambda c : deltaPhi(c._lPhi[c.l1], c.lPhi[c.l2]),              (10,0,pi)))
+  plots.append(Plot('ll_deltaPhi',                '#Delta#phi(ll)',                       lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),             (10,0,pi)))
   plots.append(Plot('photon_randomConeIso',       'random cone chargedIso(#gamma) (Gev)', lambda c : c._phRandomConeChargedIsolation[c.ph],              (20,0,20)))
   plots.append(Plot('l1g_mass',                   'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                             (40,0,200)))
   plots.append(Plot('phL1DeltaR',                 '#Delta R(#gamma, l_{1})',              lambda c : c.phL1DeltaR,                                       (20,0,5)))
@@ -311,7 +311,8 @@ for plot in plots: # 1D plots
     log.info("Yields: ")
     for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
-  extraArgs = {}
+  extraArgs   = {}
+  normalizeToMC = [False,True] if args.channel!='noData' else [False]
   if args.showSys:
     extraArgs['systematics']       = systematics
     extraArgs['linearSystematics'] = linearSystematics
@@ -323,18 +324,22 @@ for plot in plots: # 1D plots
   if(normalize or args.tag.count('compareChannels')):
     extraArgs['scaling'] = 'unity'
     extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY':'ratio'}
+    normalizeToMC        = [False]
 
-  for logY in [False, True]:
-    logTag = '-log' if logY else ''
-    sysTag = '-sys' if args.showSys else ''
-    plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + logTag + sysTag, args.selection),
-              logX              = False,
-              logY              = logY,
-              sorting           = True,
-              yRange            = (0.003 if logY else 0.0001, "auto"),
-              drawObjects       = drawLumi(None, lumiScale),
-              **extraArgs
-    )
+  for norm in normalizeToMC:
+    if norm: extraArgs['scaling'] = {0:1}
+    for logY in [False, True]:
+      extraTag  = '-log'    if logY else ''
+      extraTag += '-sys'    if args.showSys else ''
+      extraTag += '-normMC' if norm else ''
+      plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection),
+                logX              = False,
+                logY              = logY,
+                sorting           = True,
+                yRange            = (0.003 if logY else 0.0001, "auto"),
+                drawObjects       = drawLumi(None, lumiScale),
+                **extraArgs
+      )
 
 if not args.sys:
   for plot in plots: # 2D plots
