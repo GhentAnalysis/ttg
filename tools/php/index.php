@@ -131,8 +131,8 @@ a:hover { text-decoration: underline; color: #D08504; }
   function tryModifier($channelDir, $old, $new, $fullPath){
     $newChannelDir=str_replace($old, $new, $channelDir);
     $newPath      =str_replace($channelDir, $newChannelDir, $fullPath);
-    if(file_exists(realpath($newpath))) return $newPath;
-    else                                return NULL;
+    if(file_exists(substr($newPath, 0, -1))) return $newPath;
+    else                                     return NULL;
   }
 
   function modifyChannel($channelDir, $old, $new, $fullPath){
@@ -141,8 +141,7 @@ a:hover { text-decoration: underline; color: #D08504; }
     $tryAtEnd=tryModifier($channelDir, $channelDir, substr($channelDir, 0, -1).'-'.$new.'/', $fullPath);
     if(!is_null($tryAtEnd)) return $tryAtEnd;
     foreach(explode('-',$channelDir) as $sub){
-      $subnew=$sub.$new.'-';
-      $tryInBetween=tryModifier($channelDir, $sub, $sub.$new.'-', $fullPath);
+      $tryInBetween=tryModifier($channelDir, $sub, $sub.'-'.$new, $fullPath);
       if(!is_null($tryInBetween)) return $tryInBetween;
     }
     return NULL;
