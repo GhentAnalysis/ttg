@@ -215,13 +215,11 @@ else:
   plots.append(Plot('j2_phi',                     '#phi(j_{2})',                          lambda c : c._jetPhi[c.j2],                                    (10,-pi,pi)))
   plots.append(Plot('j2_csvV2',                   'CSVv2(j_{2})',                         lambda c : c._jetCsvV2[c.j2],                                  (20, 0, 1)))
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
-
-  if args.channel=='noData':
-    plots.append(Plot('eventType',                'eventType',                            lambda c : c._ttgEventType,                                    (9, 0, 9)))
-    plots.append(Plot('genPhoton_pt',             'p_{T}(gen #gamma) (GeV)',              lambda c : genPt(c),                                           (10,10,110)))
-    plots.append(Plot('genPhoton_eta',            '|#eta|(gen #gamma)',                   lambda c : genEta(c),                                          (15,0,2.5)))
-    plots.append(Plot('photonCategory',           'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
-    plots.append(Plot('photonCategoryOld',        'photonCategory (AN-15-165 def)',       lambda c : photonCategoryNumber(c, c.ph, oldDefinition=True),  (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
+  plots.append(Plot('eventType',                  'eventType',                            lambda c : c._ttgEventType,                                    (9, 0, 9)))
+  plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : genPt(c),                                           (10,10,110)))
+  plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : genEta(c),                                          (15,0,2.5)))
+  plots.append(Plot('photonCategory',             'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
+  plots.append(Plot('photonCategoryOld',          'photonCategory (AN-15-165 def)',       lambda c : photonCategoryNumber(c, c.ph, oldDefinition=True),  (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
 
 if args.filterPlot:
