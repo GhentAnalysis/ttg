@@ -24,6 +24,17 @@ div.bar {
     border: 1px solid #29407C;
     border-radius: 5px;
 }
+div.barEmpty {
+    display: block;
+    float: left;
+    margin: 0.5em 1em 0.2em 1em;
+    padding: 10px;
+    color: #ccc;
+    background: white;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
 a.bar {
     display: block;
     float: left;
@@ -111,6 +122,8 @@ a:hover { text-decoration: underline; color: #D08504; }
       } else {
         print "<div><div class=\"bar\">$name</div></div>";
       }
+    } else {
+      print "<div><div class=\"barEmpty\">$name</div></div>";
     }
   }
   showIfExists('..', 'parent');
