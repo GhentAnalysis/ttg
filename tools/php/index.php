@@ -119,20 +119,45 @@ a:hover { text-decoration: underline; color: #D08504; }
   $channels=array('all','ee','emu','mumu','SF','all','noData');
   $myChannel=NULL;
   foreach($channels as $c){
-    if(strpos($fullPath, '/'.$c)!==false){
-      $myChannel=$c;
+    foreach(explode('/', $fullPath) as $subdir){
+      if(strpos($subdir, $c)===0){
+	 $myChannelDir='/'.$subdir.'/';
+	 $temp=explode('-',$subdir);
+	 $myChannel=$temp[0];
+      }
     }
   }
 
+  function tryModifier($channelDir, $old, $new, $fullPath){
+    $newChannelDir=str_replace($old, $new, $channelDir);
+    $newPath      =str_replace($channelDir, $newChannelDir, $fullPath);
+    if(file_exists(realpath($newpath))) return $newPath;
+    else                                return NULL;
+  }
+
+  function modifyChannel($channelDir, $old, $new, $fullPath){
+    if(strpos($channelDir, $new)!==false) return $fullPath;
+    if(!is_null($old)) return tryModifier($channelDir, $old, $new, $fullPath);
+    $tryAtEnd=tryModifier($channelDir, $channelDir, substr($channelDir, 0, -1).$new.'/', $fullPath);
+    if(!is_null($tryAtEnd)) return $tryAtEnd;
+    foreach(explode('-',$channelDir) as $sub){
+      $tryInBetween=tryModifier($channelDir, $sub, $sub.'-'.$new, $fullPath);
+      if(!is_null($tryInBetween)) return $tryInBetween;
+    }
+    return NULL;
+  }
+
   if(!is_null($myChannel)){
-    $logPath    =str_replace('/'.$myChannel.'/',     '/'.$myChannel.'-log/', $fullPath);
-    $linPath    =str_replace('/'.$myChannel.'-log/', '/'.$myChannel.'/',     $fullPath);
-    $eePath     =str_replace('/'.$myChannel,         '/ee',        $fullPath);
-    $mumuPath   =str_replace('/'.$myChannel,         '/mumu',      $fullPath);
-    $allPath    =str_replace('/'.$myChannel,         '/all',       $fullPath);
-    $emuPath    =str_replace('/'.$myChannel,         '/emu',       $fullPath);
-    $SFPath     =str_replace('/'.$myChannel,         '/SF',        $fullPath);
-    $noDataPath =str_replace('/'.$myChannel,         '/noData',    $fullPath);
+    $logPath    = modifyChannel($myChannelDir, NULL,       '-log',     $fullPath);
+    $linPath    = modifyChannel($myChannelDir, '-log',     '',         $fullPath);
+    $normPath   = modifyChannel($myChannelDir, NULL,       '-normMC',  $fullPath);
+    $lumiPath   = modifyChannel($myChannelDir, '-normMC',  '',         $fullPath);
+    $eePath     = modifyChannel($myChannelDir, $myChannel, 'ee',       $fullPath);
+    $mumuPath   = modifyChannel($myChannelDir, $myChannel, 'mumu',     $fullPath);
+    $allPath    = modifyChannel($myChannelDir, $myChannel, 'all',      $fullPath);
+    $emuPath    = modifyChannel($myChannelDir, $myChannel, 'emu',      $fullPath);
+    $SFPath     = modifyChannel($myChannelDir, $myChannel, 'SF',       $fullPath);
+    $noDataPath = modifyChannel($myChannelDir, $myChannel, 'noData',   $fullPath);
 
     function multipleOptions($options){
       $counter = 0;
@@ -155,6 +180,10 @@ a:hover { text-decoration: underline; color: #D08504; }
       showIfExists($allPath,   'all');
       showIfExists($SFPath,    'SF');
       showIfExists($noDataPath,'no data');
+    }
+    if(multipleOptions(array($normPath,$lumiPath))){
+      showIfExists($normPath,   'normalize to MC');
+      showIfExists($lumiPath,   'normalize to lumi');
     }
   }
 ?>
