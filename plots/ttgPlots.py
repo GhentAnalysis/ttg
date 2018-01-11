@@ -239,6 +239,7 @@ if not args.showSys:
 
   if args.channel=="ee":   cutString += '&&isEE'
   if args.channel=="mumu": cutString += '&&isMuMu'
+  if args.channel=="SF":   cutString += '&&(isMuMu||isEE)'
   if args.channel=="emu":  cutString += '&&isEMu'
   if args.channel=="e":    cutString += '&&isE'
   if args.channel=="mu":   cutString += '&&isMu'
