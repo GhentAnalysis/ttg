@@ -179,17 +179,20 @@ if ($_GET['noplots']) {
   function displayFigures($figExt, $displayed){
     $other_exts = array('.pdf', '.cxx', '.eps', '.root', '.txt', '.tex', '.C');
     $filenames = glob('*.'.$figExt); sort($filenames);
-    $files = scandir('*.'.$figExt, SCANDIR_SORT_DESCENDING);
-    $newest_file = $files[0];
+    $newest=0;
+    foreach($filenames as $f){
+      if(filemtime($f)>$newest) $newest=filemtime($f);
+    }
     foreach ($filenames as $filename) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
         if (in_array($filename,$used)) continue;
         array_push($displayed, $filename);
         $name=str_replace('.'.$figExt, '', $filename);
-        if      (time()-filemtime($filename)             > 3  *3600)  { print "<div class='pic'>\n"; }
-        else if (filemtime($newest)-filemtime($filename) > 5  *3600)  { print "<div class='picAging'>\n"; }
-        else if (filemtime($newest)-filemtime($filename) > 240*3600)  { print "<div class='picOld'>\n"; }
-        else                                                          { print "<div class='picRecent'>\n"; }
+        $diff=filemtime($newest_file)-filemtime($filename);
+        if      ($newest-filemtime($filename) > 240*3600){ print "<div class='picOld'>\n"; }
+        else if ($newest-filemtime($filename) > 3  *3600){ print "<div class='picAging'>\n"; }
+        else if (time()-filemtime($filename)  > 3  *3600){ print "<div class='pic'>\n"; }
+        else                                             { print "<div class='picRecent'>\n"; }
        
         print "<h3><a href=\"$filename\">$name</a></h3>";
         print "<a href=\"$filename\"><img src=\"$filename\" style=\"border: none; width: 300px; \"></a>";
