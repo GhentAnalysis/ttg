@@ -73,7 +73,6 @@ if not args.isChild and args.selection is None:
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
   for s in ['None'] + systematics.keys():
     for c in channels:
-    #  if args.tag.count('sigmaIetaIeta') and (c=='noData' and not args.tag.count('QCD') and not args.tag.count('singleLep')): continue
       args.channel = c
       args.sys     = s
       submitJobs(__file__, 'selection', selections, args, subLog=os.path.join(args.tag,c,s))
@@ -97,15 +96,11 @@ ROOT.gROOT.SetBatch(True)
 # reduce string comparisons in loop --> store as booleans
 phoCB       = args.tag.count('phoCB')
 phoCBfull   = args.tag.count('phoCBfull')
-eleCB       = args.tag.count('eleCB')
-eleMva      = args.tag.count('eleMva')
-sigmaieta   = args.tag.count('igmaIetaIeta')
 forward     = args.tag.count('forward')
 central     = args.tag.count('central')
-randomCone  = args.tag.count('randomConeCheck')
 zeroLep     = args.tag.count('QCD')
 singleLep   = args.tag.count('singleLep')
-
+normalize   = args.tag.count('igmaIetaIeta') or args.tag.count('randomConeCheck')
 
 
 
@@ -138,7 +133,7 @@ stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples
 #
 
 plots = []
-Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if sigmaieta or randomCone else 'Events')
+Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if normalize else 'Events')
 Plot2D.setDefaults(stack=stack)
 
 def channelNumbering(c):
@@ -157,11 +152,10 @@ def genEta(c):
 
 
 
-if randomCone:
+if args.tag.count('randomConeCheck'):
   plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20,0,20)))
   plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80,0,20)))
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph], (20,0,2)))
-
 else:
   plots.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
 
@@ -175,8 +169,8 @@ else:
   plots.append(Plot('photon_mva',                 '#gamma-MVA',                           lambda c : c._phMva[c.ph],                                     (20,-1,1)))
   plots.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20)))
   plots.append(Plot('photon_chargedIso_NO',       'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_bins',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if sigmaieta or randomCone else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_bins_NO',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if sigmaieta or randomCone else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_bins',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_bins_NO',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
   plots.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20)))
   plots.append(Plot('photon_chargedIso_small_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), overflowBin=None))
   plots.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)',     lambda c : c._phChargedIsolation[c.ph]/c._phPt[c.ph],          (20,0,2)))
@@ -333,7 +327,7 @@ for plot in plots: # 1D plots
   if args.channel!='noData' and not args.tag.count('singleLep'):
     extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
 
-  if (sigmaieta or randomCone or args.tag.count('compareChannels')):
+  if(normalize or args.tag.count('compareChannels')):
     extraArgs['scaling'] = 'unity'
     extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY':'ratio'}
 
