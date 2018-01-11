@@ -115,7 +115,7 @@ a:hover { text-decoration: underline; color: #D08504; }
   }
   showIfExists('..', 'parent');
 
-  $fullPath=realpath("./");
+  $fullPath=realpath("./").'/';
   $channels=array('all','ee','emu','mumu','SF','all','noData');
   $myChannel=NULL;
   foreach($channels as $c){
@@ -260,6 +260,8 @@ $nondirs = array();
 foreach (glob("*") as $filename) {
     if ($_GET['noplots'] || !in_array($filename, $displayed)) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
+        if (fnmatch('*-normMC*', $filename)) continue;
+        if (fnmatch('*-log*',    $filename)) continue;
         if (is_dir($filename)) {
             print "<li>[DIR] <a href=\"$filename\">$filename</a></li>";
         } else if ($filename != "index.php" and $filename != "info.txt" and $filename != "git.txt") {
