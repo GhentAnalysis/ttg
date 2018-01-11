@@ -59,3 +59,14 @@ def editInfo(path):
   import subprocess,os
   editor = os.getenv('EDITOR', 'vi')
   subprocess.call('%s %s' % (editor, os.path.join(path, 'info.txt')), shell=True)
+
+
+#
+# Delta phi function
+#
+def deltaPhi(phi1, phi2):
+  from math import pi
+  dphi = phi2-phi1
+  if dphi > pi:   dphi -= 2.0*pi
+  if dphi <= -pi: dphi += 2.0*pi
+  return abs(dphi)

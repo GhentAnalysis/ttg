@@ -27,7 +27,7 @@ log = getLogger(args.logLevel)
 #
 # Check git and edit the info file
 #
-from ttg.tools.helpers import editInfo, plotDir, updateGitInfo
+from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi
 if args.editInfo:
   try:    os.makedirs(os.path.join(plotDir, args.tag))
   except: pass
@@ -188,6 +188,7 @@ else:
   plots.append(Plot('l2_phi',                     '#phi(l_{2})',                          lambda c : c._lPhi[c.l2],                                      (10,-pi,pi)))
   plots.append(Plot('l2_relIso',                  'relIso(l_{2})',                        lambda c : c._relIso[c.l2],                                    (10,0,0.12)))
   plots.append(Plot('dl_mass',                    'm(ll) (GeV)',                          lambda c : c.mll,                                              (40,0,200)))
+  plots.append(Plot('ll_deltaPhi',                '#Delta#phi(ll)',                       lambda c : deltaPhi(c._lPhi[c.l1], c.lPhi[c.l2]),              (10,0,pi)))
   plots.append(Plot('photon_randomConeIso',       'random cone chargedIso(#gamma) (Gev)', lambda c : c._phRandomConeChargedIsolation[c.ph],              (20,0,20)))
   plots.append(Plot('l1g_mass',                   'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                             (40,0,200)))
   plots.append(Plot('phL1DeltaR',                 '#Delta R(#gamma, l_{1})',              lambda c : c.phL1DeltaR,                                       (20,0,5)))
