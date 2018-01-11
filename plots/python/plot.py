@@ -122,6 +122,7 @@ class Plot:
         factor = 1./stack[0].Integral()
         for h in stack: h.Scale(factor)
     else:
+      from ttg.tools.style import drawTex
       if not isinstance(scaling, dict):
         raise ValueError( "'scaling' must be of the form {0:1, 2:3} which normalizes stack[0] to stack[1] etc. Got '%r'" % scaling )
       for source, target in scaling.iteritems():
@@ -136,6 +137,8 @@ class Plot:
 
         factor = histos[target][0].Integral()/source_yield
         for h in histos[source]: h.Scale(factor)
+        if len(scaling) == 1: return [drawTex((0.2, 0.8, 'Scaling: %.2f' % factor))]
+    return []
 
   #
   # Save the histogram to a results.cache file, useful when you need to to further operations on it later
@@ -385,7 +388,7 @@ class Plot:
       histsToStack = [histDict[s] for s in stack]
       histos.append(self.stackHists(histsToStack))
 
-    self.scaleStacks(histos, scaling)
+    drawObjects += self.scaleStacks(histos, scaling)
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     import ttg.tools.style as style
