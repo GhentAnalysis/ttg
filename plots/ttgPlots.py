@@ -74,6 +74,7 @@ if not args.isChild and (args.selection is None or args.channel is None):
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('QCD'):             channels = ['noData']
   elif args.tag.count('singleLep'):       channels = ['e','mu','noData']
+  elif args.tag.count('randomConeCheck'): channels = ['ee','mumu','emu','SF','all']
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
   for s in ['None'] + systematics.keys():
     for c in channels:
@@ -119,7 +120,8 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
   if args.tag.count(stackName):
     stackFile = stackName
     break
-if args.tag.count('sigmaIetaIetaMatchMC'): stackFile = 'sigmaIetaIetaMatchMC'  # for some strange reason the glob.glob does noet always find this
+if args.tag.count('sigmaIetaIetaMatchMC'):   stackFile = 'sigmaIetaIetaMatchMC'    # for some strange reason the glob.glob does noet always find this
+if args.tag.count('randomConeCheckMatchMC'): stackFile = 'randomConeCheckMatchMC'  # for some strange reason the glob.glob does noet always find this
 
 log.info('Using stackFile ' + stackFile)
 
