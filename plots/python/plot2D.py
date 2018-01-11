@@ -7,7 +7,7 @@ log = getLogger()
 # Maybe to be merged with the 1D plot class
 #
 import ROOT, os, pickle, uuid
-from ttg.tools.helpers import copyIndexPHP
+from ttg.tools.helpers import copyIndexPHP, copyGitInfo
 from ttg.tools.lock import waitForLock, removeLock
 
 #
@@ -190,6 +190,7 @@ class Plot2D:
     except: pass
     copyIndexPHP(plot_directory)
 
+    copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
     log.info('Creating output files for ' + self.name)
     for extension in extensions:
       ofile = os.path.join( plot_directory, "%s.%s"%(self.name, extension) )
