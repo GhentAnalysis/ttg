@@ -116,7 +116,7 @@ a:hover { text-decoration: underline; color: #D08504; }
   showIfExists('..', 'parent');
 
   $fullPath=realpath("./");
-  $channels=array('all','ee','mumu','SF','all','noData');
+  $channels=array('all','ee','emu','mumu','SF','all','noData');
   $myChannel=NULL;
   foreach($channels as $c){
     if(strpos($fullPath, '/'.$c)!==false){
