@@ -120,18 +120,22 @@ def fillStyle(color, lineColor = None):
 
 
 #
+# drawTex function
+#
+def drawTex(line, align=11, size=0.04):
+  tex = ROOT.TLatex()
+  tex.SetNDC()
+  tex.SetTextSize(size)
+  tex.SetTextAlign(align)
+  return tex.DrawLatex(*line)
+
+
+#
 # Common CMS information
 #
 def drawLumi(dataMCScale, lumiScale):
-  def drawTex(align, line):
-    tex = ROOT.TLatex()
-    tex.SetNDC()
-    tex.SetTextSize(0.04)
-    tex.SetTextAlign(align)
-    return tex.DrawLatex(*line)
-
   lines =[
-    (11,(0.15, 0.95, 'CMS Preliminary')),
-    (31,(0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
+    (11, (0.15, 0.95, 'CMS Preliminary')),
+    (31, (0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
   ]
-  return [drawTex(align, l) for align, l in lines]
+  return [drawTex(l, align) for align, l in lines]
