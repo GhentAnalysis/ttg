@@ -106,7 +106,7 @@ a:hover { text-decoration: underline; color: #D08504; }
   function showIfExists($path, $name){
     if(file_exists($path)){
       if(realpath('./')!=realpath($path)){
-        $webPath = str_replace('eos/user/t/tomc/www', 'tomc', $path);
+        $webPath = str_replace('eos/user/t/tomc/www', 'tomc', $path).'/?'.$_SERVER['QUERY_STRING'];
         print "<div><a class=\"bar\" href=\"$webPath\">$name</a></div>";
       } else {
         print "<div><div class=\"bar\">$name</div></div>";
@@ -115,7 +115,7 @@ a:hover { text-decoration: underline; color: #D08504; }
   }
   showIfExists('..', 'parent');
 
-  $fullPath=realpath("./").'/';
+  $fullPath=realpath("./");
   $channels=array('all','ee','mumu','SF','all','noData');
   $myChannel=NULL;
   foreach($channels as $c){
