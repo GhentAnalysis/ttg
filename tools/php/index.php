@@ -136,21 +136,22 @@ a:hover { text-decoration: underline; color: #D08504; }
   }
 
   function modifyChannel($channelDir, $old, $new, $fullPath){
-    if(strpos($channelDir, $new)!==false) return $fullPath;
     if(!is_null($old)) return tryModifier($channelDir, $old, $new, $fullPath);
-    $tryAtEnd=tryModifier($channelDir, $channelDir, substr($channelDir, 0, -1).$new.'/', $fullPath);
+    if(strpos($channelDir, $new)!==false) return $fullPath;
+    $tryAtEnd=tryModifier($channelDir, $channelDir, substr($channelDir, 0, -1).'-'.$new.'/', $fullPath);
     if(!is_null($tryAtEnd)) return $tryAtEnd;
     foreach(explode('-',$channelDir) as $sub){
-      $tryInBetween=tryModifier($channelDir, $sub, $sub.'-'.$new, $fullPath);
+      $subnew=$sub.$new.'-';
+      $tryInBetween=tryModifier($channelDir, $sub, $sub.$new.'-', $fullPath);
       if(!is_null($tryInBetween)) return $tryInBetween;
     }
     return NULL;
   }
 
   if(!is_null($myChannel)){
-    $logPath    = modifyChannel($myChannelDir, NULL,       '-log',     $fullPath);
+    $logPath    = modifyChannel($myChannelDir, NULL,       'log',      $fullPath);
     $linPath    = modifyChannel($myChannelDir, '-log',     '',         $fullPath);
-    $normPath   = modifyChannel($myChannelDir, NULL,       '-normMC',  $fullPath);
+    $normPath   = modifyChannel($myChannelDir, NULL,       'normMC',   $fullPath);
     $lumiPath   = modifyChannel($myChannelDir, '-normMC',  '',         $fullPath);
     $eePath     = modifyChannel($myChannelDir, $myChannel, 'ee',       $fullPath);
     $mumuPath   = modifyChannel($myChannelDir, $myChannel, 'mumu',     $fullPath);
@@ -182,7 +183,7 @@ a:hover { text-decoration: underline; color: #D08504; }
       showIfExists($noDataPath,'no data');
     }
     if(multipleOptions(array($normPath,$lumiPath))){
-      showIfExists($normPath,   'normalize to MC');
+      showIfExists($normPath,   'normalize to data');
       showIfExists($lumiPath,   'normalize to lumi');
     }
   }
