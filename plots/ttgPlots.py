@@ -45,26 +45,30 @@ if not (args.runSys or (args.showSys and args.isChild)): systematics = {}
 #
 # Submit subjobs
 #
-if not args.isChild and args.selection is None:
+if not args.isChild and (args.selection is None or args.channel is None):
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
-  selections = ['llg',
-                'llg-looseLeptonVeto',
-                'llg-looseLeptonVeto-mll40',
-                'llg-looseLeptonVeto-mll40-offZ',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
-                'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
 
-  if args.tag.count('QCD'):
-    selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
-  if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
-    selections = ['ll-looseLeptonVeto-mll40', 'll-looseLeptonVeto-mll40-offZ', 'll-looseLeptonVeto-mll40-offZ-njet2p', 'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p']
-  if args.tag.count('singleLep'):
-    selections = ['lg-looseLeptonVeto', 'lg-looseLeptonVeto-njet3p', 'lg-looseLeptonVeto-njet4p', 'lg-looseLeptonVeto-njet4p-deepbtag1p', 'lg-looseLeptonVeto-njet4p-deepbtag2p']
+  if args.selection:
+    selections = [args.selection]
+  else:
+    selections = ['llg',
+                  'llg-looseLeptonVeto',
+                  'llg-looseLeptonVeto-mll40',
+                  'llg-looseLeptonVeto-mll40-offZ',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
+
+    if args.tag.count('QCD'):
+      selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
+    if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
+      selections = ['ll-looseLeptonVeto-mll40', 'll-looseLeptonVeto-mll40-offZ', 'll-looseLeptonVeto-mll40-offZ-njet2p', 'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p']
+    if args.tag.count('singleLep'):
+      selections = ['lg-looseLeptonVeto', 'lg-looseLeptonVeto-njet3p', 'lg-looseLeptonVeto-njet4p', 'lg-looseLeptonVeto-njet4p-deepbtag1p', 'lg-looseLeptonVeto-njet4p-deepbtag2p']
 
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
