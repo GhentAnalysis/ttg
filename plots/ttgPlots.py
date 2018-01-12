@@ -206,7 +206,7 @@ else:
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
   plots.append(Plot('eventType',                  'eventType',                            lambda c : c._ttgEventType,                                    (9, 0, 9)))
   plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c._phTTGMatchPt[c.ph],                              (10,10,110)))
-  plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c._phTTGMatchEta[c.ph]),                        (15,0,2.5)))
+  plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c._phTTGMatchEta[c.ph]),                        (15,0,2.5), overflowBin=None))
   plots.append(Plot('photonCategory',             'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
   plots.append(Plot('photonCategoryOld',          'photonCategory (AN-15-165 def)',       lambda c : photonCategoryNumber(c, c.ph, oldDefinition=True),  (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
