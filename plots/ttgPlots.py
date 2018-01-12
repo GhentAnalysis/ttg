@@ -75,6 +75,7 @@ if not args.isChild and (args.selection is None or args.channel is None):
   elif args.tag.count('QCD'):             channels = ['noData']
   elif args.tag.count('singleLep'):       channels = ['e','mu','noData']
   elif args.tag.count('randomConeCheck'): channels = ['ee','mumu','emu','SF','all']
+  elif args.tag.count('igmaIetaIeta'):    channels = ['ee','mumu','emu','SF','all']
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
   for s in ['None'] + systematics.keys():
     for c in channels:
