@@ -25,15 +25,8 @@ div.bar {
     border-radius: 5px;
 }
 div.barEmpty {
-    display: block;
-    float: left;
-    margin: 0.5em 1em 0.2em 1em;
-    padding: 10px;
     color: #ccc;
-    background: white;
-    text-align: center;
     border: 1px solid #ccc;
-    border-radius: 5px;
 }
 a.bar {
     display: block;
@@ -68,36 +61,9 @@ div.pic {
     text-align: center;
     margin: 40px 10px 10px 2px;
 }
-div.picRecent {
-    display: block;
-    float: left;
-    background-color: white;
-    border: 1px solid green;
-    border-radius: 5px;
-    padding: 2px;
-    text-align: center;
-    margin: 40px 10px 10px 2px;
-}
-div.picAging {
-    display: block;
-    float: left;
-    background-color: white;
-    border: 1px solid orange;
-    border-radius: 5px;
-    padding: 2px;
-    text-align: center;
-    margin: 40px 10px 10px 2px;
-}
-div.picOld {
-    display: block;
-    float: left;
-    background-color: white;
-    border: 1px solid green;
-    border-radius: 5px;
-    padding: 2px;
-    text-align: center;
-    margin: 40px 10px 10px 2px;
-}
+div.picRecent { border: 1px solid green; }
+div.picAging  { border: 1px solid orange; }
+div.picOld    { border: 1px solid red; }
 div.list {
     font-size: 13pt;
     margin: 0.5em 1em 1.2em 1em;
@@ -123,7 +89,7 @@ a:hover { text-decoration: underline; color: #D08504; }
         print "<div><div class=\"bar\">$name</div></div>";
       }
     } else {
-      print "<div><div class=\"barEmpty\">$name</div></div>";
+      print "<div><div class=\"bar barEmpty\">$name</div></div>";
     }
   }
   showIfExists('..', 'parent');
@@ -231,10 +197,10 @@ if ($_GET['noplots']) {
         array_push($displayed, $filename);
         $name=str_replace('.'.$figExt, '', $filename);
         $diff=filemtime($newest_file)-filemtime($filename);
-        if      ($newest-filemtime($filename) > 240*3600){ print "<div class='picOld'>\n"; }
-        else if ($newest-filemtime($filename) > 3  *3600){ print "<div class='picAging'>\n"; }
+        if      ($newest-filemtime($filename) > 240*3600){ print "<div class='pic picOld'>\n"; }
+        else if ($newest-filemtime($filename) > 3  *3600){ print "<div class='pic picAging'>\n"; }
         else if (time()-filemtime($filename)  > 3  *3600){ print "<div class='pic'>\n"; }
-        else                                             { print "<div class='picRecent'>\n"; }
+        else                                             { print "<div class='pic picRecent'>\n"; }
        
         print "<h3><a href=\"$filename\">$name</a></h3>";
         print "<a href=\"$filename\"><img src=\"$filename\" style=\"border: none; width: 300px; \"></a>";
