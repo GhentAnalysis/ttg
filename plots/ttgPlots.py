@@ -263,7 +263,7 @@ if not args.showSys:
     c.failSigmaIetaIeta = sample.texName.count('fail')
     c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
 
-    selectPhoton        = args.selection.count('llg') or args.tag.selection('lg')
+    selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
     for i in sample.eventLoop(cutString):
       c.GetEntry(i)
