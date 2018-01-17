@@ -2,7 +2,9 @@
 # Defining shape systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
 #
 systematics = {}
-for i in ('Up', 'Down'):
+for i in ('up', 'down'):
+  systematics['isr'+i]      = []
+  systematics['fsr'+i]      = []
   systematics['pu'+i]       = [('puWeight',      'puWeight'+i)]
   systematics['phSF'+i]     = [('phWeight',      'phWeight'+i)]
   systematics['lSF'+i]      = [('lWeight',       'lWeight'+i)]
