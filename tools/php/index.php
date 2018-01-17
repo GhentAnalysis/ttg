@@ -220,14 +220,14 @@ if ($_GET['noplots']) {
             $exNoDot=str_replace('.','',$ex);
             $other_filename = str_replace('.'.$figExt, $ex, $filename);
             array_push($displayed, $other_filename);
-            if(file_exists($other_filename) and filemtime($other_filename)-filemtime($filename)<100){
+            if(file_exists($other_filename) and filemtime($filename)-filemtime($other_filename)<100){
               array_push($others, "<a class=\"file\" href=\"$other_filename\">[" . $exNoDot . "]</a>");
             }
         }
 
         $gitInfo = str_replace('.'.$figExt, '.gitInfo', $filename);
         array_push($displayed, $gitInfo);
-        if(file_exists($gitInfo) and filemtime($other_filename)-filemtime($filename)<100){
+        if(file_exists($gitInfo) and filemtime($filename)-filemtime($other_filename)<100){
           print "<p style='font-size:80%'>Modified: <a class=\"file\" href=\"$gitInfo\">".date ("F d Y H:i:s", filemtime($filename)) . "</a></p>";
         } else {
           print "<p style='font-size:80%'>Modified: ".date ("F d Y H:i:s", filemtime($filename)) . " </p>";
