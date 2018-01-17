@@ -335,35 +335,36 @@ for plot in plots: # 1D plots
       log.info("Yields: ")
       for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
-  extraArgs   = {}
-  normalizeToMC = [False,True] if args.channel!='noData' else [False]
-  if args.showSys:
-    extraArgs['systematics']       = systematics
-    extraArgs['linearSystematics'] = linearSystematics
-    extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
+  if not args.sys:
+    extraArgs   = {}
+    normalizeToMC = [False,True] if args.channel!='noData' else [False]
+    if args.showSys:
+      extraArgs['systematics']       = systematics
+      extraArgs['linearSystematics'] = linearSystematics
+      extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
 
-  if args.channel!='noData' and not args.tag.count('singleLep'):
-    extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
+    if args.channel!='noData' and not args.tag.count('singleLep'):
+      extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
 
-  if(normalize or args.tag.count('compareChannels')):
-    extraArgs['scaling'] = 'unity'
-    extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY':'ratio'}
-    normalizeToMC        = [False]
+    if(normalize or args.tag.count('compareChannels')):
+      extraArgs['scaling'] = 'unity'
+      extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY':'ratio'}
+      normalizeToMC        = [False]
 
-  for norm in normalizeToMC:
-    if norm: extraArgs['scaling'] = {0:1}
-    for logY in [False, True]:
-      extraTag  = '-log'    if logY else ''
-      extraTag += '-sys'    if args.showSys else ''
-      extraTag += '-normMC' if norm else ''
-      plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection),
-                logX              = False,
-                logY              = logY,
-                sorting           = True,
-                yRange            = (0.003 if logY else 0.0001, "auto"),
-                drawObjects       = drawLumi(None, lumiScale),
-                **extraArgs
-      )
+    for norm in normalizeToMC:
+      if norm: extraArgs['scaling'] = {0:1}
+      for logY in [False, True]:
+        extraTag  = '-log'    if logY else ''
+        extraTag += '-sys'    if args.showSys else ''
+        extraTag += '-normMC' if norm else ''
+        plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection),
+                  logX              = False,
+                  logY              = logY,
+                  sorting           = True,
+                  yRange            = (0.003 if logY else 0.0001, "auto"),
+                  drawObjects       = drawLumi(None, lumiScale),
+                  **extraArgs
+        )
 
 if not args.sys:
   for plot in plots: # 2D plots
