@@ -147,6 +147,10 @@ def channelNumbering(c):
   if singleLep: return (1 if c.isMu else 2)
   else:         return (1 if c.isMuMu else (2 if c.isEMu else 3))
 
+def genPhotonMinDeltaR(c):
+  return c._gen_phMinDeltaR[c._phMatchMCPhotonAN15165[c.ph]]
+
+
 if args.tag.count('randomConeCheck'):
   plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20,0,20)))
   plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80,0,20)))
@@ -210,6 +214,7 @@ else:
   plots.append(Plot('eventType',                  'eventType',                            lambda c : ord(c._ttgEventType),                               (15, 0, 15)))
   plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c._phTTGMatchPt[c.ph],                              (10,10,110)))
   plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c._phTTGMatchEta[c.ph]),                        (15,0,2.5), overflowBin=None))
+  plots.append(Plot('genPhoton_minDeltaR',        '|#eta|(gen #gamma)',                   lambda c : genPhotonMinDeltaR(c),                              (15,0,1.5)))
   plots.append(Plot('photonCategory',             'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
   plots.append(Plot('photonCategoryOld',          'photonCategory (AN-15-165 def)',       lambda c : photonCategoryNumber(c, c.ph, oldDefinition=True),  (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
