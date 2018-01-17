@@ -11,12 +11,16 @@ h1 {
     font-size: 14pt;
     margin: 0.5em 1em 0.2em 1em;
     text-align: left;
-    float: right;
+    display: inline-block;
+}
+div.fixed {
+    position: fixed;
+    white-space: nowrap;
+    width:100%;
 }
 div.bar {
-    display: block;
-    float: left;
-    margin: 0.5em 1em 0.2em 1em;
+    display: inline-block;
+    margin: 0.5em 0.6em 0.2em 0.6em;
     padding: 10px;
     color: #29407C;
     background: white;
@@ -29,9 +33,8 @@ div.barEmpty {
     border: 1px solid #ccc;
 }
 a.bar {
-    display: block;
-    float: left;
-    margin: 0.5em 1em 0.2em 1em;
+    display: inline-block;
+    margin: 0.5em 0.6em 0.2em 0.6em;
     padding: 10px;
     color: white;
     background: #29407C;
@@ -78,18 +81,18 @@ a:hover { text-decoration: underline; color: #D08504; }
 </style>
 </head>
 <body>
-<div>
+<div class="fixed">
 <?php
   function showIfExists($path, $name){
     if(file_exists($path)){
       if(realpath('./')!=realpath($path)){
         $webPath = str_replace('eos/user/t/tomc/www', 'tomc', $path).'/?'.$_SERVER['QUERY_STRING'];
-        print "<div><a class=\"bar\" href=\"$webPath\">$name</a></div>";
+        print "<span><a class=\"bar\" href=\"$webPath\">$name</a></span>";
       } else {
-        print "<div><div class=\"bar\">$name</div></div>";
+        print "<span><div class=\"bar\">$name</div></span>";
       }
     } else {
-      print "<div><div class=\"bar barEmpty\">$name</div></div>";
+      print "<span><div class=\"bar barEmpty\">$name</div></span>";
     }
   }
   showIfExists('..', 'parent');
@@ -131,6 +134,8 @@ a:hover { text-decoration: underline; color: #D08504; }
     $linPath    = modifyChannel($myChannelDir, '-log',     '',         $fullPath);
     $normPath   = modifyChannel($myChannelDir, NULL,       'normMC',   $fullPath);
     $lumiPath   = modifyChannel($myChannelDir, '-normMC',  '',         $fullPath);
+    $sysPath    = modifyChannel($myChannelDir, NULL,       'sys',      $fullPath);
+    $noSystPath = modifyChannel($myChannelDir, '-sys',      '',        $fullPath);
     $eePath     = modifyChannel($myChannelDir, $myChannel, 'ee',       $fullPath);
     $mumuPath   = modifyChannel($myChannelDir, $myChannel, 'mumu',     $fullPath);
     $allPath    = modifyChannel($myChannelDir, $myChannel, 'all',      $fullPath);
@@ -141,11 +146,12 @@ a:hover { text-decoration: underline; color: #D08504; }
     function multipleOptions($options){
       $counter = 0;
       foreach($options as $o){
-        if(file_exists($o) and $o!=$fullPath){
+#        if(file_exists($o) and $o!=$fullPath){
+        if(file_exists($o)){
           $counter +=1;
         }
       }
-      return ($counter > 0);
+      return ($counter > 1);
     }
 
     if(multipleOptions(array($logPath,$linPath))){
@@ -164,10 +170,16 @@ a:hover { text-decoration: underline; color: #D08504; }
       showIfExists($normPath,   'normalize to data');
       showIfExists($lumiPath,   'normalize to lumi');
     }
+    if(multipleOptions(array($sysPath,$noSysPath))){
+      showIfExists($noSysPath,  'no sys');
+      showIfExists($sysPath,    'sys');
+    }
   }
 ?>
+<span>
+<h1><form>filter  <input type="text" name="match" size="25" value="<?php if (isset($_GET['match'])) print htmlspecialchars($_GET['match']);  ?>" /><input type="Submit" value="Go" /></form></h1>
+</span>
 </div>
-<h1><form>filter  <input type="text" name="match" size="30" value="<?php if (isset($_GET['match'])) print htmlspecialchars($_GET['match']);  ?>" /><input type="Submit" value="Go" /></form></h1>
 <br style="clear:both" />
 <div>
 <pre style="font-size:80%">
@@ -196,7 +208,6 @@ if ($_GET['noplots']) {
         if (in_array($filename,$used)) continue;
         array_push($displayed, $filename);
         $name=str_replace('.'.$figExt, '', $filename);
-        $diff=filemtime($newest_file)-filemtime($filename);
         if      ($newest-filemtime($filename) > 240*3600){ print "<div class='pic picOld'>\n"; }
         else if ($newest-filemtime($filename) > 3  *3600){ print "<div class='pic picAging'>\n"; }
         else if (time()-filemtime($filename)  > 3  *3600){ print "<div class='pic'>\n"; }
