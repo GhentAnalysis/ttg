@@ -1,47 +1,32 @@
 -- MC
-TTGamma                    t#bar{t}#gamma_(genuine)                 fillStyle     kOrange
+TTGamma                    t#bar{t}#gamma_(genuine)                                  fillStyle     kOrange
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
 
-TTGamma                    t#bar{t}#gamma_(hadronicPhoton)          fillStyle     46
+TTGamma                    t#bar{t}#gamma_(hadronicPhoton,hadronicFake,misIdEle)     fillStyle     42
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
 
-TTGamma                    t#bar{t}#gamma_(misIdEle)                fillStyle     49
-+TTGamma_t
-+TTGamma_tbar
-+TTGamma_had
-
-TTGamma                    t#bar{t}#gamma_(hadronicFake)            fillStyle     6
-+TTGamma_t
-+TTGamma_tbar
-+TTGamma_had
-
-TTJets_Dilep               t#bar{t}_(genuine)                       fillStyle     633                      _ttgEventType<3
+TTJets_Dilep               t#bar{t}_(genuine,misIdEle)                               fillStyle     35                       _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               t#bar{t}_(hadronicPhoton)                fillStyle     9                        _ttgEventType<3
+TTJets_Dilep               t#bar{t}_(hadronicPhoton)                                 fillStyle     633                      _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               t#bar{t}_(misIdEle)                      fillStyle     38                       _ttgEventType<3
+TTJets_Dilep               t#bar{t}_(hadronicFake)                                   fillStyle     9                        _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               t#bar{t}_(hadronicFake)                  fillStyle     35                       _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+ZG                         Z#gamma                                                   fillStyle     598
 
-ZG                         Z#gamma                                  fillStyle     598
-WG                         W#gamma                                  fillStyle     596
-
-DY_M10to50_NLO             Drell-Yan                                fillStyle     427                      _zgEventType<3
+DY_M10to50_NLO             Drell-Yan                                                 fillStyle     427                      _zgEventType<3
 +DY_M50_NLO
 
-singleTop_tW_tbar          other                                    fillStyle     797
+singleTop_tW_tbar          other                                                     fillStyle     797
 +singleTop_tW_t
 +singleTop_t_tbar
 +singleTop_t_t
@@ -65,14 +50,15 @@ singleTop_tW_tbar          other                                    fillStyle   
 +TTWToLNu
 +TTWToQQ
 +tZq
++WG
 
 -- Data
-DoubleMuon                 data:mumu,SF,all                         errorStyle    kBlack                   isMuMu
+DoubleMuon                 data:mumu,SF,all                                          errorStyle    kBlack                   isMuMu
 +SingleMuon
 
-DoubleEG                   data:ee,SF,all                           errorStyle    kBlack                   isEE
+DoubleEG                   data:ee,SF,all                                            errorStyle    kBlack                   isEE
 +SingleElectron
 
-MuonEG                     data:emu,all                             errorStyle    kBlack                   isEMu
+MuonEG                     data:emu,all                                              errorStyle    kBlack                   isEMu
 +SingleMuon
 +SingleElectron
