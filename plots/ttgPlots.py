@@ -316,10 +316,10 @@ from ttg.tools.style import drawLumi
 for plot in plots: # 1D plots
   if isinstance(plot, Plot2D): continue
   if not args.showSys:
-   plot.saveToCache(os.path.join(plotDir, args.tag, args.channel, args.selection), args.sys)
-   if plot.name == "yield":
-    log.info("Yields: ")
-    for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+    plot.saveToCache(os.path.join(plotDir, args.tag, args.channel, args.selection), args.sys)
+    if plot.name == "yield":
+      log.info("Yields: ")
+      for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
   extraArgs   = {}
   normalizeToMC = [False,True] if args.channel!='noData' else [False]

@@ -58,11 +58,11 @@ def photonCategoryNumber(tree, index, oldDefinition=False):
   else:                                              return 4
 
 def checkMatch(tree, index, oldDefinition=False):
-  if tree.genuine        and not isSignalPhoton(tree, index, oldDefinition):   return False
-  if tree.hadronicPhoton and not isHadronicPhoton(tree, index, oldDefinition): return False
-  if tree.misIdEle       and not isGoodElectron(tree, index, oldDefinition):   return False
-  if tree.hadronicFake   and not isHadronicFake(tree, index, oldDefinition):   return False
-  return True
+  if tree.genuine        and isSignalPhoton(tree, index, oldDefinition):   return True
+  if tree.hadronicPhoton and isHadronicPhoton(tree, index, oldDefinition): return True
+  if tree.misIdEle       and isGoodElectron(tree, index, oldDefinition):   return True
+  if tree.hadronicFake   and isHadronicFake(tree, index, oldDefinition):   return True
+  return False
 
 def checkPrompt(tree, index):
   if tree.nonprompt and tree._phIsPrompt[index]:     return False
