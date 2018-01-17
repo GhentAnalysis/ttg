@@ -103,9 +103,9 @@ a:hover { text-decoration: underline; color: #D08504; }
   foreach($channels as $c){
     foreach(explode('/', $fullPath) as $subdir){
       if(strpos($subdir, $c)===0){
-	 $myChannelDir='/'.$subdir.'/';
-	 $temp=explode('-',$subdir);
-	 $myChannel=$temp[0];
+        $myChannelDir='/'.$subdir.'/';
+        $temp=explode('-',$subdir);
+        $myChannel=$temp[0];
       }
     }
   }
@@ -146,7 +146,6 @@ a:hover { text-decoration: underline; color: #D08504; }
     function multipleOptions($options){
       $counter = 0;
       foreach($options as $o){
-#        if(file_exists($o) and $o!=$fullPath){
         if(file_exists($o)){
           $counter +=1;
         }
@@ -242,7 +241,7 @@ if ($_GET['noplots']) {
 }
 ?>
 </div>
-<div class="list">
+<div class="list" style="margin-top: 2cm">
 <ul>
 <?
 $nondirs = array();
@@ -264,14 +263,5 @@ foreach ($nondirs as $file) {
 ?>
 </ul>
 </div>
-<pre style="font-size:50%">
-<?php
-/*
-  if(file_exists('git.txt')){
-    print "<h3><a class=\"file\" href=git.txt>gitInfo</a></h3>";
-  }
-*/
-?>
-</pre>
 </body>
 </html>
