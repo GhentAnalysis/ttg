@@ -58,6 +58,7 @@ def photonCategoryNumber(tree, index, oldDefinition=False):
   else:                                              return 4
 
 def checkMatch(tree, index, oldDefinition=False):
+  if not tree.checkMatch:                                                  return True
   if tree.genuine        and isSignalPhoton(tree, index, oldDefinition):   return True
   if tree.hadronicPhoton and isHadronicPhoton(tree, index, oldDefinition): return True
   if tree.misIdEle       and isGoodElectron(tree, index, oldDefinition):   return True
