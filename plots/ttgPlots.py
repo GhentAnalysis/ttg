@@ -148,7 +148,8 @@ def channelNumbering(c):
   else:         return (1 if c.isMuMu else (2 if c.isEMu else 3))
 
 def genPhotonMinDeltaR(c):
-  return c._gen_phMinDeltaR[c._phMatchMCPhotonAN15165[c.ph]]
+  if c._phMatchMCPhotonAN15165[c.ph] >= 0: return c._gen_phMinDeltaR[c._phMatchMCPhotonAN15165[c.ph]]
+  else:                                    return 999
 
 
 if args.tag.count('randomConeCheck'):
