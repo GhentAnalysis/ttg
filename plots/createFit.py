@@ -59,8 +59,7 @@ for channel in ['ee', 'emu', 'mumu']:
       randomConeSelection    = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_randomConeIso', ['data'])
       sigmaIetaIetaSideBand  = getHistFromPkl(getResultsFile('sigmaIetaIetaMatchMC',       channel, selection), 'photon_chargedIso',    ['data'])
       if pseudoData:
-        chargedIsoTTGamma    = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['t#bar{t}#gamma (2l)'])
-        chargedIsoTTGamma.Add( getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['t#bar{t}#gamma (1l)']))
+        chargedIsoTTGamma    = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['t#bar{t}#gamma'])
         chargedIsoOther      = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['TTJets'])
         chargedIsoOther.Add(   getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['Z#gamma']))
         chargedIsoOther.Add(   getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['Drell-Yan']))
