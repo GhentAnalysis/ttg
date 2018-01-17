@@ -267,7 +267,7 @@ if not args.showSys:
     c.misIdEle          = sample.texName.count('misIdEle')
     c.hadronicFake      = sample.texName.count('hadronicFake')
     c.nonprompt         = sample.texName.count('non-prompt')
-    c.checkMatch        = any(c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine)
+    c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
     c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
     c.failSigmaIetaIeta = sample.texName.count('fail')
     c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
