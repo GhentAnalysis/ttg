@@ -5,11 +5,11 @@ kmax *
 shapes * * $FILE $PROCESS $PROCESS_$SYSTEMATIC
 ---------------
 bin 1
-observation $OBSERVATION
+observation -1
 ------------------------------
 bin                    1          1
 process                signal     background
 process                0          1
-rate                   $SIGNAL    $BACKGROUND
+rate                   -1         -1
 --------------------------------
 backgroundNorm   lnN   -          2

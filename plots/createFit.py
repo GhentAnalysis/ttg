@@ -86,9 +86,6 @@ for channel in ['ee', 'emu', 'mumu']:
       with open('combineCard.txt', 'r') as source:
         with open(fileName + '.txt', 'w') as destination:
           for line in source:
-            line = line.replace('$OBSERVATION', str(chargedIsoData.Integral()))
-            line = line.replace('$BACKGROUND',  str(sigmaIetaIetaSideBand.Integral()))
-            line = line.replace('$SIGNAL',      str(randomConeSelection.Integral()))
             line = line.replace('$FILE',        fileName + '.root')
             destination.write(line)
           for i in range(chargedIsoData.GetNbinsX()):
