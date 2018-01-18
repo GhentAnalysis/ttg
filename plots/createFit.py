@@ -14,18 +14,18 @@ import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
 
 def getCombineRelease():
-  version        = 'CMSSW_7_4_7'
+  version        = 'CMSSW_8_1_0'
   combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE','..', version)))
   if not os.path.exists(combineRelease):
     log.info('Setting up combine release')
     setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
-    setupCommand += 'export SCRAM_ARCH=slc6_amd64_gcc491;'
+    setupCommand += 'export SCRAM_ARCH=slc6_amd64_gcc530;'
     setupCommand += 'source $VO_CMS_SW_DIR/cmsset_default.sh;'
     setupCommand += 'scramv1 project CMSSW ' + version + ';'
     setupCommand += 'cd ' + combineRelease + '/src;'
     setupCommand += 'git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit;'
     setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
-    setupCommand += 'git fetch origin;git checkout v6.3.1;'
+    setupCommand += 'git fetch origin;git checkout v7.0.6;'
     setupCommand += 'eval `scramv1 runtime -sh`;scramv1 b clean;scramv1 b;'
     os.system(setupCommand)
   return combineRelease
