@@ -4,10 +4,10 @@ kmax *
 ---------------
 shapes * * $FILE $PROCESS $PROCESS_$SYSTEMATIC
 ---------------
-bin 1
+bin chgIso
 observation -1
 ------------------------------
-bin                    1          1
+bin                    chgIso     chgIso
 process                signal     background
 process                0          1
 rate                   -1         -1
