@@ -34,7 +34,7 @@ def getCombineRelease():
 #
 def runMaximumLikelihoodFit(fileName):
   log.info('Running fit')
-  os.system('(eval `scramv1 runtime -sh`;combine -M MaxLikelihoodFit ' + fileName + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + fileName + '.log')))
+  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics ' + fileName + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + fileName + '.log')))
   with open(fileName + '.log') as f:
     for line in f: log.warning(line.rstrip())
 #
