@@ -5,38 +5,14 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--checkStability', action='store_true', default=False)
 args = argParser.parse_args()
 
-from ttg.plots.plot    import Plot, getHistFromPkl
-from ttg.tools.helpers import getResultsFile
-from ttg.tools.logger  import getLogger, logLevel
+from ttg.plots.plot         import Plot, getHistFromPkl
+from ttg.tools.helpers      import getResultsFile
+from ttg.tools.logger       import getLogger
+from ttg.plots.combineTools import handleCombine
 log = getLogger(args.logLevel)
 
 import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
-
-def getCombineRelease():
-  version        = 'CMSSW_8_1_0'
-  combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE','..', version)))
-  if not os.path.exists(combineRelease):
-    log.info('Setting up combine release')
-    setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
-    setupCommand += 'export SCRAM_ARCH=slc6_amd64_gcc530;'
-    setupCommand += 'source $VO_CMS_SW_DIR/cmsset_default.sh;'
-    setupCommand += 'scramv1 project CMSSW ' + version + ';'
-    setupCommand += 'cd ' + combineRelease + '/src;'
-    setupCommand += 'git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit;'
-    setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
-    setupCommand += 'git fetch origin;git checkout v7.0.6;'
-    setupCommand += 'eval `scramv1 runtime -sh`;scramv1 b clean;scramv1 b;'
-    os.system(setupCommand)
-  return combineRelease
-
-
-def getResult(filename):
-  resultsFile = ROOT.TFile(filename)
-  fitResults  = resultsFile.Get("fit_s").floatParsFinal()
-  for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
-    if r.GetName() != 'r': continue
-    return (r.getVal(), r.getAsymErrorLo(), r.getAsymErrorHi())
 
 
 def writeStatVariation(hist, prefix):
@@ -54,7 +30,7 @@ for channel in ['ee', 'emu', 'mumu']:
   for pseudoData in [True, False]:
     for j in (range(-5, 20, 1) if pseudoData and args.checkStability else [0]):
       log.info('Creating templates and card for ' + channel)
-      fileName = 'purityFit_' + channel + ('_pseudoData' if pseudoData else '')
+      dataCard = 'purityFit_' + channel + ('_pseudoData' if pseudoData else '')
       selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'
       randomConeSelection    = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_randomConeIso', ['data'])
       sigmaIetaIetaSideBand  = getHistFromPkl(getResultsFile('sigmaIetaIetaMatchMC',       channel, selection), 'photon_chargedIso',    ['data'])
@@ -76,7 +52,7 @@ for channel in ['ee', 'emu', 'mumu']:
       randomConeSelection.Scale(chargedIsoData.Integral()/randomConeSelection.Integral())
       sigmaIetaIetaSideBand.Scale(chargedIsoData.Integral()/sigmaIetaIetaSideBand.Integral())
 
-      rootfile = ROOT.TFile(fileName + '.root', 'RECREATE')
+      rootfile = ROOT.TFile(dataCard + '.root', 'RECREATE')
       randomConeSelection.Write('signal')
       sigmaIetaIetaSideBand.Write('background')
       writeStatVariation(randomConeSelection,   'signal_statSig')
@@ -84,9 +60,9 @@ for channel in ['ee', 'emu', 'mumu']:
       chargedIsoData.Write('data_obs')
 
       with open('combineCard.txt', 'r') as source:
-        with open(fileName + '.txt', 'w') as destination:
+        with open(dataCard + '.txt', 'w') as destination:
           for line in source:
-            line = line.replace('$FILE',        fileName + '.root')
+            line = line.replace('$FILE',        dataCard + '.root')
             destination.write(line)
           for i in range(chargedIsoData.GetNbinsX()):
             continue # adding statistics does not work
@@ -94,19 +70,7 @@ for channel in ['ee', 'emu', 'mumu']:
             if sigmaIetaIetaSideBand.GetBinContent(i+1): destination.write('statBack' + str(i) + ' shapeN2      -          1\n')
       rootfile.Close()
 
-      currentRelease = os.getcwd()
-      combineRelease = getCombineRelease()
-      log.info('Moving to ' + combineRelease + ' to run combine')
-      for f in [fileName + '.txt', fileName + '.root']:
-        shutil.move(f, os.path.join(combineRelease, 'src', f))
-      os.chdir(os.path.join(combineRelease, 'src'))
-
-      log.info('Running fit')
-      os.system('(eval `scramv1 runtime -sh`;combine -M MaxLikelihoodFit ' + fileName + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + fileName + '.log')))
-      result = getResult('mlfit.root')
-      log.info('Result: %.2f %.2f/+%.2f' % result)
-      shutil.move('mlfit.root', fileName + '_results.root')
-      os.chdir(currentRelease)
+      result = handleCombine(dataCard)
 
       import ttg.tools.style as styles
       chargedIsoData.style        = styles.errorStyle(ROOT.kBlack)
