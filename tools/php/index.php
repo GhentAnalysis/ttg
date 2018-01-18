@@ -226,7 +226,7 @@ if ($_GET['noplots']) {
 
         $gitInfo = str_replace('.'.$figExt, '.gitInfo', $filename);
         array_push($displayed, $gitInfo);
-        if(file_exists($gitInfo) and filemtime($filename)-filemtime($other_filename)<100){
+        if(file_exists($gitInfo) and filemtime($filename)-filemtime($gitInfo)<100){
           print "<p style='font-size:80%'>Modified: <a class=\"file\" href=\"$gitInfo\">".date ("F d Y H:i:s", filemtime($filename)) . "</a></p>";
         } else {
           print "<p style='font-size:80%'>Modified: ".date ("F d Y H:i:s", filemtime($filename)) . " </p>";
