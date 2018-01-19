@@ -61,7 +61,7 @@ def handleCombine(dataCard):
   os.chdir(os.path.join(combineRelease, 'src'))
 
   runMaximumLikelihoodFit(dataCard)
-  result = getSignalStrength('mlfit.root')
+  result = getSignalStrength('fitDiagnostics.root')
   shutil.move('mlfit.root', dataCard + '_results.root')
   os.chdir(currentRelease)
   return result
