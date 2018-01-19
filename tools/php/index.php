@@ -250,6 +250,7 @@ foreach (glob("*") as $filename) {
         if (isset($_GET['match']) && !fnmatch('*'.$_GET['match'].'*', $filename)) continue;
         if (fnmatch('*-normMC*', $filename)) continue;
         if (fnmatch('*-log*',    $filename)) continue;
+        if (fnmatch('*-sys*',    $filename)) continue;
         if (is_dir($filename)) {
             print "<li>[DIR] <a href=\"$filename\">$filename</a></li>";
         } else if ($filename != "index.php" and $filename != "info.txt" and $filename != "git.txt") {
