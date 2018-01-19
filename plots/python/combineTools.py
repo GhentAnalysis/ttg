@@ -30,14 +30,6 @@ def getCombineRelease():
   return combineRelease
 
 #
-# Run the maximum likelihood fit
-#
-def runMaximumLikelihoodFit(fileName):
-  log.info('Running fit')
-  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics ' + fileName + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + fileName + '.log')))
-  with open(fileName + '.log') as f:
-    for line in f: log.warning(line.rstrip())
-#
 # Reads the fitted signal strength from the mlfit.root file
 #
 def getSignalStrength(filename):
@@ -60,9 +52,14 @@ def handleCombine(dataCard):
     shutil.move(f, os.path.join(combineRelease, 'src', f))
   os.chdir(os.path.join(combineRelease, 'src'))
 
-  runMaximumLikelihoodFit(dataCard)
-  result = getSignalStrength('fitDiagnostics.root')
-  shutil.move('mlfit.root', dataCard + '_results.root')
+  log.info('Running fit')
+  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
+  try:
+    result = getSignalStrength('fitDiagnostics.root')
+  except:
+    with open(dataCard + '.log') as f:
+      for line in f: log.warning(line.rstrip())
+  shutil.move('fitDiagnostics.root', dataCard + '_results.root')
   os.chdir(currentRelease)
   return result
 
