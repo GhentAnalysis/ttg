@@ -20,12 +20,14 @@ def getLegendMaskedArea(legend_coordinates, pad):
           'xLowerEdge': constrain( (legend_coordinates[0] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] ),
           'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
-def getHistFromPkl(resultsFile, plotName, selector):
-  allPlots    = pickle.load(file(resultsFile))
+def getHistFromPkl(resultFile, plotName, selector):
+  waitForLock(resultFile)
+  with open(resultFile, 'rb') as f: allPlots = pickle.load(f)
+  removeLock(resultFile)
   filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
   if   len(filtered) == 1: return filtered[filtered.keys()[0]]
   elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
-  else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultsFile)
+  else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultFile)
 
 def xAxisLabels(labels):
   def applyLabels(h):
