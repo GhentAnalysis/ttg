@@ -224,7 +224,7 @@ else:
   plots.append(Plot('j2_csvV2',                   'CSVv2(j_{2})',                         lambda c : c._jetCsvV2[c.j2],                                  (20, 0, 1)))
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
   plots.append(Plot('signalRegions',              'signal region',                        lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['1j,0b', '1j,1b','#geq2j,0b','#geq2j,1b','#geq2j,#geq2b'])))
-  plots.append(Plot('eventType',                  'eventType',                            lambda c : ord(c._ttgEventType),                               (15, 0, 15)))
+  plots.append(Plot('eventType',                  'eventType',                            lambda c : ord(c._ttgEventType),                               (9, 0, 9)))
   plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c._phTTGMatchPt[c.ph],                              (10,10,110)))
   plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c._phTTGMatchEta[c.ph]),                        (15,0,2.5), overflowBin=None))
   plots.append(Plot('genPhoton_minDeltaR',        'min#Delta R(gen #gamma, other)',       lambda c : genPhotonMinDeltaR(c),                              (15,0,1.5)))
