@@ -45,7 +45,7 @@ if not (args.runSys or (args.showSys and args.isChild)): systematics = {}
 #
 # Submit subjobs
 #
-if not args.isChild and (args.selection is None or args.channel is None):
+if not args.isChild and (args.selection is None or args.channel is None or (args.runSys and not args.sys)):
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
 
