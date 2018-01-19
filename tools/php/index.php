@@ -135,7 +135,7 @@ a:hover { text-decoration: underline; color: #D08504; }
     $normPath   = modifyChannel($myChannelDir, NULL,       'normMC',   $fullPath);
     $lumiPath   = modifyChannel($myChannelDir, '-normMC',  '',         $fullPath);
     $sysPath    = modifyChannel($myChannelDir, NULL,       'sys',      $fullPath);
-    $noSystPath = modifyChannel($myChannelDir, '-sys',      '',        $fullPath);
+    $noSysPath  = modifyChannel($myChannelDir, '-sys',      '',        $fullPath);
     $eePath     = modifyChannel($myChannelDir, $myChannel, 'ee',       $fullPath);
     $mumuPath   = modifyChannel($myChannelDir, $myChannel, 'mumu',     $fullPath);
     $allPath    = modifyChannel($myChannelDir, $myChannel, 'all',      $fullPath);
