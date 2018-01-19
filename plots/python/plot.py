@@ -152,14 +152,19 @@ class Plot:
     plotName   = self.name+(sys if sys else '')
 
     waitForLock(resultFile)
-    if os.path.exists(resultFile):
-      allPlots = pickle.load(file(resultFile))
-      allPlots.update({plotName : histos})
-    else:
-      allPlots = {plotName : histos}
-    pickle.dump(allPlots, file(resultFile, 'w'))
+    try:
+      if os.path.exists(resultFile):
+        with open(resultFile, 'rb') as f:
+          allPlots = pickle.load(f)
+          allPlots.update({plotName : histos})
+      else:
+        allPlots = {plotName : histos}
+      with open(resultFile, 'wb') as f:
+        pickle.dump(allPlots, f)
+      log.info("Plot " + plotName + " saved to cache")
+    except:
+      log.warning("Could not save " + plotName + " to cache")
     removeLock(resultFile)
-    log.info("Plot " + plotName + " saved to cache")
 
 
   #
