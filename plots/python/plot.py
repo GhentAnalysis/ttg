@@ -377,7 +377,9 @@ class Plot:
       ratio = defaultRatioStyle
 
     # If a results directory is given, we can load the histograms from former runs
-    if resultsDir: self.loadFromCache(resultsDir)
+    if resultsDir:
+      try:    self.loadFromCache(resultsDir)
+      except: return True
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 

@@ -326,6 +326,7 @@ if not args.showSys:
 #
 # Drawing the plots
 #
+noWarnings = True
 from ttg.tools.style import drawLumi
 for plot in plots: # 1D plots
   if isinstance(plot, Plot2D): continue
@@ -357,7 +358,7 @@ for plot in plots: # 1D plots
         extraTag  = '-log'    if logY else ''
         extraTag += '-sys'    if args.showSys else ''
         extraTag += '-normMC' if norm else ''
-        plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection),
+        err = plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection),
                   logX              = False,
                   logY              = logY,
                   sorting           = True,
@@ -365,6 +366,7 @@ for plot in plots: # 1D plots
                   drawObjects       = drawLumi(None, lumiScale),
                   **extraArgs
         )
+        if err: noWarnings=False
 
 if not args.sys:
   for plot in plots: # 2D plots
@@ -375,4 +377,5 @@ if not args.sys:
                   logZ           = False,
                   drawOption     = option,
                   drawObjects    = drawLumi(None, lumiScale))
-log.info('Finished')
+if noWarnings: log.info('Finished')
+else:          log.info('Could not produce all plots - finished')
