@@ -38,14 +38,12 @@ if args.editInfo:
 #
 from ttg.plots.systematics import systematics, linearSystematics, applySysToTree, applySysToString
 if args.sys=='None': args.sys=None
-if not (args.runSys or (args.showSys and args.isChild)): systematics = {}
-
 
 
 #
 # Submit subjobs
 #
-if not args.isChild and (args.selection is None or args.channel is None or (args.runSys and not args.sys)):
+if not args.isChild:
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
 
@@ -77,7 +75,10 @@ if not args.isChild and (args.selection is None or args.channel is None or (args
   elif args.tag.count('randomConeCheck'): channels = ['ee','mumu','emu','SF','all']
   elif args.tag.count('igmaIetaIeta'):    channels = ['ee','mumu','emu','SF','all']
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
-  for s in ['None'] + systematics.keys():
+
+  if args.sys: sysList = [args.sys]
+  else:        sysList = ['None'] + (systematics.keys() if args.runSys else [])
+  for s in sysList:
     for c in channels:
       args.channel = c
       args.sys     = s
