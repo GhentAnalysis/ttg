@@ -144,13 +144,13 @@ class Plot:
     return []
 
   #
-  # Save the histogram to a results.cache file, useful when you need to to further operations on it later
+  # Save the histogram to a results.cache file, useful when you need to do further operations on it later
   #
   def saveToCache(self, dir, sys):
     try:    os.makedirs(os.path.join(dir))
     except: pass
 
-    resultFile = os.path.join(dir, 'results.pkl')
+    resultFile = os.path.join(dir, self.name + '.pkl')
     histos     = {s.name+s.texName: h for s, h in self.histos.iteritems()}
     plotName   = self.name+(sys if sys else '')
     waitForLock(resultFile)
@@ -173,7 +173,7 @@ class Plot:
   # Load from cache
   #
   def loadFromCache(self, resultsDir):
-    resultsFile = os.path.join(resultsDir, 'results.pkl')
+    resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     waitForLock(resultsFile)
     with open(resultsFile, 'rb') as f:
       allPlots = pickle.load(f)
@@ -253,7 +253,7 @@ class Plot:
   # Adding systematics to MC (assuming MC is first in the stack list)
   #
   def getSystematicBand(self, systematics, linearSystematics, resultsDir):
-    resultsFile = os.path.join(resultsDir, 'results.pkl')
+    resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     waitForLock(resultsFile)
     with open(resultsFile, 'rb') as f:
       allPlots = pickle.load(f)
@@ -272,7 +272,7 @@ class Plot:
       if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
         h = allPlots[plotName][histName]
-        if h.Integral()==0: log.warning("Found empty histogram %s:%s in %s/results.pkl. Please rerun with --runSys option first.", plotName, histName, resultsDir)
+        if h.Integral()==0: log.warning("Found empty histogram %s:%s in %s/%s.pkl. Please rerun with --runSys option first.", plotName, histName, resultsDir, self.name)
         self.addOverFlowBin1D(h, self.overflowBin)
         self.normalizeBinWidth(h, self.normBinWidth)
 
