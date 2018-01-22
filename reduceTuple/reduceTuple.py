@@ -121,7 +121,7 @@ if args.singleLep: newBranches += ['isE/O','isMu/O']
 elif not args.QCD: newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
-  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'dbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
+  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
   for sys in ['', 'Up', 'Down']:                       newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
   for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:     newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
