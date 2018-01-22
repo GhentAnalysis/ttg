@@ -287,6 +287,7 @@ if not args.showSys:
 
     selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
+    removePlots = False
     for i in sample.eventLoop(cutString):
       c.GetEntry(i)
       if zeroLep:
@@ -313,14 +314,18 @@ if not args.showSys:
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
 
-      toRemove = []
       for plot in plots:
         try:
-          plot.fill(sample, eventWeight)
+          plot.histos[sample].Fill(plot.varX(c), eventWeight)
         except:
-          toRemove.append(plot)
+          try:    toRemove.append(plot)
+          except: toRemove = [plot]
+          removePlots = True
           log.info('Not considering plot ' + plot.name + ' for this selection')
-      for p in toRemove: plots.remove(p)
+      if removePlots: 
+        for p in toRemove: plots.remove(p)
+        removePlots = False
+        toRemove = []
 
 
 #
