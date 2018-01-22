@@ -5,7 +5,8 @@ log = getLogger()
 # Plot class
 # Still messy but it works reasonably
 #
-import ROOT, os, pickle, uuid, numpy
+import ROOT, os, uuid, numpy
+import cPickle as pickle
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo
 from ttg.tools.lock import waitForLock, removeLock
@@ -271,7 +272,7 @@ class Plot:
       if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
         h = allPlots[plotName][histName]
-        if h.Integral()==0: log.warning("Found empty histogram %s in %s/results.pkl. Please rerun with --runSys option first.", h.GetName(), resultsDir)
+        if h.Integral()==0: log.warning("Found empty histogram %s:%s in %s/results.pkl. Please rerun with --runSys option first.", plotName, histName, resultsDir)
         self.addOverFlowBin1D(h, self.overflowBin)
         self.normalizeBinWidth(h, self.normBinWidth)
 
