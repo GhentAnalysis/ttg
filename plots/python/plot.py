@@ -71,10 +71,6 @@ class Plot:
       self.histos[s] = ROOT.TH1F(name, name, *self.binning)
 
 
-  def fill(self, sample, weight=1.):
-    self.histos[sample].Fill(self.varX(sample.chain), weight)
-
-
   #
   # Add an overflow bin, optionally called from the draw function
   #
