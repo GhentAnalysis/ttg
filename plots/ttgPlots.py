@@ -309,7 +309,6 @@ if not args.showSys:
 
       if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
       if not sample.isData:                         c.puWeight  = puReweighting(c._nTrueInt)
-      else:                                         c._nTrueInt = None
 
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
