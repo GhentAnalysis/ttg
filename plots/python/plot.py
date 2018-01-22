@@ -152,7 +152,6 @@ class Plot:
     resultFile = os.path.join(dir, 'results.pkl')
     histos     = {s.name+s.texName: h for s, h in self.histos.iteritems()}
     plotName   = self.name+(sys if sys else '')
-
     waitForLock(resultFile)
     try:
       if os.path.exists(resultFile):
@@ -175,10 +174,14 @@ class Plot:
   def loadFromCache(self, resultsDir):
     resultsFile = os.path.join(resultsDir, 'results.pkl')
     waitForLock(resultsFile)
-    allPlots = pickle.load(file(resultsFile))
+    with open(resultsFile, 'rb') as f:
+      allPlots = pickle.load(f)
     removeLock(resultsFile)
-    for s in self.histos.keys():
-      self.histos[s] = allPlots[self.name][s.name+s.texName]
+    try:
+      for s in self.histos.keys():
+        self.histos[s] = allPlots[self.name][s.name+s.texName]
+    except:
+      return True
 
   #
   # Get Yields
@@ -251,7 +254,8 @@ class Plot:
   def getSystematicBand(self, systematics, linearSystematics, resultsDir):
     resultsFile = os.path.join(resultsDir, 'results.pkl')
     waitForLock(resultsFile)
-    allPlots = pickle.load(file(resultsFile))
+    with open(resultsFile, 'rb') as f:
+      allPlots = pickle.load(f)
     removeLock(resultsFile)
 
     def sumHistos(list):
@@ -278,11 +282,6 @@ class Plot:
 
     h_sys = {}
     for sys in sysList:
-      print sys
-      print histos_summed[None].GetBinContent(1)
-      print histos_summed[sys+'Up'].GetBinContent(1)
-      print histos_summed[sys+'Down'].GetBinContent(1)
-      print
       h_sys[sys] = histos_summed[sys+'Up'].Clone()
       h_sys[sys].Scale(-1)
       h_sys[sys].Add(histos_summed[sys+'Down'])
@@ -378,8 +377,8 @@ class Plot:
 
     # If a results directory is given, we can load the histograms from former runs
     if resultsDir:
-      try:    self.loadFromCache(resultsDir)
-      except: return True
+      err = self.loadFromCache(resultsDir)
+      if err: return True
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
