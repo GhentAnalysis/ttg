@@ -333,9 +333,15 @@ for plot in plots: # 1D plots
     extraArgs   = {}
     normalizeToMC = [False,True] if args.channel!='noData' else [False]
     if args.showSys:
+      if args.runSys:
+        systematics       = {i: j for i,j in systematics.iteritems()       if i.count(args.runSys)}
+        linearSystematics = {i: j for i,j in linearSystematics.iteritems() if i.count(args.runSys)}
+        extraArgs['resultsDir']      = os.path.join(plotDir, args.tag, args.channel, args.selection, args.runSys)
+      else:
+        extraArgs['resultsDir']      = os.path.join(plotDir, args.tag, args.channel, args.selection)
       extraArgs['systematics']       = systematics
       extraArgs['linearSystematics'] = linearSystematics
-      extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
+
 
     if args.channel!='noData' and not args.tag.count('singleLep'):
       extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
