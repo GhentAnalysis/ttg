@@ -22,8 +22,8 @@ special_cuts = {
     "gJetdR04":            "phJetDeltaR>0.4",
     "gJetdR02":            "phJetDeltaR>0.2",
 
-    "l2gWindow":           "l2g>55&&l2g<80",
-    "nol2gWindow":         "!(l2g>55&&l2g<80)",
+    "l2gWindow":           "ml2g>55&&ml2g<80",
+    "nol2gWindow":         "!(ml2g>55&&ml2g<80)",
   }
 
 def photonPt(tree, min, max):
