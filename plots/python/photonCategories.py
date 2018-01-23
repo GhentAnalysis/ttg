@@ -10,11 +10,11 @@ def isSignalPhoton(tree, index, oldDefinition=False):
   else:
     mcIndex = tree._phMatchMCPhotonAN15165[index]
     if mcIndex < 0:                                                                                               return False
-    if not tree._gen_phPassParentage[mcIndex]:                                                                    return False
     if (tree._gen_phPt[mcIndex] - tree._phPt[index])/tree._gen_phPt[mcIndex] > 0.1:                               return False
-    if tree._gen_phMinDeltaR[mcIndex] < 0.2:                                                                      return False
-    if deltaR(tree._gen_phEta[mcIndex], tree._phEta[index], tree._gen_phPhi[mcIndex], tree._phPhi[index]) > 0.01: return False
     if (tree._gen_phEta[mcIndex] - tree._phEta[index])/tree._gen_phEta[mcIndex] > 0.005:                          return False
+    if deltaR(tree._gen_phEta[mcIndex], tree._phEta[index], tree._gen_phPhi[mcIndex], tree._phPhi[index]) > 0.01: return False
+    if not tree._gen_phPassParentage[mcIndex]:                                                                    return False
+    if tree._gen_phMinDeltaR[mcIndex] < 0.2:                                                                      return False
     return True
 
 def isHadronicPhoton(tree, index, oldDefinition=False):
@@ -71,9 +71,8 @@ def checkPrompt(tree, index):
   return True
 
 def checkSigmaIetaIeta(tree, index):
-  upperCut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                      # forward region needs much higher cut
-  lowerCut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                      # forward region needs much higher cut
-  if   tree.passSigmaIetaIeta and tree._phSigmaIetaIeta[index] > lowerCut:                return False
-  elif tree.failSigmaIetaIeta and tree._phSigmaIetaIeta[index] < upperCut:                return False
+  cut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                        # forward region needs much higher cut
+  if   tree.passSigmaIetaIeta and tree._phSigmaIetaIeta[index] > cut:                     return False
+  elif tree.failSigmaIetaIeta and tree._phSigmaIetaIeta[index] < cut:                     return False
   if tree._phSigmaIetaIeta[index] > (0.016 if abs(tree._phEta[index]) < 1.566 else 0.04): return False
   return True
