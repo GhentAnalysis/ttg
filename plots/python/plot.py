@@ -10,6 +10,7 @@ import cPickle as pickle
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo
 from ttg.tools.lock import waitForLock, removeLock
+from ttg.tools.style import drawTex, getDefaultCanvas
 
 def getLegendMaskedArea(legend_coordinates, pad):
   def constrain(x, interval=[0,1]):
@@ -35,6 +36,25 @@ def xAxisLabels(labels):
     for i,l in enumerate(labels):
       h.GetXaxis().SetBinLabel(i+1, l)
   return [applyLabels]
+
+#
+# Function which fills all plots and removes them when the lamdbda fails (e.g. because var is not defined)
+#
+def fillPlots(plots, c, sample, eventWeight):
+  removePlots = False
+  for plot in plots:
+    try:
+      plot.histos[sample].Fill(plot.varX(c), eventWeight)
+    except:
+      if removePlots: toRemove.append(plot)
+      else:           toRemove = [plot]
+      removePlots = True
+      log.info('Not considering plot ' + plot.name + ' for this selection')
+  if removePlots:
+    for p in toRemove: plots.remove(p)
+    toRemove = []
+
+
 
 #
 # Plot class
@@ -121,7 +141,6 @@ class Plot:
         factor = 1./stack[0].Integral()
         for h in stack: h.Scale(factor)
     else:
-      from ttg.tools.style import drawTex
       if not isinstance(scaling, dict):
         raise ValueError( "'scaling' must be of the form {0:1, 2:3} which normalizes stack[0] to stack[1] etc. Got '%r'" % scaling )
       for source, target in scaling.iteritems():
@@ -203,7 +222,7 @@ class Plot:
 
   #
   # Make a correct ratio graph (also working for poisson errors, and showing error bars for points outside of y-axis range)
-  # 
+  #
   def makeRatioGraph(self, num, den):
     graph = ROOT.TGraphAsymmErrors(num)
     graph.Set(0)
@@ -268,7 +287,7 @@ class Plot:
       if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
         h = allPlots[plotName][histName]
-        if h.Integral()==0: log.warning("Found empty histogram %s:%s in %s/%s.pkl. Please rerun with --runSys option first.", plotName, histName, resultsDir, self.name)
+        if h.Integral()==0: log.warning("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         self.addOverFlowBin1D(h, self.overflowBin)
         self.normalizeBinWidth(h, self.normBinWidth)
 
@@ -396,8 +415,7 @@ class Plot:
     drawObjects += self.scaleStacks(histos, scaling)
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
-    import ttg.tools.style as style
-    canvas = style.getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
+    canvas = getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
     for modification in canvasModifications: modification(canvas)
 
     canvas.topPad.cd()
