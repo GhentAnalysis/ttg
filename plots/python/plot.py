@@ -80,7 +80,7 @@ class Plot:
     self.texX              = texX
     self.varX              = varX
     self.histModifications = histModifications
-
+    self.scaleFactor       = None
 
     if type(binning)==type([]):   self.binning = (len(binning)-1, numpy.array(binning))
     elif type(binning)==type(()): self.binning = binning
@@ -153,9 +153,9 @@ class Plot:
           log.warning( "Requested to scale empty Stack? Do nothing." )
           continue
 
-        factor = histos[target][0].Integral()/source_yield
-        for h in histos[source]: h.Scale(factor)
-        if len(scaling) == 1: return [drawTex((0.2, 0.8, 'Scaling: %.2f' % factor))]
+        self.scaleFactor = histos[target][0].Integral()/source_yield
+        for h in histos[source]: h.Scale(self.scaleFactor)
+        if len(scaling) == 1: return [drawTex((0.2, 0.8, 'Scaling: %.2f' % self.scaleFactor))]
     return []
 
   #
@@ -288,6 +288,7 @@ class Plot:
       for histName in histNames:
         h = allPlots[plotName][histName]
         if h.Integral()==0: log.warning("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
+        if self.scaleFactor: h.Scale(self.scaleFactor)
         self.addOverFlowBin1D(h, self.overflowBin)
         self.normalizeBinWidth(h, self.normBinWidth)
 
