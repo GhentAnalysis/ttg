@@ -333,10 +333,10 @@ for plot in plots: # 1D plots
     extraArgs   = {}
     normalizeToMC = [False,True] if args.channel!='noData' else [False]
     if args.showSys:
-      if args.runSys:
-        systematics       = {i: j for i,j in systematics.iteritems()       if i.count(args.runSys)}
-        linearSystematics = {i: j for i,j in linearSystematics.iteritems() if i.count(args.runSys)}
-        extraArgs['resultsDir']      = os.path.join(plotDir, args.tag, args.channel, args.selection, args.runSys)
+      if args.sys:
+        systematics       = {i: j for i,j in systematics.iteritems()       if i.count(args.sys)}
+        linearSystematics = {i: j for i,j in linearSystematics.iteritems() if i.count(args.sys)}
+        extraArgs['resultsDir']      = os.path.join(plotDir, args.tag, args.channel, args.selection, args.sys)
       else:
         extraArgs['resultsDir']      = os.path.join(plotDir, args.tag, args.channel, args.selection)
       extraArgs['systematics']       = systematics
