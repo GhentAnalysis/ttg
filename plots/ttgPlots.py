@@ -329,18 +329,16 @@ for plot in plots: # 1D plots
       log.info("Yields: ")
       for s,y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
-  if not args.sys:
-    extraArgs   = {}
+  if not args.sys or args.showSys:
+    extraArgs = {}
     normalizeToMC = [False,True] if args.channel!='noData' else [False]
     if args.showSys:
       if args.sys:
         systematics       = {i: j for i,j in systematics.iteritems()       if i.count(args.sys)}
         linearSystematics = {i: j for i,j in linearSystematics.iteritems() if i.count(args.sys)}
-        extraArgs['resultsDir']      = os.path.join(plotDir, args.tag, args.channel, args.selection, args.sys)
-      else:
-        extraArgs['resultsDir']      = os.path.join(plotDir, args.tag, args.channel, args.selection)
       extraArgs['systematics']       = systematics
       extraArgs['linearSystematics'] = linearSystematics
+      extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
 
 
     if args.channel!='noData' and not args.tag.count('singleLep'):
@@ -357,7 +355,8 @@ for plot in plots: # 1D plots
         extraTag  = '-log'    if logY else ''
         extraTag += '-sys'    if args.showSys else ''
         extraTag += '-normMC' if norm else ''
-        err = plot.draw(plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection),
+        err = plot.draw(
+                  plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
                   logX              = False,
                   logY              = logY,
                   sorting           = True,
