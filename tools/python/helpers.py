@@ -1,7 +1,8 @@
+import ROOT, socket, os, shutil, subprocess
+from math import pi
 #
 # Get plot directory
 #
-import socket, os
 plotDir = os.path.expandvars('/eos/user/t/tomc/www/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/www/ttG/')
 def getResultsFile(*args):
   return os.path.join(*((plotDir,)+args+('results.pkl',)))
@@ -10,7 +11,6 @@ def getResultsFile(*args):
 # Get object (e.g. hist) from file using key
 #
 def getObjFromFile(fname, hname):
-    import ROOT
     f = ROOT.TFile(fname)
     assert not f.IsZombie()
     f.cd()
@@ -25,7 +25,6 @@ def getObjFromFile(fname, hname):
 # Copy the index.php file to plotting directory
 #
 def copyIndexPHP(directory):
-  import os, shutil
   index_php = os.path.join(directory, 'index.php' )
   if not os.path.exists(directory): os.makedirs(directory)
   if not directory[-1] == '/': directory = directory+'/'
@@ -40,14 +39,12 @@ def copyIndexPHP(directory):
 # Update the latest git information
 #
 def updateGitInfo():
-  import os
   os.system('(git log -n 1;git diff) &> git.txt')
 
 #
 # Copy git info for plot
 #
 def copyGitInfo(path):
-  import shutil
   if os.path.isfile('git.txt'):
     shutil.copyfile('git.txt', path)
 
@@ -56,7 +53,6 @@ def copyGitInfo(path):
 # Edit the info file in a given path
 #
 def editInfo(path):
-  import subprocess,os
   editor = os.getenv('EDITOR', 'vi')
   subprocess.call('%s %s' % (editor, os.path.join(path, 'info.txt')), shell=True)
 
@@ -65,7 +61,6 @@ def editInfo(path):
 # Delta phi function
 #
 def deltaPhi(phi1, phi2):
-  from math import pi
   dphi = phi2-phi1
   if dphi > pi:   dphi -= 2.0*pi
   if dphi <= -pi: dphi += 2.0*pi

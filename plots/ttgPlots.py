@@ -90,7 +90,7 @@ if not args.isChild:
 # Initializing
 #
 import os, ROOT
-from ttg.plots.plot           import Plot, xAxisLabels
+from ttg.plots.plot           import Plot, xAxisLabels, fillPlots
 from ttg.plots.plot2D         import Plot2D
 from ttg.plots.cutInterpreter import cutInterpreter
 from ttg.reduceTuple.objectSelection import photonSelector
@@ -149,17 +149,17 @@ def channelNumbering(c):
   else:         return (1 if c.isMuMu else (2 if c.isEMu else 3))
 
 def genPhotonMinDeltaR(c):
-  if c._phMatchMCPhotonAN15165[c.ph] >= 0: return c._gen_phMinDeltaR[c._phMatchMCPhotonAN15165[c.ph]]
-  else:                                    return 999
+  try:    return c._gen_phMinDeltaR[c._phMatchMCPhotonAN15165[c.ph]]
+  except: return 999
 
 def createSignalRegions(c):
   if c.njets == 1:
     if c.ndbjets == 0: return 0
-    if c.ndbjets == 1: return 1
+    else:              return 1
   elif c.njets >= 2:
     if c.ndbjets == 0: return 2
     if c.ndbjets == 1: return 3
-    if c.ndbjets >= 2: return 4
+    else:              return 4
   return -1
 
 
@@ -287,7 +287,6 @@ if not args.showSys:
 
     selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
-    removePlots = False
     for i in sample.eventLoop(cutString):
       c.GetEntry(i)
       if zeroLep:
@@ -314,18 +313,7 @@ if not args.showSys:
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
 
-      for plot in plots:
-        try:
-          plot.histos[sample].Fill(plot.varX(c), eventWeight)
-        except:
-          try:    toRemove.append(plot)
-          except: toRemove = [plot]
-          removePlots = True
-          log.info('Not considering plot ' + plot.name + ' for this selection')
-      if removePlots: 
-        for p in toRemove: plots.remove(p)
-        removePlots = False
-        toRemove = []
+      fillPlots(plots, c, sample, eventWeight)
 
 
 #
