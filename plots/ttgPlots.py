@@ -148,10 +148,6 @@ def channelNumbering(c):
   if singleLep: return (1 if c.isMu else 2)
   else:         return (1 if c.isMuMu else (2 if c.isEMu else 3))
 
-def genPhotonMinDeltaR(c):
-  try:    return c._gen_phMinDeltaR[c._phMatchMCPhotonAN15165[c.ph]]
-  except: return 999
-
 def createSignalRegions(c):
   if c.njets == 1:
     if c.ndbjets == 0: return 0
@@ -162,6 +158,10 @@ def createSignalRegions(c):
     else:              return 4
   return -1
 
+def genPhotonMinDeltaR(c):
+  matchIndex = c._phMatchMCPhotonAN15165[c.ph]
+  try:    return c._gen_phMinDeltaR[matchIndex]
+  except: return 999
 
 
 if args.tag.count('randomConeCheck'):
