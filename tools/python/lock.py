@@ -28,8 +28,8 @@ def removeLock(filename):
 
 import contextlib
 @contextlib.contextmanager
-def lock(filename, *args):
-  waitForLock(filename)
-  with open(filename, *args) as f:
+def lock(filename, mode, keepLock=False, existingLock=False):
+  if not existingLock: waitForLock(filename)
+  with open(filename, mode) as f:
     yield f
-  removeLock(filename)
+  if not keepLock: removeLock(filename)
