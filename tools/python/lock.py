@@ -26,13 +26,10 @@ def waitForLock(filename):
 def removeLock(filename):
   os.system("rm " + filename + "_lock")
 
-#class lock(object):
-#  def __init__(self, filename):
-#    self.filename = filename
-#    waitForLock(filename)
-
-#  def __enter__(self):
-#    pass
-
-#  def __exit__(self):
-#    removeLock(self.filename)
+import contextlib
+@contextlib.contextmanager
+def lock(filename, *args):
+  waitForLock(filename)
+  with open(filename, *args) as f:
+    yield f
+  removeLock(filename)
