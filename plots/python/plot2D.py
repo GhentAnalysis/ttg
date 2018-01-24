@@ -8,28 +8,16 @@ log = getLogger()
 #
 import ROOT, os, pickle, uuid
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo
-from ttg.tools.lock import waitForLock, removeLock
+from ttg.plots.plot import Plot
 
 #
 # Plot class
 #
-class Plot2D:
-  defaultStack        = None
-
-  @staticmethod
-  def setDefaults(stack = None):
-      Plot2D.defaultStack        = stack
-
+class Plot2D(Plot):
   def __init__(self, name, texX, varX, binningX, texY, varY, binningY, stack=None):
-    self.stack       = stack       if stack else Plot2D.defaultStack
-    self.name        = name
-    self.texX        = texX
-    self.texY        = texY
-    self.varX        = varX
+    Plot.__init__(self, name, texX, varX, binningX, stack=stack, texY=texY)
     self.varY        = varY
-
-    if type(binningX)==type([]):   self.binningX = (len(binningX)-1, numpy.array(binningX))
-    elif type(binningX)==type(()): self.binningX = binningX
+    self.binningX    = self.binning
 
     if type(binningY)==type([]):   self.binningY = (len(binningY)-1, numpy.array(binningY))
     elif type(binningY)==type(()): self.binningY = binningY
@@ -82,24 +70,6 @@ class Plot2D:
         factor = histos[target][0].Integral()/source_yield
         for h in histos[source]: h.Scale(factor)
 
-  #
-  # Save the histogram to a results.cache file, useful when you need to to further operations on it later
-  #
-  def saveToCache(self, dir):
-    try:    os.makedirs(os.path.join(dir))
-    except: pass
-
-    resultFile = os.path.join(dir, 'results.pkl')
-
-    waitForLock(resultFile)
-    if os.path.exists(resultFile):
-      allPlots = pickle.load(file(resultFile))
-      allPlots.update({self.name : self.histos})
-    else:
-      allPlots = {self.name : self.histos}
-    pickle.dump(allPlots, file(resultFile, 'w'))
-    removeLock(resultFile)
-    log.info("Plot " + self.name + " saved to cache")
 
   def getYields(self, binX=None, binY=None):
     if binX and binY: return {s.name : h.GetBinContent(binX, binY) for s,h in self.histos.iteritems()}
