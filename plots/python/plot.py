@@ -182,11 +182,12 @@ class Plot:
   #
   def loadFromCache(self, resultsDir):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
-    try: 
+    try:
       with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
       for s in self.histos.keys():
         self.histos[s] = allPlots[self.name][s.name+s.texName]
     except:
+      log.warning('No resultsfile for ' + self.name + '.pkl')
       return True
 
   #

@@ -30,6 +30,9 @@ import contextlib
 @contextlib.contextmanager
 def lock(filename, mode, keepLock=False, existingLock=False):
   if not existingLock: waitForLock(filename)
-  with open(filename, mode) as f:
-    yield f
-  if not keepLock: removeLock(filename)
+  try:
+    with open(filename, mode) as f: yield f
+  except:
+    raise
+  finally:
+    if not keepLock: removeLock(filename)
