@@ -1,10 +1,10 @@
 -- MC
-TTGamma                    t#bar{t}#gamma_(genuine)                                  fillStyle     kOrange
+TTGamma                    t#bar{t}#gamma_(genuine,misIdEle)                         fillStyle     kOrange
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
 
-TTGamma                    t#bar{t}#gamma_(hadronicPhoton,hadronicFake,misIdEle)     fillStyle     42
+TTGamma                    t#bar{t}#gamma_(hadronicPhoton,hadronicFake)              fillStyle     42
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
@@ -13,20 +13,45 @@ TTJets_Dilep               t#bar{t}_(genuine,misIdEle)                          
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               t#bar{t}_(hadronicPhoton)                                 fillStyle     633                      _ttgEventType<3
+TTJets_Dilep               t#bar{t}_(hadronicPhoton,hadronicFake)                    fillStyle     633                      _ttgEventType<3
 +TTJets_SingleLepFromTbar
 +TTJets_SingleLepFromT
 
-TTJets_Dilep               t#bar{t}_(hadronicFake)                                   fillStyle     9                        _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+ZG                         Z#gamma_(genuine,misIdEle)                                fillStyle     598
+ZG                         Z#gamma_(hadronicPhoton,hadronicFake)                     fillStyle     599
 
-ZG                         Z#gamma                                                   fillStyle     598
-
-DY_M10to50_NLO             Drell-Yan                                                 fillStyle     427                      _zgEventType<3
+DY_M10to50_NLO             Drell-Yan_(genuine,misIdEle)                              fillStyle     427                      _zgEventType<3
++DY_M50_NLO
+DY_M10to50_NLO             Drell-Yan_(hadronicPhoton,hadronicFake)                   fillStyle     428                      _zgEventType<3
 +DY_M50_NLO
 
-singleTop_tW_tbar          other                                                     fillStyle     797
+singleTop_tW_tbar          other_(genuine,misIdEle)                                  fillStyle     797
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
++VVTo2L2Nu
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
++WG
+
+singleTop_tW_tbar          other_(hadronicPhoton,hadronicFake)                       fillStyle     798
 +singleTop_tW_t
 +singleTop_t_tbar
 +singleTop_t_t
