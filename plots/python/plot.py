@@ -9,7 +9,7 @@ import ROOT, os, uuid, numpy
 import cPickle as pickle
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo
-from ttg.tools.lock import waitForLock, removeLock
+from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas
 
 def getLegendMaskedArea(legend_coordinates, pad):
@@ -23,9 +23,7 @@ def getLegendMaskedArea(legend_coordinates, pad):
           'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
 def getHistFromPkl(resultFile, plotName, selector):
-  waitForLock(resultFile)
-  with open(resultFile, 'rb') as f: allPlots = pickle.load(f)
-  removeLock(resultFile)
+  with lock(resultFile, 'rb') as f: allPlots = pickle.load(f)
   filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
   if   len(filtered) == 1: return filtered[filtered.keys()[0]]
   elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
@@ -44,7 +42,7 @@ def fillPlots(plots, c, sample, eventWeight):
   removePlots = False
   for plot in plots:
     try:
-      plot.histos[sample].Fill(plot.varX(c), eventWeight)
+      plot.fill(sample, eventWeight)
     except:
       if removePlots: toRemove.append(plot)
       else:           toRemove = [plot]
@@ -105,6 +103,8 @@ class Plot:
           histo.SetBinError(1, sqrt(histo.GetBinError(0)**2 + histo.GetBinError(1)**2))
       histo.overflowApplied = True
 
+  def fill(self, sample, weight=1.):
+    self.histos[sample].Fill(self.varX(sample.chain), weight)
 
   #
   # Stacking the hist, called during the draw function
@@ -168,20 +168,13 @@ class Plot:
     resultFile = os.path.join(dir, self.name + '.pkl')
     histos     = {s.name+s.texName: h for s, h in self.histos.iteritems()}
     plotName   = self.name+(sys if sys else '')
-    waitForLock(resultFile)
     try:
-      if os.path.exists(resultFile):
-        with open(resultFile, 'rb') as f:
-          allPlots = pickle.load(f)
-          allPlots.update({plotName : histos})
-      else:
-        allPlots = {plotName : histos}
-      with open(resultFile, 'wb') as f:
-        pickle.dump(allPlots, f)
-      log.info("Plot " + plotName + " saved to cache")
+      with lock(resultFile, 'rb', keepLock=True) as f: allPlots = pickle.load(f)
+      allPlots.update({plotName : histos})
     except:
-      log.warning("Could not save " + plotName + " to cache")
-    removeLock(resultFile)
+      allPlots = {plotName : histos}
+    with lock(resultFile, 'wb', existingLock=True) as f: pickle.dump(allPlots, f)
+    log.info("Plot " + plotName + " saved to cache")
 
 
   #
@@ -189,10 +182,9 @@ class Plot:
   #
   def loadFromCache(self, resultsDir):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
-    waitForLock(resultsFile)
-    with open(resultsFile, 'rb') as f:
-      allPlots = pickle.load(f)
-    removeLock(resultsFile)
+    with lock(resultsFile, 'rb') as f:
+      try:     allPlots = pickle.load(f)
+      except:  return True
     try:
       for s in self.histos.keys():
         self.histos[s] = allPlots[self.name][s.name+s.texName]
@@ -269,10 +261,7 @@ class Plot:
   #
   def getSystematicBand(self, systematics, linearSystematics, resultsDir):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
-    waitForLock(resultsFile)
-    with open(resultsFile, 'rb') as f:
-      allPlots = pickle.load(f)
-    removeLock(resultsFile)
+    with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
     def sumHistos(list):
       sum = list[0].Clone()
@@ -287,7 +276,7 @@ class Plot:
       if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
         h = allPlots[plotName][histName]
-        if h.Integral()==0: log.warning("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
+        if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         if self.scaleFactor: h.Scale(self.scaleFactor)
         self.addOverFlowBin1D(h, self.overflowBin)
         self.normalizeBinWidth(h, self.normBinWidth)
