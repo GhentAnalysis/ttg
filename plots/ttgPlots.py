@@ -262,14 +262,6 @@ if not args.showSys:
     if args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep', sys=args.sys)
 
-    if not sample.isData:
-      from ttg.reduceTuple.puReweighting import getReweightingFunction
-      if args.tag.count('puDown'): puWeights = 'PU_2016_36000_XSecDown'
-      elif args.tag.count('puUp'): puWeights = 'PU_2016_36000_XSecUp'
-      else:                        puWeights = 'PU_2016_36000_XSecCentral'
-      puReweighting = getReweightingFunction(data=puWeights, useMC=sample.getTrueInteractions(reduced=True))
-
-
     c.data = sample.isData
 
     # Filter booleans
@@ -307,7 +299,6 @@ if not args.showSys:
         if not checkPrompt(c, c.ph):               continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
       if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
-      if not sample.isData:                         c.puWeight  = puReweighting(c._nTrueInt)
 
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
