@@ -16,7 +16,6 @@ argParser.add_argument('--showSys',        action='store_true', default=False)
 argParser.add_argument('--editInfo',       action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
-argParser.add_argument('--runWillem',      action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
 args = argParser.parse_args()
 
@@ -268,7 +267,7 @@ if not args.showSys:
       if args.tag.count('puDown'): puWeights = 'PU_2016_36000_XSecDown'
       elif args.tag.count('puUp'): puWeights = 'PU_2016_36000_XSecUp'
       else:                        puWeights = 'PU_2016_36000_XSecCentral'
-      puReweighting = getReweightingFunction(data=puWeights, useWillem=args.runWillem, useMC=sample.getTrueInteractions(reduced=True))
+      puReweighting = getReweightingFunction(data=puWeights, useMC=sample.getTrueInteractions(reduced=True))
 
 
     c.data = sample.isData

@@ -10,7 +10,7 @@ from ttg.tools.helpers import getObjFromFile
 dataDir = '$CMSSW_BASE/src/ttg/reduceTuple/data/puReweightingData/'
 
 #Define a functio that returns a reweighting-function according to the data 
-def getReweightingFunction(data="PU_2016_36000_XSecCentral", useWillem=False, useMC=None):
+def getReweightingFunction(data="PU_2016_36000_XSecCentral", useMC=None):
 
   # Data
   histoData = getObjFromFile(dataDir + data + '.root', 'pileup')
@@ -31,7 +31,6 @@ def getReweightingFunction(data="PU_2016_36000_XSecCentral", useWillem=False, us
   # Create reweighting histo
   reweightingHisto = histoData.Clone('reweightingHisto')
   reweightingHisto.Divide(mcProfile)
-  if useWillem: reweightingHisto = getObjFromFile(dataDir+'puw_nTrueInt_Moriond2017_36p5fb_Summer16_69mb_central.root' , 'puw') # temporary debug
 
   # Define reweightingFunc
   def reweightingFunc(nTrueInt):
