@@ -6,7 +6,6 @@ argParser.add_argument('--checkStability', action='store_true', default=False)
 args = argParser.parse_args()
 
 from ttg.plots.plot         import Plot, getHistFromPkl
-from ttg.tools.helpers      import getResultsFile
 from ttg.tools.logger       import getLogger
 from ttg.plots.combineTools import handleCombine
 log = getLogger(args.logLevel)
@@ -32,23 +31,23 @@ for channel in ['ee', 'emu', 'mumu']:
       log.info('Creating templates and card for ' + channel)
       dataCard = 'purityFit_' + channel + ('_pseudoData' if pseudoData else '')
       selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'
-      randomConeSelection    = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_randomConeIso', ['data'])
-      sigmaIetaIetaSideBand  = getHistFromPkl(getResultsFile('sigmaIetaIetaMatchMC',       channel, selection), 'photon_chargedIso',    ['data'])
+      randomConeSelection    = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_randomConeIso', ['data'])
+      sigmaIetaIetaSideBand  = getHistFromPkl(('sigmaIetaIetaMatchMC',       channel, selection), 'photon_chargedIso',    ['data'])
       if pseudoData:
-        chargedIsoTTGamma    = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['t#bar{t}#gamma'])
-        chargedIsoOther      = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['TTJets'])
-        chargedIsoOther.Add(   getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['Z#gamma']))
-        chargedIsoOther.Add(   getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['Drell-Yan']))
-        chargedIsoOther.Add(   getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['single-t']))
-        chargedIsoOther.Add(   getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['multiboson']))
-        chargedIsoOther.Add(   getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['t#bar{t}+V']))
+        chargedIsoTTGamma    = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['t#bar{t}#gamma'])
+        chargedIsoOther      = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['TTJets'])
+        chargedIsoOther.Add(   getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['Z#gamma']))
+        chargedIsoOther.Add(   getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['Drell-Yan']))
+        chargedIsoOther.Add(   getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['single-t']))
+        chargedIsoOther.Add(   getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['multiboson']))
+        chargedIsoOther.Add(   getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', channel, selection), 'photon_chargedIso',    ['t#bar{t}+V']))
         chargedIsoTTGamma.Scale(1+j*0.1)
         chargedIsoData = chargedIsoTTGamma.Clone()
         chargedIsoData.Add(chargedIsoOther)
         mcResult = chargedIsoTTGamma.Integral()/chargedIsoData.Integral()
         log.info('Expected fit for mc: %.3f' % mcResult)
       else:
-        chargedIsoData      = getHistFromPkl(getResultsFile('eleSusyLoose-phoCBnoChgIso',  channel, selection), 'photon_chargedIso',    ['data'])
+        chargedIsoData      = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso',  channel, selection), 'photon_chargedIso',    ['data'])
       randomConeSelection.Scale(chargedIsoData.Integral()/randomConeSelection.Integral())
       sigmaIetaIetaSideBand.Scale(chargedIsoData.Integral()/sigmaIetaIetaSideBand.Integral())
 

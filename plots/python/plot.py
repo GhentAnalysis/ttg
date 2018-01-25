@@ -8,7 +8,7 @@ log = getLogger()
 import ROOT, os, uuid, numpy
 import cPickle as pickle
 from math import sqrt
-from ttg.tools.helpers import copyIndexPHP, copyGitInfo
+from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas
 
@@ -22,7 +22,8 @@ def getLegendMaskedArea(legend_coordinates, pad):
           'xLowerEdge': constrain( (legend_coordinates[0] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] ),
           'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
-def getHistFromPkl(resultFile, plotName, selector):
+def getHistFromPkl(subdirs, plotName, selector):
+  resultFile = os.path.join(*((plotDir,)+subdirs+(plotName +'.pkl',)))
   with lock(resultFile, 'rb') as f: allPlots = pickle.load(f)
   filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
   if   len(filtered) == 1: return filtered[filtered.keys()[0]]

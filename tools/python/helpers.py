@@ -4,8 +4,6 @@ from math import pi
 # Get plot directory
 #
 plotDir = os.path.expandvars('/eos/user/t/tomc/www/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/www/ttG/')
-def getResultsFile(*args):
-  return os.path.join(*((plotDir,)+args+('results.pkl',)))
 
 #
 # Get object (e.g. hist) from file using key
