@@ -278,8 +278,8 @@ class Plot:
         h = allPlots[plotName][histName]
         if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         if self.scaleFactor: h.Scale(self.scaleFactor)
-        self.addOverFlowBin1D(h, self.overflowBin)
         self.normalizeBinWidth(h, self.normBinWidth)
+        self.addOverFlowBin1D(h, self.overflowBin)
 
       histos_summed[sys] = sumHistos([allPlots[plotName][histName] for histName in histNames])
       # TODO: need to scale something?
