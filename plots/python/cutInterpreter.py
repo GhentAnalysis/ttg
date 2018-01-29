@@ -31,7 +31,7 @@ def photonPt(tree, min, max):
   if max and tree._phPt[tree.ph] > max: return False
   return True
 
-continous_variables = [("mll", "mll"),('photonPt',(None, photonPt))]
+continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt',(None, photonPt))]
 discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets")]
 
 class cutInterpreter:
