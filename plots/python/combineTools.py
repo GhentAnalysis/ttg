@@ -44,7 +44,7 @@ def getSignalStrength(filename):
 #
 # Complete combine chain
 #
-def handleCombine(dataCard):
+def handleCombine(dataCard, trackParameters = []):
   currentRelease = os.getcwd()
   combineRelease = getCombineRelease()
   log.info('Moving to ' + combineRelease + ' to run combine')
@@ -53,7 +53,7 @@ def handleCombine(dataCard):
   os.chdir(os.path.join(combineRelease, 'src'))
 
   log.info('Running fit')
-  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
+  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics --skipBOnlyFit --trackParameters ' + ','.join(trackParameters) + ' ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
   try:
     result = getSignalStrength('fitDiagnostics.root')
   except:
@@ -63,30 +63,28 @@ def handleCombine(dataCard):
   os.chdir(currentRelease)
   return result
 
+
+
+
 # Temporary, should become way more complicated function or class to handle systematics
-def writeCard(shapes, samples):
+def writeCard(cardName, shapes, templates, extraLines):
   def tab(list):
     return ''.join([('%11s' % i) for i in list]) + '\n'
 
-  templates = [(s + '_p') for s in samples] + [(s + '_np') for s in samples]
-
-  with open('testCombine.txt', 'w') as f:
+  with open(cardName + '.txt', 'w') as f:
     f.write('imax ' + str(len(shapes)) + '\n')
     f.write('jmax *\n')
     f.write('kmax *\n')
-    f.write('-'*200 + '\n')
-    f.write('shapes * * $FILE $PROCESS $PROCESS_$SYSTEMATIC'+'\n')
-    f.write('-'*200 + '\n')
+    f.write('-'*300 + '\n')
+    f.write('shapes * * '+cardName+'.root $CHANNEL/$PROCESS $CHANNEL/$PROCESS_$SYSTEMATIC'+'\n')
+    f.write('-'*300 + '\n')
     f.write(tab(['bin']+shapes))
     f.write(tab(['observation']+['-1']*len(shapes)))
+    f.write('-'*300 + '\n')
+    f.write(tab(['bin']    + [s    for s in shapes for i in range(len(templates))]))
+    f.write(tab(['process']+ [t    for i in range(len(shapes)) for t in templates]))
+    f.write(tab(['process']+ [t    for i in range(len(shapes)) for t in range(len(templates))]))
+    f.write(tab(['rate']+    ['-1' for i in range(len(shapes)) for t in range(len(templates))]))
     f.write('-'*200 + '\n')
-    f.write(tab(['bin']+[s for s in shapes for i in range(len(templates))]))
-    f.write(tab(['process']+[t for i in range(len(shapes)) for t in templates]))
-    f.write(tab(['process']+[t for i in range(len(shapes)) for t in range(len(templates))]))
-    f.write(tab(['rate']+['-1' for i in range(len(shapes)) for t in range(len(templates))]))
-    f.write('-'*200 + '\n')
-    for s in samples[1:]:
-      f.write(s + '_norm rateParam * ' + s + '* 1\n')
-      f.write(s + '_norm param 1.0 0.2\n')
-
-writeCard(['chgIso','sr'],['TTGamma','TTbar','ZG','Other'])
+    for x in extraLines:
+      f.write(x + '\n')
