@@ -54,12 +54,25 @@ if not args.isChild:
                   'llg-looseLeptonVeto-mll40',
                   'llg-looseLeptonVeto-mll40-offZ',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt15to20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
 
+    selections = [s for s in selections if s.count('photonPt')]
     if args.tag.count('QCD'):
       selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
     if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
@@ -200,12 +213,19 @@ else:
   plots.append(Plot('l2_eta_small',               '|#eta|(l_{2})',                        lambda c : abs(c._lEta[c.l2]),                                 (50,0,2.4)))
   plots.append(Plot('l2_phi',                     '#phi(l_{2})',                          lambda c : c._lPhi[c.l2],                                      (10,-pi,pi)))
   plots.append(Plot('l2_relIso',                  'relIso(l_{2})',                        lambda c : c._relIso[c.l2],                                    (10,0,0.12)))
-  plots.append(Plot('dl_mass',                    'm(ll) (GeV)',                          lambda c : c.mll,                                              (40,0,200)))
+  plots.append(Plot('dl_mass',                    'm(ll) (GeV)',                          lambda c : c.mll,                                              (20,0,200)))
+  plots.append(Plot('dl_mass_small',              'm(ll) (GeV)',                          lambda c : c.mll,                                              (40,0,200)))
   plots.append(Plot('ll_deltaPhi',                '#Delta#phi(ll)',                       lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),             (10,0,pi)))
   plots.append(Plot('photon_randomConeIso',       'random cone chargedIso(#gamma) (Gev)', lambda c : c._phRandomConeChargedIsolation[c.ph],              (20,0,20)))
-  plots.append(Plot('l1g_mass',                   'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                             (40,0,200)))
+  plots.append(Plot('l1g_mass',                   'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                             (20,0,200)))
+  plots.append(Plot('l1g_mass_small',             'm(l_{1}#gamma) (GeV)',                 lambda c : c.ml1g,                                             (40,0,200)))
   plots.append(Plot('phL1DeltaR',                 '{#Delta}R(#gamma, l_{1})',             lambda c : c.phL1DeltaR,                                       (20,0,5)))
-  plots.append(Plot('l2g_mass',                   'm(l_{2}#gamma) (GeV)',                 lambda c : c.ml2g,                                             (40,0,200)))
+  plots.append(Plot('l2g_mass',                   'm(l_{2}#gamma) (GeV)',                 lambda c : c.ml2g,                                             (20,0,200)))
+  plots.append(Plot('l2g_mass_small',             'm(l_{2}#gamma) (GeV)',                 lambda c : c.ml2g,                                             (40,0,200)))
+  plots.append(Plot('l2g_e_mass',                 'm(e_{2}#gamma) (GeV)',                 lambda c : c.ml2g if c._lFlavor[c.l2]==0 else -1,              (20,0,200)))
+  plots.append(Plot('l2g_e_mass_small',           'm(e_{2}#gamma) (GeV)',                 lambda c : c.ml2g if c._lFlavor[c.l2]==0 else -1,              (40,0,200)))
+  plots.append(Plot('l2g_mu_mass',                'm(#mu_{2}#gamma) (GeV)',               lambda c : c.ml2g if c._lFlavor[c.l2]==1 else -1,              (20,0,200)))
+  plots.append(Plot('l2g_mu_mass_small',          'm(#mu_{2}#gamma) (GeV)',               lambda c : c.ml2g if c._lFlavor[c.l2]==1 else -1,              (40,0,200)))
   plots.append(Plot('phL2DeltaR',                 '{#Delta}R(#gamma, l_{2})',             lambda c : c.phL2DeltaR,                                       (20,0,5)))
   plots.append(Plot('phoPt_over_dlg_mass',        'p_{T}(#gamma)/m(ll#gamma)',            lambda c : c._phPt[c.ph]/c.mllg,                               (40,0,2)))
   plots.append(Plot('dlg_mass',                   'm(ll#gamma) (GeV)',                    lambda c : c.mllg,                                             (40,0,500)))
