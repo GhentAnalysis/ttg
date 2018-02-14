@@ -82,7 +82,7 @@ outputFile.cd()
 #
 # Switch off unneeded branches
 #
-delBranches: ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
+delBranches = ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
 if not sample.isData: delBranches += ["heWeight","gen*Charge","gen*Flavor","gen_met","gen*Status","gen*Pdg"]
 for i in delBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
@@ -138,6 +138,10 @@ c.cbLoose             = args.type.count('eleCBLoose')
 c.cbMedium            = args.type.count('eleCBMedium')
 c.cbVeto              = args.type.count('eleCBVeto')
 c.susyLoose           = args.type.count('eleSusyLoose')
+
+for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
+  if args.type.count('e'  + var): setattr(c, '_lPtCorr',  '_lPt' + var)
+  if args.type.count('ph' + var): setattr(c, '_phPtCorr', '_phPt' + var)
 
 #
 # Loop over the tree and make new vars

@@ -36,6 +36,10 @@ def leptonPt(tree, index):
   if tree._lFlavor[index]: return tree._lPt[index]
   else:                    return tree._lPtCorr[index]
 
+def leptonE(tree, index):
+  if tree._lFlavor[index]: return tree._lE[index]
+  else:                    return tree._lECorr[index]
+
 
 def looseLeptonSelector(tree, index):
   if tree._lFlavor[index] == 2:        return False
