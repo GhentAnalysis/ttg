@@ -10,7 +10,7 @@ if [ ! -f "$PILEUP_LATEST" ]; then
    PILEUP_LATEST=pileup_latest.txt
 fi
 
-pileupCalc.py -i $JSON --inputLumiJSON $PILEUP_LATEST --calcMode true --minBiasXsec 66986 --maxPileupBin 100 --numPileupBins 100 PU_2016_${LUMI}_XSecDown.root
+pileupCalc.py -i $JSON --inputLumiJSON $PILEUP_LATEST --calcMode true --minBiasXsec 66017 --maxPileupBin 100 --numPileupBins 100 PU_2016_${LUMI}_XSecDown.root
 pileupCalc.py -i $JSON --inputLumiJSON $PILEUP_LATEST --calcMode true --minBiasXsec 69200 --maxPileupBin 100 --numPileupBins 100 PU_2016_${LUMI}_XSecCentral.root
-pileupCalc.py -i $JSON --inputLumiJSON $PILEUP_LATEST --calcMode true --minBiasXsec 71414 --maxPileupBin 100 --numPileupBins 100 PU_2016_${LUMI}_XSecUp.root
+pileupCalc.py -i $JSON --inputLumiJSON $PILEUP_LATEST --calcMode true --minBiasXsec 72383 --maxPileupBin 100 --numPileupBins 100 PU_2016_${LUMI}_XSecUp.root
 
