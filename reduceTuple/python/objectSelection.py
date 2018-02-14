@@ -32,10 +32,15 @@ def getLorentzVector(pt, eta, phi, e):
 #
 # Individual lepton selector
 #
+def leptonPt(tree, index):
+  if tree._lFlavor[index]: return tree._lPt[index]
+  else:                    return tree._lPtCorr[index]
+
+
 def looseLeptonSelector(tree, index):
   if tree._lFlavor[index] == 2:        return False
   if tree._relIso[index] > 0.4:        return False
-  if tree._lPt[index] < 15:            return False
+  if leptonPt(tree, index) < 15:       return False
   if abs(tree._lEta[index]) > 2.4:     return False
   if abs(tree._3dIPSig[index]) > 4:    return False
   if abs(tree._dxy[index]) > 0.05:     return False
@@ -50,9 +55,9 @@ def electronMva(tree, index):
 
 def electronSusyLoose(tree, index):
   if not tree._lElectronPassEmu[index]: return False
-  if(abs(tree._lEta[index]) < 0.8):     return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.48, -0.85)
-  elif(abs(tree._lEta[index]) < 1.479): return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.67, -0.91)
-  else:                                 return tree._lElectronMva[index] > slidingCut(tree._lPt[index], -0.49, -0.83)
+  if(abs(tree._lEta[index]) < 0.8):     return tree._lElectronMva[index] > slidingCut(tree._lPtCorr[index], -0.48, -0.85)
+  elif(abs(tree._lEta[index]) < 1.479): return tree._lElectronMva[index] > slidingCut(tree._lPtCorr[index], -0.67, -0.91)
+  else:                                 return tree._lElectronMva[index] > slidingCut(tree._lPtCorr[index], -0.49, -0.83)
 
 def electronSelector(tree, index):
   for i in xrange(ord(tree._nMu)): # cleaning electrons around muons
@@ -69,8 +74,8 @@ def muonSelector(tree, index):
   return tree._lPOGMedium[index]
 
 def leptonSelector(tree, index):
+  if leptonPt(tree, index) < 15:       return False
   if tree._relIso[index] > 0.12:       return False
-  if tree._lPt[index] < 15:            return False
   if abs(tree._lEta[index]) > 2.4:     return False
   if abs(tree._3dIPSig[index]) > 4:    return False
   if abs(tree._dxy[index]) > 0.05:     return False
@@ -87,7 +92,7 @@ def leptonSelector(tree, index):
 def getSortKey(item): return item[0]
 
 def select2l(t, n):
-  ptAndIndex        = [(t._lPt[i], i) for i in t.leptons]
+  ptAndIndex        = [(leptonPt(t, i), i) for i in t.leptons]
   if len(ptAndIndex) < 2: return False
 
   ptAndIndex.sort(reverse=True, key=getSortKey)
@@ -98,11 +103,11 @@ def select2l(t, n):
   n.isMuMu          = (t._lFlavor[n.l1] + t._lFlavor[n.l2]) == 2 # note: assuming no taus are kept
   n.isOS            = t._lCharge[n.l1] != t._lCharge[n.l2]
   n.looseLeptonVeto = len([i for i in xrange(ord(t._nLight)) if looseLeptonSelector(t, i)]) <= 2
-  return t._lPt[n.l1] > 25 and n.isOS
+  return leptonPt(t, n.l1) > 25 and n.isOS
 
 
 def select1l(t, n):
-  ptAndIndex        = [(t._lPt[i], i) for i in t.leptons]
+  ptAndIndex        = [(leptonPt(t, i), i) for i in t.leptons]
   if len(ptAndIndex) < 1: return False
 
   ptAndIndex.sort(reverse=True, key=getSortKey)
@@ -125,7 +130,7 @@ def selectLeptons(t, n, minLeptons):
 # Photon selector
 #
 def photonCutBasedReduced(c, index):
-  pt = c._phPt[index]
+  pt = c._phPtCorr[index]
   if abs(c._phEtaSC[index]) < 1.479:
     if c._phHadronicOverEm[index] >  0.0396:                                return False
     if c._phNeutralHadronIsolation[index] > 2.725+0.0148*pt+0.000017*pt*pt: return False
@@ -140,7 +145,7 @@ def photonCutBasedReduced(c, index):
 def photonSelector(tree, index, n, pixelSeed, minLeptons):
   if abs(tree._phEta[index]) > 1.4442 and abs(tree._phEta[index]) < 1.566:      return False
   if abs(tree._phEta[index]) > 2.5:                                             return False
-  if tree._phPt[index] < 15:                                                    return False
+  if tree._phPtCorr[index] < 15:                                                return False
   if pixelSeed and tree._phHasPixelSeed[index]:                                 return False
   if not pixelSeed and not tree._phPassElectronVeto[index]:                     return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
@@ -163,9 +168,9 @@ def selectPhotons(t, n, doCut, minLeptons):
 # Add invariant masses to the tree
 #
 def makeInvariantMasses(t, n):
-  first  = getLorentzVector(t._lPt[n.l1], t._lEta[n.l1], t._lPhi[n.l1], t._lE[n.l1])     if len(t.leptons) > 0 else None
-  second = getLorentzVector(t._lPt[n.l2], t._lEta[n.l2], t._lPhi[n.l2], t._lE[n.l2])     if len(t.leptons) > 1 else None
-  photon = getLorentzVector(t._phPt[n.ph], t._phEta[n.ph], t._phPhi[n.ph], t._phE[n.ph]) if len(t.photons) > 0 else None
+  first  = getLorentzVector(leptonPt(t, n.l1), t._lEta[n.l1], t._lPhi[n.l1], leptonE(t, n.l1))   if len(t.leptons) > 0 else None
+  second = getLorentzVector(leptonPt(t, n.l2), t._lEta[n.l2], t._lPhi[n.l2], leptonE(t, n.l2))   if len(t.leptons) > 1 else None
+  photon = getLorentzVector(t._phPtCorr[n.ph], t._phEta[n.ph], t._phPhi[n.ph], t._phECorr[n.ph]) if len(t.photons) > 0 else None
 
   n.mll  = (first+second).M()        if first and second else -1
   n.mllg = (first+second+photon).M() if first and second and photon else -1
