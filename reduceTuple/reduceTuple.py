@@ -46,6 +46,7 @@ if not args.isChild and not args.subJob:
   splitData = args.splitData
   for sample in sampleList:
     args.sample = sample.name
+    if (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr')): continue
     if splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
       for dataRun in (['B','C','D','E','F','G','H'] if splitData not in ['B','C','D','E','F','G','H'] else [splitData]):
         args.splitData = dataRun
