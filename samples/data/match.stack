@@ -9,13 +9,9 @@ TTGamma                    t#bar{t}#gamma_(hadronicPhoton,hadronicFake)         
 +TTGamma_tbar
 +TTGamma_had
 
-TTJets_Dilep               t#bar{t}_(genuine,misIdEle)                               fillStyle     35                       _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 t#bar{t}_(genuine,misIdEle)                               fillStyle     35                       _ttgEventType<3
 
-TTJets_Dilep               t#bar{t}_(hadronicPhoton,hadronicFake)                    fillStyle     633                      _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 t#bar{t}_(hadronicPhoton,hadronicFake)                    fillStyle     633                      _ttgEventType<3
 
 ZG                         Z#gamma_(genuine,misIdEle)                                fillStyle     598
 ZG                         Z#gamma_(hadronicPhoton,hadronicFake)                     fillStyle     599

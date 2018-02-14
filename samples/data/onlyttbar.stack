@@ -1,11 +1,7 @@
 -- MC
-TTJets_Dilep               t#bar{t}_(overlap)    fillStyle     46                       _ttgEventType>=3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 t#bar{t}_(overlap)    fillStyle     46                       _ttgEventType>=3
 
-TTJets_Dilep               t#bar{t}              fillStyle     633                      _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 t#bar{t}              fillStyle     633                      _ttgEventType<3
 
 ZG                         Z#gamma               fillStyle     598
 WG                         W#gamma               fillStyle     596

@@ -1,7 +1,5 @@
 -- MC (match hadronicFake)
-TTJets_Dilep               MC_(hadronicPhoton,hadronicFake)                    errorStyle    kRed                    _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 MC_(hadronicPhoton,hadronicFake)                    errorStyle    kRed                    _ttgEventType<3
 
 DY_M10to50_NLO             MC_(hadronicPhoton,hadronicFake)                    errorStyle    kRed                    _zgEventType<3
 +DY_M50_NLO
