@@ -30,7 +30,7 @@ class leptonTrackingEfficiency:
 
   def getSF(self, tree, index, sigma=0):
     flavor = tree._lFlavor[index]
-    pt     = tree._lPt[index]
+    pt     = tree._lPt[index] if flavor==1 else tree._lPtCorr[index]
     eta    = abs(tree._lEtaSC[index] if flavor==0 else tree._lEta[index])
 
     if abs(flavor)==0:
