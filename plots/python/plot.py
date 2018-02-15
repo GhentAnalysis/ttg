@@ -388,6 +388,11 @@ class Plot:
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
+    # Check if at least one entry is present
+    if not sum([h.Integral() for h in self.histos.values()]) > 0:
+      log.info('Empty histograms for ' + self.name + ', skipping')
+      return
+
     # Apply style to histograms + normalize bin width + add overflow bin
     for s, h in histDict.iteritems():
       if hasattr(s, 'style'): s.style(h)
