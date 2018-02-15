@@ -54,7 +54,7 @@ if not args.isChild and not args.subJob:
         args.subProdLabel=None
         args.splitData=None
     else:
-      submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name)
+      submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=os.path.join(args.type, sample.name))
   exit(0)
 
 #
