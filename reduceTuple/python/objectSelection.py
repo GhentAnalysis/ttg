@@ -118,6 +118,7 @@ def select1l(t, n):
 
   ptAndIndex.sort(reverse=True, key=getSortKey)
   n.l1              = ptAndIndex[0][1]
+  n.l1_pt           = ptAndIndex[0][0]
   n.isE             = (t._lFlavor[n.l1] == 0)
   n.isMu            = (t._lFlavor[n.l1] == 1)
   n.looseLeptonVeto = len([i for i in xrange(ord(t._nLight)) if looseLeptonSelector(t, i)]) <= 1
@@ -166,7 +167,9 @@ def selectPhotons(t, n, doCut, minLeptons):
   else:                              pixelSeed = True
   t.photons  = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, pixelSeed, minLeptons)]
   n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
-  if len(t.photons): n.ph = t.photons[0]
+  if len(t.photons): 
+    n.ph    = t.photons[0]
+    n.ph_pt = t._phPtCorr[photons[0]]
   return (len(t.photons) > 0 or not doCut)
 
 
