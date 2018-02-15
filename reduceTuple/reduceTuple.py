@@ -64,9 +64,12 @@ if not args.isChild and not args.subJob:
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
-sample     = getSampleFromList(sampleList, args.sample)
-c          = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
-lumiWeight = float(sample.xsec)*1000/sample.getTotalEvents() if not sample.isData else 1
+sample = getSampleFromList(sampleList, args.sample)
+c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
+
+if not sample.isData:
+  totalWeights = sample.getTotalWeights()
+  lumiWeights  = [float(sample.xsec)*1000/totalWeight for totalWeight in totalWeights]
 
 
 #
@@ -84,7 +87,7 @@ outputFile.cd()
 # Switch off unneeded branches
 #
 delBranches = ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
-if not sample.isData: delBranches += ["heWeight","gen*Charge","gen*Flavor","gen_met","gen*Status","gen*Pdg"]
+if not sample.isData: delBranches += ["gen*Charge","gen*Flavor","gen_met","gen*Status","gen*Pdg"]
 for i in delBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
 
@@ -122,9 +125,10 @@ if args.singleLep: newBranches += ['isE/O','isMu/O']
 elif not args.QCD: newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
-  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
-  for sys in ['', 'Up', 'Down']:                       newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
-  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:     newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
+  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:           newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
+  for sys in ['', 'Up', 'Down']:                                 newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
+  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:               newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
+  for sys in ['muRu', 'muRd', 'muFu', 'muFd', 'muRFu', 'muRFd']: newBranches += ['weight_' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -177,7 +181,22 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   makeDeltaR(c, newVars)
 
   if not sample.isData:
-    newVars.genWeight          = c._weight*lumiWeight
+    newVars.genWeight          = c._weight*lumiWeights[0]
+    try:
+      newVars.weight_muRu      = c._lheWeights[3]*lumiWeights[3]
+      newVars.weight_muRd      = c._lheWeights[6]*lumiWeights[6]
+      newVars.weight_muFu      = c._lheWeights[1]*lumiWeights[1]
+      newVars.weight_muFd      = c._lheWeights[2]*lumiWeights[2]
+      newVars.weight_muRFu     = c._lheWeights[4]*lumiWeights[4]
+      newVars.weight_muRFd     = c._lheWeights[8]*lumiWeights[8]
+    except:
+      newVars.weight_muRu      = -1
+      newVars.weight_muRd      = -1
+      newVars.weight_muFu      = -1
+      newVars.weight_muFd      = -1
+      newVars.weight_muRFu     = -1
+      newVars.weight_muRFd     = -1
+
     newVars.puWeight           = puReweighting(c._nTrueInt)
     newVars.puWeightUp         = puReweightingUp(c._nTrueInt)
     newVars.puWeightDown       = puReweightingDown(c._nTrueInt)
