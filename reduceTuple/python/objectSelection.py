@@ -102,6 +102,8 @@ def select2l(t, n):
   ptAndIndex.sort(reverse=True, key=getSortKey)
   n.l1              = ptAndIndex[0][1]
   n.l2              = ptAndIndex[1][1]
+  n.l1_pt           = ptAndIndex[0][0]
+  n.l2_pt           = ptAndIndex[1][0]
   n.isEE            = (t._lFlavor[n.l1] + t._lFlavor[n.l2]) == 0
   n.isEMu           = (t._lFlavor[n.l1] + t._lFlavor[n.l2]) == 1
   n.isMuMu          = (t._lFlavor[n.l1] + t._lFlavor[n.l2]) == 2 # note: assuming no taus are kept
