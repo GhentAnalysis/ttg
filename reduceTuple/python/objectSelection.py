@@ -169,7 +169,7 @@ def selectPhotons(t, n, doCut, minLeptons):
   n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
   if len(t.photons): 
     n.ph    = t.photons[0]
-    n.ph_pt = t._phPtCorr[photons[0]]
+    n.ph_pt = t._phPtCorr[n.ph]
   return (len(t.photons) > 0 or not doCut)
 
 

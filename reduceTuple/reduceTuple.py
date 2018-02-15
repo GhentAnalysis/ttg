@@ -68,8 +68,7 @@ sample = getSampleFromList(sampleList, args.sample)
 c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
 
 if not sample.isData:
-  totalWeights = sample.getTotalWeights()
-  lumiWeights  = [float(sample.xsec)*1000/totalWeight for totalWeight in totalWeights]
+  lumiWeights  = [float(sample.xsec)*1000/totalWeight for totalWeight in sample.getTotalWeights()]
 
 
 #
@@ -84,12 +83,16 @@ outputFile = ROOT.TFile(os.path.join(reducedTupleDir, sample.name + '_' + output
 outputFile.cd()
 
 #
-# Switch off unneeded branches
+# Switch off unused branches, avoid copying of branches we want to delete
 #
-delBranches = ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
-if not sample.isData: delBranches += ["gen*Charge","gen*Flavor","gen_met","gen*Status","gen*Pdg"]
-for i in delBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
+unusedBranches = ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
+deleteBranches = ["Scale","Res","pass","flag","met","POG"]
+if not sample.isData:
+  unusedBranches += ["gen*Charge","gen*Flavor","gen_met","gen*Status","gen*Pdg"]
+  deleteBranches += ["heWeight"]
+for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
+for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
 
 
 #
@@ -127,7 +130,7 @@ if not sample.isData:
   for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:           newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
   for sys in ['', 'Up', 'Down']:                                 newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
   for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:               newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
-  for sys in ['muRu', 'muRd', 'muFu', 'muFd', 'muRFu', 'muRFd']: newBranches += ['weight_' + sys + '/F']
+  for sys in ['q2Up','q2Down','pdfUp','pdfDown']:                newBranches += ['weight_' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -152,6 +155,7 @@ for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
 #
 log.info('Starting event loop')
 from ttg.reduceTuple.objectSelection import selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
+from math import sqrt
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
   if not selectLeptons(c, newVars, minLeptons):                                            continue
@@ -181,20 +185,16 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   if not sample.isData:
     newVars.genWeight          = c._weight*lumiWeights[0]
-    try:
-      newVars.weight_muRu      = c._lheWeights[3]*lumiWeights[3]
-      newVars.weight_muRd      = c._lheWeights[6]*lumiWeights[6]
-      newVars.weight_muFu      = c._lheWeights[1]*lumiWeights[1]
-      newVars.weight_muFd      = c._lheWeights[2]*lumiWeights[2]
-      newVars.weight_muRFu     = c._lheWeights[4]*lumiWeights[4]
-      newVars.weight_muRFd     = c._lheWeights[8]*lumiWeights[8]
-    except:
-      newVars.weight_muRu      = -1
-      newVars.weight_muRd      = -1
-      newVars.weight_muFu      = -1
-      newVars.weight_muFd      = -1
-      newVars.weight_muRFu     = -1
-      newVars.weight_muRFd     = -1
+
+    try:    q2Weights          = [c._lheWeight[i]*lumiWeights[i] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
+    except: q2Weights          = [newVars.genWeight]
+    newVars.weight_q2Down      = min(q2Weights)
+    newVars.weight_q2Up        = max(q2Weights)
+
+    try:    pdfVarRms          = sqrt(sum([(newVars.genWeight - c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)]))/100   # Using RMS of 100 pdf's
+    except: pdfVarRms          = 0
+    newVars.weight_pdfDown     = newVars.genWeight - pdfVarRms
+    newVars.weight_pdfUp       = newVars.genWeight + pdfVarRms
 
     newVars.puWeight           = puReweighting(c._nTrueInt)
     newVars.puWeightUp         = puReweightingUp(c._nTrueInt)
