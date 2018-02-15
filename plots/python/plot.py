@@ -24,11 +24,13 @@ def getLegendMaskedArea(legend_coordinates, pad):
 
 def getHistFromPkl(subdirs, plotName, selector):
   resultFile = os.path.join(*((plotDir,)+subdirs+(plotName +'.pkl',)))
-  with lock(resultFile, 'rb') as f: allPlots = pickle.load(f)
-  filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
-  if   len(filtered) == 1: return filtered[filtered.keys()[0]]
-  elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
-  else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultFile)
+  if os.path.isdir(os.path.dirname(resultFile)):
+    with lock(resultFile, 'rb') as f: allPlots = pickle.load(f)
+    filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
+    if   len(filtered) == 1: return filtered[filtered.keys()[0]]
+    elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
+    else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultFile)
+  else:                      log.error('Missing cache file ' + resultFile)
 
 def xAxisLabels(labels):
   def applyLabels(h):

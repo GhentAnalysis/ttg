@@ -46,12 +46,17 @@ class Sample:
   def addSelectionString(self, selectionString):
     self.selectionString = selectionString
 
-  def getTotalEvents(self):
-    total = 0
+  def getTotalWeights(self):
+    maxVar = None
     for f in self.listOfFiles:
-      f      = ROOT.TFile(f)
-      total += f.Get('blackJackAndHookers/hCounter').GetBinContent(1)
-    return total
+      f = ROOT.TFile(f)
+      if not maxVar:
+        maxVar = f.Get('blackJackAndHookers/lheCounter').GetNbinsX()
+        totals = [0 for i in range(maxVar)]
+      for i in range(maxVar):
+        if i==0: totals[i] += f.Get('blackJackAndHookers/hCounter').GetBinContent(i+1)    # should be no difference, but more precise
+        else:    totals[i] += f.Get('blackJackAndHookers/lheCounter').GetBinContent(i+1)
+    return totals
 
   def getTrueInteractions(self, reduced=False):
     trueInteractions = None
