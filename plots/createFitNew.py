@@ -13,7 +13,6 @@ log = getLogger(args.logLevel)
 import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
 
-shapes      = ['sr_OF']
 #shapes      = ['chgIso','sr_SF','sr_OF']
 #samples     = ['TTGamma','TTJets','ZG','DY','other']
 samples     = ['TTGamma','TTJets','ZG','WG','DY','multiboson','single-t']
@@ -32,7 +31,19 @@ def writeStatVariation(hist, prefix):
     up.Write(prefix + str(i) + 'Up')
     down.Write(prefix + str(i) + 'Down')
 
-def writeRootFile(name):
+
+def addHists(hists, name, toAdd):
+  if not toAdd:     return
+  if name in hists: hists[name].Add(toAdd)
+  else:             hists[name] = toAdd
+
+def writeHist(file, shape, template, hist):
+  if not file.GetDirectory(shape): file.mkdir(shape)
+  file.cd(shape)
+  hist.Write(template)
+  file.cd()
+
+def writeRootFile(name, shapes):
   f = ROOT.TFile(name + '.root', 'RECREATE')
   for s in shapes: f.mkdir(s)
 
@@ -43,8 +54,7 @@ def writeRootFile(name):
     hists['sr_OF_']  = getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             [sample])
     for s in shapes:
       if hists[s + '_']:
-        try:    hists[s].Add(s + '_')
-        except: hists[s] = hists[s + '_']
+        addHists(hists, s, hists[s + '_'])
 
   for s in shapes:
     f.cd(s)
@@ -63,28 +73,23 @@ def writeRootFile(name):
         hists[s].Write(sample + ('_p' if prompt else '_np'))
   f.Close()
 
-def writeRootFileTest(name):
+def writeRootFile(name):
   f = ROOT.TFile(name + '.root', 'RECREATE')
-  for s in shapes: f.mkdir(s)
 
-  hists = {}
-  for sample in ['DoubleEG','DoubleMuon','MuonEG']:
-    hists['sr_OF_']  = getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             [sample])
-    for s in shapes:
-      if hists[s + '_']:
-        try:    hists[s].Add(s + '_')
-        except: hists[s] = hists[s + '_']
+  writeHist(f, 'chgIso', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+  writeHist(f, 'sr_OF',  'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             ['MuonEG']))
+  writeHist(f, 'sr_SF',  'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             ['DoubleEG'],['DoubleMuon']))
 
-  for s in shapes:
-    f.cd(s)
-    hists[s].Write('data_obs')
-
-  for sample in samples:
-    hists['sr_OF']  = getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             [sample])
-
-    for s in shapes:
-      f.cd(s)
-      hists[s].Write(sample)
+#  for splitType in ['', '_p', '_np']:
+  for splitType in ['']:
+    for sample in samples:
+      if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']]
+      elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
+    # else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
+      else:                  selectors = [[sample]]
+      writeHist(f, 'chgIso', sample, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', *selectors))
+      writeHist(f, 'sr_OF',  sample, getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
+      writeHist(f, 'sr_SF',  sample, getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
   f.Close()
 
 
@@ -96,8 +101,8 @@ extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
 extraLines += [(s + '_norm param 1.0 0.2')            for s in samples[1:]]
 #extraLines += ['nonPrompt rateParam * *_np 1'] 
 
-writeRootFileTest(cardName)
-writeCard(cardName, shapes, templates, extraLines)
+writeRootFile(cardName)
+writeCard(cardName, ['sr_OF', 'sr_SF'], templates, extraLines)
 
 
 result = handleCombine(cardName, trackParameters = ['TTJets_norm', 'ZG_norm'])
