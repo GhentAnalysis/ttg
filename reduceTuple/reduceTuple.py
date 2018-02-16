@@ -68,7 +68,7 @@ sample = getSampleFromList(sampleList, args.sample)
 c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
 
 if not sample.isData:
-  lumiWeights  = [(float(sample.xsec)*1000/totalWeight if totalWeight > 0 else 0) for totalWeight in sample.getTotalWeights()]
+  lumiWeights  = [(float(sample.xsec)*1000/totalWeight if totalWeight > 0 else lumiWeights[0]) for totalWeight in sample.getTotalWeights()]
 
 
 #
@@ -146,9 +146,13 @@ c.cbMedium            = args.type.count('eleCBMedium')
 c.cbVeto              = args.type.count('eleCBVeto')
 c.susyLoose           = args.type.count('eleSusyLoose')
 
+def switchBranches(c, default, variation):
+  return lambda c: setattr(c, default, getattr(c, variation))
+
+branchModifications = []
 for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
-  if args.type.count('e'  + var): setattr(c, '_lPtCorr',  '_lPt' + var)
-  if args.type.count('ph' + var): setattr(c, '_phPtCorr', '_phPt' + var)
+  if args.type.count('e'  + var): branchModifications += [applySys(c, '_lPtCorr',  '_lPt' + var),  applySys(c, '_lECorr',  '_lE' + var)]
+  if args.type.count('ph' + var): branchModifications += [applySys(c, '_phPtCorr', '_phPt' + var), applySys(c, '_phECorr', '_phE' + var)]
 
 #
 # Loop over the tree and make new vars
@@ -158,6 +162,8 @@ from ttg.reduceTuple.objectSelection import selectLeptons, selectPhotons, makeIn
 from math import sqrt
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
+  for s in branchModifications: s(c)
+
   if not selectLeptons(c, newVars, minLeptons):                                            continue
   if not selectPhotons(c, newVars, doPhotonCut, minLeptons):                               continue
 
