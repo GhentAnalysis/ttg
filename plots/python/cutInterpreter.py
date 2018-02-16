@@ -27,8 +27,8 @@ special_cuts = {
   }
 
 def photonPt(tree, min, max):
-  if tree._phPt[tree.ph] < min:         return False
-  if max and tree._phPt[tree.ph] > max: return False
+  if tree.ph_pt < min:         return False
+  if max and tree.ph_pt > max: return False
   return True
 
 continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt',(None, photonPt))]
