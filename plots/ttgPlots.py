@@ -72,7 +72,7 @@ if not args.isChild:
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p']
 
-    selections = [s for s in selections if s.count('photonPt')]
+
     if args.tag.count('QCD'):
       selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
     if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
