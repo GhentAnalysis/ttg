@@ -22,15 +22,20 @@ def getLegendMaskedArea(legend_coordinates, pad):
           'xLowerEdge': constrain( (legend_coordinates[0] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] ),
           'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
-def getHistFromPkl(subdirs, plotName, selector):
+def getHistFromPkl(subdirs, plotName, *selectors):
+  hist = None
   resultFile = os.path.join(*((plotDir,)+subdirs+(plotName +'.pkl',)))
   if os.path.isdir(os.path.dirname(resultFile)):
     with lock(resultFile, 'rb') as f: allPlots = pickle.load(f)
-    filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
-    if   len(filtered) == 1: return filtered[filtered.keys()[0]]
-    elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
-    else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultFile)
-  else:                      log.error('Missing cache file ' + resultFile)
+    for selector in selectors:
+      filtered    = {s:h for s,h in allPlots[plotName].iteritems() if all(s.count(sel) for sel in selector)}
+      if len(filtered) == 1:
+        if hist:               hist.Add(filtered[filtered.keys()[0]])
+        else:                  hist   = filtered[filtered.keys()[0]]
+      elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
+      else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultFile)
+  else:                        log.error('Missing cache file ' + resultFile)
+  return hist
 
 def xAxisLabels(labels):
   def applyLabels(h):
