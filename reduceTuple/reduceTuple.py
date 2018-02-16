@@ -50,7 +50,7 @@ if not args.isChild and not args.subJob:
     if splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
       for dataRun in (['B','C','D','E','F','G','H'] if splitData not in ['B','C','D','E','F','G','H'] else [splitData]):
         args.splitData = dataRun
-        submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=sample.name+args.splitData)
+        submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=os.path.join(args.type, sample.name+args.splitData))
         args.subProdLabel=None
         args.splitData=None
     else:
@@ -68,7 +68,7 @@ sample = getSampleFromList(sampleList, args.sample)
 c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
 
 if not sample.isData:
-  lumiWeights  = [float(sample.xsec)*1000/totalWeight for totalWeight in sample.getTotalWeights()]
+  lumiWeights  = [(float(sample.xsec)*1000/totalWeight if totalWeight > 0 else 0) for totalWeight in sample.getTotalWeights()]
 
 
 #
