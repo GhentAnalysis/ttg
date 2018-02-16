@@ -43,36 +43,6 @@ def writeHist(file, shape, template, hist):
   hist.Write(template)
   file.cd()
 
-def writeRootFile(name, shapes):
-  f = ROOT.TFile(name + '.root', 'RECREATE')
-  for s in shapes: f.mkdir(s)
-
-  hists = {}
-  for sample in ['DoubleEG','DoubleMuon','MuonEG']:
-    hists['chgIso_'] = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', [sample])
-    hists['sr_SF_']  = getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             [sample])
-    hists['sr_OF_']  = getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             [sample])
-    for s in shapes:
-      if hists[s + '_']:
-        addHists(hists, s, hists[s + '_'])
-
-  for s in shapes:
-    f.cd(s)
-    hists[s].Write('data_obs')
-
-  for sample in samples:
-    for prompt in [True, False]:
-      if prompt: categories = '(genuine,misIdEle)'
-      else:      categories = '(hadronicPhoton,hadronicFake)'
-      hists['chgIso'] = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', [sample, categories])
-      hists['sr_SF']  = getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             [sample, categories])
-      hists['sr_OF']  = getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             [sample, categories])
-
-      for s in shapes:
-        f.cd(s)
-        hists[s].Write(sample + ('_p' if prompt else '_np'))
-  f.Close()
-
 def writeRootFile(name):
   f = ROOT.TFile(name + '.root', 'RECREATE')
 
