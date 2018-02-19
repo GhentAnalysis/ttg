@@ -68,7 +68,7 @@ sample = getSampleFromList(sampleList, args.sample)
 c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
 
 if not sample.isData:
-  lumiWeights  = [(float(sample.xsec)*1000/totalWeight if totalWeight > 0 else lumiWeights[0]) for totalWeight in sample.getTotalWeights()]
+  lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
 
 
 #
@@ -151,8 +151,8 @@ def switchBranches(c, default, variation):
 
 branchModifications = []
 for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
-  if args.type.count('e'  + var): branchModifications += [applySys(c, '_lPtCorr',  '_lPt' + var),  applySys(c, '_lECorr',  '_lE' + var)]
-  if args.type.count('ph' + var): branchModifications += [applySys(c, '_phPtCorr', '_phPt' + var), applySys(c, '_phECorr', '_phE' + var)]
+  if args.type.count('e'  + var): branchModifications += [switchBranches(c, '_lPtCorr',  '_lPt' + var),  switchBranches(c, '_lECorr',  '_lE' + var)]
+  if args.type.count('ph' + var): branchModifications += [switchBranches(c, '_phPtCorr', '_phPt' + var), switchBranches(c, '_phECorr', '_phE' + var)]
 
 #
 # Loop over the tree and make new vars
