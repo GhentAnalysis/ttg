@@ -56,6 +56,7 @@ class Sample:
       for i in range(maxVar):
         if i==0: totals[i] += f.Get('blackJackAndHookers/hCounter').GetBinContent(i+1)    # should be no difference, but more precise
         else:    totals[i] += f.Get('blackJackAndHookers/lheCounter').GetBinContent(i+1)
+    totals = [(t if t > 0 else totals[0]) for t in totals]
     return totals
 
   def getTrueInteractions(self, reduced=False):
