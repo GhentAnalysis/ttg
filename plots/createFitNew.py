@@ -67,7 +67,7 @@ extraLines += [(s + '_norm param 1.0 0.2')            for s in samples[1:]]
 #extraLines += ['nonPrompt rateParam * *_np 1'] 
 
 writeRootFile(cardName)
-writeCard(cardName, ['sr_OF', 'sr_SF'], templates, extraLines)
+writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso'], templates, extraLines)
 
 
 result = handleCombine(cardName, trackParameters = ['TTJets_norm', 'ZG_norm'])
