@@ -49,7 +49,9 @@ def handleCombine(dataCard, trackParameters = []):
   combineRelease = getCombineRelease()
   log.info('Moving to ' + combineRelease + ' to run combine')
   for f in [dataCard + '.txt', dataCard + '.root']:
-    shutil.move(f, os.path.join(combineRelease, 'src', f))
+    newPath = os.path.join(combineRelease, 'src', f)
+    shutil.move(f, newPath)
+    log.info("Input file: " + newPath)
   os.chdir(os.path.join(combineRelease, 'src'))
 
   log.info('Running fit')
