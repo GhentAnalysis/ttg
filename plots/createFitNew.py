@@ -64,7 +64,8 @@ templates = [(s + '_p') for s in samples] + [(s + '_np') for s in samples]
 
 extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
 extraLines += [(s + '_norm param 1.0 0.2')            for s in samples[1:]]
-#extraLines += ['nonPrompt rateParam * *_np 1'] 
+extraLines += ['nonPrompt rateParam * *_np 1'] 
+extraLines += ['nonPrompt param 1.0 0.2'] 
 
 writeRootFile(cardName)
 writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso'], templates, extraLines)
