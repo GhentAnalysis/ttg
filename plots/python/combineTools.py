@@ -67,26 +67,38 @@ def handleCombine(dataCard, trackParameters = []):
 
 
 
-
-# Temporary, should become way more complicated function or class to handle systematics
-def writeCard(cardName, shapes, templates, extraLines):
+# Write the card including all systematics and shapes
+def writeCard(cardName, shapes, templates, extraLines, systematics, linearSystematics):
   def tab(list):
     return ''.join([('%11s' % i) for i in list]) + '\n'
+
+  def linSys(info, template):
+    sample, value = info
+    value = 1+value/100.
+    if sample:
+      if template.count(sample): return value
+      else:                      return '-'
+    else:                        return value
 
   with open(cardName + '.txt', 'w') as f:
     f.write('imax ' + str(len(shapes)) + '\n')
     f.write('jmax *\n')
     f.write('kmax *\n')
     f.write('-'*400 + '\n')
-    f.write('shapes * * '+cardName+'.root $CHANNEL/$PROCESS $CHANNEL/$PROCESS_$SYSTEMATIC'+'\n')
+    f.write('shapes * * '+cardName+'.root $CHANNEL/$PROCESS $CHANNEL$SYSTEMATIC/$PROCESS'+'\n')
     f.write('-'*400 + '\n')
     f.write(tab(['bin']+shapes))
     f.write(tab(['observation']+['-1']*len(shapes)))
     f.write('-'*400 + '\n')
-    f.write(tab(['bin']    + [s    for s in shapes for i in range(len(templates))]))
-    f.write(tab(['process']+ [t    for i in range(len(shapes)) for t in templates]))
-    f.write(tab(['process']+ [t    for i in range(len(shapes)) for t in range(len(templates))]))
-    f.write(tab(['rate']+    ['-1' for i in range(len(shapes)) for t in range(len(templates))]))
+    f.write(tab(['bin','']    + [s    for s in shapes for i in range(len(templates))]))
+    f.write(tab(['process','']+ [t    for i in range(len(shapes)) for t in templates]))
+    f.write(tab(['process','']+ [t    for i in range(len(shapes)) for t in range(len(templates))]))
+    f.write(tab(['rate','']+    ['-1' for i in range(len(shapes)) for t in range(len(templates))]))
+    f.write('-'*400 + '\n')
+    for sys, info in linearSystematics.iteritems():
+      f.write(tab([sys, 'lnN'] + [linSys(info, t) for i in range(len(shapes)) for t in range(len(templates))]))
+    for sys in [s.replace('Up','') for s in systematics.keys() if 'Up' in s]:
+      f.write(tab([sys, 'shape'] + ['1' for i in range(len(shapes)) for t in range(len(templates))]))
     f.write('-'*400 + '\n')
     for x in extraLines:
       f.write(x + '\n')

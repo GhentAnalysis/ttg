@@ -42,7 +42,7 @@ def writeHist(file, shape, template, hist):
   hist.Write(template)
   file.cd()
 
-def writeRootFile(name):
+def writeRootFile(name, systematics):
   f = ROOT.TFile(name + '.root', 'RECREATE')
 
   writeHist(f, 'chgIso', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
@@ -51,12 +51,13 @@ def writeRootFile(name):
 
   for splitType in ['', '_p', '_np']:
     for sample in samples:
-      if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']]
-      elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
-      else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
-      writeHist(f, 'chgIso', sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', *selectors))
-      writeHist(f, 'sr_OF',  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
-      writeHist(f, 'sr_SF',  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
+      for sys in [''] + systematics.keys():
+        if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']]
+        elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
+        else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
+        writeHist(f, 'chgIso'+sys, sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', *selectors))
+        writeHist(f, 'sr_OF'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
+        writeHist(f, 'sr_SF'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
   f.Close()
 
 
@@ -67,8 +68,9 @@ extraLines += [(s + '_norm param 1.0 0.2')            for s in samples[1:]]
 extraLines += ['nonPrompt rateParam * *_np 1'] 
 extraLines += ['nonPrompt param 1.0 0.2'] 
 
-writeRootFile(cardName)
-writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso'], templates, extraLines)
+from ttg.plots.systematics import systematics, linearSystematics
+writeRootFile(cardName, systematics)
+writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso'], templates, extraLines, systematics, linearSystematics)
 
 
 result = handleCombine(cardName, trackParameters = ['TTJets_norm', 'ZG_norm'])
