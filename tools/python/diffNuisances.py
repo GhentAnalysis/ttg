@@ -43,8 +43,6 @@ if len(args) == 0:
 if options.pullDef!="" and options.pullDef not in CP.allowed_methods(): exit("Method %s not allowed, choose one of [%s]"%(options.pullDef,",".join(CP.allowed_methods())))
 
 
-setUpString = "diffNuisances run on %s, at %s with the following options ... "%(args[0],datetime.datetime.utcnow())+str(options)
-
 file = ROOT.TFile(args[0])
 if file == None: raise RuntimeError, "Cannot open file %s" % args[0]
 fit_s  = file.Get("fit_s")
@@ -218,10 +216,6 @@ for i in range(fpf_s.getSize()):
 #----------
 # print the results
 #----------
-
-#print details
-print setUpString
-print 
 
 fmtstring = "%-40s     %15s    %15s  %10s"
 highlight = "*%s*"
