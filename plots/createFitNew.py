@@ -14,8 +14,7 @@ import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
 
 #shapes      = ['chgIso','sr_SF','sr_OF']
-#samples     = ['TTGamma','TTJets','ZG','DY','other']
-samples     = ['TTGamma','TTJets','ZG','WG','DY','multiboson','single-t']
+samples     = ['TTGamma','TTJets','ZG','DY','other']
 
 
 cardName = 'test'
@@ -50,16 +49,14 @@ def writeRootFile(name):
   writeHist(f, 'sr_OF',  'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             ['MuonEG']))
   writeHist(f, 'sr_SF',  'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             ['DoubleEG'],['DoubleMuon']))
 
-#  for splitType in ['', '_p', '_np']:
-  for splitType in ['']:
+  for splitType in ['', '_p', '_np']:
     for sample in samples:
       if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']]
       elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
-    # else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
-      else:                  selectors = [[sample]]
-      writeHist(f, 'chgIso', sample, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', *selectors))
-      writeHist(f, 'sr_OF',  sample, getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
-      writeHist(f, 'sr_SF',  sample, getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
+      else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
+      writeHist(f, 'chgIso', sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', *selectors))
+      writeHist(f, 'sr_OF',  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
+      writeHist(f, 'sr_SF',  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             *selectors))
   f.Close()
 
 
