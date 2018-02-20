@@ -60,9 +60,7 @@ def writeRootFile(name):
   f.Close()
 
 
-
-templates = samples
-#templates = [(s + '_p') for s in samples] + [(s + '_np') for s in samples]
+templates = [(s + '_p') for s in samples] + [(s + '_np') for s in samples]
 
 extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
 extraLines += [(s + '_norm param 1.0 0.2')            for s in samples[1:]]
