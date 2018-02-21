@@ -20,11 +20,17 @@ def getCombineRelease():
     setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
     setupCommand += 'export SCRAM_ARCH=' + arch + ';'
     setupCommand += 'source $VO_CMS_SW_DIR/cmsset_default.sh;'
-    setupCommand += 'scramv1 project CMSSW ' + version + ';'
+    setupCommand += 'scramv1 project CMSSW ' + release + ';'
     setupCommand += 'cd ' + combineRelease + '/src;'
     setupCommand += 'git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit;'
     setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
     setupCommand += 'git fetch origin;git checkout ' + version + ';'
+    setupCommand += 'cd ' + combineRelease + '/src;'
+    setupCommand += 'mkdir CombineHarvester; cd CombineHarvester;'
+    setupCommand += 'git init;'
+    setupCommand += 'git remote add origin git@github.com:cms-analysis/CombineHarvester.git;'
+    setupCommand += 'git config core.sparsecheckout true; echo CombineTools/ >> .git/info/sparse-checkout;'
+    setupCommand += 'git pull origin master;'
     setupCommand += 'eval `scramv1 runtime -sh`;scramv1 b clean;scramv1 b;'
     os.system(setupCommand)
   return combineRelease
@@ -41,28 +47,38 @@ def getSignalStrength(filename):
     log.info('Result: %.2f %.2f/+%.2f' % result)
     return result
 
+
+
 #
 # Complete combine chain
 #
 def handleCombine(dataCard, trackParameters = []):
-  currentRelease = os.getcwd()
+  currentDir     = os.getcwd()
   combineRelease = getCombineRelease()
   log.info('Moving to ' + combineRelease + ' to run combine')
   for f in [dataCard + '.txt', dataCard + '.root']:
+    log.info('Input file: ' + currentDir + '/combine/' + f)
     newPath = os.path.join(combineRelease, 'src', f)
-    shutil.move(f, newPath)
-    log.info("Input file: " + newPath)
+    shutil.copy('combine/' + f, newPath)
+  shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
   os.chdir(os.path.join(combineRelease, 'src'))
 
   log.info('Running fit')
-  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics --skipBOnlyFit --trackParameters ' + ','.join(trackParameters) + ' ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
+  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics --trackParameters ' + ','.join(trackParameters) + ' ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
   try:
     result = getSignalStrength('fitDiagnostics.root')
   except:
     with open(dataCard + '.log') as f:
       for line in f: log.warning(line.rstrip())
-  shutil.move('fitDiagnostics.root', dataCard + '_results.root')
-  os.chdir(currentRelease)
+  command  = 'eval `scramv1 runtime -sh`';
+  command += 'python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt;'
+  command += 'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt;'
+  command += 'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex;'
+  command += 'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex;'
+  command += 'mv fitDiagnostics.root ' + dataCard + '_results.root;'
+  command += 'mv *' + dataCard + '* ' + currentDir + '/combine/'
+  os.system(command)
+  os.chdir(currentDir)
   return result
 
 
@@ -80,7 +96,7 @@ def writeCard(cardName, shapes, templates, extraLines, systematics, linearSystem
       else:                      return '-'
     else:                        return value
 
-  with open(cardName + '.txt', 'w') as f:
+  with open('combine/' + cardName + '.txt', 'w') as f:
     f.write('imax ' + str(len(shapes)) + '\n')
     f.write('jmax *\n')
     f.write('kmax *\n')
