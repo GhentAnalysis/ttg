@@ -70,9 +70,9 @@ class Sample:
 
   # init the chain and return it
   def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None, sys=None):
-    if not (sys and (self.name=='TTGamma' or self.name=='TT_pow') and ('fsr' in sys or 'isr' in sys)): sys=None
-    else:                                                                                              sys=sys.lower()
-    if sys and (sys.count('Scale') or sys.count('Res')): reducedType += '-' + sys
+    if sys and (sys.count('Scale') or sys.count('Res')):                                         reducedType += '-' + sys
+    if sys and (self.name=='TTGamma' or self.name=='TT_pow') and ('fsr' in sys or 'isr' in sys): sys=sys.lower()
+    else:                                                                                        sys=None
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
