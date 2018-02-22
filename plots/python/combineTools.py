@@ -25,12 +25,6 @@ def getCombineRelease():
     setupCommand += 'git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit;'
     setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
     setupCommand += 'git fetch origin;git checkout ' + version + ';'
-    setupCommand += 'cd ' + combineRelease + '/src;'
-    setupCommand += 'mkdir CombineHarvester; cd CombineHarvester;'
-    setupCommand += 'git init;'
-    setupCommand += 'git remote add origin git@github.com:cms-analysis/CombineHarvester.git;'
-    setupCommand += 'git config core.sparsecheckout true; echo CombineTools/ >> .git/info/sparse-checkout;'
-    setupCommand += 'git pull origin master;'
     setupCommand += 'eval `scramv1 runtime -sh`;scramv1 b clean;scramv1 b;'
     os.system(setupCommand)
   return combineRelease
