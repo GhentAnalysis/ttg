@@ -183,7 +183,6 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m: continue
     if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e: continue
 
-
   goodJets(c, newVars)
   bJets(c, newVars)
   makeInvariantMasses(c, newVars)
@@ -192,12 +191,12 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   if not sample.isData:
     newVars.genWeight          = c._weight*lumiWeights[0]
 
-    try:    q2Weights          = [c._lheWeight[i]*lumiWeights[i] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
+    try:    q2Weights          = [c._weight*c._lheWeight[i]*lumiWeights[i] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
     except: q2Weights          = [newVars.genWeight]
     newVars.weight_q2Down      = min(q2Weights)
     newVars.weight_q2Up        = max(q2Weights)
 
-    try:    pdfVarRms          = sqrt(sum([(newVars.genWeight - c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)]))/100   # Using RMS of 100 pdf's
+    try:    pdfVarRms          = sqrt(sum([(newVars.genWeight - c._weight*c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)]))/100   # Using RMS of 100 pdf's
     except: pdfVarRms          = 0
     newVars.weight_pdfDown     = newVars.genWeight - pdfVarRms
     newVars.weight_pdfUp       = newVars.genWeight + pdfVarRms
