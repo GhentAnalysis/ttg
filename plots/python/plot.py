@@ -22,16 +22,19 @@ def getLegendMaskedArea(legend_coordinates, pad):
           'xLowerEdge': constrain( (legend_coordinates[0] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] ),
           'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
+loadedPkls = {}
 def getHistFromPkl(subdirs, plotName, sys, *selectors):
+  global loadePkls
   hist = None
   resultFile = os.path.join(*((plotDir,)+subdirs+(plotName +'.pkl',)))
   if os.path.isdir(os.path.dirname(resultFile)):
-    with lock(resultFile, 'rb') as f: allPlots = pickle.load(f)
+    if resultFile not in loadedPkls:
+      with lock(resultFile, 'rb') as f: loadedPkls[resultFile] = pickle.load(f)
     for selector in selectors:
-      filtered    = {s:h for s,h in allPlots[plotName+sys].iteritems() if all(s.count(sel) for sel in selector)}
+      filtered    = {s:h for s,h in loadedPkls[resultFile][plotName+sys].iteritems() if all(s.count(sel) for sel in selector)}
       if len(filtered) == 1:
         if hist:               hist.Add(filtered[filtered.keys()[0]])
-        else:                  hist   = filtered[filtered.keys()[0]]
+        else:                  hist   = filtered[filtered.keys()[0]].Clone()
       elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
       else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultFile)
   else:                        log.error('Missing cache file ' + resultFile)
