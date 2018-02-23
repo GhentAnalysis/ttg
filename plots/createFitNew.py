@@ -37,30 +37,43 @@ def addHists(hists, name, toAdd):
   if name in hists: hists[name].Add(toAdd)
   else:             hists[name] = toAdd
 
-def writeHist(file, shape, template, hist):
+def writeHist(file, shape, template, hist, statVariations=None):
   if not file.GetDirectory(shape): file.mkdir(shape)
   file.cd(shape)
   hist.Write(template)
   file.cd()
+  if statVariations is not None:
+    for i in range(1, hist.GetNbinsX()+1):
+      up   = hist.Clone()
+      down = hist.Clone()
+      up.SetBinContent(  i, hist.GetBinContent(i)+hist.GetBinError(i))
+      down.SetBinContent(i, hist.GetBinContent(i)-hist.GetBinError(i))
+      writeHist(file, shape + shape + template + 'Stat' + str(i) + 'Up',   template, up)
+      writeHist(file, shape + shape + template + 'Stat' + str(i) + 'Down', template, down)
+      statVariations.append(shape + template + 'Stat' + str(i))
 
 def writeRootFile(name, systematics):
   try:    os.makedirs('combine')
   except: pass
+
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
   writeHist(f, 'chgIso', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
   writeHist(f, 'sr_OF',  'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             '', ['MuonEG']))
   writeHist(f, 'sr_SF',  'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             '', ['DoubleEG'],['DoubleMuon']))
 
+  statVariations = []
   for splitType in ['', '_p', '_np']:
     for sample in samples:
-      for sys in [''] + systematics.keys():
+      for sys in [''] + systematics:
         if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']]
         elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
         else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
-        writeHist(f, 'chgIso'+sys, sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', sys, *selectors))
-        writeHist(f, 'sr_OF'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             sys, *selectors))
-        writeHist(f, 'sr_SF'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             sys, *selectors))
+        writeHist(f, 'chgIso'+sys, sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
+        writeHist(f, 'sr_OF'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             sys, *selectors), (statVariations if sys=='' else None))
+        writeHist(f, 'sr_SF'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'), 'njets',             sys, *selectors), (statVariations if sys=='' else None))
+
+  return set(statVariations)
   f.Close()
 
 
@@ -71,8 +84,8 @@ extraLines += [(s + '_norm param 1.0 0.2')            for s in samples[1:]]
 extraLines += ['nonPrompt rateParam * *_np 1'] 
 extraLines += ['nonPrompt param 1.0 0.2'] 
 
-writeRootFile(cardName, systematics)
-writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso'], templates, extraLines, systematics, linearSystematics)
+statVariations = writeRootFile(cardName, systematics.keys())
+writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
 
 
 result = handleCombine(cardName, trackParameters = ['TTJets_norm', 'ZG_norm'])
