@@ -1,4 +1,5 @@
-from ttg.tools.logger import getLogger
+from ttg.tools.logger  import getLogger
+from ttg.tools.helpers import deltaR
 log = getLogger()
 
 #
@@ -11,15 +12,6 @@ import ROOT
 #
 # Helper functions
 #
-def deltaPhi(phi1, phi2):
-  dphi = phi2-phi1
-  if dphi > pi:   dphi -= 2.0*pi
-  if dphi <= -pi: dphi += 2.0*pi
-  return abs(dphi)
-
-def deltaR(eta1, eta2, phi1, phi2):
-  return sqrt(deltaPhi(phi1, phi2)**2 + (eta1-eta2)**2)
-
 def slidingCut(pt, low, high):
   slope = (high - low)/10.;
   return min(low, max(high, low + slope*(pt-15)))

@@ -1,8 +1,7 @@
 #
-# 8 TeV - style matching, same as semi-leptonic group
+# Photon categorization functions
 #
-
-from ttg.reduceTuple.objectSelection import deltaR
+from ttg.tools.helpers import deltaR
 
 def isSignalPhoton(tree, index, oldDefinition=False):
   if not oldDefinition:
