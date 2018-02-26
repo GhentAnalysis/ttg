@@ -280,7 +280,7 @@ if not args.showSys:
   from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector, selectPhotons
   from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
   for sample in sum(stack, []):
-    if args.sys and sample.isData: continue
+    if args.sys and 'Scale' not in args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep', sys=args.sys)
 
     c.data = sample.isData
