@@ -80,7 +80,7 @@ def handleCombine(dataCard, trackParameters = []):
 # Write the card including all systematics and shapes
 def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics, linearSystematics):
   def tab(list):
-    return ''.join([('%20s' % i) for i in list]) + '\n'
+    return ''.join(['%25s' % list[0]] + [('%12s' % i) for i in list[1:]]) + '\n'
 
   def linSys(info, template):
     sample, value = info
@@ -109,7 +109,7 @@ def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for i in range(len(shapes)) for t in range(len(templates))]))
     for sys in [s.replace('Up','') for s in systematics if 'Up' in s]:
       f.write(tab([sys, 'shape'] + ['1' for i in range(len(shapes)) for t in range(len(templates))]))
-    for sys in mcStatistics:
+    for sys in sorted(mcStatistics):
       f.write(tab([sys, 'shape'] + [('1' if sys.count(shapes[i]) and sys.count(templates[t]) else '-') for i in range(len(shapes)) for t in range(len(templates))]))
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
