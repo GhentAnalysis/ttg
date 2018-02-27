@@ -8,7 +8,7 @@ log = getLogger()
 import ROOT, os, uuid, numpy
 import cPickle as pickle
 from math import sqrt
-from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir
+from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas
 
@@ -32,9 +32,7 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
       with lock(resultFile, 'rb') as f: loadedPkls[resultFile] = pickle.load(f)
     for selector in selectors:
       filtered    = {s:h for s,h in loadedPkls[resultFile][plotName+sys].iteritems() if all(s.count(sel) for sel in selector)}
-      if len(filtered) == 1:
-        if hist:               hist.Add(filtered[filtered.keys()[0]])
-        else:                  hist   = filtered[filtered.keys()[0]].Clone()
+      if len(filtered) == 1:   hist = addHist(hist, filtered[filtered.keys()[0]])
       elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
       else:                    log.error('Missing ' + str(selector) + ' for plot ' + plotName + ' in ' + resultFile)
   else:                        log.error('Missing cache file ' + resultFile)
@@ -45,6 +43,16 @@ def xAxisLabels(labels):
     for i,l in enumerate(labels):
       h.GetXaxis().SetBinLabel(i+1, l)
   return [applyLabels]
+
+
+def applySysToOtherHist(source, sourceVar, destination):
+  destinationVar = destination.Clone()
+  for i in range(source.GetNbinsX()+1):
+    modificationFactor = 1+(source.GetBinContent(i)-sourceVar.GetBinContent(i))/source.GetBinContent(i) if source.GetBinContent(i) > 0 else 1
+    destinationVar.SetBinContent(i, modificationFactor*destination.GetBinContent(i))
+  return destinationVar
+
+
 
 #
 # Function which fills all plots and removes them when the lamdbda fails (e.g. because var is not defined)
@@ -286,13 +294,21 @@ class Plot:
       if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
         h = allPlots[plotName][histName]
+        if sys and 'Scale' in sys: # Ugly hack to apply scale systematics on MC instead of data
+          data, dataSys = None, None
+          for dataset in ['MuonEG','DoubleEG','DoubleMuon']:
+            if (dataset + 'data') not in allPlots[self.name]: continue
+            data    = addHist(data,    allPlots[self.name][dataset+'data'])
+            dataSys = addHist(dataSys, allPlots[self.name+sys][dataset+'data'])
+          if data: allPlots[plotName][histName] = applySysToOtherHist(data, dataSys, allPlots[plotName][histName])
         if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         if self.scaleFactor: h.Scale(self.scaleFactor)
         self.normalizeBinWidth(h, self.normBinWidth)
         self.addOverFlowBin1D(h, self.overflowBin)
 
+
       histos_summed[sys] = sumHistos([allPlots[plotName][histName] for histName in histNames])
-      # TODO: need to scale something?
+
 
     sysList = [sys.replace('Up','') for sys in systematics if sys.count('Up')]
 
