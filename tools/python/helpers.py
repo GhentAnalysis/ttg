@@ -66,3 +66,11 @@ def deltaPhi(phi1, phi2):
 
 def deltaR(eta1, eta2, phi1, phi2):
   return sqrt(deltaPhi(phi1, phi2)**2 + (eta1-eta2)**2)
+
+#
+# Safe hist add
+#
+def addHist(first, second):
+  if first and second: first.Add(second)
+  elif second:         first = second.Clone()
+  return first
