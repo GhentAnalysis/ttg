@@ -4,9 +4,7 @@ TTGamma                    t#bar{t}#gamma_(match,_#sigma_{i#etai#eta}_fail)     
 +TTGamma_tbar
 +TTGamma_had
 
-TTJets_Dilep               t#bar{t}_(match,_#sigma_{i#etai#eta}_fail)              fillStyle     kBlue                    _phMatchPdgId==22&&_ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 t#bar{t}_(match,_#sigma_{i#etai#eta}_fail)              fillStyle     kBlue                    _phMatchPdgId==22&&_ttgEventType<3
 
 ZG                         other_(match,_#sigma_{i#etai#eta}_fail)                 fillStyle     kOrange                  _phMatchPdgId==22
 +singleTop_tW_tbar
@@ -33,6 +31,25 @@ ZG                         other_(match,_#sigma_{i#etai#eta}_fail)              
 +TTWToLNu
 +TTWToQQ
 +tZq
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
+
+
+
+
 
 DY_M10to50_NLO             Drell-Yan_(match,_#sigma_{i#etai#eta}_fail)                fillStyle     kOrange                  _phMatchPdgId==22&&_zgEventType<3
 +DY_M50_NLO
@@ -44,9 +61,7 @@ TTGamma                    t#bar{t}#gamma_(no_match,_#sigma_{i#etai#eta}_fail)  
 +TTGamma_tbar
 +TTGamma_had
 
-TTJets_Dilep               t#bar{t}_(no_match,_#sigma_{i#etai#eta}_fail)              fillStyle     kCyan                    _phMatchPdgId!=22&&_ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 t#bar{t}_(no_match,_#sigma_{i#etai#eta}_fail)              fillStyle     kCyan                    _phMatchPdgId!=22&&_ttgEventType<3
 
 ZG                         other_(no_match,_#sigma_{i#etai#eta}_fail)                 fillStyle     kOrange                  _phMatchPdgId!=22
 +singleTop_tW_tbar
@@ -73,6 +88,24 @@ ZG                         other_(no_match,_#sigma_{i#etai#eta}_fail)           
 +TTWToLNu
 +TTWToQQ
 +tZq
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
+
+
+
 
 
 DY_M10to50_NLO             Drell-Yan_(no_match,_#sigma_{i#etai#eta}_fail)             fillStyle     kYellow                  _phMatchPdgId!=22&&_zgEventType<3

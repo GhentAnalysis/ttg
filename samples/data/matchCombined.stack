@@ -28,6 +28,23 @@ TTGamma                    MC_(genuine)                 fillStyle     kRed
 +TTWToLNu
 +TTWToQQ
 +tZq
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
+
+
 
 
 TTGamma                    MC_(hadronicPhoton)          fillStyle     46
@@ -59,6 +76,22 @@ TTGamma                    MC_(hadronicPhoton)          fillStyle     46
 +TTWToLNu
 +TTWToQQ
 +tZq
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
+
 
 
 TTGamma                    MC_(misIdEle)                fillStyle     49
@@ -90,6 +123,22 @@ TTGamma                    MC_(misIdEle)                fillStyle     49
 +TTWToLNu
 +TTWToQQ
 +tZq
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
+
 
 
 TTGamma                    MC_(hadronicFake)            fillStyle     6
@@ -121,23 +170,31 @@ TTGamma                    MC_(hadronicFake)            fillStyle     6
 +TTWToLNu
 +TTWToQQ
 +tZq
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
 
 
-TTJets_Dilep               MC_(genuine)                             fillStyle     kRed                     _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
 
-TTJets_Dilep               MC_(hadronicPhoton)                      fillStyle     46                       _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 MC_(genuine)                             fillStyle     kRed                     _ttgEventType<3
 
-TTJets_Dilep               MC_(misIdEle)                            fillStyle     9                        _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 MC_(hadronicPhoton)                      fillStyle     46                       _ttgEventType<3
 
-TTJets_Dilep               MC_(hadronicFake)                        fillStyle     6                        _ttgEventType<3
-+TTJets_SingleLepFromTbar
-+TTJets_SingleLepFromT
+TTJets_pow                 MC_(misIdEle)                            fillStyle     9                        _ttgEventType<3
+
+TTJets_pow                 MC_(hadronicFake)                        fillStyle     6                        _ttgEventType<3
 
 
 DY_M10to50_NLO             MC_(genuine)                             fillStyle     kRed                     _zgEventType<3

@@ -33,6 +33,23 @@ TTGamma                    MC_(hadronicPhoton,hadronicFake)                    e
 +TTWToLNu
 +TTWToQQ
 +tZq
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
+
+
 
 -- Data
 DoubleMuon                 data_(#sigma_{i#etai#eta}_fail):mumu,SF,all         errorStyle    kBlue                   isMuMu

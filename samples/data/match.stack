@@ -46,6 +46,24 @@ singleTop_tW_tbar          other_(genuine,misIdEle)                             
 +TTWToQQ
 +tZq
 +WG
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
+
+
+
 
 singleTop_tW_tbar          other_(hadronicPhoton,hadronicFake)                       fillStyle     798
 +singleTop_tW_t
@@ -72,6 +90,23 @@ singleTop_tW_tbar          other_(hadronicPhoton,hadronicFake)                  
 +TTWToQQ
 +tZq
 +WG
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
++tHq
++tHW
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
+
+
 
 -- Data
 DoubleMuon                 data:mumu,SF,all                                          errorStyle    kBlack                   isMuMu
