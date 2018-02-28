@@ -61,12 +61,12 @@ if not args.isChild:
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to30',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt30to40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to30',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt30to40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p'
@@ -371,7 +371,7 @@ for plot in plots: # 1D plots
                   logY              = logY,
                   sorting           = True,
                   yRange            = (0.003 if logY else 0.0001, "auto"),
-                  drawObjects       = drawLumi(None, lumiScale),
+                  drawObjects       = drawLumi(None, lumiScale, isOnlySim=(channel=='noData')),
                   **extraArgs
         )
         if err: noWarnings=False
@@ -384,6 +384,6 @@ if not args.sys:
         plot.draw(plot_directory = os.path.join(plotDir, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,
-                  drawObjects    = drawLumi(None, lumiScale))
+                  drawObjects    = drawLumi(None, lumiScale, isOnlySim=(channel=='noData')))
 if noWarnings: log.info('Finished')
 else:          log.info('Could not produce all plots - finished')

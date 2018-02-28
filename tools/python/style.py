@@ -133,9 +133,9 @@ def drawTex(line, align=11, size=0.04):
 #
 # Common CMS information
 #
-def drawLumi(dataMCScale, lumiScale):
+def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
   lines =[
-    (11, (0.15, 0.95, 'CMS Preliminary')),
+    (11, (0.15, 0.95, 'CMS Simulation' if isOnlySim else 'CMS Preliminary')),
     (31, (0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
   ]
   return [drawTex(l, align) for align, l in lines]
