@@ -49,10 +49,7 @@ if not args.isChild:
   if args.selection:
     selections = [args.selection]
   else:
-    selections = [#'llg',
-                  #'llg-looseLeptonVeto',
-                  'llg-looseLeptonVeto-mll40',
-                  #'llg-looseLeptonVeto-mll40-offZ',
+    selections = ['llg-looseLeptonVeto-mll40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
@@ -64,10 +61,12 @@ if not args.isChild:
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to30',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt30to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p'
