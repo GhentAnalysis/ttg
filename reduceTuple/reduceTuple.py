@@ -196,7 +196,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.weight_q2Down      = min(q2Weights)
     newVars.weight_q2Up        = max(q2Weights)
 
-    try:    pdfVarRms          = sqrt(sum([(newVars.genWeight - c._weight*c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)]))/100   # Using RMS of 100 pdf's
+    try:    pdfVarRms          = sqrt(sum([(newVars.genWeight - c._weight*c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)])/100)   # Using RMS of 100 pdf's
     except: pdfVarRms          = 0
     newVars.weight_pdfDown     = newVars.genWeight - pdfVarRms
     newVars.weight_pdfUp       = newVars.genWeight + pdfVarRms
