@@ -371,7 +371,7 @@ for plot in plots: # 1D plots
                   logY              = logY,
                   sorting           = True,
                   yRange            = (0.003 if logY else 0.0001, "auto"),
-                  drawObjects       = drawLumi(None, lumiScale, isOnlySim=(channel=='noData')),
+                  drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
                   **extraArgs
         )
         if err: noWarnings=False
@@ -384,6 +384,6 @@ if not args.sys:
         plot.draw(plot_directory = os.path.join(plotDir, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,
-                  drawObjects    = drawLumi(None, lumiScale, isOnlySim=(channel=='noData')))
+                  drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')))
 if noWarnings: log.info('Finished')
 else:          log.info('Could not produce all plots - finished')
