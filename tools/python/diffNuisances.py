@@ -240,7 +240,7 @@ elif options.format == 'latex':
         fmtstring = "%-40s &  %15s & %15s & %6s \\\\"
         print "\\begin{tabular}{|l|r|r|r|} \\hline ";
         #what = r"$(x_\text{out} - x_\text{in})/\sigma_{\text{in}}$, $\sigma_{\text{out}}/\sigma_{\text{in}}$"
-        what = r"\Delta x/\sigma_{\text{in}}$, $\sigma_{\text{out}}/\sigma_{\text{in}}$"
+        what = r"$\Delta x/\sigma_{\text{in}}$, $\sigma_{\text{out}}/\sigma_{\text{in}}$"
         print  fmtstring % ('',     '$b$-only fit', '$s+b$ fit', '')
         print (fmtstring % ('name', what, what, r'$\rho(\theta, \mu)$')), " \\hline"
 elif options.format == 'twiki':
