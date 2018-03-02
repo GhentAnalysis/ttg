@@ -136,6 +136,8 @@ a:hover { text-decoration: underline; color: #D08504; }
     $lumiPath   = modifyChannel($myChannelDir, '-normMC',  '',         $fullPath);
     $sysPath    = modifyChannel($myChannelDir, NULL,       'sys',      $fullPath);
     $noSysPath  = modifyChannel($myChannelDir, '-sys',      '',        $fullPath);
+    $postPath   = modifyChannel($myChannelDir, NULL,       'post',     $fullPath);
+    $noPostPath = modifyChannel($myChannelDir, '-post',      '',       $fullPath);
     $eePath     = modifyChannel($myChannelDir, $myChannel, 'ee',       $fullPath);
     $mumuPath   = modifyChannel($myChannelDir, $myChannel, 'mumu',     $fullPath);
     $allPath    = modifyChannel($myChannelDir, $myChannel, 'all',      $fullPath);
@@ -172,6 +174,10 @@ a:hover { text-decoration: underline; color: #D08504; }
     if(multipleOptions(array($sysPath,$noSysPath))){
       showIfExists($noSysPath,  'no sys');
       showIfExists($sysPath,    'sys');
+    }
+    if(multipleOptions(array($postPath,$noPostPath))){
+      showIfExists($noPostPath,  'pre-fit');
+      showIfExists($postPath,    'post-fit');
     }
   }
 ?>
