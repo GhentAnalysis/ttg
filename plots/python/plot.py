@@ -272,13 +272,20 @@ class Plot:
     return legend
 
 
-
+  #
+  # Applying post-fit values
+  #
+  def applyPostFitScaling(self, postFitInfo):
+    for sample, h in self.histos.iteritems():
+      if sample.name in postFitInfo:
+        log.info('Applying post-fit scaling value of ' + str(postFitInfo[sample.name]) + ' to ' + sample.name)
+        h.Scale(postFitInfo[sample.name])
 
 
   #
   # Adding systematics to MC (assuming MC is first in the stack list)
   #
-  def getSystematicBand(self, systematics, linearSystematics, resultsDir):
+  def getSystematicBand(self, systematics, linearSystematics, resultsDir, postFitInfo=None):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
@@ -295,6 +302,9 @@ class Plot:
       if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
         h = allPlots[plotName][histName]
+        if postFitInfo:
+          for i in postFitInfo:
+            if histName.count(i): h.Scale(postFitInfo[i])
         if sys and 'Scale' in sys: # Ugly hack to apply scale systematics on MC instead of data
           data, dataSys = None, None
           for dataset in ['MuonEG','DoubleEG','DoubleMuon']:
@@ -309,7 +319,6 @@ class Plot:
 
 
       histos_summed[sys] = sumHistos([allPlots[plotName][histName] for histName in histNames])
-
 
     sysList = [sys.replace('Up','') for sys in systematics if sys.count('Up')]
 
@@ -384,6 +393,7 @@ class Plot:
           systematics = {},
           linearSystematics = {},
           resultsDir = None,
+          postFitInfo = None,
           ):
     ''' yRange: 'auto' (default) or [low, high] where low/high can be 'auto'
         extensions: ["pdf", "png", "root"] (default)
@@ -412,6 +422,8 @@ class Plot:
     if resultsDir:
       err = self.loadFromCache(resultsDir)
       if err: return True
+
+    if postFitInfo: self.applyPostFitScaling(postFitInfo)
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
@@ -516,7 +528,7 @@ class Plot:
     canvas.topPad.RedrawAxis()
 
     if len(systematics) or len(linearSystematics):
-      boxes, ratioBoxes                = self.getSystematicBand(systematics, linearSystematics, resultsDir)
+      boxes, ratioBoxes                = self.getSystematicBand(systematics, linearSystematics, resultsDir, postFitInfo)
       drawObjects                     += boxes
       if ratio: ratio['drawObjects']  += ratioBoxes
 

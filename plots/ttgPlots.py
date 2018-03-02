@@ -13,6 +13,7 @@ argParser.add_argument('--sys',            action='store',      default=None)
 argParser.add_argument('--filterPlot',     action='store',      default=None)
 argParser.add_argument('--runSys',         action='store_true', default=False)
 argParser.add_argument('--showSys',        action='store_true', default=False)
+argParser.add_argument('--post',           action='store_true', default=False)
 argParser.add_argument('--editInfo',       action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
@@ -329,6 +330,9 @@ if not args.showSys:
 #
 # Drawing the plots
 #
+postFitInfo = None
+if args.post:
+  from ttg.plots.postFitInfo import postFitInfo
 noWarnings = True
 from ttg.tools.style import drawLumi
 for plot in plots: # 1D plots
@@ -349,6 +353,7 @@ for plot in plots: # 1D plots
       extraArgs['systematics']       = systematics
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
+      extraArgs['postFitInfo']       = postFitInfo
 
 
     if args.channel!='noData' and not args.tag.count('singleLep'):
@@ -365,6 +370,7 @@ for plot in plots: # 1D plots
         extraTag  = '-log'    if logY else ''
         extraTag += '-sys'    if args.showSys else ''
         extraTag += '-normMC' if norm else ''
+        extraTag += '-post'   if args.post else ''
         err = plot.draw(
                   plot_directory    = os.path.join(plotDir, args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
                   logX              = False,
