@@ -1,8 +1,8 @@
--- MC (sigmaIetaIeta pass)
-TTJets_pow               t#bar{t}_(#sigma_{i#etai#eta}_pass)             errorStyle     kBlue         _ttgEventType<3
+-- MC (TTbar)
+TTJets_pow               t#bar{t}_(#sigma_{i#etai#eta}_pass)             errorStyle     633       _ttgEventType<3
 
--- MC (sigmaIetaIeta fail)
-TTGamma                  t#bar{t}#gamma_(#sigma_{i#etai#eta}_pass)       errorStyle     kRed
+-- MC (TTGamma)
+TTGamma                  t#bar{t}#gamma_(#sigma_{i#etai#eta}_pass)       errorStyle     kOrange
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had

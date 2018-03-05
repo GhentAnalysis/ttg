@@ -52,12 +52,12 @@ TTGamma                    MC_(#sigma_{i#etai#eta}_fail,hadronicPhoton,hadronicF
 
 
 -- Data
-DoubleMuon                 data_(#sigma_{i#etai#eta}_fail):mumu,SF,all         errorStyle    kBlue                   isMuMu
+DoubleMuon                 data_(#sigma_{i#etai#eta}_fail):mumu,SF,all         errorStyle    kBlack                   isMuMu
 +SingleMuon
 
-DoubleEG                   data_(#sigma_{i#etai#eta}_fail):ee,SF,all           errorStyle    kBlue                   isEE
+DoubleEG                   data_(#sigma_{i#etai#eta}_fail):ee,SF,all           errorStyle    kBlack                   isEE
 +SingleElectron
 
-MuonEG                     data_(#sigma_{i#etai#eta}_fail):emu,all             errorStyle    kBlue                   isEMu
+MuonEG                     data_(#sigma_{i#etai#eta}_fail):emu,all             errorStyle    kBlack                   isEMu
 +SingleMuon
 +SingleElectron
