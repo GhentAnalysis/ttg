@@ -158,7 +158,8 @@ class Plot:
     if scaling=="unity":
       for stack in histos:
         if not stack[0].Integral() > 0: continue
-        factor = 1./stack[0].Integral()
+        if self.normBinWidth: factor = 1./stack[0].Integral('width') # actually not fully correct for figures with overflow bin, should check
+        else:                 factor = 1./stack[0].Integral()
         for h in stack: h.Scale(factor)
     else:
       if not isinstance(scaling, dict):
