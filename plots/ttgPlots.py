@@ -50,24 +50,23 @@ if not args.isChild:
   if args.selection:
     selections = [args.selection]
   else:
-    selections = ['llg-looseLeptonVeto-mll40',
+    selections = [#'llg-looseLeptonVeto-mll40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40to60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt15to20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt15to20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to30',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt30to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p'
@@ -132,11 +131,8 @@ import glob
 stackFile = 'default'
 for f in sorted(glob.glob("../samples/data/*.stack")):
   stackName = os.path.basename(f).split('.')[0]
-  if args.tag.count(stackName):
+  if stackName not in stackFile and args.tag.count(stackName):
     stackFile = stackName
-    break
-if args.tag.count('sigmaIetaIetaMatchMC'):   stackFile = 'sigmaIetaIetaMatchMC'    # for some strange reason the glob.glob does noet always find this
-if args.tag.count('randomConeCheckMatchMC'): stackFile = 'randomConeCheckMatchMC'  # for some strange reason the glob.glob does noet always find this
 
 log.info('Using stackFile ' + stackFile)
 
@@ -192,12 +188,16 @@ else:
   plots.append(Plot('photon_eta',                 '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                (15,0,2.5)))
   plots.append(Plot('photon_phi',                 '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                     (10,-pi,pi)))
   plots.append(Plot('photon_mva',                 '#gamma-MVA',                           lambda c : c._phMva[c.ph],                                     (20,-1,1)))
-  plots.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20)))
-  plots.append(Plot('photon_chargedIso_NO',       'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), overflowBin=None))
+  plots.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_NO',       'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
   plots.append(Plot('photon_chargedIso_bins',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
   plots.append(Plot('photon_chargedIso_bins_NO',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20)))
-  plots.append(Plot('photon_chargedIso_small_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_small_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_bins2',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_bins2_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_bins3',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1,21), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_bins3_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1,21), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
   plots.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)',     lambda c : c._phChargedIsolation[c.ph]/c.ph_pt,                (20,0,2)))
   plots.append(Plot('photon_neutralIso',          'neutralIso(#gamma) (GeV)',             lambda c : c._phNeutralHadronIsolation[c.ph],                  (25,0,5)))
   plots.append(Plot('photon_photonIso',           'photonIso(#gamma) (GeV)',              lambda c : c._phPhotonIsolation[c.ph],                         (32,0,8)))
@@ -384,7 +384,7 @@ for plot in plots: # 1D plots
 
 if not args.sys:
   for plot in plots: # 2D plots
-    if isinstance(plot, Plot): continue
+    if not hasattr(plot, 'varY'): continue
     for logY in [False, True]:
       for option in ['SCAT', 'COLZ']:
         plot.draw(plot_directory = os.path.join(plotDir, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
