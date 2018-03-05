@@ -46,7 +46,7 @@ def getSignalStrength(filename):
 #
 # Complete combine chain
 #
-def handleCombine(dataCard, trackParameters = []):
+def handleCombine(dataCard, trackParameters = [], toys = None):
   currentDir     = os.getcwd()
   combineRelease = getCombineRelease()
   log.info('Moving to ' + combineRelease + ' to run combine')
@@ -58,7 +58,9 @@ def handleCombine(dataCard, trackParameters = []):
   os.chdir(os.path.join(combineRelease, 'src'))
 
   log.info('Running fit')
-  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics --trackParameters ' + ','.join(trackParameters) + ' ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
+  extraOptions = ''
+  if toys: extraOptions += ' -t ' + str(toys)
+  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics ' + extraOptions + ' --trackParameters ' + ','.join(trackParameters) + ' ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
   try:
     result = getSignalStrength('fitDiagnostics.root')
   except:
