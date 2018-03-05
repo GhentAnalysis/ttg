@@ -65,7 +65,7 @@ def writeRootFile(name, systematics):
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
 #  writeHist(f, 'chgIso1' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
-  writeHist(f, 'chgIso2', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+#  writeHist(f, 'chgIso2', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
   writeHist(f, 'sr_OF',   'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             '', ['MuonEG']))
   writeHist(f, 'sr_SF',   'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             '', ['DoubleEG'],['DoubleMuon']))
 
@@ -77,7 +77,7 @@ def writeRootFile(name, systematics):
         elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
         else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
 #        writeHist(f, 'chgIso1'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
-        writeHist(f, 'chgIso2'+sys, sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
+#        writeHist(f, 'chgIso2'+sys, sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
         writeHist(f, 'sr_OF'+sys,   sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             sys, *selectors), (statVariations if sys=='' else None))
         writeHist(f, 'sr_SF'+sys,   sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             sys, *selectors), (statVariations if sys=='' else None))
 
@@ -88,14 +88,14 @@ def writeRootFile(name, systematics):
 templates = [(s + '_p') for s in samples] + [(s + '_np') for s in samples]
 
 extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
-extraLines += [(s + '_norm param 1.0 0.2')            for s in samples[1:]]
+extraLines += [(s + '_norm param 1.0 0.1')            for s in samples[1:]]
 extraLines += ['nonPrompt rateParam * *_np 1'] 
 extraLines += ['nonPrompt param 1.0 0.2'] 
 #extraLines += ['* autoMCStats 0'] # does not work
 
 statVariations = writeRootFile(cardName, systematics.keys())
 #writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso1', 'chgIso2'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
-writeCard(cardName, ['sr_OF', 'sr_SF', 'chgIso1'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)  # chgIso1 does not work?
+writeCard(cardName, ['sr_OF', 'sr_SF'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
 
 
-result = handleCombine(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','nonPrompt','r'])
+result = handleCombine(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','nonPrompt','r'], toys=None)

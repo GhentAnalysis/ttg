@@ -59,7 +59,7 @@ def handleCombine(dataCard, trackParameters = [], toys = None):
 
   log.info('Running fit')
   extraOptions = ''
-  if toys: extraOptions += ' -t ' + str(toys)
+  if toys: extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
   os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics ' + extraOptions + ' --trackParameters ' + ','.join(trackParameters) + ' ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
   try:
     result = getSignalStrength('fitDiagnostics.root')
