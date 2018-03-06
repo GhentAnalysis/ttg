@@ -80,21 +80,21 @@ class Plot2D(Plot):
   # Draw function roughly stolen from Robert's RootTools, might need some cleanup, very lengthy
   #
   def draw(self, \
-	  zRange = None,
+          zRange = None,
           scaling = {}, 
-	  extensions = ["pdf", "png", "root","C"], 
-	  plot_directory = ".", 
-	  logX = False, logY = False, logZ = True, 
-	  drawObjects = [],
+          extensions = ["pdf", "png", "root","C"], 
+          plot_directory = ".", 
+          logX = False, logY = False, logZ = True, 
+          drawObjects = [],
           drawOption = 'COLZ',
-	  widths = {},
-	  ):
+          widths = {},
+          ):
     ''' plot: a Plot2D instance
-	zRange: None ( = ROOT default) or [low, high] 
-	extensions: ["pdf", "png", "root"] (default)
-	logX: True/False (default), logY: True/False(default), logZ: True/False(default)
-	drawObjects = [] Additional ROOT objects that are called by .Draw() 
-	widths = {} (default) to update the widths. Values are {'y_width':500, 'x_width':500, 'y_ratio_width':200}
+        zRange: None ( = ROOT default) or [low, high] 
+        extensions: ["pdf", "png", "root"] (default)
+        logX: True/False (default), logY: True/False(default), logZ: True/False(default)
+        drawObjects = [] Additional ROOT objects that are called by .Draw() 
+        widths = {} (default) to update the widths. Values are {'y_width':500, 'x_width':500, 'y_ratio_width':200}
     '''
 
     import ttg.tools.style as style
@@ -118,7 +118,7 @@ class Plot2D(Plot):
       histsToStack = [histDict[s] for s in stack]
       histos.append(self.stackHists(histsToStack))
 
-    self.scaleStacks(histos, scaling)
+#   self.scaleStacks(histos, scaling)
 
     # delete canvas if it exists
     if hasattr("ROOT","c1"): del ROOT.c1 
@@ -134,7 +134,7 @@ class Plot2D(Plot):
       histo.GetXaxis().SetTitle(self.texX)
       histo.GetYaxis().SetTitle(self.texY)
       if zRange is not None:
-	  histo.GetZaxis().SetRangeUser( *zRange )
+          histo.GetZaxis().SetRangeUser( *zRange )
       # precision 3 fonts. see https://root.cern.ch/root/htmldoc//TAttText.html#T5
       histo.GetXaxis().SetTitleFont(43)
       histo.GetYaxis().SetTitleFont(43)
