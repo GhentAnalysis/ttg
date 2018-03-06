@@ -45,8 +45,8 @@ def handleCombine(dataCard, combineCommand, otherCommands = []):
   if logLevel(log, 'DEBUG'): verbosity = '-v 2'
   else:                      verbosity = '-v 0'
   os.system('(eval `scramv1 runtime -sh`; combine ' + verbosity + ' ' + combineCommand + ') &> ' + dataCard + '.log')
-  os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
   os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands))
+  os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
   os.chdir(currentDir)
 
 #
