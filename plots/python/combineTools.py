@@ -1,7 +1,7 @@
 from ttg.tools.logger import getLogger, logLevel
 log = getLogger()
 
-import os,shutil,ROOT 
+import os,shutil,ROOT
 
 #
 # Combine settings
@@ -11,7 +11,7 @@ arch           = 'slc6_amd64_gcc530'
 version        = 'v7.0.6'
 
 #
-# Setup function for combine
+# Setup combine release if not yet present, and returns its path
 #
 def getCombineRelease():
   combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE','..', release)))
@@ -30,7 +30,27 @@ def getCombineRelease():
   return combineRelease
 
 #
-# Reads the fitted signal strength from the mlfit.root file
+# Handle a combine command
+#
+def handleCombine(dataCard, combineCommand, otherCommands = []):
+  currentDir     = os.getcwd()
+  combineRelease = getCombineRelease()
+  log.info('Moving to ' + combineRelease + ' to run combine')
+  for f in [dataCard + '.txt', dataCard + '.root']:
+    log.info('Input file: ' + currentDir + '/combine/' + f)
+    newPath = os.path.join(combineRelease, 'src', f)
+    shutil.copy('combine/' + f, newPath)
+  shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
+  os.chdir(os.path.join(combineRelease, 'src'))
+  if logLevel(log, 'DEBUG'): verbosity = '-v 2'
+  else:                      verbosity = '-v 0'
+  os.system('(eval `scramv1 runtime -sh`; combine ' + verbosity + ' ' + combineCommand + ') &> ' + dataCard + '.log')
+  os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
+  os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands))
+  os.chdir(currentDir)
+
+#
+# Reads the fitted signal strength from the fitDiagnostics.root file
 #
 def getSignalStrength(filename):
   resultsFile = ROOT.TFile(filename)
@@ -41,43 +61,50 @@ def getSignalStrength(filename):
     log.info('Result: %.2f %.2f/+%.2f' % result)
     return result
 
-
-
 #
-# Complete combine chain
+# Run fit diagnostics
 #
-def handleCombine(dataCard, trackParameters = [], toys = None):
-  currentDir     = os.getcwd()
-  combineRelease = getCombineRelease()
-  log.info('Moving to ' + combineRelease + ' to run combine')
-  for f in [dataCard + '.txt', dataCard + '.root']:
-    log.info('Input file: ' + currentDir + '/combine/' + f)
-    newPath = os.path.join(combineRelease, 'src', f)
-    shutil.copy('combine/' + f, newPath)
-  shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
-  os.chdir(os.path.join(combineRelease, 'src'))
-
-  log.info('Running fit')
+def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=False):
   extraOptions = ''
-  if toys: extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
-  os.system('(eval `scramv1 runtime -sh`;combine -M FitDiagnostics ' + extraOptions + ' --trackParameters ' + ','.join(trackParameters) + ' ' + dataCard + '.txt)' + ('' if logLevel(log, 'DEBUG') else (' &> ' + dataCard + '.log')))
+  if toys:                 extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
+  if statOnly:             extraOptions += ' --justFit --profilingMode=none'
+  if len(trackParameters): extraOptions += ' --trackParameters ' + ','.join(trackParameters)
+  combineCommand = '-M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.txt'
+  otherCommands  = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
+                    'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
+                    'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex',
+                    'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex',
+                    'mv fitDiagnostics.root ' + dataCard + '_fitDiagnostics.root']
+  log.info('Running FitDiagnostics')
+  handleCombine(dataCard, combineCommand, otherCommands)
   try:
-    result = getSignalStrength('fitDiagnostics.root')
+    result = getSignalStrength('./combine/' + dataCard + '_fitDiagnostics.root')
+    return result
   except:
-    with open(dataCard + '.log') as f:
+    with open('./combine/' + dataCard + '.log') as f:
       for line in f: log.warning(line.rstrip())
-  command  = 'eval `scramv1 runtime -sh`';
-  command += 'python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt;'
-  command += 'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt;'
-  command += 'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex;'
-  command += 'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex;'
-  command += 'mv fitDiagnostics.root ' + dataCard + '_results.root;'
-  command += 'mv *' + dataCard + '* ' + currentDir + '/combine/'
-  os.system(command)
-  os.chdir(currentDir)
-  return result
+
+  return None
+
+#
+# Run significance
+#
+def runSignificance(dataCard, expected=False):
+  command = '-M Significance ' + dataCard + '.txt'
+  if expected: command += ' -t -1 --expectSignal=1'
+  handleCombine(dataCard, command)
+  with open('./combine/' + dataCard + '.log') as f:
+    for line in f: log.info(line.rstrip())
 
 
+#
+# Run impacts (really need to find some real documentation for this)
+#
+def runImpacts(dataCard):
+  command  = '-M MultiDimFit -n initialFit --algo singles ????????????'
+  handleCombine(dataCard, command)
+  with open('./combine/' + dataCard + '.log') as f:
+    for line in f: log.info(line.rstrip())
 
 # Write the card including all systematics and shapes
 def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics, linearSystematics):

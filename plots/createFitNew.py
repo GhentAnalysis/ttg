@@ -7,7 +7,7 @@ args = argParser.parse_args()
 
 from ttg.plots.plot         import Plot, getHistFromPkl
 from ttg.tools.logger       import getLogger
-from ttg.plots.combineTools import handleCombine,writeCard
+from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance
 from ttg.plots.systematics  import systematics, linearSystematics
 log = getLogger(args.logLevel)
 
@@ -58,6 +58,9 @@ def writeHist(file, shape, template, hist, statVariations=None):
       writeHist(file, shape + shape + template + 'Stat' + str(i) + 'Down', template, down)
       statVariations.append(shape + template + 'Stat' + str(i))
 
+#
+# For a full simultaneous fit
+#
 def writeRootFile(name, systematics):
   try:    os.makedirs('combine')
   except: pass
@@ -84,6 +87,29 @@ def writeRootFile(name, systematics):
   return set(statVariations)
   f.Close()
 
+#
+# For a charged isolation only fit
+#
+def writeRootFileForChgIso(name, systematics):
+  try:    os.makedirs('combine')
+  except: pass
+
+  f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
+
+  writeHist(f, 'chgIso1' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+
+  statVariations = []
+  for splitType in ['_p', '_np']:
+    for sample in samples:
+      for sys in [''] + systematics:
+        if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']]
+        elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
+        else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
+        writeHist(f, 'chgIso1'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
+
+  return set(statVariations)
+  f.Close()
+
 
 templates = [(s + '_p') for s in samples] + [(s + '_np') for s in samples]
 
@@ -98,4 +124,6 @@ statVariations = writeRootFile(cardName, systematics.keys())
 writeCard(cardName, ['sr_OF', 'sr_SF'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
 
 
-result = handleCombine(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','nonPrompt','r'], toys=None)
+result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','nonPrompt','r'], toys=None, statOnly=False)
+#runSignificance(cardName)
+#runSignificance(cardName, expected=True)
