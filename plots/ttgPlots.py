@@ -55,17 +55,23 @@ if not args.isChild:
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt15to20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20to40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
@@ -178,7 +184,7 @@ if args.tag.count('randomConeCheck'):
   plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80,0,20)))
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph], (20,0,2)))
 else:
-  plots.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (20,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (20,0,0.04)))
+  plots.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (40,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (50,0,0.04)))
 
   plots.append(Plot('yield',                      'yield',                                lambda c : channelNumbering(c),                                (3, 0.5, 2.5 if singleLep else 3.5), histModifications=xAxisLabels(['#mu','e'] if singleLep else ['#mu#mu', 'e#mu', 'ee'])))
   plots.append(Plot('nVertex',                    'vertex multiplicity',                  lambda c : ord(c._nVertex),                                    (50, 0, 50)))
@@ -293,7 +299,7 @@ if not args.showSys:
     c.nonprompt         = sample.texName.count('non-prompt')
     c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
     c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
-    c.failSigmaIetaIeta = sample.texName.count('fail')
+    c.failSigmaIetaIeta = sample.texName.count('fail') or args.tag.count("failSigmaIetaIeta")
     c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
 
     selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
