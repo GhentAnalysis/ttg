@@ -22,12 +22,13 @@ def getCombineRelease():
     setupCommand += 'source $VO_CMS_SW_DIR/cmsset_default.sh;'
     setupCommand += 'scramv1 project CMSSW ' + release + ';'
     setupCommand += 'cd ' + combineRelease + '/src;'
+    setupCommand += 'eval `scramv1 runtime -sh`;'
     setupCommand += 'git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit;'
     setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
     setupCommand += 'git fetch origin;git checkout ' + version + ';'
-#    setupCommand += 'cd ' + combineRelease + '/src;'
-#    setupCommand += 'git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester;'
-    setupCommand += 'eval `scramv1 runtime -sh`;scramv1 b clean;scramv1 b;'
+    setupCommand += 'scramv1 b clean;scramv1 b -j 8;'
+    setupCommand += 'curl -s "https://raw.githubusercontent.com/cms-analysis/CombineHarvester/master/CombineTools/scripts/sparse-checkout-ssh.sh" | bash;'
+    setupCommand += 'scramv1 b -j 8;'
     os.system(setupCommand)
   return combineRelease
 
