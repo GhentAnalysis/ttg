@@ -278,9 +278,10 @@ class Plot:
   #
   def applyPostFitScaling(self, postFitInfo):
     for sample, h in self.histos.iteritems():
-      if sample.name in postFitInfo:
-        log.debug('Applying post-fit scaling value of ' + str(postFitInfo[sample.name]) + ' to ' + sample.name)
-        h.Scale(postFitInfo[sample.name])
+      for key,value in postFitInfo.iteritems():
+        if key in sample.name or key in sample.texName:
+          log.debug('Applying post-fit scaling value of ' + str(value) + ' to ' + sample.name)
+          h.Scale(value)
 
 
   #
