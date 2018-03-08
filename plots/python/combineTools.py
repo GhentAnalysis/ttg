@@ -8,7 +8,7 @@ import os,shutil,ROOT
 #
 release        = 'CMSSW_8_1_0'
 arch           = 'slc6_amd64_gcc530'
-version        = 'v7.0.6'
+version        = 'v7.0.7'
 
 #
 # Setup combine release if not yet present, and returns its path
@@ -25,6 +25,8 @@ def getCombineRelease():
     setupCommand += 'git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit;'
     setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
     setupCommand += 'git fetch origin;git checkout ' + version + ';'
+#    setupCommand += 'cd ' + combineRelease + '/src;'
+#    setupCommand += 'git clone https://github.com/cms-analysis/CombineHarvester.git CombineHarvester;'
     setupCommand += 'eval `scramv1 runtime -sh`;scramv1 b clean;scramv1 b;'
     os.system(setupCommand)
   return combineRelease
