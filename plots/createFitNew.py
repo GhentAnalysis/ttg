@@ -7,7 +7,7 @@ args = argParser.parse_args()
 
 from ttg.plots.plot         import Plot, getHistFromPkl
 from ttg.tools.logger       import getLogger
-from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance
+from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts
 from ttg.plots.systematics  import systematics, linearSystematics
 log = getLogger(args.logLevel)
 
@@ -116,7 +116,7 @@ if chgIsoFit:
   statVariations = writeRootFileForChgIso(cardName, systematics.keys())
   writeCard(cardName, ['chgIso'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
   result = runFitDiagnostics(cardName, toys=None, statOnly=False)
-
+  runImpacts(cardName)
 else:
   templates   = [(s + '_p') for s in samples] + [(s + '_np') for s in samples]
   extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
