@@ -1,0 +1,5 @@
+-- MC (chgIso pass)
+TTJets_pow               t#bar{t}_(chgIso_pass)             errorStyle     kBlue         _ttgEventType<3
+
+-- MC (chgIso fail)
+TTJets_pow               t#bar{t}_(chgIso_fail)             errorStyle     kRed          _ttgEventType<3

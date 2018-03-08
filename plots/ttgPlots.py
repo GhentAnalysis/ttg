@@ -3,7 +3,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse
+import os, argparse, numpy
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--selection',      action='store',      default=None)
@@ -27,7 +27,7 @@ log = getLogger(args.logLevel)
 #
 # Check git and edit the info file
 #
-from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi
+from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi, deltaR
 if args.editInfo:
   try:    os.makedirs(os.path.join(plotDir, args.tag))
   except: pass
@@ -111,7 +111,6 @@ import os, ROOT
 from ttg.plots.plot           import Plot, xAxisLabels, fillPlots
 from ttg.plots.plot2D         import Plot2D
 from ttg.plots.cutInterpreter import cutInterpreter
-from ttg.reduceTuple.objectSelection import photonSelector
 from ttg.samples.Sample       import createStack
 from ttg.plots.photonCategories import photonCategoryNumber
 from math import pi
@@ -125,7 +124,7 @@ forward     = args.tag.count('forward')
 central     = args.tag.count('central')
 zeroLep     = args.tag.count('QCD')
 singleLep   = args.tag.count('singleLep')
-normalize   = args.tag.count('igmaIetaIeta') or args.tag.count('randomConeCheck')
+normalize   = args.tag.count('sigmaIetaIeta') or args.tag.count('randomConeCheck')
 
 
 
@@ -156,7 +155,7 @@ stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples
 #
 
 plots = []
-Plot.setDefaults(stack=stack, texY = '(1/N) dN/dx' if normalize else 'Events')
+Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'))
 Plot2D.setDefaults(stack=stack)
 
 def channelNumbering(c):
@@ -209,7 +208,7 @@ else:
   plots.append(Plot('photon_photonIso',           'photonIso(#gamma) (GeV)',              lambda c : c._phPhotonIsolation[c.ph],                         (32,0,8)))
   plots.append(Plot('photon_SigmaIetaIeta',       '#sigma_{i#etai#eta}(#gamma)',          lambda c : c._phSigmaIetaIeta[c.ph],                           (20,0,0.04)))
   plots.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',               lambda c : c._phHadronicOverEm[c.ph],                          (20,0,.025)))
-  plots.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                   lambda c : c.phJetDeltaR,                                      (20,0,5)))
+  plots.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                   lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
   plots.append(Plot('l1_pt',                      'p_{T}(l_{1}) (GeV)',                   lambda c : c.l1_pt,                                            (20,0,200)))
   plots.append(Plot('l1_eta',                     '|#eta|(l_{1})',                        lambda c : abs(c._lEta[c.l1]),                                 (15,0,2.4)))
   plots.append(Plot('l1_eta_small',               '|#eta|(l_{1})',                        lambda c : abs(c._lEta[c.l1]),                                 (50,0,2.4)))
@@ -280,10 +279,10 @@ if not args.showSys:
 
   if   args.tag.count('QCD'):                                                       reduceType = 'phoCB'
   elif args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
+  elif args.tag.count('lessStrongJetCleaning'):                                     reduceType = 'eleSusyLoose-phoCB-new'
   else:                                                                             reduceType = 'eleSusyLoose-phoCB'
 
-  from ttg.reduceTuple.objectSelection import deltaR, looseLeptonSelector, selectPhotons
-  from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta
+  from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta, checkChgIso
   for sample in sum(stack, []):
     if args.sys and 'Scale' not in args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep', sys=args.sys)
@@ -299,8 +298,13 @@ if not args.showSys:
     c.nonprompt         = sample.texName.count('non-prompt')
     c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
     c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
-    c.failSigmaIetaIeta = sample.texName.count('fail') or args.tag.count("failSigmaIetaIeta")
-    c.passSigmaIetaIeta = sample.texName.count('pass') or args.tag.count("noChgIso")
+    c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail') or args.tag.count("failSigmaIetaIeta")
+    c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
+    c.sigmaIetaIeta2    = sample.texName.count('0.01022 < #sigma_{i#etai#eta} < 0.015')
+    c.sigmaIetaIeta3    = sample.texName.count('0.015 < #sigma_{i#etai#eta} < 0.02')
+    c.sigmaIetaIeta4    = sample.texName.count('0.02 < #sigma_{i#etai#eta}')
+    c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
+    c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
 
     selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
@@ -321,6 +325,7 @@ if not args.showSys:
         if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
 
         if not checkSigmaIetaIeta(c, c.ph):        continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+        if not checkChgIso(c, c.ph):               continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
         if not checkMatch(c, c.ph, oldDefinition): continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
         if not checkPrompt(c, c.ph):               continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
@@ -337,7 +342,10 @@ if not args.showSys:
 #
 postFitInfo = None
 if args.post:
-  from ttg.plots.postFitInfo import postFitInfo
+  if args.tag.count('match'):
+    from ttg.plots.postFitInfoChgIso import postFitInfo
+  else:
+    from ttg.plots.postFitInfo import postFitInfo
 noWarnings = True
 from ttg.tools.style import drawLumi
 for plot in plots: # 1D plots

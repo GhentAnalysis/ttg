@@ -73,5 +73,13 @@ def checkSigmaIetaIeta(tree, index):
   cut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                        # forward region needs much higher cut
   if   tree.passSigmaIetaIeta and tree._phSigmaIetaIeta[index] > cut:                     return False
   elif tree.failSigmaIetaIeta and tree._phSigmaIetaIeta[index] < cut:                     return False
+  elif tree.sigmaIetaIeta2    and tree._phSigmaIetaIeta[index] < cut   and tree._phSigmaIetaIeta[index] > 0.015: return False
+  elif tree.sigmaIetaIeta3    and tree._phSigmaIetaIeta[index] < 0.015 and tree._phSigmaIetaIeta[index] > 0.02:  return False
+  elif tree.sigmaIetaIeta4    and tree._phSigmaIetaIeta[index] < 0.02:                                           return False
   if tree._phSigmaIetaIeta[index] > (0.016 if abs(tree._phEta[index]) < 1.566 else 0.04): return False
+  return True
+
+def checkChgIso(tree, index):
+  if   tree.failChgIso and tree._phChargedIsolation[tree.ph] < 0.441:                     return False
+  elif tree.passChgIso and tree._phChargedIsolation[tree.ph] > 0.441:                     return False
   return True
