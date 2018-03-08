@@ -45,9 +45,8 @@ def handleCombine(dataCard, combineCommand, otherCommands = []):
     shutil.copy('combine/' + f, newPath)
   shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
   os.chdir(os.path.join(combineRelease, 'src'))
-  if logLevel(log, 'DEBUG'): verbosity = '-v 2'
-  else:                      verbosity = '-v 0'
-  os.system('(eval `scramv1 runtime -sh`; combine ' + verbosity + ' ' + combineCommand + ') &> ' + dataCard + '.log')
+  if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine', 'combine -v 2')
+  os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + dataCard + '.log')
   os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands))
   os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
   os.chdir(currentDir)
@@ -72,7 +71,7 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
   if toys:                 extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
   if statOnly:             extraOptions += ' --justFit --profilingMode=none'
   if len(trackParameters): extraOptions += ' --trackParameters ' + ','.join(trackParameters)
-  combineCommand = '-M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.txt'
+  combineCommand = 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.txt'
   otherCommands  = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
                     'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
                     'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex',
@@ -93,8 +92,9 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
 # Run significance
 #
 def runSignificance(dataCard, expected=False):
-  command = '-M Significance ' + dataCard + '.txt'
+  command = 'combine -M Significance ' + dataCard + '.txt'
   if expected: command += ' -t -1 --expectSignal=1'
+  log.info('Running Significance')
   handleCombine(dataCard, command)
   with open('./combine/' + dataCard + '.log') as f:
     for line in f: log.info(line.rstrip())
@@ -104,10 +104,18 @@ def runSignificance(dataCard, expected=False):
 # Run impacts (really need to find some real documentation for this)
 #
 def runImpacts(dataCard):
-  command  = '-M MultiDimFit -n initialFit --algo singles ????????????'
+  command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
+  command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
+  command += 'cd CombineHarvester/CombineTools/scripts;'
+  command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doInitialFit;'
+  command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doFits --parallel 8;'
+  command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 -o impacts.json;'
+  command += 'plotImpacts.py -i impacts.json -o impacts;'
+  command += 'mv impacts.pdf ../../../' + dataCard + '_impacts.pdf'
+  log.info('Running Impacts')
   handleCombine(dataCard, command)
   with open('./combine/' + dataCard + '.log') as f:
-    for line in f: log.info(line.rstrip())
+    for line in f: log.debug(line.rstrip())
 
 # Write the card including all systematics and shapes
 def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics, linearSystematics):
