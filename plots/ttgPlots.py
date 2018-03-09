@@ -51,28 +51,33 @@ if not args.isChild:
     selections = [args.selection]
   else:
     selections = [#'llg-looseLeptonVeto-mll40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40to60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt60',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1p',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt15to20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20to40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40to60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1p',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag0-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag1p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag0-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt15to20',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20to40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
+                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
                   #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p'
@@ -279,7 +284,7 @@ if not args.showSys:
 
   if   args.tag.count('QCD'):                                                       reduceType = 'phoCB'
   elif args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
-  elif args.tag.count('lessStrongJetCleaning'):                                     reduceType = 'eleSusyLoose-phoCB-new'
+  elif args.tag.count('pixelSeedVeto'):                                             reduceType = 'eleSusyLoose-phoCB-pixelSeedVeto'
   else:                                                                             reduceType = 'eleSusyLoose-phoCB'
 
   from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta, checkChgIso

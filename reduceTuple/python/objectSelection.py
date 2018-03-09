@@ -145,6 +145,7 @@ def photonSelector(tree, index, n, minLeptons):
   if abs(tree._phEta[index]) > 1.4442 and abs(tree._phEta[index]) < 1.566:      return False
   if abs(tree._phEta[index]) > 2.5:                                             return False
   if tree._phPtCorr[index] < 15:                                                return False
+  if tree._phHasPixelSeed[index]:                                               return False
   if not tree._phPassElectronVeto[index]:                                       return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
