@@ -67,10 +67,10 @@ def writeRootFile(name, systematics):
 
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
-#  writeHist(f, 'chgIso1' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
-#  writeHist(f, 'chgIso2', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
-  writeHist(f, 'sr_OF',   'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             '', ['MuonEG']))
-  writeHist(f, 'sr_SF',   'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             '', ['DoubleEG'],['DoubleMuon']))
+#  writeHist(f, 'chgIso1' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+#  writeHist(f, 'chgIso2', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'),                   'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+  writeHist(f, 'sr_OF',   'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'),                   'signalRegions',             '', ['MuonEG']))
+  writeHist(f, 'sr_SF',   'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'),                   'signalRegions',             '', ['DoubleEG'],['DoubleMuon']))
 
   statVariations = []
   for splitType in ['_p', '_np']:
@@ -79,10 +79,10 @@ def writeRootFile(name, systematics):
         if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']]
         elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)']]
         else:                  selectors = [[sample, '(genuine,misIdEle)'], [sample, '(hadronicPhoton,hadronicFake)']]
-#        writeHist(f, 'chgIso1'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
-#        writeHist(f, 'chgIso2'+sys, sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
-        writeHist(f, 'sr_OF'+sys,   sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             sys, *selectors), (statVariations if sys=='' else None))
-        writeHist(f, 'sr_SF'+sys,   sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ'),                   'signalRegions',             sys, *selectors), (statVariations if sys=='' else None))
+#        writeHist(f, 'chgIso1'+sys,  sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
+#        writeHist(f, 'chgIso2'+sys, sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'),                   'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
+        writeHist(f, 'sr_OF'+sys,   sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'emu', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'),                   'signalRegions',             sys, *selectors), (statVariations if sys=='' else None))
+        writeHist(f, 'sr_SF'+sys,   sample + splitType, getHistFromPkl(('eleSusyLoose-phoCBfull-match',     'SF',  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'),                   'signalRegions',             sys, *selectors), (statVariations if sys=='' else None))
 
   return set(statVariations)
   f.Close()
@@ -96,14 +96,14 @@ def writeRootFileForChgIso(name, systematics):
 
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
-  writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+  writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
 
   statVariations = []
   for splitType in ['_p', '_np']:
     for sys in [''] + systematics:
       if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)'] for sample in samples]
       elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)'] for sample in samples]
-      writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p'), 'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
+      writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'photon_chargedIso', sys, *selectors), (statVariations if sys=='' else None))
 
   return set(statVariations)
   f.Close()
