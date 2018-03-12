@@ -5,7 +5,7 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--checkStability', action='store_true', default=False)
 args = argParser.parse_args()
 
-from ttg.plots.plot         import Plot, getHistFromPkl
+from ttg.plots.plot         import getHistFromPkl
 from ttg.tools.logger       import getLogger
 from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts
 from ttg.plots.systematics  import systematics, linearSystematics
