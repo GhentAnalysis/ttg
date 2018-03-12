@@ -145,6 +145,7 @@ c.cbLoose             = args.type.count('eleCBLoose')
 c.cbMedium            = args.type.count('eleCBMedium')
 c.cbVeto              = args.type.count('eleCBVeto')
 c.susyLoose           = args.type.count('eleSusyLoose')
+c.noPixelSeedVeto     = args.type.count('noPixelSeedVeto')
 
 def switchBranches(c, default, variation):
   return lambda c: setattr(c, default, getattr(c, variation))
