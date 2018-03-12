@@ -50,37 +50,15 @@ if not args.isChild:
   if args.selection:
     selections = [args.selection]
   else:
-    selections = [#'llg-looseLeptonVeto-mll40',
+    selections = ['llg-looseLeptonVeto-mll40-photonPt20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt15to20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40to60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1p',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag0-photonPt20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag1p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag0-photonPt20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt15to20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40to60',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt15to20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20to40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40to60',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt40',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt60',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR02-njet2p-deepbtag1p',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gJetdR04-njet2p-deepbtag1p',
-                  #'llg-looseLeptonVeto-mll40-offZ-llgNoZ-gLepdR04-gJetdR04-njet2p-deepbtag1p'
+                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20',
                   ]
 
 
