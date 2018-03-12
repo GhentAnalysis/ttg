@@ -1,13 +1,27 @@
-# ttg
 Repository for tt+gamma analysis in the dilepton channel
 
-# tuples
+# Input tuples
 Tuples are produced in the heavyNeutrino framework (https://github.com/GhentAnalysis/heavyNeutrino)
-using option 'TTG' (basic skim of 2 leptons and 1 photon without additional requirements)
+using option 'dilep' (basic skim of 2 leptons without additional requirements). The branch used is
+currently CMSSW\_8\_0\_X
 
-# postprocessing of tuples
-Using ttg/reduceTuple/reduceTuple.py the tuples are futher skimmed for a given lepton and photon id
-Some usuful variables like m(ll), m(llg), deltaR,... are added to the tuples
+# Structure of the repository
 
-# plotting script
-See ttg/plots/ttgPlots.py
+## tools
+Small helper functions and scripts.
+
+## samples
+Contains the Sample object class and several configuration files (x-sec, styles, how to stack histograms,...)
+to handle them.
+
+## reduceTuple
+The reduceTuple.py script skims the heavyNeutrino tuples based on a given lepton and photon id
+Some usuful variables like m(ll), m(llg), deltaR,... are added to the tuples, such that they can be
+fastly accessed by second-level (i.e. plotting) scripts.
+
+## plots
+This directory contains the plotting scripts as well as the scripts to do the fits. The plotting script is called 
+ttgPlots.py and runs over reduced tuples (as produced by the reduceTuple/reduceTuple.py scripts) which are based
+on the original heavyNeutrino tuples but skimmed for lepton and photon id requirements.
+The ttgPlots.py script creates plots in .png, .pdf, .root,.C and .pkl formats. The .pkl format is used as an
+input to the fitting script.
