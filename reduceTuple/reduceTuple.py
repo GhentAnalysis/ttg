@@ -88,8 +88,8 @@ outputFile.cd()
 unusedBranches = ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
 deleteBranches = ["Scale","Res","pass","flag","met","POG"]
 if not sample.isData:
-  unusedBranches += ["gen*Charge","gen*Flavor","gen_met","gen*Status","gen*Pdg"]
-  deleteBranches += ["heWeight"]
+  unusedBranches += ["gen_nL", "gen_l","gen_met","gen_HT"]
+  deleteBranches += ["heWeight","gen_ph"]
 for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
 for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
@@ -132,6 +132,7 @@ if not sample.isData:
   for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:               newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
   for sys in ['q2Up','q2Down','pdfUp','pdfDown']:                newBranches += ['weight_' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
+  newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F']
 
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)

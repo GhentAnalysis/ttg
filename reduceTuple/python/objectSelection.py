@@ -153,12 +153,25 @@ def photonSelector(tree, index, n, minLeptons):
   if tree.photonMva:            return tree._phMva[index] > 0.20
   return True
 
+def addGenPhotonInfo(t, n):
+  n.genPhDeltaR        = 99
+  n.genPhMinDeltaR     = 99
+  n.genPhPassParentage = False
+  for i in range(ord(t._gen_nPh)):
+    myDeltaR = deltaR(t._phEta[n.ph], t._gen_phEta[i], t._phPhi[n.ph], t._gen_phPhi[i])
+    if myDeltaR < n.genPhDeltaR:
+      n.genPhDeltaR        = myDeltaR
+      n.genPhPassParentage = t._gen_phPassParentage[i]
+      n.genPhMinDeltaR     = t._gen_phMinDeltaR[i]
+      n.genPhRelPt         = (t._gen_phPt[i]-t._phPt[n.ph])/t._gen_phPt[i]
+
 def selectPhotons(t, n, doCut, minLeptons):
   t.photons  = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, minLeptons)]
   n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
   if len(t.photons): 
     n.ph    = t.photons[0]
     n.ph_pt = t._phPtCorr[n.ph]
+    addGenPhotonInfo(t, n)
   return (len(t.photons) > 0 or not doCut)
 
 
