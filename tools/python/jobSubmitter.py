@@ -1,7 +1,33 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-import os, time
+import os, time, subprocess
+
+def system(command):
+  return subprocess.check_output(command, shell=True)
+
+# Check the cream02 queue, do not submit new jobs when over 2000 (limit is 2500)
+def checkQueueOnCream02():
+  queue = int(system('qstat -u $USER | wc -l'))
+  if queue > 2000:
+    log.info('Too much jobs in queue (' + str(queue) + '), sleeping')
+    time.sleep(500)
+    checkQueue()
+
+# Cream02 running
+def launchCream02(command, logfile, checkQueue=False):
+  if checkQueue: checkQueueOnCream02()
+  log.info('Launching ' + command ' on cream02')
+  out = system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=15:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh")
+  if out.count('Invalid credential'):
+      time.sleep(10)
+      launch(command, logfile, runLocal)
+
+# Local running: limit to 8 jobs running simultaneously
+def launchLocal(command, logfile, runLocal):
+  while(int(system('ps uaxw | grep python | grep $USER |grep -c -v grep')) > 8): time.sleep(20)
+  log.info('Launching ' + command ' on local machine')
+  system(command + ' &> ' + logfile + ' &')
 
 #
 # Job submitter for T2_BE_IIHE
@@ -12,21 +38,11 @@ import os, time
 #   dropArgs:   if some args need to be ignored
 #   subLog:     subdirectory for the logs
 #
-
-def launch(command, logfile, runLocal):
-    if runLocal: os.system(command + ' &> ' + logfile + ' &')
-    else:        os.system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=15:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh &> .qsub.log")
-    with open('.qsub.log','r') as qsublog:
-      for l in qsublog:
-        if 'Invalid credential' in l:
-          time.sleep(10)
-          launch(command, logfile, runLocal)
-
 def submitJobs(script, subJobArg, subJobList, args, dropArgs = [], subLog=''):
   os.system("mkdir -p log")
 
   submitArgs = {arg: getattr(args, arg) for arg in vars(args) if arg not in dropArgs and arg!=subJobArg and getattr(args, arg)}
-  for subJob in subJobList:
+  for i, subJob in enumerate(subJobList):
     submitArgs[subJobArg] = str(subJob)
     submitArgs['isChild'] = True
 
@@ -38,5 +54,6 @@ def submitJobs(script, subJobArg, subJobList, args, dropArgs = [], subLog=''):
     try:    os.makedirs(logdir)
     except: pass
 
-    log.info('Launching ' + command)
-    if not args.dryRun: launch(command, logfile, args.runLocal)
+    if not args.dryRun:
+      if args.runLocal: launchLocal(command, logfile)
+      else:             launchCream02(command, logfile, checkQueue=(i%100==0))
