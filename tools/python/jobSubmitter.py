@@ -4,29 +4,32 @@ log = getLogger()
 import os, time, subprocess
 
 def system(command):
-  return subprocess.check_output(command, shell=True)
+  return subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
 
 # Check the cream02 queue, do not submit new jobs when over 2000 (limit is 2500)
 def checkQueueOnCream02():
-  queue = int(system('qstat -u $USER | wc -l'))
+  try:    queue = int(system('qstat -u $USER | wc -l'))
+  except: checkQueueOnCream02()
   if queue > 2000:
     log.info('Too much jobs in queue (' + str(queue) + '), sleeping')
     time.sleep(500)
-    checkQueue()
+    checkQueueOnCream02()
+
 
 # Cream02 running
 def launchCream02(command, logfile, checkQueue=False):
   if checkQueue: checkQueueOnCream02()
-  log.info('Launching ' + command ' on cream02')
-  out = system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=15:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh")
-  if out.count('Invalid credential'):
+  log.info('Launching ' + command + ' on cream02')
+  try:    out = system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=15:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh")
+  except: out = 'failed'
+  if not out.count('.cream02.iihe.ac.be'):
       time.sleep(10)
-      launch(command, logfile, runLocal)
+      launchCream02(command, logfile)
 
 # Local running: limit to 8 jobs running simultaneously
 def launchLocal(command, logfile, runLocal):
   while(int(system('ps uaxw | grep python | grep $USER |grep -c -v grep')) > 8): time.sleep(20)
-  log.info('Launching ' + command ' on local machine')
+  log.info('Launching ' + command + ' on local machine')
   system(command + ' &> ' + logfile + ' &')
 
 #
