@@ -190,6 +190,7 @@ a:hover { text-decoration: underline; color: #D08504; }
 <pre style="font-size:80%">
 <?php
   if(file_exists('info.txt')){
+    print "<br /><br /><br />";
     echo file_get_contents('info.txt');
   }
 ?>
