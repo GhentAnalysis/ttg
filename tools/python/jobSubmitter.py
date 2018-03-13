@@ -27,7 +27,7 @@ def launchCream02(command, logfile, checkQueue=False):
       launchCream02(command, logfile)
 
 # Local running: limit to 8 jobs running simultaneously
-def launchLocal(command, logfile, runLocal):
+def launchLocal(command, logfile):
   while(int(system('ps uaxw | grep python | grep $USER |grep -c -v grep')) > 8): time.sleep(20)
   log.info('Launching ' + command + ' on local machine')
   system(command + ' &> ' + logfile + ' &')
