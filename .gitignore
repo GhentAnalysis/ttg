@@ -4,6 +4,5 @@ __init__.py
 analysisNote
 plots/fitPlots
 plots/combine
-**/.qsub.log
 **/git.txt
 reduceTuple/data/puReweightingData/pileup_latest.txt
