@@ -57,6 +57,6 @@ def submitJobs(script, subJobArg, subJobList, args, dropArgs = [], subLog=''):
     try:    os.makedirs(logdir)
     except: pass
 
-    if not args.dryRun:
-      if args.runLocal: launchLocal(command, logfile)
-      else:             launchCream02(command, logfile, checkQueue=(i%100==0))
+    if args.dryRun:     log.info('Dry-run: ' + command)
+    elif args.runLocal: launchLocal(command, logfile)
+    else:               launchCream02(command, logfile, checkQueue=(i%100==0))
