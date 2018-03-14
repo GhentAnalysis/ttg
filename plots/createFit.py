@@ -2,7 +2,7 @@
 import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
-argParser.add_argument('--bigFit',         action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
+argParser.add_argument('--bigFit',         action='store_true', default=False)
 args = argParser.parse_args()
 
 from ttg.tools.logger       import getLogger
@@ -101,7 +101,7 @@ else:
     writeCard(cardName, ['chgIso'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
     systematics = {}
     result = runFitDiagnostics(cardName, toys=None, statOnly=False)
-    nonPromptSF[selection] = (result[0], sqrt((result[1]/result[0])**2+0.25**2)*result[0], -sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
+    nonPromptSF[selection] = (result[0], -sqrt((result[1]/result[0])**2+0.25**2)*result[0], sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
     runImpacts(cardName)
 
   for i,j in nonPromptSF.iteritems():
@@ -150,6 +150,6 @@ else:
   writeCard(cardName, ['sr_OF', 'sr_SF'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
 
   result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
-  runImpacts(cardName)
+  #runImpacts(cardName)
   #runSignificance(cardName)
   #runSignificance(cardName, expected=True)
