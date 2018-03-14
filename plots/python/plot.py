@@ -66,8 +66,6 @@ def normalizeBinWidth(hist, norm=None):
       width = hist.GetBinWidth(i)
       hist.SetBinContent(i, val/(width/norm))
       hist.SetBinError(i, err/(width/norm))
-  return hist
-
 
 
 #

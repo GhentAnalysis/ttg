@@ -24,16 +24,15 @@ def protectHist(hist):
       if hist.GetBinContent(i) <= 0.00001: hist.SetBinContent(i, 0.00001)
   return hist
 
-def removeFirstBin(hist):
-  hist.SetBinContent(1, 0)
-  hist.SetBinError(1, 0)
-  return hist
-
 def applyNonPromptSF(hist, nonPromptSF):
   hist.Scale(nonPromptSF['njet2p-deepbtag1p'][0])  # Currently scaling all SR with same factor from njet2p-deepbtag1p, could be adapted to specific SF for each SR
   return hist
 
-def writeHist(file, shape, template, hist, statVariations=None):
+def writeHist(file, shape, template, hist, statVariations=None, norm=None, removeBins = []):
+  if norm: normalizeBinWidth(hist, norm)
+  for i in removeBins:
+    hist.SetBinContent(i, 0)
+    hist.SetBinError(i, 0)
   if not file.GetDirectory(shape): file.mkdir(shape)
   file.cd(shape)
   protectHist(hist).Write(template)
@@ -60,14 +59,14 @@ def writeRootFileForChgIso(name, systematics, selection):
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
   plot = 'photon_chargedIso_bins_NO'
-  writeHist(f, 'chgIso' , 'data_obs', normalizeBinWidth(removeFirstBin(getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])),norm=1))
+  writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1, removeBins=[1])
 
   statVariations = []
   for splitType in ['_p', '_np']:
     for sys in [''] + systematics:
       if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)'] for sample in samples]
       elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)'] for sample in samples]
-      writeHist(f, 'chgIso'+sys,  'all' + splitType, normalizeBinWidth(removeFirstBin(getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, sys, *selectors)), norm=1), (statVariations if sys=='' else None))
+      writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1, removeBins=[1])
 
   return set(statVariations)
   f.Close()
