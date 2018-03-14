@@ -36,11 +36,11 @@ def replaceShape(hist, shape):
   normalization = hist.Integral("width")/shape.Integral("width")
   hist = shape.Clone()
   hist.Scale(normalization)
-
+  return hist
 
 def writeHist(file, name, template, hist, statVariations=None, norm=None, removeBins = [], shape=None):
   if norm:  normalizeBinWidth(hist, norm)
-  if shape: replaceShape(hist, shape)
+  if shape: hist = replaceShape(hist, shape)
   for i in removeBins:
     hist.SetBinContent(i, 0)
     hist.SetBinError(i, 0)
@@ -84,7 +84,7 @@ if args.bigFit:
 
         if name.count('dd'):
           sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-failSigmaIetaIeta', channel, selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
-          normalizeBinWidth(sideBandShape, norm)
+          normalizeBinWidth(sideBandShape, 1)
         else:
           sideBandShape = None
 
@@ -124,14 +124,20 @@ else:
 
     f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
-    writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1, removeBins=[1])
+    writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1)
+
+    if name.count('dd'):
+      sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-failSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
+      normalizeBinWidth(sideBandShape, 1)
+    else:
+      sideBandShape = None
 
     statVariations = []
     for splitType in ['_p', '_np']:
       if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']            for sample in samples]
       elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)'] for sample in samples]
       for sys in [''] + systematics:
-        writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1, removeBins=[1])
+        writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1, shape=sideBandShape)
 
     f.Close()
     return set(statVariations)
@@ -142,15 +148,15 @@ else:
   extraLines  = ['prompt_norm rateParam * all_p 1']
 
   nonPromptSF = {}
-  #for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p']:
-  for selection in ['njet2p-deepbtag1p']:
-    cardName = 'chgIsoFit_' + selection
-    statVariations = writeRootFileForChgIso(cardName, systematics.keys(), selection)
-    writeCard(cardName, ['chgIso'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
-    systematics = {}
-    result = runFitDiagnostics(cardName, toys=None, statOnly=False)
-    nonPromptSF[selection] = (result[0], -sqrt((result[1]/result[0])**2+0.25**2)*result[0], sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
-    runImpacts(cardName)
+  for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p']:
+#  for selection in ['njet2p-deepbtag1p']:
+    for dataDriven in [False]:
+      cardName = 'chgIsoFit_' + ('_dd' if dataDriven else '') + selection
+      statVariations = writeRootFileForChgIso(cardName, [], selection)
+      writeCard(cardName, ['chgIso'], templates, extraLines, [], statVariations, linearSystematics)
+      result = runFitDiagnostics(cardName, toys=None, statOnly=False)
+      nonPromptSF[selection] = (result[0], -sqrt((result[1]/result[0])**2+0.25**2)*result[0], sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
+      runImpacts(cardName)
 
   for i,j in nonPromptSF.iteritems():
     log.info('Charged isolation fit for ' + i + ' results in %.2f (+%.2f, %.2f)' % j)
