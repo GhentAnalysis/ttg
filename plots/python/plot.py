@@ -38,7 +38,7 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
     if resultFile not in loadedPkls:
       with lock(resultFile, 'rb') as f: loadedPkls[resultFile] = pickle.load(f)
     for selector in selectors:
-      filtered    = {s:h for s,h in loadedPkls[resultFile][plotName+sys].iteritems() if all(s.count(sel) for sel in selector)}
+      filtered = {s:h for s,h in loadedPkls[resultFile][plotName+sys].iteritems() if all(s.count(sel) for sel in selector)}
       if len(filtered) == 1:   hist = addHist(hist, filtered[filtered.keys()[0]])
       elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
   else:                        log.error('Missing cache file ' + resultFile)
@@ -54,6 +54,21 @@ def xAxisLabels(labels):
     for i,l in enumerate(labels):
       h.GetXaxis().SetBinLabel(i+1, l)
   return [applyLabels]
+
+#
+# Normalize binwidth when non-unifor bin width is used
+#
+def normalizeBinWidth(hist, norm=None):
+  if norm:
+    for i in range(hist.GetXaxis().GetNbins()+1):
+      val   = hist.GetBinContent(i)
+      err   = hist.GetBinError(i)
+      width = hist.GetBinWidth(i)
+      hist.SetBinContent(i, val/(width/norm))
+      hist.SetBinError(i, err/(width/norm))
+  return hist
+
+
 
 #
 # Function which fills all plots and removes them when the lamdbda fails (e.g. because var is not defined)
@@ -220,19 +235,6 @@ class Plot:
 
 
   #
-  # Normalize binwidth when non-unifor bin width is used
-  #
-  def normalizeBinWidth(self, hist, norm=None):
-    if norm:
-      for i in range(hist.GetXaxis().GetNbins()+1):
-        val   = hist.GetBinContent(i)
-        err   = hist.GetBinError(i)
-        width = hist.GetBinWidth(i)
-        hist.SetBinContent(i, val/(width/norm))
-        hist.SetBinError(i, err/(width/norm))
-
-
-  #
   # Make a correct ratio graph (also working for poisson errors, and showing error bars for points outside of y-axis range)
   #
   def makeRatioGraph(self, num, den):
@@ -316,7 +318,7 @@ class Plot:
           if data: allPlots[plotName][histName] = applySysToOtherHist(data, dataSys, allPlots[plotName][histName])
         if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         if self.scaleFactor: h.Scale(self.scaleFactor)
-        self.normalizeBinWidth(h, self.normBinWidth)
+        normalizeBinWidth(h, self.normBinWidth)
         self.addOverFlowBin1D(h, self.overflowBin)
 
 
@@ -438,7 +440,7 @@ class Plot:
     for s, h in histDict.iteritems():
       if hasattr(s, 'style'): s.style(h)
       h.texName = s.texName
-      self.normalizeBinWidth(h, self.normBinWidth)
+      normalizeBinWidth(h, self.normBinWidth)
       self.addOverFlowBin1D(h, self.overflowBin)
 
     # Transform histDict --> histos where the stacks are added up
