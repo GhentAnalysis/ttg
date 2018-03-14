@@ -45,7 +45,7 @@ def handleCombine(dataCard, combineCommand, otherCommands = []):
     shutil.copy('combine/' + f, newPath)
   shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
   os.chdir(os.path.join(combineRelease, 'src'))
-  if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine', 'combine -v 2')
+  if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine ', 'combine -v 2 ')
   os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + dataCard + '.log')
   os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands))
   os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
@@ -66,10 +66,11 @@ def getSignalStrength(filename):
 #
 # Run fit diagnostics
 #
-def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=False):
-  extraOptions = ''
+def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=False, alsoBOnly=False):
+  extraOptions = ' --robustFit=1'
   if toys:                 extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
   if statOnly:             extraOptions += ' --justFit --profilingMode=none'
+  if not alsoBOnly:        extraOptions += ' --skipBOnlyFit'
   if len(trackParameters): extraOptions += ' --trackParameters ' + ','.join(trackParameters)
   combineCommand = 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.txt'
   otherCommands  = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
