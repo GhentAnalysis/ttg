@@ -11,7 +11,7 @@ arch           = 'slc6_amd64_gcc530'
 version        = 'v7.0.7'
 
 #
-# Setup combine release if not yet present, and returns its path
+# Setup combine release and combineTool.py if not yet present, and returns its path
 #
 def getCombineRelease():
   combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE','..', release)))
@@ -117,6 +117,10 @@ def runImpacts(dataCard):
   handleCombine(dataCard, command)
   with open('./combine/' + dataCard + '.log') as f:
     for line in f: log.debug(line.rstrip())
+  os.system("pdftoppm combine/" + dataCard + "_impacts.pdf " + dataCard + "_impacts -png;mogrify -trim " + dataCard + "_impacts*.png")
+  os.system("mkdir -p ~/www/ttG/combinePlots/")
+  os.system("cp $CMSSW_BASE/src/ttg/tools/php/index.php ~/www/ttG/combinePlots/")
+  os.system("mv " + dataCard + "_impacts*.png ~/www/ttG/combinePlots/")
 
 # Write the card including all systematics and shapes
 def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics, linearSystematics):
