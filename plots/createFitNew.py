@@ -4,11 +4,12 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 args = argParser.parse_args()
 
-from ttg.plots.plot         import getHistFromPkl
 from ttg.tools.logger       import getLogger
+log = getLogger(logLevel=args.logLevel)
+
+from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
 from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts
 from ttg.plots.systematics  import systematics, linearSystematics
-log = getLogger(args.logLevel)
 
 import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
@@ -16,7 +17,6 @@ ROOT.gROOT.SetBatch(True)
 from math import sqrt
 
 samples     = ['TTGamma','TTJets','ZG','DY','other']
-
 
 def protectHist(hist):
   if hist.Integral() < 0.00001:
@@ -26,6 +26,7 @@ def protectHist(hist):
 
 def removeFirstBin(hist):
   hist.SetBinContent(1, 0)
+  hist.SetBinError(1, 0)
   return hist
 
 def applyNonPromptSF(hist, nonPromptSF):
@@ -58,14 +59,15 @@ def writeRootFileForChgIso(name, systematics, selection):
 
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
-  writeHist(f, 'chgIso' , 'data_obs', removeFirstBin(getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', selection), 'photon_chargedIso', '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])))
+  plot = 'photon_chargedIso_bins_NO'
+  writeHist(f, 'chgIso' , 'data_obs', normalizeBinWidth(removeFirstBin(getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])),norm=1))
 
   statVariations = []
   for splitType in ['_p', '_np']:
     for sys in [''] + systematics:
       if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)'] for sample in samples]
       elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)'] for sample in samples]
-      writeHist(f, 'chgIso'+sys,  'all' + splitType, removeFirstBin(getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), 'photon_chargedIso', sys, *selectors)), (statVariations if sys=='' else None))
+      writeHist(f, 'chgIso'+sys,  'all' + splitType, normalizeBinWidth(removeFirstBin(getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, sys, *selectors)), norm=1), (statVariations if sys=='' else None))
 
   return set(statVariations)
   f.Close()
@@ -75,14 +77,15 @@ def writeRootFileForChgIso(name, systematics, selection):
 # Charged isolation fit
 #
 templates   = ['all_np', 'all_p'] 
-extraLines  = ['prompt_norm rateParam * all_p 1', 'prompt_norm param 1.0 0.2']
+extraLines  = ['prompt_norm rateParam * all_p 1']
 
 nonPromptSF = {}
-#  for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p']:
+#for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p']:
 for selection in ['njet2p-deepbtag1p']:
   cardName = 'chgIsoFit_' + selection
   statVariations = writeRootFileForChgIso(cardName, systematics.keys(), selection)
   writeCard(cardName, ['chgIso'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
+  systematics = {}
   result = runFitDiagnostics(cardName, toys=None, statOnly=False)
   nonPromptSF[selection] = (result[0], sqrt((result[1]/result[0])**2+0.25**2)*result[0], -sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
   runImpacts(cardName)
