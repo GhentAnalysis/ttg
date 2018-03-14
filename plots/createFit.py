@@ -32,13 +32,20 @@ def applyNonPromptSF(hist, nonPromptSF):
   hist.Scale(nonPromptSF['njet2p-deepbtag1p'][0])  # Currently scaling all SR with same factor from njet2p-deepbtag1p, could be adapted to specific SF for each SR
   return hist
 
-def writeHist(file, shape, template, hist, statVariations=None, norm=None, removeBins = []):
-  if norm: normalizeBinWidth(hist, norm)
+def replaceShape(hist, shape):
+  normalization = hist.Integral("width")/shape.Integral("width")
+  hist = shape.Clone()
+  hist.Scale(normalization)
+
+
+def writeHist(file, name, template, hist, statVariations=None, norm=None, removeBins = [], shape=None):
+  if norm:  normalizeBinWidth(hist, norm)
+  if shape: replaceShape(hist, shape)
   for i in removeBins:
     hist.SetBinContent(i, 0)
     hist.SetBinError(i, 0)
-  if not file.GetDirectory(shape): file.mkdir(shape)
-  file.cd(shape)
+  if not file.GetDirectory(name): file.mkdir(name)
+  file.cd(name)
   protectHist(hist).Write(template)
   file.cd()
   if statVariations is not None:
@@ -47,9 +54,9 @@ def writeHist(file, shape, template, hist, statVariations=None, norm=None, remov
       down = hist.Clone()
       up.SetBinContent(  i, hist.GetBinContent(i)+hist.GetBinError(i))
       down.SetBinContent(i, hist.GetBinContent(i)-hist.GetBinError(i))
-      writeHist(file, shape + shape + template + 'Stat' + str(i) + 'Up',   template, up)
-      writeHist(file, shape + shape + template + 'Stat' + str(i) + 'Down', template, down)
-      statVariations.append(shape + template + 'Stat' + str(i))
+      writeHist(file, name + name + template + 'Stat' + str(i) + 'Up',   template, up)
+      writeHist(file, name + name + template + 'Stat' + str(i) + 'Down', template, down)
+      statVariations.append(name + template + 'Stat' + str(i))
 
 # Create combine directory
 try:    os.makedirs('combine')
@@ -61,12 +68,53 @@ except: pass
 # One big simultaneous fit
 #
 if args.bigFit:
-  def writeRootFileForSimultaneousFit(name, systematics, selection):
-    pass
+  def writeRootFileForSimultaneousFit(name, systematics):
+    f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
+    shapes = []
+    statVariations = []
+    for channel in ['SF', 'emu']:
+     #for sr, selection in enumerate(['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag1p']):
+      for sr, selection in enumerate(['njet2p-deepbtag1', 'njet2p-deepbtag1p']):
+        plot      = 'photon_chargedIso_bins_NO'
+        selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-' + selection + '-photonPt20'
+        name      = 'sr' + str(sr) + channel
+        shapes.append(name)
 
+        writeHist(f, name, 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', channel, selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1)
+
+        if name.count('dd'):
+          sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-failSigmaIetaIeta', channel, selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
+          normalizeBinWidth(sideBandShape, norm)
+        else:
+          sideBandShape = None
+
+        for sample in samples:
+          for splitType in ['_p', '_np']:
+            if   splitType=='_p':  selector = [sample, '(genuine,misIdEle)']
+            elif splitType=='_np': selector = [sample, '(hadronicPhoton,hadronicFake)']
+            for sys in [''] + systematics:
+              writeHist(f, name+sys, sample+splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', channel, selection), plot, sys, selector), (statVariations if sys=='' else None), norm=1, shape=(sideBandShape if splitType=='_np' else None))
+    f.Close()
+    return shapes, set(statVariations)
+
+  cardName    = 'simultaneousFit'
+  templates   = [s + '_p' for s in samples] + [s + '_np' for s in samples]
+  extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
+  extraLines += [(s + '_norm param 1.0 0.1')            for s in samples[1:]]
+  extraLines += ['nonPrompt rateParam * *_np 1']
+  #extraLines += ['nonPrompt param 1.0 0.2']
+  #extraLines += ['* autoMCStats 0'] # does not work
+
+  shapes, statVariations = writeRootFileForSimultaneousFit(cardName, systematics.keys())
+  writeCard(cardName, shapes, templates, extraLines, systematics.keys(), statVariations, linearSystematics)
+
+  result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
+  runImpacts(cardName)
+  #runSignificance(cardName)
+  #runSignificance(cardName, expected=True)
 
 #
-# 2-level fit: chgIso separately before SR
+# 2-stage fit: chgIso separately before SR
 #
 else:
   # ROOT File for a charged isolation only fit
@@ -85,8 +133,8 @@ else:
       for sys in [''] + systematics:
         writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1, removeBins=[1])
 
-    return set(statVariations)
     f.Close()
+    return set(statVariations)
 
 
   # Charged isolation fit
@@ -133,8 +181,8 @@ else:
 
           writeHist(f, shape+sys, sample, total, (statVariations if sys=='' else None))
 
-    return set(statVariations)
     f.Close()
+    return set(statVariations)
 
 
   # Signal regions fit
