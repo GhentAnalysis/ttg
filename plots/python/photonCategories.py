@@ -64,11 +64,6 @@ def checkMatch(tree, index, oldDefinition=False):
   if tree.hadronicFake   and isHadronicFake(tree, index, oldDefinition):   return True
   return False
 
-def checkPrompt(tree, index):
-  if tree.nonprompt and tree._phIsPrompt[index]:     return False
-  if tree.prompt    and not tree._phIsPrompt[index]: return False
-  return True
-
 def checkSigmaIetaIeta(tree, index):
   cut = (0.01022 if abs(tree._phEta[index]) < 1.566 else  0.03001)                        # forward region needs much higher cut
   if   tree.passSigmaIetaIeta and tree._phSigmaIetaIeta[index] > cut:                     return False
