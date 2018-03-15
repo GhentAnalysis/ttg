@@ -155,7 +155,7 @@ else:
     for dataDriven in [True]:
       cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
       statVariations = writeRootFileForChgIso(cardName, [], selection)
-      writeCard(cardName, ['chgIso'], templates, extraLines, [], statVariations, [])
+      writeCard(cardName, ['chgIso'], templates, extraLines, [], statVariations, {})
       result = runFitDiagnostics(cardName, toys=None, statOnly=False)
       nonPromptSF[selection] = (result[0], -sqrt((result[1]/result[0])**2+0.25**2)*result[0], sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
       runImpacts(cardName)
