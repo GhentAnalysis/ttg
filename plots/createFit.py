@@ -198,8 +198,6 @@ else:
   templates   = samples
   extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
   extraLines += [(s + '_norm param 1.0 0.1')            for s in samples[1:]]
-  #extraLines += ['nonPrompt rateParam * *_np 1']
-  #extraLines += ['nonPrompt param 1.0 0.2']
   #extraLines += ['* autoMCStats 0'] # does not work
 
   statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
