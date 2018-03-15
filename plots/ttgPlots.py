@@ -263,7 +263,7 @@ if not args.showSys:
   elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
   else:                                                                             reduceType = 'eleSusyLoose-phoCB'
 
-  from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta, checkChgIso
+  from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
   for sample in sum(stack, []):
     if args.sys and 'Scale' not in args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep', sys=args.sys)
@@ -273,17 +273,15 @@ if not args.showSys:
     # Filter booleans
     oldDefinition       = args.tag.count('oldMatch')
     c.genuine           = sample.texName.count('genuine')
-    c.hadronicPhoton    = sample.texName.count('hadronicPhoton')
     c.misIdEle          = sample.texName.count('misIdEle')
-    c.hadronicFake      = sample.texName.count('hadronicFake')
-    c.nonprompt         = sample.texName.count('non-prompt')
+    c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronicPhoton')
+    c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronicFake')
     c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
-    c.prompt            = sample.texName.count('prompt') and not sample.texName.count('non-prompt')
     c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail') or args.tag.count("failSigmaIetaIeta")
     c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
-    c.sigmaIetaIeta2    = sample.texName.count('0.01022 < #sigma_{i#etai#eta} < 0.015')
-    c.sigmaIetaIeta3    = sample.texName.count('0.015 < #sigma_{i#etai#eta} < 0.02')
-    c.sigmaIetaIeta4    = sample.texName.count('0.02 < #sigma_{i#etai#eta}')
+    c.sigmaIetaIeta2    = sample.texName.count(',0.01022')
+    c.sigmaIetaIeta3    = sample.texName.count(',0.015')
+    c.sigmaIetaIeta4    = sample.texName.count(',0.02')
     c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
     c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
 
@@ -308,7 +306,6 @@ if not args.showSys:
         if not checkSigmaIetaIeta(c, c.ph):        continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
         if not checkChgIso(c, c.ph):               continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
         if not checkMatch(c, c.ph, oldDefinition): continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
-        if not checkPrompt(c, c.ph):               continue  # filter using PAT matching definitions based on filter booleans (prompt or non-prompt)
 
       if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
 
