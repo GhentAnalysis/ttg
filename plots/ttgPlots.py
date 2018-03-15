@@ -155,12 +155,6 @@ def createSignalRegions(c):
     else:              return 4
   return -1
 
-def genPhotonMinDeltaR(c):
-  matchIndex = c._phMatchMCPhotonAN15165[c.ph]
-  try:    return c._gen_phMinDeltaR[matchIndex]
-  except: return 999
-
-
 if args.tag.count('randomConeCheck'):
   plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20,0,20)))
   plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80,0,20)))
@@ -182,6 +176,8 @@ else:
   plots.append(Plot('photon_chargedIso_bins_NO',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
   plots.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
   plots.append(Plot('photon_chargedIso_small_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_wide',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,2,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_wide_NO',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,2,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
   plots.append(Plot('photon_chargedIso_bins2',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
   plots.append(Plot('photon_chargedIso_bins2_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
   plots.append(Plot('photon_chargedIso_bins3',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1,21), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
@@ -234,9 +230,11 @@ else:
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
   plots.append(Plot('signalRegions',              'signal region',                        lambda c : createSignalRegions(c),                             (5, 0, 5), histModifications=xAxisLabels(['1j,0b', '1j,1b','#geq2j,0b','#geq2j,1b','#geq2j,#geq2b'])))
   plots.append(Plot('eventType',                  'eventType',                            lambda c : ord(c._ttgEventType),                               (9, 0, 9)))
-  plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c._phTTGMatchPt[c.ph],                              (10,10,110)))
-  plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c._phTTGMatchEta[c.ph]),                        (15,0,2.5), overflowBin=None))
-  plots.append(Plot('genPhoton_minDeltaR',        'min #DeltaR(gen #gamma, other)',       lambda c : genPhotonMinDeltaR(c),                              (15,0,1.5)))
+# plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c.genPhPt,                                          (10,10,110)))
+# plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c.genPhEta),                                    (15,0,2.5), overflowBin=None))
+  plots.append(Plot('genPhoton_minDeltaR',        'min #DeltaR(gen #gamma, other)',       lambda c : c.genPhMinDeltaR,                                   (15,0,1.5)))
+  plots.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, $gamma)',          lambda c : c.genPhDeltaR,                                      (15,0,1.5)))
+  plots.append(Plot('genPhoton_relPt',            '#DeltaR(gen #gamma, $gamma)',          lambda c : c.genPhRelPt,                                       (20,-1,1)))
   plots.append(Plot('photonCategory',             'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
 
