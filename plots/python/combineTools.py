@@ -35,7 +35,7 @@ def getCombineRelease():
 #
 # Handle a combine command
 #
-def handleCombine(dataCard, combineCommand, otherCommands = []):
+def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
   currentDir     = os.getcwd()
   combineRelease = getCombineRelease()
   log.info('Moving to ' + combineRelease + ' to run combine')
@@ -46,7 +46,7 @@ def handleCombine(dataCard, combineCommand, otherCommands = []):
   shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
   os.chdir(os.path.join(combineRelease, 'src'))
   if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine ', 'combine -v 2 ')
-  os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + dataCard + '.log')
+  os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + logFile + '.log')
   os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands))
   os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
   os.chdir(currentDir)
@@ -72,6 +72,9 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
   if statOnly:             extraOptions += ' --justFit --profilingMode=none'
   if not alsoBOnly:        extraOptions += ' --skipBOnlyFit'
   if len(trackParameters): extraOptions += ' --trackParameters ' + ','.join(trackParameters)
+  if statOnly: logFile = dataCard + '_statOnly'
+  elif toys:   logFile = dataCard + '_toys'
+  else:        logFile = dataCard
   combineCommand = 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.txt'
   otherCommands  = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
                     'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
@@ -79,7 +82,7 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
                     'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex',
                     'mv fitDiagnostics.root ' + dataCard + '_fitDiagnostics.root']
   log.info('Running FitDiagnostics')
-  handleCombine(dataCard, combineCommand, otherCommands)
+  handleCombine(dataCard, logFile, combineCommand, otherCommands)
   try:
     result = getSignalStrength('./combine/' + dataCard + '_fitDiagnostics.root')
     return result
@@ -96,7 +99,7 @@ def runSignificance(dataCard, expected=False):
   command = 'combine -M Significance ' + dataCard + '.txt'
   if expected: command += ' -t -1 --expectSignal=1'
   log.info('Running Significance')
-  handleCombine(dataCard, command)
+  handleCombine(dataCard, dataCard + '_sig', command)
   with open('./combine/' + dataCard + '.log') as f:
     for line in f: log.info(line.rstrip())
 
@@ -114,7 +117,7 @@ def runImpacts(dataCard):
   command += 'plotImpacts.py -i impacts.json -o impacts;'
   command += 'mv impacts.pdf ../../../' + dataCard + '_impacts.pdf'
   log.info('Running Impacts')
-  handleCombine(dataCard, command)
+  handleCombine(dataCard, dataCard + '_impacts', command)
   with open('./combine/' + dataCard + '.log') as f:
     for line in f: log.debug(line.rstrip())
   os.system("pdftoppm combine/" + dataCard + "_impacts.pdf " + dataCard + "_impacts -png;mogrify -trim " + dataCard + "_impacts*.png")
