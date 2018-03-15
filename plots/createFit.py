@@ -29,7 +29,9 @@ def protectHist(hist):
   return hist
 
 def applyNonPromptSF(hist, nonPromptSF):
-  hist.Scale(nonPromptSF['njet2p-deepbtag1p'][0])  # Currently scaling all SR with same factor from njet2p-deepbtag1p, could be adapted to specific SF for each SR
+  srMap = {1:'njet1-deepbtag0', 2:'njet1-deepbtag1p', 3:'njet2p-deepbtag0', 4:'njet2p-deepbtag1', 5:'njet2p-deepbtag2p'}
+  for bin, sr in srMap.iteritems():
+    hist.SetBinContent(bin, hist.GetBinContent(bin)*(nonPromptSF[sr][0]))
   return hist
 
 def replaceShape(hist, shape):
@@ -126,16 +128,17 @@ else:
 
     writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1)
 
-    if name.count('dd'):
-      sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-failSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
-      normalizeBinWidth(sideBandShape, 1)
-    else:
-      sideBandShape = None
-
     statVariations = []
     for splitType in ['_p', '_np']:
       if   splitType=='_p':  selectors = [[sample, '(genuine,misIdEle)']            for sample in samples]
       elif splitType=='_np': selectors = [[sample, '(hadronicPhoton,hadronicFake)'] for sample in samples]
+
+      if name.count('dd') and splitType=='_np':
+        sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-failSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
+        normalizeBinWidth(sideBandShape, 1)
+      else:
+        sideBandShape = None
+
       for sys in [''] + systematics:
         writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-match', 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1, shape=sideBandShape)
 
@@ -149,11 +152,10 @@ else:
 
   nonPromptSF = {}
   for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p']:
-#  for selection in ['njet2p-deepbtag1p']:
-    for dataDriven in [False]:
-      cardName = 'chgIsoFit_' + ('_dd' if dataDriven else '') + selection
+    for dataDriven in [True]:
+      cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
       statVariations = writeRootFileForChgIso(cardName, [], selection)
-      writeCard(cardName, ['chgIso'], templates, extraLines, [], statVariations, linearSystematics)
+      writeCard(cardName, ['chgIso'], templates, extraLines, [], statVariations, [])
       result = runFitDiagnostics(cardName, toys=None, statOnly=False)
       nonPromptSF[selection] = (result[0], -sqrt((result[1]/result[0])**2+0.25**2)*result[0], sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
       runImpacts(cardName)
@@ -204,6 +206,7 @@ else:
   writeCard(cardName, ['sr_OF', 'sr_SF'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
 
   result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
-  #runImpacts(cardName)
-  #runSignificance(cardName)
-  #runSignificance(cardName, expected=True)
+  result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
+  runImpacts(cardName)
+  runSignificance(cardName)
+  runSignificance(cardName, expected=True)
