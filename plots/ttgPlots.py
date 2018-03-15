@@ -262,7 +262,7 @@ if not args.showSys:
 
   if   args.tag.count('QCD'):                                                       reduceType = 'phoCB'
   elif args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
-  elif args.tag.count('pixelSeedVeto'):                                             reduceType = 'eleSusyLoose-phoCB-pixelSeedVeto'
+  elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
   else:                                                                             reduceType = 'eleSusyLoose-phoCB'
 
   from ttg.plots.photonCategories import checkMatch, checkPrompt, checkSigmaIetaIeta, checkChgIso
