@@ -2,10 +2,10 @@
 TTJets_pow               t#bar{t}_(hadronicPhoton,#sigma_{i#etai#eta}_pass)                       errorStyle     kBlue          _ttgEventType<3
 
 -- MC (sigmaIetaIeta fail)
-TTJets_pow               t#bar{t}_(hadronicPhoton,0.01022_<_#sigma_{i#etai#eta}_<_0.015)          errorStyle     kRed           _ttgEventType<3
+TTJets_pow               t#bar{t}_(hadronicPhoton,sideband1)                                      errorStyle     kRed           _ttgEventType<3
 
 -- MC (sigmaIetaIeta fail)
-TTJets_pow               t#bar{t}_(hadronicPhoton,0.015_<_#sigma_{i#etai#eta}_<_0.02)             errorStyle     kGreen         _ttgEventType<3
+TTJets_pow               t#bar{t}_(hadronicPhoton,sideband2)                                      errorStyle     kGreen         _ttgEventType<3
 
 -- MC (sigmaIetaIeta fail)
-TTJets_pow               t#bar{t}_(hadronicPhoton,0.02_<_#sigma_{i#etai#eta})                     errorStyle     kOrange        _ttgEventType<3
+TTJets_pow               t#bar{t}_(hadronicPhoton,sideband3)                                      errorStyle     kOrange        _ttgEventType<3

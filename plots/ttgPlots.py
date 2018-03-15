@@ -279,11 +279,20 @@ if not args.showSys:
     c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
     c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail') or args.tag.count("failSigmaIetaIeta")
     c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
-    c.sigmaIetaIeta2    = sample.texName.count(',0.01022')
-    c.sigmaIetaIeta3    = sample.texName.count(',0.015')
-    c.sigmaIetaIeta4    = sample.texName.count(',0.02')
+    c.sigmaIetaIeta1    = sample.texName.count('sideband1')
+    c.sigmaIetaIeta2    = sample.texName.count('sideband2')
+    c.sigmaIetaIeta3    = sample.texName.count('sideband3')
     c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
     c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
+
+    if central:
+      if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01022 < #sigma_{i#etai#eta} < 0.015')
+      elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.015 < #sigma_{i#etai#eta} < 0.02')
+      elif c.sigmaIetaIeta3: sample.texName = sample.texName.replace('sideband3', '0.02 < #sigma_{i#etai#eta}')
+    elif forward:
+      if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.03001 < #sigma_{i#etai#eta} < 0.033')
+      elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.033 < #sigma_{i#etai#eta} < 0.036')
+      elif c.sigmaIetaIeta3: sample.texName = sample.texName.replace('sideband3', '0.036 < #sigma_{i#etai#eta}')
 
     selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 

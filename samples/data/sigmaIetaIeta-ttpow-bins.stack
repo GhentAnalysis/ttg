@@ -1,0 +1,11 @@
+-- MC (sigmaIetaIeta pass)
+TTJets_pow               t#bar{t}_(nonprompt,#sigma_{i#etai#eta}_pass)                       errorStyle     kBlue          _ttgEventType<3
+
+-- MC (sigmaIetaIeta fail)
+TTJets_pow               t#bar{t}_(nonprompt,sideband1)                                      errorStyle     kRed           _ttgEventType<3
+
+-- MC (sigmaIetaIeta fail)
+TTJets_pow               t#bar{t}_(nonprompt,sideband2)                                      errorStyle     kGreen         _ttgEventType<3
+
+-- MC (sigmaIetaIeta fail)
+TTJets_pow               t#bar{t}_(nonprompt,sideband3)                                      errorStyle     kOrange        _ttgEventType<3
