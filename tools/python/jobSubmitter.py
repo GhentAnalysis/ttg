@@ -8,13 +8,14 @@ def system(command):
 
 # Check the cream02 queue, do not submit new jobs when over 2000 (limit is 2500)
 def checkQueueOnCream02():
-  try:    queue = int(system('qstat -u $USER | wc -l'))
-  except: checkQueueOnCream02()
-  if queue > 2000:
+  try:
+   queue = int(system('qstat -u $USER | wc -l'))
+   if queue > 2000:
     log.info('Too much jobs in queue (' + str(queue) + '), sleeping')
     time.sleep(500)
     checkQueueOnCream02()
-
+  except:
+    checkQueueOnCream02()
 
 # Cream02 running
 def launchCream02(command, logfile, checkQueue=False):
