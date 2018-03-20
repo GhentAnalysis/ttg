@@ -230,11 +230,11 @@ else:
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
   plots.append(Plot('signalRegions',              'signal region',                        lambda c : createSignalRegions(c),                             (5, 0, 5), histModifications=xAxisLabels(['1j,0b', '1j,1b','#geq2j,0b','#geq2j,1b','#geq2j,#geq2b'])))
   plots.append(Plot('eventType',                  'eventType',                            lambda c : ord(c._ttgEventType),                               (9, 0, 9)))
-# plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c.genPhPt,                                          (10,10,110)))
-# plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c.genPhEta),                                    (15,0,2.5), overflowBin=None))
+  plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c.genPhPt,                                          (10,10,110)))
+  plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c.genPhEta),                                    (15,0,2.5), overflowBin=None))
   plots.append(Plot('genPhoton_minDeltaR',        'min #DeltaR(gen #gamma, other)',       lambda c : c.genPhMinDeltaR,                                   (15,0,1.5)))
-  plots.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, $gamma)',          lambda c : c.genPhDeltaR,                                      (15,0,1.5)))
-  plots.append(Plot('genPhoton_relPt',            '#DeltaR(gen #gamma, $gamma)',          lambda c : c.genPhRelPt,                                       (20,-1,1)))
+  plots.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, #gamma)',          lambda c : c.genPhDeltaR,                                      (15,0,0.3)))
+  plots.append(Plot('genPhoton_relPt',            'rel p_{T}',                            lambda c : c.genPhRelPt,                                       (20,-0.2,0.2)))
   plots.append(Plot('photonCategory',             'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
 
