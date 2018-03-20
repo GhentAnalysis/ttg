@@ -380,6 +380,7 @@ for plot in plots: # 1D plots
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
                   **extraArgs
         )
+        extraArgs['saveGitInfo'] = False
         if err: noWarnings=False
 
 if not args.sys:

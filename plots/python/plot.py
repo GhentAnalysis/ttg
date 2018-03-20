@@ -396,6 +396,7 @@ class Plot:
           linearSystematics = {},
           resultsDir = None,
           postFitInfo = None,
+          saveGitInfo = True,
           ):
     ''' yRange: 'auto' (default) or [low, high] where low/high can be 'auto'
         extensions: ["pdf", "png", "root"] (default)
@@ -589,7 +590,7 @@ class Plot:
 
     canvas.cd()
 
-    copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
+    if saveGitInfo: copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
     log.info('Creating output files for ' + self.name)
     for extension in extensions:
       ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
