@@ -132,7 +132,7 @@ if not sample.isData:
   for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:               newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
   for sys in ['q2Up','q2Down','pdfUp','pdfDown']:                newBranches += ['weight_' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
-  newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta']
+  newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
 
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
