@@ -68,6 +68,7 @@ def checkSigmaIetaIeta(tree, index):
   central = abs(tree._phEta[index]) < 1.566
   if   tree.passSigmaIetaIeta and (tree._phSigmaIetaIeta[index] > (0.01022 if central else 0.03001)):                                                                 return False
   elif tree.failSigmaIetaIeta and (tree._phSigmaIetaIeta[index] < (0.01022 if central else 0.03001)):                                                                 return False
+  elif tree.sideSigmaIetaIeta and (tree._phSigmaIetaIeta[index] < (0.012   if central else 0.032)):                                                                   return False
   elif tree.sigmaIetaIeta1    and (tree._phSigmaIetaIeta[index] < (0.01022 if central else 0.03001) or tree._phSigmaIetaIeta[index] > (0.015 if central else 0.033)): return False
   elif tree.sigmaIetaIeta2    and (tree._phSigmaIetaIeta[index] < (0.015   if central else 0.033)   or tree._phSigmaIetaIeta[index] > (0.02  if central else 0.036)): return False
   elif tree.sigmaIetaIeta3    and (tree._phSigmaIetaIeta[index] < (0.02    if central else 0.036)):                                                                   return False
