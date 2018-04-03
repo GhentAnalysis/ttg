@@ -127,10 +127,10 @@ if args.singleLep: newBranches += ['isE/O','isMu/O']
 elif not args.QCD: newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
-  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:           newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
-  for sys in ['', 'Up', 'Down']:                                 newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
-  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:               newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
-  for sys in ['q2Up','q2Down','pdfUp','pdfDown']:                newBranches += ['weight_' + sys + '/F']
+  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:                        newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
+  for sys in ['', 'Up', 'Down']:                                              newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
+  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:                            newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
+  for sys in ['q2Up','q2Down','q2ShapeUp', 'q2ShapeDown', 'pdfUp','pdfDown']: newBranches += ['weight_' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
   newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
 
@@ -197,6 +197,11 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     except: q2Weights          = [newVars.genWeight]
     newVars.weight_q2Down      = min(q2Weights)
     newVars.weight_q2Up        = max(q2Weights)
+
+    try:    q2Weights          = [c._weight*c._lheWeight[i]*lumiWeights[0] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
+    except: q2Weights          = [newVars.genWeight]
+    newVars.weight_q2ShapeDown = min(q2Weights)
+    newVars.weight_q2ShapeUp   = max(q2Weights)
 
     try:    pdfVarRms          = sqrt(sum([(newVars.genWeight - c._weight*c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)])/100)   # Using RMS of 100 pdf's
     except: pdfVarRms          = 0
