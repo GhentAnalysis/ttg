@@ -16,7 +16,7 @@ for i in ('Up', 'Down'):
   systematics['bTagl'+i]    = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]    = [('bTagWeight',    'bTagWeightb'+i)]
   systematics['pdf'+i]      = [('genWeight',     'weight_pdf'+i)]
-  systematics['q2'+i]       = [('genWeight',     'weight_q2'+i)]
+  systematics['q2'+i]       = [('genWeight',     'weight_q2Shape'+i)]
   systematics['JEC'+i]      = [('njets',         'njets_JEC'+i),     ('ndbjets',    'ndbjets_JEC'+i), ('j1', 'j1_JEC'+i), ('j2', 'j2_JEC'+i), ('_jetPt', '_jetPt_JEC'+i)]
   systematics['JER'+i]      = [('njets',         'njets_JER'+i),     ('ndbjets',    'ndbjets_JER'+i), ('j1', 'j1_JER'+i), ('j2', 'j2_JER'+i), ('_jetPt', '_jetPt_JER'+i)]
 
