@@ -2,10 +2,9 @@
 TTJets_pow               t#bar{t}_(hadronicFake,#sigma_{i#etai#eta}_pass)          errorStyle     kBlue          _ttgEventType<3
 
 -- MC (sigmaIetaIeta fail)
-TTJets_pow               t#bar{t}_(hadronicFake,sideband1)                         errorStyle     kRed           _ttgEventType<3
+TTJets_pow               t#bar{t}_(hadronicFake,sideband2)                         errorStyle     kRed           _ttgEventType<3
 
 -- MC (sigmaIetaIeta fail)
-TTJets_pow               t#bar{t}_(hadronicFake,sideband2)                         errorStyle     kGreen         _ttgEventType<3
+TTJets_pow               t#bar{t}_(hadronicFake,sideband1)                         errorStyle     kYellow        _ttgEventType<3
 
--- MC (sigmaIetaIeta fail)
-TTJets_pow               t#bar{t}_(hadronicFake,sideband3)                         errorStyle     kOrange        _ttgEventType<3
+
