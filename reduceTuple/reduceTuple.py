@@ -127,10 +127,11 @@ if args.singleLep: newBranches += ['isE/O','isMu/O']
 elif not args.QCD: newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
-  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:                        newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
-  for sys in ['', 'Up', 'Down']:                                              newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
-  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:                            newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
-  for sys in ['q2Up','q2Down','q2ShapeUp', 'q2ShapeDown', 'pdfUp','pdfDown']: newBranches += ['weight_' + sys + '/F']
+  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:        newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
+  for sys in ['', 'Up', 'Down']:                              newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
+  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:            newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
+  for sys in ['q2Up','q2Down','q2ShapeUp', 'q2ShapeDown']:    newBranches += ['weight_' + sys + '/F']
+  for sys in ['pdfUp','pdfDown','pdfShapeUp','pdfShapeDown']: newBranches += ['weight_' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
   newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
 
@@ -191,49 +192,54 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   makeDeltaR(c, newVars)
 
   if not sample.isData:
-    newVars.genWeight          = c._weight*lumiWeights[0]
+    newVars.genWeight           = c._weight*lumiWeights[0]
 
-    try:    q2Weights          = [c._weight*c._lheWeight[i]*lumiWeights[i] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
-    except: q2Weights          = [newVars.genWeight]
-    newVars.weight_q2Down      = min(q2Weights)
-    newVars.weight_q2Up        = max(q2Weights)
+    try:    q2Weights           = [c._lheWeight[i]*lumiWeights[i] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
+    except: q2Weights           = [newVars.genWeight]
+    newVars.weight_q2Down       = c._weight*min(q2Weights)
+    newVars.weight_q2Up         = c._weight*max(q2Weights)
 
-    try:    q2Weights          = [c._weight*c._lheWeight[i]*lumiWeights[0] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
-    except: q2Weights          = [newVars.genWeight]
-    newVars.weight_q2ShapeDown = min(q2Weights)
-    newVars.weight_q2ShapeUp   = max(q2Weights)
+    try:    q2Weights           = [c._lheWeight[i]*lumiWeights[0] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
+    except: q2Weights           = [newVars.genWeight]
+    newVars.weight_q2ShapeDown  = c._weight*min(q2Weights)
+    newVars.weight_q2ShapeUp    = c._weight*max(q2Weights)
 
-    try:    pdfVarRms          = sqrt(sum([(newVars.genWeight - c._weight*c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)])/100)   # Using RMS of 100 pdf's
-    except: pdfVarRms          = 0
-    newVars.weight_pdfDown     = newVars.genWeight - pdfVarRms
-    newVars.weight_pdfUp       = newVars.genWeight + pdfVarRms
+    try:    pdfVarRms           = sqrt(sum([(lumiWeights[0] - c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)])/100)   # Using RMS of 100 pdf's
+    except: pdfVarRms           = 0
+    newVars.weight_pdfDown      = c._weight*(lumiWeights[0] - pdfVarRms)
+    newVars.weight_pdfUp        = c._weight*(lumiWeights[0] + pdfVarRms)
 
-    newVars.puWeight           = puReweighting(c._nTrueInt)
-    newVars.puWeightUp         = puReweightingUp(c._nTrueInt)
-    newVars.puWeightDown       = puReweightingDown(c._nTrueInt)
+    try:    pdfVarRms           = sqrt(sum([(1 - c._lheWeight[i])**2 for i in range(9,109)])/100)   # Using RMS of 100 pdf's
+    except: pdfVarRms           = 0
+    newVars.weight_pdfShapeDown = newVars.genWeight*(1 - pdfVarRms)
+    newVars.weight_pdfShapeUp   = newVars.genWeight*(1 + pdfVarRms)
+
+    newVars.puWeight            = puReweighting(c._nTrueInt)
+    newVars.puWeightUp          = puReweightingUp(c._nTrueInt)
+    newVars.puWeightDown        = puReweightingDown(c._nTrueInt)
 
     if minLeptons > 1:
       l1 = newVars.l1
       l2 = newVars.l2
-      newVars.lWeight          = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
-      newVars.lWeightUp        = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
-      newVars.lWeightDown      = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
-      newVars.lTrackWeight     = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
+      newVars.lWeight           = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
+      newVars.lWeightUp         = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
+      newVars.lWeightDown       = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
+      newVars.lTrackWeight      = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
     elif minLeptons > 0:
       l1 = newVars.l1
-      newVars.lWeight          = leptonSF.getSF(c, l1)
-      newVars.lWeightUp        = leptonSF.getSF(c, l1, sigma=+1)
-      newVars.lWeightDown      = leptonSF.getSF(c, l1, sigma=-1)
-      newVars.lTrackWeight     = leptonTrackingSF.getSF(c, l1)
+      newVars.lWeight           = leptonSF.getSF(c, l1)
+      newVars.lWeightUp         = leptonSF.getSF(c, l1, sigma=+1)
+      newVars.lWeightDown       = leptonSF.getSF(c, l1, sigma=-1)
+      newVars.lTrackWeight      = leptonTrackingSF.getSF(c, l1)
     else:
-      newVars.lWeight          = 1.
-      newVars.lWeightUp        = 1.
-      newVars.lWeightDown      = 1.
-      newVars.lTrackWeight     = 1.
+      newVars.lWeight           = 1.
+      newVars.lWeightUp         = 1.
+      newVars.lWeightDown       = 1.
+      newVars.lTrackWeight      = 1.
 
-    newVars.phWeight           = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
-    newVars.phWeightUp         = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
-    newVars.phWeightDown       = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.phWeight            = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.phWeightUp          = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.phWeightDown        = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
  
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
