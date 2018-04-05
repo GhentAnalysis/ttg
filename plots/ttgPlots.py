@@ -368,6 +368,8 @@ for plot in plots: # 1D plots
     for norm in normalizeToMC:
       if norm: extraArgs['scaling'] = {0:1}
       for logY in [False, True]:
+        if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.75)
+        else:                                            yRange = None
         extraTag  = '-log'    if logY else ''
         extraTag += '-sys'    if args.showSys else ''
         extraTag += '-normMC' if norm else ''
@@ -377,7 +379,7 @@ for plot in plots: # 1D plots
                   logX              = False,
                   logY              = logY,
                   sorting           = True,
-                  yRange            = (0.003 if logY else 0.0001, "auto"),
+                  yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
                   **extraArgs
         )
