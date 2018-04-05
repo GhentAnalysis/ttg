@@ -12,6 +12,9 @@ from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas
 
+#
+# Calculate legend area
+#
 def getLegendMaskedArea(legend_coordinates, pad):
   def constrain(x, interval=[0,1]):
     if x<interval[0]: return interval[0]
@@ -22,6 +25,9 @@ def getLegendMaskedArea(legend_coordinates, pad):
           'xLowerEdge': constrain( (legend_coordinates[0] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] ),
           'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
+#
+# Apply the relative variation between source and sourceVar to the destination histogram
+#
 def applySysToOtherHist(source, sourceVar, destination):
   destinationVar = destination.Clone()
   for i in range(source.GetNbinsX()+1):
@@ -29,6 +35,9 @@ def applySysToOtherHist(source, sourceVar, destination):
     destinationVar.SetBinContent(i, modificationFactor*destination.GetBinContent(i))
   return destinationVar
 
+#
+# Load a histogram from pkl
+#
 loadedPkls = {}
 def getHistFromPkl(subdirs, plotName, sys, *selectors):
   global loadePkls
@@ -42,13 +51,26 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
       if len(filtered) == 1:   hist = addHist(hist, filtered[filtered.keys()[0]])
       elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
   else:                        log.error('Missing cache file ' + resultFile)
-  if 'phScaleUp' in sys and not any('MuonEG' in sel for sel in selectors):
+  if 'Scale' in sys and not any('MuonEG' in sel for sel in selectors):
     data    = getHistFromPkl(subdirs, plotName, '',   ['MuonEG'],['DoubleEG'],['DoubleMuon'])
     dataSys = getHistFromPkl(subdirs, plotName, sys,  ['MuonEG'],['DoubleEG'],['DoubleMuon'])
     hist = applySysToOtherHist(data, dataSys, hist)
   if not hist: log.error('Missing ' + str(selectors) + ' for plot ' + plotName + ' in ' + resultFile)
   return hist
 
+#
+# Get systematic uncertainty on sideband template: based on shape difference of ttbar hadronicFakes in sideband and nominal region
+#
+def applySidebandUnc(hist, plot, resultsDir, up):
+  selection     = resultsDir.split('/')[-1]
+  ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins-central', 'all', selection), plot, '', ['TTJets','hadronicFake','pass'])
+  ttbarSideband = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins-central', 'all', selection), plot, '', ['TTJets','hadronicFake,0.012'])
+  if up: return applySysToOtherHist(ttbarNominal, ttbarSideband, hist)
+  else:  return applySysToOtherHist(ttbarSideband, ttbarNominal, hist)
+
+#
+# Returns histmodificator which applies labels to x-axis
+#
 def xAxisLabels(labels):
   def applyLabels(h):
     for i,l in enumerate(labels):
@@ -84,6 +106,8 @@ def fillPlots(plots, c, sample, eventWeight):
   if removePlots:
     for p in toRemove: plots.remove(p)
     toRemove = []
+
+
 
 
 
@@ -301,12 +325,10 @@ class Plot:
     histos_summed = {}
     for sys in systematics.keys() + [None]:
       plotName = self.name+(sys if sys else '')
-      if plotName not in allPlots.keys(): log.error('No ' + sys + ' variation found for ' +  self.name)
+      if plotName not in allPlots.keys():
+        if 'sideBand' in sys: allPlots[plotName] = {}
+        else:                 log.error('No ' + sys + ' variation found for ' +  self.name)
       for histName in histNames:
-        h = allPlots[plotName][histName]
-        if postFitInfo:
-          for i in postFitInfo:
-            if histName.count(i): h.Scale(postFitInfo[i])
         if sys and 'Scale' in sys: # Ugly hack to apply scale systematics on MC instead of data
           data, dataSys = None, None
           for dataset in ['MuonEG','DoubleEG','DoubleMuon']:
@@ -314,6 +336,12 @@ class Plot:
             data    = addHist(data,    allPlots[self.name][dataset+'data'])
             dataSys = addHist(dataSys, allPlots[self.name+sys][dataset+'data'])
           if data: allPlots[plotName][histName] = applySysToOtherHist(data, dataSys, allPlots[plotName][histName])
+        if sys and 'sideBand' in sys: # Ugly hack to apply side band uncertainty
+          allPlots[plotName][histName] = applySidebandUnc(allPlots[self.name][histName], self.name, resultsDir, 'Up' in sys)
+        h = allPlots[plotName][histName]
+        if postFitInfo:
+          for i in postFitInfo:
+            if histName.count(i): h.Scale(postFitInfo[i])
         if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         if self.scaleFactor: h.Scale(self.scaleFactor)
         normalizeBinWidth(h, self.normBinWidth)

@@ -344,7 +344,10 @@ for plot in plots: # 1D plots
   if not args.sys or args.showSys:
     extraArgs = {}
     normalizeToMC = [False,True] if args.channel!='noData' else [False]
-    if args.showSys:
+    if args.tag.count('onlydata'):
+      extraArgs['resultsDir']  = os.path.join(plotDir, args.tag, args.channel, args.selection)
+      extraArgs['systematics'] = {'sideBandUncUp' : [], 'sideBandUncDown' : []}
+    elif args.showSys:
       if args.sys:
         systematics       = {i: j for i,j in systematics.iteritems()       if i.count(args.sys)}
         linearSystematics = {i: j for i,j in linearSystematics.iteritems() if i.count(args.sys)}
