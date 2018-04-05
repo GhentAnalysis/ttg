@@ -1,0 +1,24 @@
+-- Data (with sideband uncertainty)
+DoubleMuon                 dataSys:mumu,SF,all      fillStyle    kGray                   isMuMu
++SingleMuon
+
+DoubleEG                   dataSys:ee,SF,all        fillStyle    kGray                   isEE
++SingleElectron
+
+MuonEG                     dataSys:emu,all          fillStyle    kGray                   isEMu
++SingleMuon
++SingleElectron
+
+
+-- Data (with stat uncertainty)
+DoubleMuon                 dataStat:mumu,SF,all      errorStyle    kBlack                   isMuMu
++SingleMuon
+
+DoubleEG                   dataStat:ee,SF,all        errorStyle    kBlack                   isEE
++SingleElectron
+
+MuonEG                     dataStat:emu,all          errorStyle    kBlack                   isEMu
++SingleMuon
++SingleElectron
+
+
