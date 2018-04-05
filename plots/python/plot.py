@@ -65,6 +65,8 @@ def applySidebandUnc(hist, plot, resultsDir, up):
   selection     = resultsDir.split('/')[-1]
   ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins-central', 'all', selection), plot, '', ['TTJets','hadronicFake','pass'])
   ttbarSideband = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins-central', 'all', selection), plot, '', ['TTJets','hadronicFake,0.012'])
+  ttbarNominal.Scale(1/ttbarNominal.Integral())
+  ttbarSideband.Scale(1/ttbarSideband.Integral())
   if up: return applySysToOtherHist(ttbarNominal, ttbarSideband, hist)
   else:  return applySysToOtherHist(ttbarSideband, ttbarNominal, hist)
 
