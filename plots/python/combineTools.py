@@ -54,14 +54,15 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
 #
 # Reads the fitted signal strength from the fitDiagnostics.root file
 #
-def getSignalStrength(filename):
+def getParam(filename, param):
   resultsFile = ROOT.TFile(filename)
   fitResults  = resultsFile.Get("fit_s").floatParsFinal()
   for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
-    if r.GetName() != 'r': continue
+    if r.GetName() != param: continue
     result = (r.getVal(), r.getAsymErrorLo(), r.getAsymErrorHi())
-    log.info('Result: %.2f %.2f/+%.2f' % result)
+    log.info('Result for ' + param + ': %.2f %.2f/+%.2f' % result)
     return result
+
 
 #
 # Run fit diagnostics
@@ -84,8 +85,7 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
   log.info('Running FitDiagnostics')
   handleCombine(dataCard, logFile, combineCommand, otherCommands)
   try:
-    result = getSignalStrength('./combine/' + dataCard + '_fitDiagnostics.root')
-    return result
+    return {param : getParam('./combine/' + dataCard + '_fitDiagnostics.root', param) for param in ['r']+trackParameters}
   except:
     with open('./combine/' + dataCard + '.log') as f:
       for line in f: log.warning(line.rstrip())
