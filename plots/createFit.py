@@ -216,6 +216,7 @@ elif False:
 else:
   # ROOT File for a charged isolation only fit
   def writeRootFileForChgIso(name, systematics, selection):
+    tag       = 'eleSusyLoose-phoCBnoChgIso-newMatch-central'
     selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-' + selection + '-photonPt20'
     plot      = 'photon_chargedIso_bins_NO'
 
@@ -224,6 +225,7 @@ else:
     writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-newMatch-central', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1)
 
     statVariations = []
+    from ttg.plots.plot import applySidebandUnc
     for splitType in ['_g', '_f', '_h']:
       if   splitType=='_g': selectors = [[sample, '(genuine,misIdEle)'] for sample in samples]
       elif splitType=='_f': selectors = [[sample, '(hadronicFake)']     for sample in samples]
@@ -232,11 +234,14 @@ else:
       if name.count('dd') and splitType=='_f':
         sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta-central', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
         normalizeBinWidth(sideBandShape, 1)
+        sideBandShapeUp   = applySidebandUnc(sideBandShape, plot, selection, True)
+        sideBandShapeDown = applySidebandUnc(sideBandShape, plot, selection, False)
+        writeHist(f, 'chgIso',                'all' + splitType, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1, shape=sideBandShape)
+        writeHist(f, 'chgIsoSideBandUncUp',   'all' + splitType, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors), None,                                  norm=1, shape=sideBandShapeUp)
+        writeHist(f, 'chgIsoSideBandUncDown', 'all' + splitType, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors), None,                                  norm=1, shape=sideBandShapeDown)
       else:
-        sideBandShape = None
-
-      for sys in [''] + systematics:
-        writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-newMatch-central', 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1, shape=sideBandShape)
+        for sys in [''] + systematics:
+          writeHist(f, 'chgIso'+sys,  'all' + splitType, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors), (statVariations if sys=='' else None), norm=1)
 
     f.Close()
     return set(statVariations)
@@ -252,9 +257,8 @@ else:
     for dataDriven in [True]:
       cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
       statVariations = writeRootFileForChgIso(cardName, [], selection)
-      writeCard(cardName, ['chgIso'], templates, extraLines, [], statVariations, {})
-      result = runFitDiagnostics(cardName, toys=None, statOnly=False)
-      nonPromptSF[selection] = (result[0], -sqrt((result[1]/result[0])**2+0.25**2)*result[0], sqrt((result[2]/result[0])**2+0.25**2)*result[0])    # Add extra uncertainty of 25% based on different chgIso shape in sigmaIetaIeta sideband
+      writeCard(cardName, ['chgIso'], templates, extraLines, ['SideBandUncUp:all_f'], statVariations, {})
+      nonPromptSF[selection] = runFitDiagnostics(cardName, toys=None, statOnly=False)
       runImpacts(cardName)
 
   for i,j in nonPromptSF.iteritems():

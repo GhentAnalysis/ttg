@@ -148,17 +148,23 @@ def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics
     f.write(tab(['bin']+shapes))
     f.write(tab(['observation']+['-1']*len(shapes)))
     f.write('-'*400 + '\n')
-    f.write(tab(['bin','']    + [s    for s in shapes for i in range(len(templates))]))
-    f.write(tab(['process','']+ [t    for i in range(len(shapes)) for t in templates]))
-    f.write(tab(['process','']+ [t    for i in range(len(shapes)) for t in range(len(templates))]))
-    f.write(tab(['rate','']+    ['-1' for i in range(len(shapes)) for t in range(len(templates))]))
+    f.write(tab(['bin','']    + [s    for s in shapes for t in templates]))
+    f.write(tab(['process','']+ [t    for s in shapes for t in templates]))
+    f.write(tab(['process','']+ [t    for s in shapes for t in range(len(templates))]))
+    f.write(tab(['rate','']+    ['-1' for s in shapes for t in templates]))
     f.write('-'*400 + '\n')
+
     for sys, info in linearSystematics.iteritems():
-      f.write(tab([sys, 'lnN'] + [linSys(info, t) for i in range(len(shapes)) for t in range(len(templates))]))
+      f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates]))
+
     for sys in [s.replace('Up','') for s in systematics if 'Up' in s]:
-      f.write(tab([sys, 'shape'] + ['1' for i in range(len(shapes)) for t in range(len(templates))]))
+      if ':' in sys: sys, sample = sys.split(':')
+      else :         sys, sample = sys, None
+      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) else '1') for s in shapes for t in templates]))
+
     for sys in sorted(mcStatistics):
-      f.write(tab([sys, 'shape'] + [('1' if sys.count(shapes[i]) and sys.count(templates[t]) else '-') for i in range(len(shapes)) for t in range(len(templates))]))
+      f.write(tab([sys, 'shape'] + [('1' if sys.count(s) and sys.count(t) else '-') for s in shapes for t in templates]))
+
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
       f.write(tab([x for x in extraLine.split()]))
