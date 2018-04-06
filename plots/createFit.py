@@ -110,7 +110,7 @@ if args.bigFit:
   shapes, statVariations = writeRootFileForSimultaneousFit(cardName, systematics.keys())
   writeCard(cardName, shapes, templates, extraLines, systematics.keys(), statVariations, linearSystematics)
 
-  result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
   runImpacts(cardName)
   #runSignificance(cardName)
   #runSignificance(cardName, expected=True)
@@ -152,10 +152,47 @@ else:
     return set(statVariations)
 
 
+  # Post-fit plots
+  from ttg.plots.plot import Plot
+  from ttg.tools.style import drawLumi
+  import ttg.tools.style as styles
+  def plot(name, name2, results):
+    f = ROOT.TFile('combine/' + name + '.root')
+    all_f      = f.Get('chgIso/all_f')
+    all_g      = f.Get('chgIso/all_g')
+    all_h      = f.Get('chgIso/all_h')
+    data       = f.Get('chgIso/data_obs')
+
+    if results:
+      all_f.Scale(results['r'][0])
+      all_h.Scale(results['hadronic_norm'][0])
+      all_g.Scale(results['promt_norm'][0])
+
+    data.style  = styles.errorStyle(ROOT.kBlack)
+    all_g.style = styles.fillStyle(ROOT.kYellow) 
+    all_h.style = styles.fillStyle(ROOT.kRed) 
+    all_f.style = styles.fillStyle(ROOT.kGreen)
+
+    data.texName  = 'data'
+    all_g.texName = 'genuine'
+    all_h.texName = 'hadronic photons'
+    all_f.texName = 'hadronic fakes (from sideband)'
+
+    plot       = Plot(name + name2, 'chargedIso(#gamma) (GeV)', None, None, overflowBin=None, stack=[[]], texY='Events')
+    plot.stack = [[all_g, all_h, all_f], [data]]
+    plot.histos = {i:i for i in sum(plot.stack, [])}
+
+    plot.draw(plot_directory = '/user/tomc/www/ttG/combinePlots/',
+      ratio   = {'yRange':(0.1,1.9),'texY': 'ratio'},
+      logX    = False, logY = False, sorting = False,
+      yRange  = (0.0001, "auto"),
+      drawObjects = drawLumi(None, 35.9),
+    )
+
   # Charged isolation fit
   templates   = ['all_g', 'all_f', 'all_h'] 
   extraLines  = ['prompt_norm   rateParam * all_g 1']
-  extraLines  = ['hadronic_norm rateParam * all_h 1']
+  extraLines += ['hadronic_norm rateParam * all_h 1']
 
   nonPromptSF = {}
   for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p']:
@@ -163,12 +200,14 @@ else:
       cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
       statVariations = writeRootFileForChgIso(cardName, [], selection)
       writeCard(cardName, ['chgIso'], templates, extraLines, ['SideBandUncUp:all_f'], statVariations, {})
-      nonPromptSF[selection] = runFitDiagnostics(cardName, toys=None, statOnly=False)
+      results = runFitDiagnostics(cardName, toys=None, statOnly=False, trackParameters = ['prompt_norm', 'hadronic_norm'])
+      nonPromptSF[selection] = results['r']
+      plot(cardName, '_prefit',  None)
+      plot(cardName, '_postfit', results)
       runImpacts(cardName)
 
   for i,j in nonPromptSF.iteritems():
     log.info('Charged isolation fit for ' + i + ' results in %.2f (+%.2f, %.2f)' % j)
-
 
 
 
@@ -212,8 +251,8 @@ else:
   statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
   writeCard(cardName, ['sr_OF', 'sr_SF'], templates, extraLines, systematics.keys(), statVariations, linearSystematics)
 
-  result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
-  result = runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
   runImpacts(cardName)
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
