@@ -165,8 +165,8 @@ else:
 
     if results:
       all_f.Scale(results['r'][0])
-      all_h.Scale(results['hadronic_norm'][0])
-      all_g.Scale(results['promt_norm'][0])
+ #    all_h.Scale(results['hadronic_norm'][0])
+      all_g.Scale(results['prompt_norm'][0])
 
     data.style  = styles.errorStyle(ROOT.kBlack)
     all_g.style = styles.fillStyle(ROOT.kYellow) 
@@ -192,7 +192,7 @@ else:
   # Charged isolation fit
   templates   = ['all_g', 'all_f', 'all_h'] 
   extraLines  = ['prompt_norm   rateParam * all_g 1']
-  extraLines += ['hadronic_norm rateParam * all_h 1']
+# extraLines += ['hadronic_norm rateParam * all_h 1']
 
   nonPromptSF = {}
   for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p']:
@@ -200,7 +200,7 @@ else:
       cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
       statVariations = writeRootFileForChgIso(cardName, [], selection)
       writeCard(cardName, ['chgIso'], templates, extraLines, ['SideBandUncUp:all_f'], statVariations, {})
-      results = runFitDiagnostics(cardName, toys=None, statOnly=False, trackParameters = ['prompt_norm', 'hadronic_norm'])
+      results = runFitDiagnostics(cardName, toys=None, statOnly=False, trackParameters = ['prompt_norm'])
       nonPromptSF[selection] = results['r']
       plot(cardName, '_prefit',  None)
       plot(cardName, '_postfit', results)
