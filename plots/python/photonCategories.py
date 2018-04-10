@@ -71,7 +71,7 @@ def checkSigmaIetaIeta(tree, index):
   elif tree.sideSigmaIetaIeta and (tree._phSigmaIetaIeta[index] < (0.012   if central else 0.032)):                                                                   return False
   elif tree.sigmaIetaIeta1    and (tree._phSigmaIetaIeta[index] < (0.01022 if central else 0.03001) or tree._phSigmaIetaIeta[index] > (0.012 if central else 0.032)): return False
   elif tree.sigmaIetaIeta2    and (tree._phSigmaIetaIeta[index] < (0.012   if central else 0.032)):                                                                   return False
-  elif tree._phSigmaIetaIeta[index] > 0.04:                                                                                                                           return False
+  elif tree._phSigmaIetaIeta[index] > (0.02 if central else 0.04):                                                                                                    return False
   return True
 
 def checkChgIso(tree, index):
