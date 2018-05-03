@@ -190,9 +190,9 @@ else:
     )
 
   # Charged isolation fit
-  templates   = ['all_g', 'all_f', 'all_h'] 
+  templates   = ['all_f', 'all_g', 'all_h']
   extraLines  = ['prompt_norm   rateParam * all_g 1']
-# extraLines += ['hadronic_norm rateParam * all_h 1']
+ # extraLines += ['hadronic_norm rateParam * all_h 1']
 
   nonPromptSF = {}
   for selection in ['njet1-deepbtag0', 'njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p']:
