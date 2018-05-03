@@ -205,10 +205,10 @@ def isGoodJet(tree, index):
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True
 
-def goodJets(t, n):
+def goodJets(t, n, ptCut=30):
   allGoodJets = [i for i in xrange(ord(t._nJets)) if isGoodJet(t, i)]
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
-    setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > 30])
+    setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > ptCut])
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
     setattr(n, 'j1'+var,    getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
     setattr(n, 'j2'+var,    getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)

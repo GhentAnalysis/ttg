@@ -43,18 +43,19 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/da
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample: sampleList = filter(lambda s: s.name == args.sample, sampleList)
-  splitData = args.splitData
+
+  jobs = []
   for sample in sampleList:
-    args.sample = sample.name
     if (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr')): continue
-    if splitData and sample.isData:                                                                # Chains become very slow for data, so we split them
-      for dataRun in (['B','C','D','E','F','G','H'] if splitData not in ['B','C','D','E','F','G','H'] else [splitData]):
-        args.splitData = dataRun
-        submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=os.path.join(args.type, sample.name+args.splitData))
-        args.subProdLabel=None
-        args.splitData=None
-    else:
-      submitJobs(__file__, 'subJob', xrange(sample.splitJobs), args, subLog=os.path.join(args.type, sample.name))
+
+    if sample.isData:
+      runs = ['B','C','D','E','F','G','H'] # Chains become very slow for data, so we split them
+      if args.splitData in runs: splitData = [args.splitData]
+      else:                      splitData = runs
+    else:                        splitData = [None]
+    jobs += [(sample.name, str(i), j) for i in xrange(sample.splitJobs) for j in splitData]
+
+  submitJobs(__file__, ('sample','subJob','splitData'), jobs, argParser, subLog=args.type)
   exit(0)
 
 #
@@ -148,6 +149,7 @@ c.cbMedium            = args.type.count('eleCBMedium')
 c.cbVeto              = args.type.count('eleCBVeto')
 c.susyLoose           = args.type.count('eleSusyLoose')
 c.noPixelSeedVeto     = args.type.count('noPixelSeedVeto')
+jetPtCut              = 40 if args.type.count('jetPt40') else 30
 
 def switchBranches(c, default, variation):
   return lambda c: setattr(c, default, getattr(c, variation))
@@ -186,7 +188,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m: continue
     if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e: continue
 
-  goodJets(c, newVars)
+  goodJets(c, newVars, jetPtCut)
   bJets(c, newVars)
   makeInvariantMasses(c, newVars)
   makeDeltaR(c, newVars)

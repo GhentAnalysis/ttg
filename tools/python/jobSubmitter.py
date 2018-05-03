@@ -52,6 +52,9 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=
   for subJob in subJobList:
     for arg, value in zip(subJobArgs, subJob):
       if value: submitArgs[arg] = str(value)
+      else: 
+        try:    submitArgs.pop(arg)
+        except: pass
 
     command = script + ' ' + ' '.join(['--' + arg + '=' + str(value) for arg, value in submitArgs.iteritems() if value != False])
     command = command.replace('=True','')
