@@ -47,37 +47,11 @@ if not args.isChild:
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
 
-  if args.selection:
-    selections = [args.selection]
-  else:
-    selections = ['llg-looseLeptonVeto-mll40-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag0-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag1p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag0-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-photonPt20',
-                  'llg-looseLeptonVeto-mll40-onZ-photonPt20',
-                  'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-njet1-deepbtag0-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-njet1-deepbtag1p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag0-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1p-photonPt20',
-                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag2p-photonPt20',
-                  ]
-
-
-    if args.tag.count('QCD'):
-      selections = ['pho','pho-njet1p','pho-njet2p','pho-njet2p-deepbtag1p','pho-njet2p-deepbtag1p-photonPt20','pho-njet2p-deepbtag1p-photonPt40','pho-njet2p-deepbtag1p-photonPt60']
-    if args.tag.count('eleSusyLoose') and not args.tag.count('pho'):
-      selections = ['ll-looseLeptonVeto-mll40', 'll-looseLeptonVeto-mll40-offZ', 'll-looseLeptonVeto-mll40-offZ-njet2p', 'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p']
-    if args.tag.count('singleLep'):
-      selections = ['lg-looseLeptonVeto', 'lg-looseLeptonVeto-njet3p', 'lg-looseLeptonVeto-njet4p', 'lg-looseLeptonVeto-njet4p-deepbtag1p', 'lg-looseLeptonVeto-njet4p-deepbtag2p']
+  if args.selection:                selections = [args.selection]
+  elif args.tag.count('QCD'):       from ttg.plots.selections import qcdSelections     as selections
+  elif args.tag.count('singleLep'): from ttg.plots.selections import silepSelections   as selections
+  elif not args.tag.count('pho'):   from ttg.plots.selections import dilepSelections   as selections
+  else:                             from ttg.plots.selections import defaultSelections as selections
 
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
