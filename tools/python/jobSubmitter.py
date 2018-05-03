@@ -49,7 +49,7 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=
   args.isChild = True
   changedArgs  = [arg for arg in vars(args) if getattr(args, arg) and argParser.get_default(arg) != getattr(args,arg)]
   submitArgs   = {arg: getattr(args, arg) for arg in changedArgs if arg not in dropArgs}
-  for subJob in subJobList:
+  for i, subJob in enumerate(subJobList):
     for arg, value in zip(subJobArgs, subJob):
       if value: submitArgs[arg] = str(value)
       else: 
