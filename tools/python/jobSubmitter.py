@@ -55,8 +55,8 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=
 
     command = script + ' ' + ' '.join(['--' + arg + '=' + str(value) for arg, value in submitArgs.iteritems() if value != False])
     command = command.replace('=True','')
-    logdir  = os.path.join('log', os.path.basename(script).split('.')[0], subLog)
-    logfile = os.path.join(logdir, str(subJob) + ".log")
+    logdir  = os.path.join('log', os.path.basename(script).split('.')[0], *(str(s) for s in subJob[:-1]))
+    logfile = os.path.join(logdir, str(subJob[-1]) + ".log")
 
     try:    os.makedirs(logdir)
     except: pass

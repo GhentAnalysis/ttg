@@ -44,29 +44,14 @@ from ttg.plots.systematics import systematics, linearSystematics, applySysToTree
 if not args.isChild:
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
-
-  if args.selection:                selections = [args.selection]
-  elif args.tag.count('QCD'):       from ttg.plots.selections import qcdSelections     as selections
-  elif args.tag.count('singleLep'): from ttg.plots.selections import silepSelections   as selections
-  elif not args.tag.count('pho'):   from ttg.plots.selections import dilepSelections   as selections
-  else:                             from ttg.plots.selections import defaultSelections as selections
-
-  if args.channel:                        channels = [args.channel]
-  elif args.tag.count('compareChannels'): channels = ['all']
-  elif args.tag.count('QCD'):             channels = ['noData']
-  elif args.tag.count('singleLep'):       channels = ['e','mu','noData']
-  elif args.tag.count('randomConeCheck'): channels = ['ee','mumu','emu','SF','all']
-  elif args.tag.count('igmaIetaIeta'):    channels = ['ee','mumu','emu','SF','all']
-  else:                                   channels = ['ee','mumu','emu','SF','all','noData']
+  from ttg.plots.selections   import getVariations
 
   if args.sys: sysList = [args.sys]
   else:        sysList = [None] + (systematics.keys() if args.runSys else [])
-  for s in sysList:
-    for c in channels:
-      if c != 'all': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
-      else:          selections_ = selections
-      selections_  = [(sel, c, s) for sel in selections_]
-      submitJobs(__file__, ('selection', 'channel', 'sys'), selections_, argParser, subLog=os.path.join(args.tag,c,s if s else 'None'))
+
+  subJobArgs, subJobList = getVariations(args, sysList)
+
+  submitJobs(__file__, subJobArgs, subJobList, argParser, subLog=args.tag)
   exit(0)
 
 

@@ -7,7 +7,9 @@ defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-orOnZ-photonPt20',
+                     ]
+
+onZSelections     = ['llg-looseLeptonVeto-mll40-orOnZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-onZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-orOnZ-njet1-deepbtag0-photonPt20',
@@ -35,3 +37,28 @@ silepSelections   = ['lg-looseLeptonVeto-photonPt20',
                      'lg-looseLeptonVeto-njet4p-photonPt20', 
                      'lg-looseLeptonVeto-njet4p-deepbtag1p-photonPt20', 
                      'lg-looseLeptonVeto-njet4p-deepbtag2p-photonPt20']
+
+def getVariations(args, sysList):
+  if args.selection:                selections = [args.selection]
+  if args.tag.count('QCD'):         selections = qcdSelections
+  elif args.tag.count('singleLep'): selections = silepSelections
+  elif not args.tag.count('pho'):   selections = dilepSelections
+  elif args.tag.count('phoCBfull'): selections = dilepSelections+onZSelections+jetPtSelections
+  else:                             selections = defaultSelections
+
+  if args.channel:                        channels = [args.channel]
+  elif args.tag.count('compareChannels'): channels = ['all']
+  elif args.tag.count('QCD'):             channels = ['noData']
+  elif args.tag.count('singleLep'):       channels = ['e','mu','noData']
+  elif args.tag.count('randomConeCheck'): channels = ['ee','mumu','emu','SF','all']
+  elif args.tag.count('igmaIetaIeta'):    channels = ['ee','mumu','emu','SF','all']
+  else:                                   channels = ['ee','mumu','emu','SF','all','noData']
+
+  variations = []
+  for s in sysList:
+    for c in channels:
+      if c != 'all': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
+      else:          selections_ = selections
+      variations += [(sel, c, s) for sel in selections_]
+
+  return ('selection', 'channel', 'sys'), variations
