@@ -8,7 +8,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
-argParser.add_argument('--tag',            action='store',      default='eleSusyLoose-phoCB')
+argParser.add_argument('--tag',            action='store',      default='eleSusyLoose-phoCBfull')
 argParser.add_argument('--sys',            action='store',      default=None)
 argParser.add_argument('--filterPlot',     action='store',      default=None)
 argParser.add_argument('--runSys',         action='store_true', default=False)
@@ -37,8 +37,6 @@ if args.editInfo:
 # Systematics
 #
 from ttg.plots.systematics import systematics, linearSystematics, applySysToTree, applySysToString
-if args.sys=='None': args.sys=None
-
 
 #
 # Submit subjobs
@@ -62,15 +60,15 @@ if not args.isChild:
   else:                                   channels = ['ee','mumu','emu','SF','all','noData']
 
   if args.sys: sysList = [args.sys]
-  else:        sysList = ['None'] + (systematics.keys() if args.runSys else [])
+  else:        sysList = [None] + (systematics.keys() if args.runSys else [])
   for s in sysList:
     for c in channels:
       if c != 'all': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
       else:          selections_ = selections
-      args.channel = c
-      args.sys     = s
-      submitJobs(__file__, 'selection', selections_, args, subLog=os.path.join(args.tag,c,s))
+      selections_  = [(sel, c, s) for sel in selections_]
+      submitJobs(__file__, ('selection', 'channel', 'sys'), selections_, argParser, subLog=os.path.join(args.tag,c,s if s else 'None'))
   exit(0)
+
 
 
 #

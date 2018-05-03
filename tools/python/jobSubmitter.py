@@ -36,19 +36,22 @@ def launchLocal(command, logfile):
 #
 # Job submitter for T2_BE_IIHE
 #   script:     script to be called
-#   subJobArg:  argument to be varied
-#   subJobList: possible values for the argument
+#   subJobArgs: argument or tuple of arguments to be varied
+#   subJobList: possible values/tuples for the argument
 #   args:       other args
 #   dropArgs:   if some args need to be ignored
 #   subLog:     subdirectory for the logs
 #
-def submitJobs(script, subJobArg, subJobList, args, dropArgs = [], subLog=''):
+def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=''):
   os.system("mkdir -p log")
 
-  submitArgs = {arg: getattr(args, arg) for arg in vars(args) if arg not in dropArgs and arg!=subJobArg and getattr(args, arg)}
-  for i, subJob in enumerate(subJobList):
-    submitArgs[subJobArg] = str(subJob)
-    submitArgs['isChild'] = True
+  args         = argParser.parse_args()
+  args.isChild = True
+  changedArgs  = [arg for arg in vars(args) if getattr(args, arg) and argParser.get_default(arg) != getattr(args,arg)]
+  submitArgs   = {arg: getattr(args, arg) for arg in changedArgs if arg not in dropArgs}
+  for subJob in subJobList:
+    for arg, value in zip(subJobArgs, subJob):
+      if value: submitArgs[arg] = str(value)
 
     command = script + ' ' + ' '.join(['--' + arg + '=' + str(value) for arg, value in submitArgs.iteritems() if value != False])
     command = command.replace('=True','')
