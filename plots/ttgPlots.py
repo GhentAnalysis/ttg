@@ -59,6 +59,16 @@ if not args.isChild:
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1-photonPt20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
                   'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-photonPt20',
+                  'llg-looseLeptonVeto-mll40-onZ-photonPt20',
+                  'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-njet1-deepbtag0-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-njet1-deepbtag1p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag0-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1p-photonPt20',
+                  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag2p-photonPt20',
                   ]
 
 
@@ -81,9 +91,11 @@ if not args.isChild:
   else:        sysList = ['None'] + (systematics.keys() if args.runSys else [])
   for s in sysList:
     for c in channels:
+      if c != 'all': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
+      else:          selections_ = selections
       args.channel = c
       args.sys     = s
-      submitJobs(__file__, 'selection', selections, args, subLog=os.path.join(args.tag,c,s))
+      submitJobs(__file__, 'selection', selections_, args, subLog=os.path.join(args.tag,c,s))
   exit(0)
 
 
@@ -154,6 +166,22 @@ def createSignalRegions(c):
     if c.ndbjets == 1: return 3
     else:              return 4
   return -1
+
+def createSignalRegionsLarge(c):
+  if c.njets == 1:
+    if c.ndbjets == 0: return 0
+    else:              return 1
+  elif c.njets == 2:
+    if c.ndbjets == 0: return 2
+    if c.ndbjets == 1: return 3
+    else:              return 4
+  elif c.njets >= 3:
+    if c.ndbjets == 0: return 5
+    if c.ndbjets == 1: return 6
+    if c.ndbjets == 2: return 7
+    else:              return 8
+  return -1
+
 
 if args.tag.count('randomConeCheck'):
   plots.append(Plot('photon_chargedIso',      'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20,0,20)))
@@ -229,6 +257,7 @@ else:
   plots.append(Plot('j2_csvV2',                   'CSVv2(j_{2})',                         lambda c : c._jetCsvV2[c.j2],                                  (20, 0, 1)))
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
   plots.append(Plot('signalRegions',              'signal region',                        lambda c : createSignalRegions(c),                             (5, 0, 5), histModifications=xAxisLabels(['1j,0b', '1j,1b','#geq2j,0b','#geq2j,1b','#geq2j,#geq2b'])))
+  plots.append(Plot('signalRegionsLarge',         'signal region',                        lambda c : createSignalRegionsLarge(c),                        (9, 0, 9), histModifications=xAxisLabels(['1j,0b', '1j,1b','2j,0b','2j,1b','2j,2b','#geq3j,0b','#geq3j,1b','#geq3j,2b','#geq3j,3b'])))
   plots.append(Plot('eventType',                  'eventType',                            lambda c : ord(c._ttgEventType),                               (9, 0, 9)))
   plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c.genPhPt,                                          (10,10,110)))
   plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                   lambda c : abs(c.genPhEta),                                    (15,0,2.5), overflowBin=None))
