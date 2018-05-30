@@ -243,16 +243,8 @@ lumiScale = 35.9
 # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
 #
 if not args.showSys:
-  cutString, passingFunctions = cutInterpreter.cutString(args.selection)
-  if not cutString: cutString = '(1)'
+  cutString, passingFunctions = cutInterpreter.cutString(args.selection, channel)
   if args.sys:      cutString = applySysToString(args.sys, cutString)
-
-  if args.channel=="ee":   cutString += '&&isEE'
-  if args.channel=="mumu": cutString += '&&isMuMu'
-  if args.channel=="SF":   cutString += '&&(isMuMu||isEE)'
-  if args.channel=="emu":  cutString += '&&isEMu'
-  if args.channel=="e":    cutString += '&&isE'
-  if args.channel=="mu":   cutString += '&&isMu'
 
   if   args.tag.count('QCD'):                                                       reduceType = 'phoCB'
   elif args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'

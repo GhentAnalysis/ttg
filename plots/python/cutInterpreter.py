@@ -100,7 +100,7 @@ class cutInterpreter:
     raise ValueError( "Can't interpret string %s. All cuts %s" % (string,  ", ".join( [ c[0] for c in continous_variables + discrete_variables] +  special_cuts.keys() ) ) )
 
   @staticmethod
-  def cutString(cuts):
+  def cutString(cuts, channel):
     strings   = []
     functions = []
     for cut in cuts.split('-'):
@@ -109,7 +109,14 @@ class cutInterpreter:
       if string and string!='(1)':      strings.append(string)
       if function:                      functions.append(function)
 
-    cutString        = "&&".join(strings) if len(strings) else None
+    cutString        = "&&".join(strings) if len(strings) else '(1)'
     passingFunctions = (lambda t: all(f(t) for f in functions)) if len(functions) else (lambda t : True)
+
+    if channel=="ee":   cutString += '&&isEE'
+    if channel=="mumu": cutString += '&&isMuMu'
+    if channel=="SF":   cutString += '&&(isMuMu||isEE)'
+    if channel=="emu":  cutString += '&&isEMu'
+    if channel=="e":    cutString += '&&isE'
+    if channel=="mu":   cutString += '&&isMu'
 
     return cutString, passingFunctions
