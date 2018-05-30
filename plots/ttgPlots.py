@@ -124,6 +124,15 @@ def createSignalRegions(c):
     else:              return 4
   return -1
 
+def createSignalRegionsSmall(c):
+  if c.njets == 1:
+    if c.ndbjets > 0:  return 0
+  elif c.njets >= 2:
+    if c.ndbjets == 0: return 1
+    if c.ndbjets == 1: return 2
+    else:              return 3
+  return -1
+
 def createSignalRegionsLarge(c):
   if c.njets == 1:
     if c.ndbjets == 0: return 0
@@ -214,6 +223,7 @@ else:
   plots.append(Plot('j2_csvV2',                   'CSVv2(j_{2})',                         lambda c : c._jetCsvV2[c.j2],                                  (20, 0, 1)))
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                       lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
   plots.append(Plot('signalRegions',              'signal region',                        lambda c : createSignalRegions(c),                             (5, 0, 5), histModifications=xAxisLabels(['1j,0b', '1j,1b','#geq2j,0b','#geq2j,1b','#geq2j,#geq2b'])))
+  plots.append(Plot('signalRegionsSmall',         'signal region',                        lambda c : createSignalRegionsSmall(c),                        (4, 0, 4), histModifications=xAxisLabels(['1j,1b','#geq2j,0b','#geq2j,1b','#geq2j,#geq2b'])))
   plots.append(Plot('signalRegionsLarge',         'signal region',                        lambda c : createSignalRegionsLarge(c),                        (9, 0, 9), histModifications=xAxisLabels(['1j,0b', '1j,1b','2j,0b','2j,1b','2j,2b','#geq3j,0b','#geq3j,1b','#geq3j,2b','#geq3j,3b'])))
   plots.append(Plot('eventType',                  'eventType',                            lambda c : ord(c._ttgEventType),                               (9, 0, 9)))
   plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',              lambda c : c.genPhPt,                                          (10,10,110)))

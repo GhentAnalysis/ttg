@@ -169,13 +169,13 @@ def addGenPhotonInfo(t, n, index):
       n.genPhPt            = t._gen_phPt[i]
       n.genPhEta           = t._gen_phEta[i]
 
-def selectPhotons(t, n, doCut, minLeptons):
+def selectPhotons(t, n, doCut, minLeptons, isData):
   t.photons  = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, minLeptons)]
   n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
   if len(t.photons): 
     n.ph    = t.photons[0]
     n.ph_pt = t._phPtCorr[n.ph]
-    addGenPhotonInfo(t, n, n.ph)
+    if isData: addGenPhotonInfo(t, n, n.ph)
   return (len(t.photons) > 0 or not doCut)
 
 

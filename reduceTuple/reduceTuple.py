@@ -170,7 +170,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   for s in branchModifications: s(c)
 
   if not selectLeptons(c, newVars, minLeptons):                                            continue
-  if not selectPhotons(c, newVars, doPhotonCut, minLeptons):                               continue
+  if not selectPhotons(c, newVars, doPhotonCut, minLeptons, sample.isData):                continue
 
   if sample.isData and minLeptons > 1:
     if not c._passMETFilters:                                                              continue
