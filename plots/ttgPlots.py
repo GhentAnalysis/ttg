@@ -154,7 +154,7 @@ if args.tag.count('randomConeCheck'):
   plots.append(Plot('photon_chargedIso_small','chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80,0,20)))
   plots.append(Plot('photon_relChargedIso',   'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph], (20,0,2)))
 else:
-  plots.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (40,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (50,0,0.04)))
+ #plots.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (40,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (50,0,0.04)))
 
   plots.append(Plot('yield',                      'yield',                                lambda c : channelNumbering(c),                                (3, 0.5, 2.5 if singleLep else 3.5), histModifications=xAxisLabels(['#mu','e'] if singleLep else ['#mu#mu', 'e#mu', 'ee'])))
   plots.append(Plot('nVertex',                    'vertex multiplicity',                  lambda c : ord(c._nVertex),                                    (50, 0, 50)))
@@ -243,7 +243,7 @@ lumiScale = 35.9
 # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
 #
 if not args.showSys:
-  cutString, passingFunctions = cutInterpreter.cutString(args.selection, channel)
+  cutString, passingFunctions = cutInterpreter.cutString(args.selection, args.channel)
   if args.sys:      cutString = applySysToString(args.sys, cutString)
 
   if   args.tag.count('QCD'):                                                       reduceType = 'phoCB'
