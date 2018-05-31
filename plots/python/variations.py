@@ -43,7 +43,7 @@ def getVariations(args, sysList):
   if args.tag.count('QCD'):         selections = qcdSelections
   elif args.tag.count('singleLep'): selections = silepSelections
   elif not args.tag.count('pho'):   selections = dilepSelections
-  elif args.tag.count('phoCBfull'): selections = dilepSelections+onZSelections+jetPtSelections
+  elif args.tag.count('phoCBfull'): selections = defaultSelections+onZSelections
   else:                             selections = defaultSelections
 
   if args.channel:                        channels = [args.channel]
@@ -57,8 +57,8 @@ def getVariations(args, sysList):
   variations = []
   for s in sysList:
     for c in channels:
-      if c != 'all': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
-      else:          selections_ = selections
+      if c != 'SF': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
+      else:         selections_ = selections
       variations += [(sel, c, s) for sel in selections_]
 
   return ('selection', 'channel', 'sys'), variations
