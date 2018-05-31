@@ -44,7 +44,7 @@ from ttg.plots.systematics import systematics, linearSystematics, applySysToTree
 if not args.isChild:
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
-  from ttg.plots.selections   import getVariations
+  from ttg.plots.variations   import getVariations
 
   if args.sys: sysList = [args.sys]
   else:        sysList = [None] + (systematics.keys() if args.runSys else [])
