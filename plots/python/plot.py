@@ -481,6 +481,14 @@ class Plot:
 
     drawObjects += self.scaleStacks(histos, scaling)
 
+    # Check if at least two bins are filled, otherwise skip, unless yield
+    filledBins = 0
+    for bin in range(1, histos[0][0].GetNbinsX()+1):
+      if any([l[0].GetBinContent(bin) > 0 for l in histos]): filledBins += 1
+    if filledBins < 2 and self.name != 'yield':
+      log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
+      return
+
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     canvas = getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
     for modification in canvasModifications: modification(canvas)
