@@ -16,7 +16,7 @@ special_cuts = {
 
     "onZ":                 "abs(mll-91.1876)<15&&!isEMu",
     "llgOnZ":              "abs(mllg-91.1876)<15&&!isEMu",
-    "orOnZ":               "(abs(mll-91.1876)<15||abs(mll-91.1876)<15)&&!isEMu",
+    "orOnZ":               "(abs(mll-91.1876)<15||abs(mllg-91.1876)<15)&&!isEMu",
     "offZ":                "abs(mll-91.1876)>15||isEMu",
     "llgNoZ":              "abs(mllg-91.1876)>15||isEMu",
 
