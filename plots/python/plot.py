@@ -3,7 +3,7 @@ log = getLogger()
 
 #
 # Plot class
-# Still messy but it works reasonably
+# Still messy, contains a lot of functions, but does a lot of automatized work
 #
 import ROOT, os, uuid, numpy
 import cPickle as pickle
@@ -108,9 +108,6 @@ def fillPlots(plots, c, sample, eventWeight):
   if removePlots:
     for p in toRemove: plots.remove(p)
     toRemove = []
-
-
-
 
 
 #
@@ -281,8 +278,8 @@ class Plot:
   #
   def getRatioLine(self, min, max):
     line = ROOT.TPolyLine(2)
-    line.SetPoint(0, min, 1.)
-    line.SetPoint(1, max, 1.)
+    line.SetPoint(0, self.min, 1.)
+    line.SetPoint(1, self.max, 1.)
     line.SetLineWidth(1)
     return line
 
@@ -399,11 +396,24 @@ class Plot:
 
     return boxes, ratio_boxes
 
+  #
+  # Get filled bins in plot
+  #
+  def getFilledBins(self, histos, threshold=0):
+    filledBins = []
+    for bin in range(1, histos[0][0].GetNbinsX()+1):
+      if any([h[0].GetBinContent(bin) > threshold for h in histos]): filledBins.append(bin)
+    return filledBins
 
-
-
-
-
+  #
+  # Remove empty bins from plot
+  #
+  def removeEmptyBins(self, histos, threshold):
+    filledBins = self.getFilledBins(histos, threshold)
+    self.min   = histos[0][0].GetBinLowEdge(filledBins[0])
+    self.max   = histos[0][0].GetBinLowEdge(filledBins[-1]+1)
+    for h in histos:
+      h[0].GetXaxis().SetRangeUser(self.min, self.max)
 
   #
   # Draw function
@@ -482,12 +492,11 @@ class Plot:
     drawObjects += self.scaleStacks(histos, scaling)
 
     # Check if at least two bins are filled, otherwise skip, unless yield
-    filledBins = 0
-    for bin in range(1, histos[0][0].GetNbinsX()+1):
-      if any([l[0].GetBinContent(bin) > 0 for l in histos]): filledBins += 1
-    if filledBins < 2 and self.name != 'yield':
+    if len(self.getFilledBins(histos)) < 2 and self.name != 'yield':
       log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
       return
+
+    self.removeEmptyBins(histos, 0.001 if logY else 0.1)
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     canvas = getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
@@ -524,8 +533,8 @@ class Plot:
       for histo in [h[0] for h in histos]:
         for i in range(1, 1 + histo.GetNbinsX()):
           # low/high bin edge in the units of the x axis
-          xLowerEdge_axis = histo.GetBinLowEdge(i)
-          xUpperEdge_axis = histo.GetBinLowEdge(i)+histo.GetBinWidth(i)
+          xLowerEdge_axis = self.min
+          xUpperEdge_axis = self.max
           # linear transformation to gPad system
           xLowerEdge  = (xLowerEdge_axis - histo.GetXaxis().GetXmin())/(histo.GetXaxis().GetXmax() - histo.GetXaxis().GetXmin())
           xUpperEdge  = (xUpperEdge_axis - histo.GetXaxis().GetXmin())/(histo.GetXaxis().GetXmax() - histo.GetXaxis().GetXmin())
