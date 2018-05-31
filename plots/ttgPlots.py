@@ -73,7 +73,6 @@ ROOT.gROOT.SetBatch(True)
 phoCB       = args.tag.count('phoCB')
 phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
-central     = args.tag.count('central')
 zeroLep     = args.tag.count('QCD')
 singleLep   = args.tag.count('singleLep')
 normalize   = args.tag.count('sigmaIetaIeta') or args.tag.count('randomConeCheck')
@@ -273,12 +272,12 @@ if not args.showSys:
     c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
     c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
 
-    if central:
-      if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01022 < #sigma_{i#etai#eta} < 0.012')
-      elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
-    elif forward:
+    if forward:
       if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.03001 < #sigma_{i#etai#eta} < 0.032')
       elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.032 < #sigma_{i#etai#eta}')
+    else:
+      if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01022 < #sigma_{i#etai#eta} < 0.012')
+      elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
 
     selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
@@ -294,9 +293,9 @@ if not args.showSys:
       if not passingFunctions(c): continue
 
       if selectPhoton:
-        if phoCBfull and not c._phCutBasedMedium[c.ph]:                  continue
-        if forward and abs(c._phEta[c.ph]) < 1.566:                      continue
-        if central and abs(c._phEta[c.ph]) > 1.4442:                     continue
+        if phoCBfull and not c._phCutBasedMedium[c.ph]:  continue
+        if forward and abs(c._phEta[c.ph]) < 1.566:      continue
+        if not forward and abs(c._phEta[c.ph]) > 1.4442: continue
 
         if not checkSigmaIetaIeta(c, c.ph):        continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
         if not checkChgIso(c, c.ph):               continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
