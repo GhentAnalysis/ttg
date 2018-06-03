@@ -139,3 +139,27 @@ def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
     (31, (0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
   ]
   return [drawTex(l, align) for align, l in lines]
+
+#
+# Coordinate tranformations between Axis and NDC
+#
+def fromAxisToNDC(pad, axis, coordinate, isY=False):
+  log     = pad.GetLogy()           if isY else pad.GetLogx()
+  minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin() 
+  maxPad  = (1.-pad.GetTopMargin()) if isY else (1.-pad.GetRightMargin())
+  maxPad  = 1.-pad.GetTopMargin()   if isY else 1.-pad.GetRightMargin()
+  minAxis = axis.GetXmin()
+  maxAxis = axis.GetXmax()
+
+  if log: return minPad + math.log(coordinate)*(maxPad-minPad)/(math.log(maxAxis)-math.log(minAxis))
+  else:   return minPad + coordinate*(maxPad-minPad)/(maxAxis-minAxis)
+
+def fromNDCToAxis(pad, axis, coordinate, isY=False):
+  log     = pad.GetLogy()           if isY else pad.GetLogx()
+  minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin() 
+  maxPad  = (1.-pad.GetTopMargin()) if isY else (1.-pad.GetRightMargin())
+  minAxis = axis.GetXmin()
+  maxAxis = axis.GetXmax()
+  
+  if log: return math.exp((coordinate-minPad)/(maxPad-minPad)*(math.log(maxAxis)-math.log(minAxis)))
+  else:   return (coordinate-minPad)/(maxPad-minPad)*(maxAxis-minAxis)

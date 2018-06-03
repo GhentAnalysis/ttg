@@ -5,25 +5,12 @@ log = getLogger()
 # Plot class
 # Still messy, contains a lot of functions, but does a lot of automatized work
 #
-import ROOT, os, uuid, numpy
+import ROOT, os, uuid, numpy, math
 import cPickle as pickle
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas
-
-#
-# Calculate legend area
-#
-def getLegendMaskedArea(legend_coordinates, pad):
-  def constrain(x, interval=[0,1]):
-    if x<interval[0]: return interval[0]
-    elif x>=interval[0] and x<interval[1]: return x
-    else: return interval[1]
-
-  return {'yLowerEdge': constrain( 1.-(1.-legend_coordinates[1] - pad.GetTopMargin())/(1.-pad.GetTopMargin()-pad.GetBottomMargin()), interval=[0.3, 1] ),
-          'xLowerEdge': constrain( (legend_coordinates[0] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] ),
-          'xUpperEdge': constrain( (legend_coordinates[2] - pad.GetLeftMargin())/(1.-pad.GetLeftMargin()-pad.GetRightMargin()), interval = [0, 1] )}
 
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
@@ -278,8 +265,8 @@ class Plot:
   #
   def getRatioLine(self, min, max):
     line = ROOT.TPolyLine(2)
-    line.SetPoint(0, self.min, 1.)
-    line.SetPoint(1, self.max, 1.)
+    line.SetPoint(0, self.xmin, 1.)
+    line.SetPoint(1, self.xmax, 1.)
     line.SetLineWidth(1)
     return line
 
@@ -410,10 +397,10 @@ class Plot:
   #
   def removeEmptyBins(self, histos, threshold):
     filledBins = self.getFilledBins(histos, threshold)
-    self.min   = histos[0][0].GetBinLowEdge(filledBins[0])
-    self.max   = histos[0][0].GetBinLowEdge(filledBins[-1]+1)
+    self.xmin   = histos[0][0].GetBinLowEdge(filledBins[0])
+    self.xmax   = histos[0][0].GetBinLowEdge(filledBins[-1]+1)
     for h in histos:
-      h[0].GetXaxis().SetRangeUser(self.min, self.max)
+      h[0].GetXaxis().SetRangeUser(self.xmin, self.xmax)
 
   #
   # Draw function
@@ -496,7 +483,6 @@ class Plot:
       log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
       return
 
-    self.removeEmptyBins(histos, 0.001 if logY else 0.1)
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     canvas = getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
@@ -504,17 +490,15 @@ class Plot:
 
     canvas.topPad.cd()
 
-    # Range on y axis
+    # Range on y axis and remove empty bins
     max_ = max(l[0].GetMaximum() for l in histos)
     min_ = min(l[0].GetMinimum() for l in histos)
 
-    if logY: (yMin_, yMax_) = (0.7, 10**0.5*max_)
-    else:    (yMin_, yMax_) = (0 if min_>0 else 1.2*min_, 1.2*max_)
-
     if type(yRange)==type(()) and len(yRange)==2:
-      yMin_ = yRange[0] if not yRange[0]=="auto" else yMin_
-      yMax_ = yRange[1] if not yRange[1]=="auto" else yMax_
+      yMin_ = yRange[0] if not yRange[0]=="auto" else (0.7          if logY else (0 if min_>0 else 1.2*min_))
+      yMax_ = yRange[1] if not yRange[1]=="auto" else (10**0.5*max_ if logY else 1.2*max_)
 
+    self.removeEmptyBins(histos, yMin_ if logY or min_ < 0 else yMax_/200.)
 
     # If legend is in the form (tuple, int) then the number of columns is provided
     if len(legend) == 2: legendColumns, legend = legend[1], legend[0]
@@ -525,37 +509,31 @@ class Plot:
       if legend=="auto": legendCoordinates = (0.50,0.9-0.05*sum(map(len, histos)),0.92,0.9)
       else:              legendCoordinates = legend
 
-    #Avoid overlap with the legend
-    if (yRange=="auto" or yRange[1]=="auto") and legend:
-      scaleFactor = 1
-      # Get x-range and y
-      legendMaskedArea = getLegendMaskedArea(legendCoordinates, canvas.topPad)
-      for histo in [h[0] for h in histos]:
-        for i in range(1, 1 + histo.GetNbinsX()):
-          # low/high bin edge in the units of the x axis
-          xLowerEdge_axis = self.min
-          xUpperEdge_axis = self.max
-          # linear transformation to gPad system
-          xLowerEdge  = (xLowerEdge_axis - histo.GetXaxis().GetXmin())/(histo.GetXaxis().GetXmax() - histo.GetXaxis().GetXmin())
-          xUpperEdge  = (xUpperEdge_axis - histo.GetXaxis().GetXmin())/(histo.GetXaxis().GetXmax() - histo.GetXaxis().GetXmin())
+      #Avoid overlap with the legend
+      if (yRange=="auto" or yRange[1]=="auto"):
+        scaleFactor = 1
+        from style import fromAxisToNDC, fromNDCToAxis
+        for histo in [h[0] for h in histos]:
+          for i in range(1, 1 + histo.GetNbinsX()):
+            xLowerEdge  = fromAxisToNDC(canvas.topPad, histo.GetXaxis(), histo.GetBinLowEdge(i))
+            xUpperEdge  = fromAxisToNDC(canvas.topPad, histo.GetXaxis(), histo.GetBinLowEdge(i)+histo.GetBinWidth(i))
 
-          # maximum allowed fraction in given bin wrt to the legendMaskedArea: Either all (1) or legendMaskedArea['yLowerEdge']
-          if xUpperEdge>legendMaskedArea['xLowerEdge'] and xLowerEdge<legendMaskedArea['xUpperEdge']: maxFraction = legendMaskedArea['yLowerEdge']
-          else:                                                                                       maxFraction = 1
-          maxFraction *=0.8
+            # maximum allowed fraction in bin to avoid overlap with legend
+            if xUpperEdge > legendCoordinates[0] and xLowerEdge < legendCoordinates[2]: maxFraction = 0.8*max(0.3, fromNDCToAxis(canvas.topPad, histo.GetYaxis(), legendCoordinates[3], isY=True))
+            else:                                                                       maxFraction = 0.8
 
-          # Use: (y - yMin_) / (sf*yMax_ - yMin_) = maxFraction (and y->log(y) in log case).
-          # Compute the maximum required scale factor s.
-          y = histo.GetBinContent(i)
-          try:
-            if logY: new_sf = yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1
-            else:    new_sf = 1./yMax_*(yMin_ + (y-yMin_)/maxFraction )
-            scaleFactor = new_sf if new_sf>scaleFactor else scaleFactor
-          except ZeroDivisionError:
-            pass
+            # Use: (y - yMin_) / (sf*yMax_ - yMin_) = maxFraction (and y->log(y) in log case).
+            # Compute the maximum required scale factor s.
+            y = histo.GetBinContent(i)
+            try:
+              if logY: new_sf = yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1
+              else:    new_sf = 1./yMax_*(yMin_ + (y-yMin_)/maxFraction )
+              scaleFactor = new_sf if new_sf>scaleFactor else scaleFactor
+            except ZeroDivisionError:
+              pass
 
-      # Apply scale factor to avoid legend
-      yMax_ = scaleFactor*yMax_
+        # Apply scale factor to avoid legend
+        yMax_ = scaleFactor*yMax_
 
     # Draw the histos
     same = ""
