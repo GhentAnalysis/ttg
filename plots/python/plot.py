@@ -297,7 +297,7 @@ class Plot:
   #
   # Adding systematics to MC (assuming MC is first in the stack list)
   #
-  def getSystematicBand(self, systematics, linearSystematics, resultsDir, postFitInfo=None):
+  def calcSystematics(self, systematics, linearSystematics, resultsDir, postFitInfo=None):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
@@ -361,26 +361,24 @@ class Plot:
     for ib in range(h_rel_err.GetNbinsX()+1):
       h_rel_err.SetBinContent(ib, sqrt(h_rel_err.GetBinContent(ib)))
 
-    # Divide by the summed hist to get relative errors
+    # Divide by the summed hist to get relative errors, and return
     h_rel_err.Divide(histos_summed[None])
+    return h_rel_err
 
-    boxes = []
-    ratio_boxes = []
-    for ib in range(1, 1 + h_rel_err.GetNbinsX() ):
-      val = histos_summed[None].GetBinContent(ib)
-      if val<0: continue
-      sys = h_rel_err.GetBinContent(ib)
-      box = ROOT.TBox( h_rel_err.GetXaxis().GetBinLowEdge(ib),  max([0.003, (1-sys)*val]), h_rel_err.GetXaxis().GetBinUpEdge(ib), max([0.003, (1+sys)*val]) )
-      box.SetLineColor(ROOT.kBlack)
-      box.SetFillStyle(3444)
-      box.SetFillColor(ROOT.kBlack)
-      r_box = ROOT.TBox( h_rel_err.GetXaxis().GetBinLowEdge(ib),  max(0.1, 1-sys), h_rel_err.GetXaxis().GetBinUpEdge(ib), min(1.9, 1+sys) )
-      r_box.SetLineColor(ROOT.kBlack)
-      r_box.SetFillStyle(3444)
-      r_box.SetFillColor(ROOT.kBlack)
-      boxes.append( box )
-      ratio_boxes.append( r_box )
-
+  def getSystematicBand(self, totalMC, sysValues):
+    boxes, ratio_boxes = [], []
+    for ib in range(1, 1 + totalMC.GetNbinsX()):
+      val = totalMC.GetBinContent(i)
+      if val > 0:
+        sys   = sysValues.GetBinContent(i)
+        box   = ROOT.TBox(totalMC.GetXaxis().GetBinLowEdge(ib),  max([0.003, (1-sys)*val]), totalMC.GetXaxis().GetBinUpEdge(ib), max([0.003, (1+sys)*val]))
+        r_box = ROOT.TBox(totalMC.GetXaxis().GetBinLowEdge(ib),  max(0.1, 1-sys),           totalMC.GetXaxis().GetBinUpEdge(ib), min(1.9, 1+sys))
+        for b in [box, r_box]:
+          b.SetLineColor(ROOT.kBlack)
+          b.SetFillStyle(3444)
+          b.SetFillColor(ROOT.kBlack)
+        boxes.append(box)
+        ratio_boxes.append(r_box)
     return boxes, ratio_boxes
 
   #
@@ -483,6 +481,9 @@ class Plot:
       log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
       return
 
+    # Calculate the systematics on the first stack
+    if len(systematics) or len(linearSystematics):
+      sysValues = self.calcSystematics(systematics, linearSystematics, resultsDir, postFitInfo)
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     canvas = getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
@@ -512,27 +513,26 @@ class Plot:
       #Avoid overlap with the legend
       if (yRange=="auto" or yRange[1]=="auto"):
         scaleFactor = 1
-        from style import fromAxisToNDC, fromNDCToAxis
+        from ttg.tools.style import fromAxisToNDC, fromNDCToAxis
         for histo in [h[0] for h in histos]:
           for i in range(1, 1 + histo.GetNbinsX()):
             xLowerEdge  = fromAxisToNDC(canvas.topPad, histo.GetXaxis(), histo.GetBinLowEdge(i))
             xUpperEdge  = fromAxisToNDC(canvas.topPad, histo.GetXaxis(), histo.GetBinLowEdge(i)+histo.GetBinWidth(i))
 
             # maximum allowed fraction in bin to avoid overlap with legend
-            if xUpperEdge > legendCoordinates[0] and xLowerEdge < legendCoordinates[2]: maxFraction = 0.8*max(0.3, fromNDCToAxis(canvas.topPad, histo.GetYaxis(), legendCoordinates[3], isY=True))
-            else:                                                                       maxFraction = 0.8
+            if xUpperEdge > legendCoordinates[0] and xLowerEdge < legendCoordinates[2]: maxFraction = 0.96*max(0.3, fromNDCToAxis(canvas.topPad, histo.GetYaxis(), legendCoordinates[3], isY=True))
+            else:                                                                       maxFraction = 0.96
 
             # Use: (y - yMin_) / (sf*yMax_ - yMin_) = maxFraction (and y->log(y) in log case).
             # Compute the maximum required scale factor s.
-            y = histo.GetBinContent(i)
+            y = histo.GetBinContent(i)+max(sysValues[i] if len(systematics) or len(linearSystematics) else 0, histo.GetBinError(i))
             try:
-              if logY: new_sf = yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1
-              else:    new_sf = 1./yMax_*(yMin_ + (y-yMin_)/maxFraction )
+              if logY: scaleFactor = max(scaleFactor, yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1)
+              else:    scaleFactor = max(scaleFactor, 1./yMax_*(yMin_ + (y-yMin_)/maxFraction))
               scaleFactor = new_sf if new_sf>scaleFactor else scaleFactor
             except ZeroDivisionError:
               pass
 
-        # Apply scale factor to avoid legend
         yMax_ = scaleFactor*yMax_
 
     # Draw the histos
@@ -556,7 +556,7 @@ class Plot:
     canvas.topPad.RedrawAxis()
 
     if len(systematics) or len(linearSystematics):
-      boxes, ratioBoxes                = self.getSystematicBand(systematics, linearSystematics, resultsDir, postFitInfo)
+      boxes, ratioBoxes                = self.getSystematicBand(histos[0][0], sysValues)
       drawObjects                     += boxes
       if ratio: ratio['drawObjects']  += ratioBoxes
 
