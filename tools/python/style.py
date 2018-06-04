@@ -143,23 +143,23 @@ def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
 #
 # Coordinate tranformations between Axis and NDC
 #
-def fromAxisToNDC(pad, axis, coordinate, isY=False):
+def fromAxisToNDC(pad, axisRange, coordinate, isY=False):
   log     = pad.GetLogy()           if isY else pad.GetLogx()
   minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin() 
   maxPad  = (1.-pad.GetTopMargin()) if isY else (1.-pad.GetRightMargin())
   maxPad  = 1.-pad.GetTopMargin()   if isY else 1.-pad.GetRightMargin()
-  minAxis = axis.GetXmin()
-  maxAxis = axis.GetXmax()
+  minAxis = axisRange[0]
+  maxAxis = axisRange[1]
 
-  if log: return minPad + math.log(coordinate)*(maxPad-minPad)/(math.log(maxAxis)-math.log(minAxis))
-  else:   return minPad + coordinate*(maxPad-minPad)/(maxAxis-minAxis)
+  if log: return minPad + (math.log(coordinate)-math.log(minAxis))/(math.log(maxAxis)-math.log(minAxis))*(maxPad-minPad)
+  else:   return minPad + (coordinate-minAxis)/(maxAxis-minAxis)*(maxPad-minPad)
 
-def fromNDCToAxis(pad, axis, coordinate, isY=False):
+def fromNDCToAxis(pad, axisRange, coordinate, isY=False):
   log     = pad.GetLogy()           if isY else pad.GetLogx()
   minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin() 
   maxPad  = (1.-pad.GetTopMargin()) if isY else (1.-pad.GetRightMargin())
-  minAxis = axis.GetXmin()
-  maxAxis = axis.GetXmax()
-  
-  if log: return math.exp((coordinate-minPad)/(maxPad-minPad)*(math.log(maxAxis)-math.log(minAxis)))
-  else:   return (coordinate-minPad)/(maxPad-minPad)*(maxAxis-minAxis)
+  minAxis = axisRange[0]
+  maxAxis = axisRange[1]
+
+  if log: return minAxis + math.exp((coordinate-minPad)/(maxPad-minPad)*(math.log(maxAxis)-math.log(minAxis)))
+  else:   return minAxis + (coordinate-minPad)/(maxPad-minPad)*(maxAxis-minAxis)

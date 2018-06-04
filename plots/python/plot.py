@@ -199,7 +199,9 @@ class Plot:
 
         self.scaleFactor = histos[target][0].Integral()/source_yield
         for h in histos[source]: h.Scale(self.scaleFactor)
-        if len(scaling) == 1: return [drawTex((0.2, 0.8, 'Scaling: %.2f' % self.scaleFactor))]
+        if len(scaling) == 1: 
+          self.textNDC = 0.82
+          return [drawTex((0.2, 0.85, 'Scaling: %.2f' % self.scaleFactor))]
     return []
 
   #
@@ -263,7 +265,7 @@ class Plot:
   #
   # Get ratio line
   #
-  def getRatioLine(self, min, max):
+  def getRatioLine(self):
     line = ROOT.TPolyLine(2)
     line.SetPoint(0, self.xmin, 1.)
     line.SetPoint(1, self.xmax, 1.)
@@ -295,9 +297,9 @@ class Plot:
 
 
   #
-  # Adding systematics to MC (assuming MC is first in the stack list)
+  # Adding systematics to MC (identified by 'stackForSys')
   #
-  def calcSystematics(self, systematics, linearSystematics, resultsDir, postFitInfo=None):
+  def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
@@ -306,7 +308,7 @@ class Plot:
       for h in list[1:]: sum.Add(h)
       return sum
 
-    histNames = [s.name+s.texName for s in self.stack[0]]
+    histNames = [s.name+s.texName for s in stackForSys]
 
     histos_summed = {}
     for sys in systematics.keys() + [None]:
@@ -332,7 +334,6 @@ class Plot:
         if self.scaleFactor: h.Scale(self.scaleFactor)
         normalizeBinWidth(h, self.normBinWidth)
         self.addOverFlowBin1D(h, self.overflowBin)
-
 
       histos_summed[sys] = sumHistos([allPlots[plotName][histName] for histName in histNames])
 
@@ -365,12 +366,15 @@ class Plot:
     h_rel_err.Divide(histos_summed[None])
     return h_rel_err
 
-  def getSystematicBand(self, totalMC, sysValues):
+  #
+  # Get the boxes for the systematic band 
+  #
+  def getSystematicBoxes(self, totalMC):
     boxes, ratio_boxes = [], []
     for ib in range(1, 1 + totalMC.GetNbinsX()):
-      val = totalMC.GetBinContent(i)
+      val = totalMC.GetBinContent(ib)
       if val > 0:
-        sys   = sysValues.GetBinContent(i)
+        sys   = totalMC.sysValues.GetBinContent(ib)
         box   = ROOT.TBox(totalMC.GetXaxis().GetBinLowEdge(ib),  max([0.003, (1-sys)*val]), totalMC.GetXaxis().GetBinUpEdge(ib), max([0.003, (1+sys)*val]))
         r_box = ROOT.TBox(totalMC.GetXaxis().GetBinLowEdge(ib),  max(0.1, 1-sys),           totalMC.GetXaxis().GetBinUpEdge(ib), min(1.9, 1+sys))
         for b in [box, r_box]:
@@ -384,21 +388,16 @@ class Plot:
   #
   # Get filled bins in plot
   #
-  def getFilledBins(self, histos, threshold=0):
-    filledBins = []
-    for bin in range(1, histos[0][0].GetNbinsX()+1):
-      if any([h[0].GetBinContent(bin) > threshold for h in histos]): filledBins.append(bin)
-    return filledBins
+  def getFilledBins(self, yMax, threshold=0):
+    return [i for i in range(1, yMax.GetNbinsX()+1) if yMax.GetBinContent(i) > threshold]
 
   #
   # Remove empty bins from plot
   #
-  def removeEmptyBins(self, histos, threshold):
-    filledBins = self.getFilledBins(histos, threshold)
-    self.xmin   = histos[0][0].GetBinLowEdge(filledBins[0])
-    self.xmax   = histos[0][0].GetBinLowEdge(filledBins[-1]+1)
-    for h in histos:
-      h[0].GetXaxis().SetRangeUser(self.xmin, self.xmax)
+  def removeEmptyBins(self, histos, yMax, threshold):
+    filledBins = self.getFilledBins(yMax, threshold)
+    self.xmin  = yMax.GetBinLowEdge(filledBins[0])
+    self.xmax  = yMax.GetBinLowEdge(filledBins[-1]+1)
 
   #
   # Draw function
@@ -435,6 +434,7 @@ class Plot:
         canvasModifications = [] could be used to pass on lambdas to modify the canvas
     '''
 
+    self.textNDC = 1
     # Canvas widths
     default_widths = {'y_width':500, 'x_width': 520, 'y_ratio_width': (200 if ratio else None)}
     default_widths.update(widths)
@@ -476,14 +476,21 @@ class Plot:
 
     drawObjects += self.scaleStacks(histos, scaling)
 
-    # Check if at least two bins are filled, otherwise skip, unless yield
-    if len(self.getFilledBins(histos)) < 2 and self.name != 'yield':
-      log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
-      return
-
     # Calculate the systematics on the first stack
     if len(systematics) or len(linearSystematics):
-      sysValues = self.calcSystematics(systematics, linearSystematics, resultsDir, postFitInfo)
+      histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo)
+
+    # Get minimum and maximum boundaries for the plot, including statistical and systematic errors
+    yMax, yMin = histos[0][0].Clone(), histos[0][0].Clone()
+    for h in (s[0] for s in histos):
+      for i in range(1, 1 + h.GetNbinsX()):
+        yMax.SetBinContent(i, max(yMax.GetBinContent(i), h.GetBinContent(i)*((1+h.sysValues.GetBinContent(i)) if hasattr(h, 'sysValues') else 1) + h.GetBinError(i)))
+        yMin.SetBinContent(i, min(yMin.GetBinContent(i), h.GetBinContent(i)*((1-h.sysValues.GetBinContent(i)) if hasattr(h, 'sysValues') else 1) - h.GetBinError(i)))
+ 
+    # Check if at least two bins are filled, otherwise skip, unless yield
+    if len(self.getFilledBins(yMax)) < 2 and self.name != 'yield':
+      log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
+      return
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     canvas = getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
@@ -492,14 +499,10 @@ class Plot:
     canvas.topPad.cd()
 
     # Range on y axis and remove empty bins
-    max_ = max(l[0].GetMaximum() for l in histos)
-    min_ = min(l[0].GetMinimum() for l in histos)
+    self.ymin = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
 
-    if type(yRange)==type(()) and len(yRange)==2:
-      yMin_ = yRange[0] if not yRange[0]=="auto" else (0.7          if logY else (0 if min_>0 else 1.2*min_))
-      yMax_ = yRange[1] if not yRange[1]=="auto" else (10**0.5*max_ if logY else 1.2*max_)
-
-    self.removeEmptyBins(histos, yMin_ if logY or min_ < 0 else yMax_/200.)
+    # Remove empty bins from the edges (or when they are too small to see)
+    self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/100.)
 
     # If legend is in the form (tuple, int) then the number of columns is provided
     if len(legend) == 2: legendColumns, legend = legend[1], legend[0]
@@ -507,32 +510,28 @@ class Plot:
 
     #Calculate legend coordinates in gPad coordinates
     if legend:
-      if legend=="auto": legendCoordinates = (0.50,0.9-0.05*sum(map(len, histos)),0.92,0.9)
+      if legend=="auto": legendCoordinates = (0.45,0.9-0.05*sum(map(len, histos)),0.85,0.9)
       else:              legendCoordinates = legend
 
       #Avoid overlap with the legend
       if (yRange=="auto" or yRange[1]=="auto"):
-        scaleFactor = 1
+        self.ymax = yMax.GetMaximum()
         from ttg.tools.style import fromAxisToNDC, fromNDCToAxis
-        for histo in [h[0] for h in histos]:
-          for i in range(1, 1 + histo.GetNbinsX()):
-            xLowerEdge  = fromAxisToNDC(canvas.topPad, histo.GetXaxis(), histo.GetBinLowEdge(i))
-            xUpperEdge  = fromAxisToNDC(canvas.topPad, histo.GetXaxis(), histo.GetBinLowEdge(i)+histo.GetBinWidth(i))
+        for i in range(1, 1 + yMax.GetNbinsX()):
+          xLowerEdge = fromAxisToNDC(canvas.topPad, [self.xmin, self.xmax], yMax.GetBinLowEdge(i))
+          xUpperEdge = fromAxisToNDC(canvas.topPad, [self.xmin, self.xmax], yMax.GetBinLowEdge(i+1))
 
-            # maximum allowed fraction in bin to avoid overlap with legend
-            if xUpperEdge > legendCoordinates[0] and xLowerEdge < legendCoordinates[2]: maxFraction = 0.96*max(0.3, fromNDCToAxis(canvas.topPad, histo.GetYaxis(), legendCoordinates[3], isY=True))
-            else:                                                                       maxFraction = 0.96
+          # maximum allowed fraction in bin to avoid overlap with legend
+          topMarginNDC = 1-canvas.topPad.GetTopMargin()
+          if xUpperEdge > legendCoordinates[0] and xLowerEdge < legendCoordinates[2]: maxFraction = (max(0.3, legendCoordinates[1]))/topMarginNDC
+          else:                                                                       maxFraction = min(topMarginNDC-yMax.GetTickLength(), self.textNDC)/topMarginNDC
 
-            # Use: (y - yMin_) / (sf*yMax_ - yMin_) = maxFraction (and y->log(y) in log case).
-            # Compute the maximum required scale factor s.
-            y = histo.GetBinContent(i)+max(sysValues[i] if len(systematics) or len(linearSystematics) else 0, histo.GetBinError(i))
-            try:
-              if logY: scaleFactor = max(scaleFactor, yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1)
-              else:    scaleFactor = max(scaleFactor, 1./yMax_*(yMin_ + (y-yMin_)/maxFraction))
-            except ZeroDivisionError:
-              pass
-
-        yMax_ = scaleFactor*yMax_
+          try:
+            if logY: scaledMax = math.exp(math.log(self.ymin) + (math.log(yMax.GetBinContent(i)) - math.log(self.ymin))/maxFraction)
+            else:    scaledMax = self.ymin + (yMax.GetBinContent(i) - self.ymin)/maxFraction
+            self.ymax = max(self.ymax, scaledMax)
+          except:
+            pass
 
     # Draw the histos
     same = ""
@@ -540,7 +539,8 @@ class Plot:
       drawOption = h.drawOption if hasattr(h, "drawOption") else "hist"
       canvas.topPad.SetLogy(logY)
       canvas.topPad.SetLogx(logX)
-      h.GetYaxis().SetRangeUser(yMin_, yMax_)
+      h.GetXaxis().SetRangeUser(self.xmin, self.xmax)
+      h.GetYaxis().SetRangeUser(self.ymin, self.ymax)
       h.GetXaxis().SetTitle(self.texX)
       h.GetYaxis().SetTitle(self.texY)
 
@@ -554,10 +554,11 @@ class Plot:
 
     canvas.topPad.RedrawAxis()
 
-    if len(systematics) or len(linearSystematics):
-      boxes, ratioBoxes                = self.getSystematicBand(histos[0][0], sysValues)
-      drawObjects                     += boxes
-      if ratio: ratio['drawObjects']  += ratioBoxes
+    for h in (s[0] for s in histos):
+      if hasattr(h, 'sysValues'):
+        boxes, ratioBoxes                = self.getSystematicBoxes(h)
+        drawObjects                     += boxes
+        if ratio: ratio['drawObjects']  += ratioBoxes
 
     if legend: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
     for o in drawObjects:
@@ -585,6 +586,7 @@ class Plot:
       h_ratio.GetYaxis().SetTickLength( 0.03*2 )
 
       h_ratio.GetYaxis().SetRangeUser( *ratio['yRange'] )
+      h_ratio.GetXaxis().SetRangeUser(self.xmin, self.xmax)
       h_ratio.GetYaxis().SetNdivisions(505)
 
       for modification in ratioModifications: modification(h_ratio)
@@ -603,7 +605,7 @@ class Plot:
       canvas.bottomPad.SetLogx(logX)
       canvas.bottomPad.SetLogy(ratio['logY'])
 
-      ratio['drawObjects'] += [self.getRatioLine(h_ratio.GetXaxis().GetXmin(), h_ratio.GetXaxis().GetXmax())]
+      ratio['drawObjects'] += [self.getRatioLine()]
       for o in ratio['drawObjects']:
         try:    o.Draw()
         except: log.debug( "ratio['drawObjects'] has something I can't Draw(): %r", o)
