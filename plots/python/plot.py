@@ -529,7 +529,6 @@ class Plot:
             try:
               if logY: scaleFactor = max(scaleFactor, yMin_/yMax_*(y/yMin_)**(1./maxFraction) if y>0 else 1)
               else:    scaleFactor = max(scaleFactor, 1./yMax_*(yMin_ + (y-yMin_)/maxFraction))
-              scaleFactor = new_sf if new_sf>scaleFactor else scaleFactor
             except ZeroDivisionError:
               pass
 
