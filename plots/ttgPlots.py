@@ -345,7 +345,7 @@ for plot in plots: # 1D plots
 
 
     if args.channel!='noData' and not args.tag.count('singleLep'):
-      extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'data/MC'}
+      extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'obs/pred'}
 
     if(normalize or args.tag.count('compareChannels')):
       extraArgs['scaling'] = 'unity'
