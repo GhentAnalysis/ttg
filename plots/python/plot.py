@@ -370,13 +370,22 @@ class Plot:
   # Get the boxes for the systematic band 
   #
   def getSystematicBoxes(self, totalMC):
+    def constrain(low, up, x):
+      return min(max(x, low), up)
+
     boxes, ratio_boxes = [], []
     for ib in range(1, 1 + totalMC.GetNbinsX()):
       val = totalMC.GetBinContent(ib)
       if val > 0:
         sys   = totalMC.sysValues.GetBinContent(ib)
-        box   = ROOT.TBox(totalMC.GetXaxis().GetBinLowEdge(ib),  max([0.003, (1-sys)*val]), totalMC.GetXaxis().GetBinUpEdge(ib), max([0.003, (1+sys)*val]))
-        r_box = ROOT.TBox(totalMC.GetXaxis().GetBinLowEdge(ib),  max(0.1, 1-sys),           totalMC.GetXaxis().GetBinUpEdge(ib), min(1.9, 1+sys))
+        xmin  = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinLowEdge(ib))
+        xmax  = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinUpEdge(ib))
+        ymin  = constrain(self.ymin,  self.ymax,  (1-sys)*val)
+        ymax  = constrain(self.ymin,  self.ymax,  (1+sys)*val)
+        yrmin = constrain(self.yrmin, self.yrmax, (1-sys))
+        yrmax = constrain(self.yrmin, self.yrmax, (1+sys))
+        box   = ROOT.TBox(xmin, ymin,  xmax, ymax)
+        r_box = ROOT.TBox(xmin, yrmin, xmax, yrmax)
         for b in [box, r_box]:
           b.SetLineColor(ROOT.kBlack)
           b.SetFillStyle(3444)
@@ -499,7 +508,8 @@ class Plot:
     canvas.topPad.cd()
 
     # Range on y axis and remove empty bins
-    self.ymin = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
+    self.ymin  = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
+    self.yrmin, self.yrmax = ratio['yRange']
 
     # Remove empty bins from the edges (or when they are too small to see)
     self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/100.)
@@ -585,7 +595,7 @@ class Plot:
       h_ratio.GetXaxis().SetTickLength( 0.03*3 )
       h_ratio.GetYaxis().SetTickLength( 0.03*2 )
 
-      h_ratio.GetYaxis().SetRangeUser( *ratio['yRange'] )
+      h_ratio.GetYaxis().SetRangeUser(self.yrmin, self.yrmax)
       h_ratio.GetXaxis().SetRangeUser(self.xmin, self.xmax)
       h_ratio.GetYaxis().SetNdivisions(505)
 
