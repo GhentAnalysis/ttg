@@ -544,8 +544,8 @@ class Plot:
       h.GetXaxis().SetTitle(self.texX)
       h.GetYaxis().SetTitle(self.texY)
 
-      if ratio is None: h.GetYaxis().SetTitleOffset(1.3)
-      else:             h.GetYaxis().SetTitleOffset(1.6)
+      if ratio is None: h.GetYaxis().SetTitleOffset(1.6)
+      else:             h.GetYaxis().SetTitleOffset(2.0)
 
       for modification in histModifications+self.histModifications: modification(h)
 
@@ -579,8 +579,8 @@ class Plot:
       h_ratio.GetXaxis().SetTitle(self.texX)
       h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
-      h_ratio.GetXaxis().SetTitleOffset( 3.2 )
-      h_ratio.GetYaxis().SetTitleOffset( 1.6 )
+      h_ratio.GetXaxis().SetTitleOffset(3.2)
+      h_ratio.GetYaxis().SetTitleOffset(2.0)
 
       h_ratio.GetXaxis().SetTickLength( 0.03*3 )
       h_ratio.GetYaxis().SetTickLength( 0.03*2 )
