@@ -10,7 +10,7 @@ import cPickle as pickle
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
-from ttg.tools.style import drawTex, getDefaultCanvas
+from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
 
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
@@ -199,7 +199,7 @@ class Plot:
 
         self.scaleFactor = histos[target][0].Integral()/source_yield
         for h in histos[source]: h.Scale(self.scaleFactor)
-        if len(scaling) == 1: 
+        if len(scaling) == 1:
           self.textNDC = 0.82
           return [drawTex((0.2, 0.85, 'Scaling: %.2f' % self.scaleFactor))]
     return []
@@ -367,7 +367,7 @@ class Plot:
     return h_rel_err
 
   #
-  # Get the boxes for the systematic band 
+  # Get the boxes for the systematic band
   #
   def getSystematicBoxes(self, totalMC):
     def constrain(low, up, x):
@@ -407,6 +407,29 @@ class Plot:
     filledBins = self.getFilledBins(yMax, threshold)
     self.xmin  = yMax.GetBinLowEdge(filledBins[0])
     self.xmax  = yMax.GetBinLowEdge(filledBins[-1]+1)
+
+  #
+  # Avoid legend overlap in pad for given legend coordinates and yMax histogram, returns proposed ymax
+  #
+  def avoidLegendOverlap(self, pad, yMax, coordinates, logY):
+    ymax = yMax.GetMaximum()
+    for i in range(1, 1 + yMax.GetNbinsX()):
+      xLowerEdge = fromAxisToNDC(pad, [self.xmin, self.xmax], yMax.GetBinLowEdge(i))
+      xUpperEdge = fromAxisToNDC(pad, [self.xmin, self.xmax], yMax.GetBinLowEdge(i+1))
+
+      # maximum allowed fraction in bin to avoid overlap with legend
+      topMarginNDC = 1-pad.GetTopMargin()
+      if xUpperEdge > coordinates[0] and xLowerEdge < coordinates[2]: maxFraction = (max(0.3, coordinates[1]))/topMarginNDC
+      else:                                                           maxFraction = min(topMarginNDC-yMax.GetTickLength(), self.textNDC)/topMarginNDC
+
+      try:
+        if logY: scaledMax = math.exp(math.log(self.ymin) + (math.log(yMax.GetBinContent(i)) - math.log(self.ymin))/maxFraction)
+        else:    scaledMax = self.ymin + (yMax.GetBinContent(i) - self.ymin)/maxFraction
+        ymax = max(ymax, scaledMax)
+      except:
+        pass
+    return ymax
+
 
   #
   # Draw function
@@ -495,7 +518,7 @@ class Plot:
       for i in range(1, 1 + h.GetNbinsX()):
         yMax.SetBinContent(i, max(yMax.GetBinContent(i), h.GetBinContent(i)*((1+h.sysValues.GetBinContent(i)) if hasattr(h, 'sysValues') else 1) + h.GetBinError(i)))
         yMin.SetBinContent(i, min(yMin.GetBinContent(i), h.GetBinContent(i)*((1-h.sysValues.GetBinContent(i)) if hasattr(h, 'sysValues') else 1) - h.GetBinError(i)))
- 
+
     # Check if at least two bins are filled, otherwise skip, unless yield
     if len(self.getFilledBins(yMax)) < 2 and self.name != 'yield':
       log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
@@ -508,7 +531,8 @@ class Plot:
     canvas.topPad.cd()
 
     # Range on y axis and remove empty bins
-    self.ymin  = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
+    self.ymin = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
+    self.ymax = yRange[1] if (yRange!="auto" and yRange[1]!="auto") else (1.2*yMax.GetMaximum())
     self.yrmin, self.yrmax = ratio['yRange']
 
     # Remove empty bins from the edges (or when they are too small to see)
@@ -518,30 +542,27 @@ class Plot:
     if len(legend) == 2: legendColumns, legend = legend[1], legend[0]
     else:                legendColumns, legend = 1, legend
 
-    #Calculate legend coordinates in gPad coordinates
+    # Legend coordinates + optimization of y-axis, try both left and right corner in case of auto legend + auto y-axis
     if legend:
-      if legend=="auto": legendCoordinates = (0.45,0.9-0.05*sum(map(len, histos)),0.85,0.9)
-      else:              legendCoordinates = legend
+      if legend=="auto":
+        left           = canvas.topPad.GetLeftMargin() + yMax.GetTickLength('Y') + 0.01
+        right          = 1 - canvas.topPad.GetRightMargin() - yMax.GetTickLength('Y') - 0.01
+        top            = 1 - canvas.topPad.GetTopMargin() - yMax.GetTickLength() - 0.01
+        bottom         = max(0.4, top - 0.045*sum(map(len, histos)))
+        tryCoordinates = [(left, bottom, left+0.35, top), (right-0.35, bottom, right, top)]
+      else:
+        tryCoordinates = [legend]
 
       #Avoid overlap with the legend
-      if (yRange=="auto" or yRange[1]=="auto"):
-        self.ymax = yMax.GetMaximum()
-        from ttg.tools.style import fromAxisToNDC, fromNDCToAxis
-        for i in range(1, 1 + yMax.GetNbinsX()):
-          xLowerEdge = fromAxisToNDC(canvas.topPad, [self.xmin, self.xmax], yMax.GetBinLowEdge(i))
-          xUpperEdge = fromAxisToNDC(canvas.topPad, [self.xmin, self.xmax], yMax.GetBinLowEdge(i+1))
-
-          # maximum allowed fraction in bin to avoid overlap with legend
-          topMarginNDC = 1-canvas.topPad.GetTopMargin()
-          if xUpperEdge > legendCoordinates[0] and xLowerEdge < legendCoordinates[2]: maxFraction = (max(0.3, legendCoordinates[1]))/topMarginNDC
-          else:                                                                       maxFraction = min(topMarginNDC-yMax.GetTickLength(), self.textNDC)/topMarginNDC
-
-          try:
-            if logY: scaledMax = math.exp(math.log(self.ymin) + (math.log(yMax.GetBinContent(i)) - math.log(self.ymin))/maxFraction)
-            else:    scaledMax = self.ymin + (yMax.GetBinContent(i) - self.ymin)/maxFraction
-            self.ymax = max(self.ymax, scaledMax)
-          except:
-            pass
+      if yRange=="auto" or yRange[1]=="auto":
+        self.ymax = None
+        for coordinates in tryCoordinates:
+          ymax = self.avoidLegendOverlap(canvas.topPad, yMax, coordinates, logY)
+          if (not self.ymax) or ymax < self.ymax:
+            self.ymax = ymax
+            legendCoordinates = coordinates
+      else:
+        legendCoordinates = tryCoordinates[0]
 
     # Draw the histos
     same = ""
