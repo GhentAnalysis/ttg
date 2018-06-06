@@ -175,7 +175,7 @@ def selectPhotons(t, n, doCut, minLeptons, isData):
   if len(t.photons): 
     n.ph    = t.photons[0]
     n.ph_pt = t._phPtCorr[n.ph]
-    if isData: addGenPhotonInfo(t, n, n.ph)
+    if not isData: addGenPhotonInfo(t, n, n.ph)
   return (len(t.photons) > 0 or not doCut)
 
 
