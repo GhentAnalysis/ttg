@@ -10,18 +10,18 @@
 #
 import os, argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
-argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
-argParser.add_argument('--sample',         action='store',      default=None)
-argParser.add_argument('--type',           action='store',      default='eleSusyLoose-phoCB')
-argParser.add_argument('--subJob',         action='store',      default=None)
-argParser.add_argument('--splitData',      action='store',      default=None)
-argParser.add_argument('--subProdLabel',   action='store',      default=None)
-argParser.add_argument('--QCD',            action='store_true', default=False)
-argParser.add_argument('--singleLep',      action='store_true', default=False)
-argParser.add_argument('--isChild',        action='store_true', default=False)
-argParser.add_argument('--runLocal',       action='store_true', default=False)
-argParser.add_argument('--debug',          action='store_true', default=False)
-argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
+argParser.add_argument('--logLevel',       action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
+argParser.add_argument('--sample',         action='store',      default=None,                 help='Sample for which to produce reducedTuple, as listed in samples/data/tuples.conf')
+argParser.add_argument('--type',           action='store',      default='eleSusyLoose-phoCB', help='Specify type of reducedTuple')
+argParser.add_argument('--subJob',         action='store',      default=None,                 help='The xth subjob for a sample, number of subjobs is defined by split parameter in tuples.conf')
+argParser.add_argument('--splitData',      action='store',      default=None,                 help='Splits the data in its separate runs')
+argParser.add_argument('--QCD',            action='store_true', default=False,                help='use tuplesQCD.conf instead of tuples.conf')
+argParser.add_argument('--singleLep',      action='store_true', default=False,                help='use tuplesSingleLep.conf instead of tuples.conf')
+argParser.add_argument('--runLocal',       action='store_true', default=False,                help='use local resources instead of Cream02')
+argParser.add_argument('--debug',          action='store_true', default=False,                help='only run over first three files for debugging')
+argParser.add_argument('--dryRun',         action='store_true', default=False,                help='do not launch subjobs, only show them')
+argParser.add_argument('--isChild',        action='store_true', default=False,                help='mark as subjob, will never submit subjobs by itself')
+argParser.add_argument('--overwrite',      action='store_true', default=False,                help='overwrite if valid output file already exists')
 args = argParser.parse_args()
 
 
@@ -66,7 +66,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 sample = getSampleFromList(sampleList, args.sample)
-c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData, subProductionLabel=args.subProdLabel)
+c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData)
 
 if not sample.isData:
   lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
@@ -80,7 +80,12 @@ try:    os.makedirs(reducedTupleDir)
 except: pass
 
 outputId   = (args.splitData if args.splitData in ['B','C','D','E','F','G','H'] else '') + str(args.subJob)
-outputFile = ROOT.TFile(os.path.join(reducedTupleDir, sample.name + '_' + outputId + '.root'),"RECREATE")
+outputName = os.path.join(reducedTupleDir, sample.name + '_' + outputId + '.root')
+from ttg.tools.helpers import isValidRootFile
+if not args.overwrite and isValidRootFile(outputName):
+  log.info('Finished: valid outputfile already exists')
+  exit(0)
+outputFile = ROOT.TFile(outputName ,"RECREATE")
 outputFile.cd()
 
 #
@@ -242,7 +247,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.phWeight            = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
     newVars.phWeightUp          = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
     newVars.phWeightDown        = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
- 
+
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
       setattr(newVars, 'bTagWeightCSV' + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = True))
