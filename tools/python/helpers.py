@@ -1,23 +1,37 @@
 import ROOT, socket, os, shutil, subprocess
 from math import pi, sqrt
+
 #
 # Get plot directory
 #
 plotDir = os.path.expandvars('/eos/user/t/tomc/www/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/www/ttG/')
 
 #
-# Get object (e.g. hist) from file using key
+# Check if valid ROOT file exists
+#
+def isValidRootFile(fname):
+  f = ROOT.TFile(fname)
+  if not f: return False
+  try:
+    return not (f.IsZombie() or f.TestBit(ROOT.TFile.kRecovered) or f.GetListOfKeys().IsEmpty())
+  finally:
+    f.Close()
+
+#
+# Get object (e.g. hist) from file using key, and keep in memory after closing
 #
 def getObjFromFile(fname, hname):
+  assert isValidRootFile(fname)
+  try:
     f = ROOT.TFile(fname)
-    assert not f.IsZombie()
     f.cd()
     htmp = f.Get(hname)
-    if not htmp:  return htmp
+    if not htmp: return None
     ROOT.gDirectory.cd('PyROOT:/')
     res = htmp.Clone()
-    f.Close()
     return res
+  finally:
+    f.Close()
 
 #
 # Copy the index.php file to plotting directory
