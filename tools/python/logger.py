@@ -42,6 +42,7 @@ def getLogger(logLevel='INFO', logFile=None):
     logger.error("Uncaught exception:", exc_info=args)
 
   sys.excepthook = excepthook
+  logger.info('Command: ' + ' '.join(sys.argv))
   return logger
 
 def logLevel(logger, level):
