@@ -533,7 +533,7 @@ class Plot:
     # Range on y axis and remove empty bins
     self.ymin = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
     self.ymax = yRange[1] if (yRange!="auto" and yRange[1]!="auto") else (1.2*yMax.GetMaximum())
-    self.yrmin, self.yrmax = ratio['yRange'] if ratio else None, None
+    self.yrmin, self.yrmax = ratio['yRange'] if ratio else (None, None)
 
     # Remove empty bins from the edges (or when they are too small to see)
     self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/100.)
