@@ -40,7 +40,7 @@ silepSelections   = ['lg-looseLeptonVeto-photonPt20',
 
 def getVariations(args, sysList):
   if args.selection:                selections = [args.selection]
-  if args.tag.count('QCD'):         selections = qcdSelections
+  elif args.tag.count('QCD'):       selections = qcdSelections
   elif args.tag.count('singleLep'): selections = silepSelections
   elif not args.tag.count('pho'):   selections = dilepSelections
   elif args.tag.count('phoCBfull'): selections = defaultSelections+onZSelections
