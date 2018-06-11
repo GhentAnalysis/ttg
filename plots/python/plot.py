@@ -369,30 +369,25 @@ class Plot:
   #
   # Get the boxes for the systematic band
   #
-  def getSystematicBoxes(self, totalMC):
+  def getSystematicBoxes(self, totalMC, ratio = False):
     def constrain(low, up, x):
       return min(max(x, low), up)
 
-    boxes, ratio_boxes = [], []
+    boxes = []
     for ib in range(1, 1 + totalMC.GetNbinsX()):
       val = totalMC.GetBinContent(ib)
       if val > 0:
         sys   = totalMC.sysValues.GetBinContent(ib)
         xmin  = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinLowEdge(ib))
         xmax  = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinUpEdge(ib))
-        ymin  = constrain(self.ymin,  self.ymax,  (1-sys)*val)
-        ymax  = constrain(self.ymin,  self.ymax,  (1+sys)*val)
-        yrmin = constrain(self.yrmin, self.yrmax, (1-sys))
-        yrmax = constrain(self.yrmin, self.yrmax, (1+sys))
+        ymin  = constrain(self.yrmin if ratio else self.ymin, self.yrmax if ratio else self.ymax, (1-sys) if ratio else (1-sys)*val)
+        ymax  = constrain(self.yrmin if ratio else self.ymin, self.yrmax if ratio else self.ymax, (1+sys) if ratio else (1+sys)*val)
         box   = ROOT.TBox(xmin, ymin,  xmax, ymax)
-        r_box = ROOT.TBox(xmin, yrmin, xmax, yrmax)
-        for b in [box, r_box]:
-          b.SetLineColor(ROOT.kBlack)
-          b.SetFillStyle(3444)
-          b.SetFillColor(ROOT.kBlack)
+        box.SetLineColor(ROOT.kBlack)
+        box.SetFillStyle(3444)
+        box.SetFillColor(ROOT.kBlack)
         boxes.append(box)
-        ratio_boxes.append(r_box)
-    return boxes, ratio_boxes
+    return boxes
 
   #
   # Get filled bins in plot
@@ -587,9 +582,8 @@ class Plot:
 
     for h in (s[0] for s in histos):
       if hasattr(h, 'sysValues'):
-        boxes, ratioBoxes                = self.getSystematicBoxes(h)
-        drawObjects                     += boxes
-        if ratio: ratio['drawObjects']  += ratioBoxes
+        drawObjects                     += self.getSystematicBoxes(h)
+        if ratio: ratio['drawObjects']  += self.getSystematicBoxes(h, ratio=True)
 
     if legend: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
     for o in drawObjects:
