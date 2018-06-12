@@ -26,17 +26,21 @@ def getLogs(logDir):
 jobsToSubmit = []
 for logfile in getLogs('./log'):
   finished = False
+  command  = None
   with open(logfile) as f:
     for line in f:
       if 'Finished' in line or 'finished' in line: finished = True
       if 'Command:' in line:                       command  = line.split('Command: ')[-1].rstrip()
-  if not finished:  jobsToSubmit.append((command, logfile))
+  if not finished and command: jobsToSubmit.append((command, logfile))
 
 from ttg.tools.helpers import updateGitInfo
 updateGitInfo()
 
 from ttg.tools.jobSubmitter import launchLocal, launchCream02
-for command, logfile in jobsToSubmit:
-  if args.dryRun:     log.info('Dry-run: ' + command)
-  elif args.runLocal: launchLocal(command, logfile)
-  else:               launchCream02(command, logfile, checkQueue=(i%100==0))
+for i, (command, logfile) in enumerate(jobsToSubmit):
+  if args.dryRun:
+    log.info('Dry-run: ' + command)
+  else:
+    os.remove(logfile)
+    if args.runLocal: launchLocal(command, logfile)
+    else:             launchCream02(command, logfile, checkQueue=(i%100==0))

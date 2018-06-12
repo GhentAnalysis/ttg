@@ -356,7 +356,7 @@ for plot in plots: # 1D plots
       if norm: extraArgs['scaling'] = {0:1}
       for logY in [False, True]:
         if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.75)
-        else:                                            yRange = None
+        else:                                                                                             yRange = None
         extraTag  = '-log'    if logY else ''
         extraTag += '-sys'    if args.showSys else ''
         extraTag += '-normMC' if norm else ''
