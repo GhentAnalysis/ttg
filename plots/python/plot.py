@@ -413,9 +413,9 @@ class Plot:
       xUpperEdge = fromAxisToNDC(pad, [self.xmin, self.xmax], yMax.GetBinLowEdge(i+1))
 
       # maximum allowed fraction in bin to avoid overlap with legend
-      topMarginNDC = 1-pad.GetTopMargin()
-      if xUpperEdge > coordinates[0] and xLowerEdge < coordinates[2]: maxFraction = (max(0.3, coordinates[1]))/topMarginNDC
-      else:                                                           maxFraction = min(topMarginNDC-yMax.GetTickLength(), self.textNDC)/topMarginNDC
+      marginsNDC = 1-pad.GetTopMargin()-pad.GetBottomMargin()
+      if xUpperEdge > coordinates[0] and xLowerEdge < coordinates[2]: maxFraction = (max(0.3, coordinates[1]-pad.GetBottomMargin()))/marginsNDC
+      else:                                                           maxFraction = min(marginsNDC-yMax.GetTickLength(), self.textNDC)/marginsNDC
 
       try:
         if logY: scaledMax = math.exp(math.log(self.ymin) + (math.log(yMax.GetBinContent(i)) - math.log(self.ymin))/maxFraction)
@@ -423,6 +423,7 @@ class Plot:
         ymax = max(ymax, scaledMax)
       except:
         pass
+      print xLowerEdge, xUpperEdge, maxFraction, yMax.GetBinContent(i), ymax
     return ymax
 
 
