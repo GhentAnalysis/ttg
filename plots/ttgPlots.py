@@ -75,7 +75,7 @@ phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
 zeroLep     = args.tag.count('QCD')
 singleLep   = args.tag.count('singleLep')
-normalize   = args.tag.count('sigmaIetaIeta') or args.tag.count('randomConeCheck')
+normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay'])
 
 
 
