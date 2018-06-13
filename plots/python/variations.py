@@ -49,6 +49,7 @@ def getVariations(args, sysList):
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('QCD'):             channels = ['noData']
+  elif args.tag.count('splitOverlay'):    channels = ['noData']
   elif args.tag.count('singleLep'):       channels = ['e','mu','noData']
   elif args.tag.count('randomConeCheck'): channels = ['ee','mumu','emu','SF','all']
   elif args.tag.count('igmaIetaIeta'):    channels = ['ee','mumu','emu','SF','all']
