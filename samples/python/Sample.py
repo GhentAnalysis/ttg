@@ -154,10 +154,10 @@ def createStack(tuplesFile, styleFile, channel):
 
         try:    color = int(color)                                                          # Create style element for this sample
         except: color = getattr(ROOT, color)
-        if style == 'fillStyle':    style = styles.fillStyle(color)
-        elif style == 'errorStyle': style = styles.errorStyle(color)
-        elif style == 'lineStyle':  style = styles.lineStyle(color)
-        else:                       raise('Unkown style')
+        if style == 'fillStyle':       style = styles.fillStyle(color)
+        elif style == 'errorStyle':    style = styles.errorStyle(color)
+        elif style.count('lineStyle'): style = styles.lineStyle(color,width=int(style.split('lineStyle')[-1])
+        else:                          raise('Unkown style')
 
         if texName.count('data'):                                                           # If data, skip if not needed for this channel, fix texName
           if not texName.count(channel):
