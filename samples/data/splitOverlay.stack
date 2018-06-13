@@ -1,22 +1,22 @@
 -- 2l,ISR
-TTGamma                    t#bar{t}#gamma_(2l,ISR)    lineStyle2    kOrange                  _ttgEventType==8
+TTGamma                    t#bar{t}#gamma_(2l,ISR)    lineStyle     kOrange                  _ttgEventType==8
 
 -- 2l,t/b
-TTGamma                    t#bar{t}#gamma_(2l,t/b)    lineStyle2    42                       (_ttgEventType==7||_ttgEventType==3)
+TTGamma                    t#bar{t}#gamma_(2l,t/b)    lineStyle     42                       (_ttgEventType==7||_ttgEventType==3)
 
 -- 2l,W/l
-TTGamma                    t#bar{t}#gamma_(2l,W/l)    lineStyle2    41                       (_ttgEventType==6||_ttgEventType==5||_ttgEventType==4)
+TTGamma                    t#bar{t}#gamma_(2l,W/l)    lineStyle     41                       (_ttgEventType==6||_ttgEventType==5||_ttgEventType==4)
 
 -- 1l,had
-TTGamma_t                  t#bar{t}#gamma_(1l,had)    lineStyle2    28
+TTGamma_t                  t#bar{t}#gamma_(1l,had)    lineStyle     28
 +TTGamma_tbar
 +TTGamma_had
 
 -- Other
-TTJets_pow                 other                      lineStyle2    797                      _ttgEventType<3
-DY_M10to50_NLO             other                      lineStyle2    797                      _zgEventType<3
+TTJets_pow                 other                      lineStyle     797                      _ttgEventType<3
+DY_M10to50_NLO             other                      lineStyle     797                      _zgEventType<3
 +DY_M50_NLO
-singleTop_tW_tbar          other                      lineStyle2    797
+singleTop_tW_tbar          other                      lineStyle     797
 +singleTop_tW_t
 +singleTop_t_tbar
 +singleTop_t_t
