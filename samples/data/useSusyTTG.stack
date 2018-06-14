@@ -1,7 +1,7 @@
 -- MC
 TTGJets                    t#bar{t}#gamma_(NLO)  fillStyle     kOrange
 
-TTJets_pow                 t#bar{t}              fillStyle     633                      _ttgEventType<3
+TTJets_pow                 t#bar{t}              fillStyle     633                      _ttgEventType<7
 
 ZG                         Z#gamma               fillStyle     598
 WG                         W#gamma               fillStyle     596
