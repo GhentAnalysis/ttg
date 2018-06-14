@@ -2,7 +2,7 @@
 TTGamma                    t#bar{t}#gamma_(2l,ISR)    fillStyle     kOrange                  _ttgEventType==8
 TTGamma                    t#bar{t}#gamma_(2l,t/b)    fillStyle     42                       (_ttgEventType==7||_ttgEventType==3)
 TTGamma                    t#bar{t}#gamma_(2l,W/l)    fillStyle     41                       (_ttgEventType==6||_ttgEventType==5||_ttgEventType==4)
-TTGamma_t                  t#bar{t}#gamma_(1l)        fillStyle     28
+TTGamma_t                  t#bar{t}#gamma_(1l,had)    fillStyle     28
 +TTGamma_tbar
 +TTGamma_had
 
