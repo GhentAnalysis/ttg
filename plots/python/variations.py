@@ -39,12 +39,12 @@ silepSelections   = ['lg-looseLeptonVeto-photonPt20',
                      'lg-looseLeptonVeto-njet4p-deepbtag2p-photonPt20']
 
 def getVariations(args, sysList):
-  if args.selection:                selections = [args.selection]
-  elif args.tag.count('QCD'):       selections = qcdSelections
-  elif args.tag.count('singleLep'): selections = silepSelections
-  elif not args.tag.count('pho'):   selections = dilepSelections
-  elif args.tag.count('phoCBfull'): selections = defaultSelections+onZSelections
-  else:                             selections = defaultSelections
+  if args.selection:                                                 selections = [args.selection]
+  elif args.tag.count('QCD'):                                        selections = qcdSelections
+  elif args.tag.count('singleLep'):                                  selections = silepSelections
+  elif not args.tag.count('pho') and args.tag.count('eleSusyLoose'): selections = dilepSelections
+  elif args.tag.count('phoCBfull'):                                  selections = defaultSelections+onZSelections
+  else:                                                              selections = defaultSelections
 
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
