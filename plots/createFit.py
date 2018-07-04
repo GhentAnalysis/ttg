@@ -121,13 +121,13 @@ if args.bigFit:
 else:
   # ROOT File for a charged isolation only fit
   def writeRootFileForChgIso(name, systematics, selection):
-    tag       = 'eleSusyLoose-phoCBnoChgIso-newMatch-central'
+    tag       = 'eleSusyLoose-phoCBnoChgIso-match'
     selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-' + selection + '-photonPt20'
     plot      = 'photon_chargedIso_bins_NO'
 
     f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
-    writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso-newMatch-central', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1)
+    writeHist(f, 'chgIso' , 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']),norm=1)
 
     statVariations = []
     from ttg.plots.plot import applySidebandUnc
@@ -137,7 +137,7 @@ else:
       elif splitType=='_h': selectors = [[sample, '(hadronicPhoton)']   for sample in samples]
 
       if name.count('dd') and splitType=='_f':
-        sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta-central', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
+        sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
         normalizeBinWidth(sideBandShape, 1)
         sideBandShapeUp   = applySidebandUnc(sideBandShape, plot, selection, True)
         sideBandShapeDown = applySidebandUnc(sideBandShape, plot, selection, False)
@@ -217,8 +217,8 @@ else:
     f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
     baseSelection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'
-    writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-newMatch-central', 'emu', baseSelection), 'signalRegions', '', ['MuonEG']))
-    writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-newMatch-central', 'SF',  baseSelection), 'signalRegions', '', ['DoubleEG'],['DoubleMuon']))
+    writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'emu', baseSelection), 'signalRegions', '', ['MuonEG']))
+    writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  baseSelection), 'signalRegions', '', ['DoubleEG'],['DoubleMuon']))
 
     statVariations = []
     for sample in samples:
@@ -227,9 +227,9 @@ else:
       hadronicSelectors = [[sample, '(hadronicPhoton)']]
       for sys in [''] + systematics:
         for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF')]:
-          prompt   = getHistFromPkl(('eleSusyLoose-phoCBfull-newMatch-central', channel, baseSelection), 'signalRegions', sys, *promptSelectors)
-          fake     = getHistFromPkl(('eleSusyLoose-phoCBfull-newMatch-central', channel, baseSelection), 'signalRegions', sys, *fakeSelectors)
-          hadronic = getHistFromPkl(('eleSusyLoose-phoCBfull-newMatch-central', channel, baseSelection), 'signalRegions', sys, *hadronicSelectors)
+          prompt   = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection), 'signalRegions', sys, *promptSelectors)
+          fake     = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection), 'signalRegions', sys, *fakeSelectors)
+          hadronic = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection), 'signalRegions', sys, *hadronicSelectors)
           if nonPromptSF: fake = applyNonPromptSF(fake, nonPromptSF)
           total = prompt.Clone()
           total.Add(fake)
