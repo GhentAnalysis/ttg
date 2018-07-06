@@ -210,8 +210,6 @@ else:
     log.info('Charged isolation fit for ' + i + ' results in %.2f (+%.2f, %.2f)' % j)
 
 
-
-
   # ROOT file for a signal regions fit
   def writeRootFile(name, systematics, nonPromptSF):
     f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
@@ -235,6 +233,9 @@ else:
           total.Add(fake)
           total.Add(hadronic)
 
+          if sample=='ZG':
+            for i in range(total.GetNbinsX()):
+              total.SetBinContent(i, total.GetBinContent(i)*(0.82 if i < 2 else 0.88))  # hacky, need to implement properly when more time
           writeHist(f, shape+sys, sample, total, (statVariations if sys=='' else None))
 
     f.Close()
