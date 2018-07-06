@@ -423,7 +423,6 @@ class Plot:
         ymax = max(ymax, scaledMax)
       except:
         pass
-      print xLowerEdge, xUpperEdge, maxFraction, yMax.GetBinContent(i), ymax
     return ymax
 
 
