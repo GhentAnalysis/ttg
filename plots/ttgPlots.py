@@ -242,9 +242,6 @@ lumiScale = 35.9
 # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
 #
 if not args.showSys:
-  cutString, passingFunctions = cutInterpreter.cutString(args.selection, args.channel)
-  if args.sys:      cutString = applySysToString(args.sys, cutString)
-
   if   args.tag.count('QCD'):                                                       reduceType = 'phoCB'
   elif args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
   elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
@@ -252,6 +249,9 @@ if not args.showSys:
 
   from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
   for sample in sum(stack, []):
+    cutString, passingFunctions = cutInterpreter.cutString(args.selection, args.channel)
+    if args.sys:
+      cutString = applySysToString(sample.name, args.sys, cutString)
     if args.sys and 'Scale' not in args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep', sys=args.sys)
 
@@ -288,7 +288,7 @@ if not args.showSys:
         c.lTrackWeight = 1.
         c.triggerWeight = 1.
       elif not sample.isData and args.sys:
-        applySysToTree(args.sys, c)
+        applySysToTree(sample.name, args.sys, c)
 
       if not passingFunctions(c): continue
 
