@@ -17,7 +17,7 @@ ROOT.gROOT.SetBatch(True)
 
 from math import sqrt
 
-samples     = ['TTGamma','TTJets','ZG','DY','other']
+samples     = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 30), ('DY', 30), ('other', 30)]
 
 #
 # Helper functions
@@ -90,7 +90,7 @@ if args.bigFit:
         else:
           sideBandShape = None
 
-        for sample in samples:
+        for sample, _ in samples:
           for splitType in ['_p', '_np']:
             if   splitType=='_p':  selector = [sample, '(genuine,misIdEle)']
             elif splitType=='_np': selector = [sample, '(hadronicPhoton,hadronicFake)']
@@ -100,9 +100,9 @@ if args.bigFit:
     return shapes, set(statVariations)
 
   cardName    = 'simultaneousFit'
-  templates   = [s + '_p' for s in samples] + [s + '_np' for s in samples]
-  extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
-  extraLines += [(s + '_norm param 1.0 0.1')            for s in samples[1:]]
+  templates   = [s + '_p' for s,_ in samples] + [s + '_np' for s,_ in samples]
+  extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s,_ in samples[1:]]
+  extraLines += [(s + '_norm param 1.0 0.1')            for s,_ in samples[1:]]
   extraLines += ['nonPrompt rateParam * *_np 1']
   #extraLines += ['nonPrompt param 1.0 0.2']
   #extraLines += ['* autoMCStats 0'] # does not work
@@ -132,9 +132,9 @@ else:
     statVariations = []
     from ttg.plots.plot import applySidebandUnc
     for splitType in ['_g', '_f', '_h']:
-      if   splitType=='_g': selectors = [[sample, '(genuine,misIdEle)'] for sample in samples]
-      elif splitType=='_f': selectors = [[sample, '(hadronicFake)']     for sample in samples]
-      elif splitType=='_h': selectors = [[sample, '(hadronicPhoton)']   for sample in samples]
+      if   splitType=='_g': selectors = [[sample, '(genuine,misIdEle)'] for sample,_ in samples]
+      elif splitType=='_f': selectors = [[sample, '(hadronicFake)']     for sample,_ in samples]
+      elif splitType=='_h': selectors = [[sample, '(hadronicPhoton)']   for sample,_ in samples]
 
       if name.count('dd') and splitType=='_f':
         sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
@@ -219,7 +219,7 @@ else:
     writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  baseSelection), 'signalRegions', '', ['DoubleEG'],['DoubleMuon']))
 
     statVariations = []
-    for sample in samples:
+    for sample,_ in samples:
       promptSelectors   = [[sample, '(genuine,misIdEle)']]
       fakeSelectors     = [[sample, '(hadronicFake)']]
       hadronicSelectors = [[sample, '(hadronicPhoton)']]
@@ -244,9 +244,9 @@ else:
 
   # Signal regions fit
   cardName    = 'srFit'
-  templates   = samples
-  extraLines  = [(s + '_norm rateParam * ' + s + '* 1') for s in samples[1:]]
-  extraLines += [(s + '_norm param 1.0 0.1')            for s in samples[1:]]
+  templates   = [s for s,_ in samples]
+  extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
+  extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
   #extraLines += ['* autoMCStats 0'] # does not work
 
   statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
