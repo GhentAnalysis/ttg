@@ -126,11 +126,12 @@ def runImpacts(dataCard):
   os.system("mv " + dataCard + "_impacts*.png ~/www/ttG/combinePlots/")
 
 # Write the card including all systematics and shapes
-def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics, linearSystematics):
+def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, mcStatistics, linearSystematics):
   def tab(list):
     return ''.join(['%25s' % list[0]] + [('%12s' % i) for i in list[1:]]) + '\n'
 
   def linSys(info, template):
+    if template not in templates: return '-'
     sample, value = info
     value = 1+value/100.
     if sample:
@@ -148,22 +149,22 @@ def writeCard(cardName, shapes, templates, extraLines, systematics, mcStatistics
     f.write(tab(['bin']+shapes))
     f.write(tab(['observation']+['-1']*len(shapes)))
     f.write('-'*400 + '\n')
-    f.write(tab(['bin','']    + [s    for s in shapes for t in templates]))
-    f.write(tab(['process','']+ [t    for s in shapes for t in templates]))
-    f.write(tab(['process','']+ [t    for s in shapes for t in range(len(templates))]))
-    f.write(tab(['rate','']+    ['-1' for s in shapes for t in templates]))
+    f.write(tab(['bin','']    + [s    for s in shapes for t in templates+templatesNoSys]))
+    f.write(tab(['process','']+ [t    for s in shapes for t in templates+templatesNoSys]))
+    f.write(tab(['process','']+ [t    for s in shapes for t in range(len(templates+templatesNoSys))]))
+    f.write(tab(['rate','']+    ['-1' for s in shapes for t in templates+templatesNoSys]))
     f.write('-'*400 + '\n')
 
     for sys, info in linearSystematics.iteritems():
-      f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates]))
+      f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in [s.replace('Up','') for s in systematics if 'Up' in s]:
       if ':' in sys: sys, sample = sys.split(':')
       else :         sys, sample = sys, None
-      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) else '1') for s in shapes for t in templates]))
+      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else '1') for s in shapes for t in templates+templatesNoSys]))
 
     for sys in sorted(mcStatistics):
-      f.write(tab([sys, 'shape'] + [('1' if sys.count(s) and sys.count(t) else '-') for s in shapes for t in templates]))
+      f.write(tab([sys, 'shape'] + [('1' if t in templates and sys.count(s) and sys.count(t) else '-') for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
