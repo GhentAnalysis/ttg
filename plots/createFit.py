@@ -44,7 +44,8 @@ def replaceShape(hist, shape):
   hist.Scale(normalization)
   return hist
 
-def writeHist(file, name, template, hist, statVariations=None, norm=None, removeBins = [], shape=None, mergeBins=False):
+def writeHist(file, name, template, histTemp, statVariations=None, norm=None, removeBins = [], shape=None, mergeBins=False):
+  hist = histTemp.Clone()
   if norm:  normalizeBinWidth(hist, norm)
   if shape: hist = replaceShape(hist, shape)
   for i in removeBins:
@@ -199,7 +200,7 @@ else:
         
         chgIsoHist = None
         for selection in selections:
-          chgIsoHist = addHist(chgIsoHist, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors))     
+          chgIsoHist = addHist(chgIsoHist, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors))
         writeHist(f, 'chgIso',                'all' + splitType, chgIsoHist, (statVariations if sys=='' else None), norm=1, shape=sideBandShape)
         writeHist(f, 'chgIsoSideBandUncUp',   'all' + splitType, chgIsoHist, None,                                  norm=1, shape=sideBandShapeUp)
         writeHist(f, 'chgIsoSideBandUncDown', 'all' + splitType, chgIsoHist, None,                                  norm=1, shape=sideBandShapeDown)
