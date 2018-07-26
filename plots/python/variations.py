@@ -1,5 +1,6 @@
 defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20',
+                     'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag0-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag1p-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20',

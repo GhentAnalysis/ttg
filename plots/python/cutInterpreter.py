@@ -26,6 +26,8 @@ special_cuts = {
 
     "l2gWindow":           "ml2g>55&&ml2g<80",
     "nol2gWindow":         "!(ml2g>55&&ml2g<80)",
+
+    "signalRegion":        "(njets>1)||(njets==1&&ndbjets==1)",   # signal regions small
   }
 
 def photonPt(tree, min, max):
