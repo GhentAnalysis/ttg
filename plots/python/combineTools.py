@@ -159,8 +159,8 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in [s.replace('Up','') for s in systematics if 'Up' in s]:
-      if ':' in sys: sys, sample = sys.split(':')
-      else :         sys, sample = sys, None
+      if ':' in sys: sample, sys = sys.split(':')
+      else :         sample, sys = None, sys
       f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else '1') for s in shapes for t in templates+templatesNoSys]))
 
     for sys in sorted(mcStatistics):
