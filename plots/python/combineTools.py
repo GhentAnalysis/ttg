@@ -44,6 +44,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
     newPath = os.path.join(combineRelease, 'src', f)
     shutil.copy('combine/' + f, newPath)
   shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
+  shutil.copy('../data/sysMappings.sys', combineRelease + '/src/CombineHarvester/CombineTools/scripts/sysMappings.json')
   os.chdir(os.path.join(combineRelease, 'src'))
   if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine ', 'combine -v 2 ')
   os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + logFile + '.log')
@@ -114,7 +115,7 @@ def runImpacts(dataCard):
   command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doInitialFit;'
   command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doFits --parallel 8;'
   command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 -o impacts.json;'
-  command += 'plotImpacts.py -i impacts.json -o impacts;'
+  command += 'plotImpacts.py -i impacts.json --per-page=30 --cms-label preliminary --translate sysMappings.json -o impacts;'
   command += 'mv impacts.pdf ../../../' + dataCard + '_impacts.pdf'
   log.info('Running Impacts')
   handleCombine(dataCard, dataCard + '_impacts', command)
