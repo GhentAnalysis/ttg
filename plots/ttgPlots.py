@@ -336,8 +336,9 @@ for plot in plots: # 1D plots
       extraArgs['systematics'] = {'sideBandUncUp' : [], 'sideBandUncDown' : []}
     elif args.showSys:
       if args.sys:
-        systematics       = {i: j for i,j in systematics.iteritems()       if i.count(args.sys)}
-        linearSystematics = {i: j for i,j in linearSystematics.iteritems() if i.count(args.sys)}
+        extraArgs['addMCStat'] = (args.sys == 'stat')
+        systematics            = {i: j for i,j in systematics.iteritems()       if i.count(args.sys)}
+        linearSystematics      = {i: j for i,j in linearSystematics.iteritems() if i.count(args.sys)}
       extraArgs['systematics']       = systematics
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)

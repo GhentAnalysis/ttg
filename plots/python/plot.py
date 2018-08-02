@@ -305,16 +305,21 @@ class Plot:
   # postFitInfo       --> dictionary (name, scalefactor) to apply scalefactors to specific samples
   # addMCStat         --> include MC statistics in the uncertainty band
   #
-  def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=False):
+  def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=True):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
+    sysKeys = [sys.replace('Up', '') for sys in systematics.keys() if sys.count('Up')]
+    if addMCStat:
+      sysKeys += [s.name + s.texName + 'Stat' for s in stackForSys]
+
     histos_summed = {}
-    for sys in [None] + systematics.keys():
-      plotName = self.name+(sys if sys else '')                                                                                        # in the 2D cache, the first key is plotname+sys
-      if plotName not in allPlots:
-        if 'sideBand' in sys: allPlots[plotName] = {}                                                                                  # special case for sideband unc
-        else:                 log.error('No ' + sys + ' variation found for ' +  self.name)
+    for sys in [None] + [(s + 'Up') for s in sysKeys] + [(s + 'Down') for s in sysKeys]:
+      if sys and (not 'Stat' in sys) and (not 'sideBand' in sys) plotName = self.name+sys                                              # in the 2D cache, the first key is plotname+sys
+      else:                                                      plotName = self.name                                                  # for nominal and some exceptions 
+
+      if plotName not in allPlots:                                                                                                     # check if sys variation has been run already
+        log.error('No ' + sys + ' variation found for ' +  self.name)
 
       histos_summed[sys] = None
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
@@ -329,6 +334,13 @@ class Plot:
         else:                                                                                                                          # normal case, simply taken from cache
           h = allPlots[plotName][histName]
 
+        if sys and 'StatUp' in sys and sys.replace('StatUp', '') in histName:                                                          # MC statistics for plots
+          for i in range(0, h.GetNbinsX()+1):
+            h.SetBinContent(i, h.GetBinContent(i)+h.GetBinError(i))
+        if sys and 'StatDown' in sys and  sys.replace('StatDown', '') in histName:
+          for i in range(0, h.GetNbinsX()+1):
+            h.SetBinContent(i, h.GetBinContent(i)-h.GetBinError(i))
+
         if postFitInfo:                                                                                                                # apply post-fit scalefactors if available
           for i in postFitInfo:
             if histName.count(i): h.Scale(postFitInfo[i])
@@ -340,7 +352,7 @@ class Plot:
         addHist(histos_summed[sys], h)
 
     h_sys = {}
-    for sys in [sys.replace('Up','') for sys in systematics if sys.count('Up')]:
+    for sys in sysKeys:
       h_sys[sys] = histos_summed[sys+'Up'].Clone()
       h_sys[sys].Scale(-1)
       h_sys[sys].Add(histos_summed[sys+'Down'])
@@ -445,6 +457,7 @@ class Plot:
           ratioModifications = [],
           systematics = {},
           linearSystematics = {},
+          addMCStat = True,
           resultsDir = None,
           postFitInfo = None,
           saveGitInfo = True,
@@ -505,7 +518,7 @@ class Plot:
 
     # Calculate the systematics on the first stack
     if len(systematics) or len(linearSystematics):
-      histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo)
+      histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)
 
     # Get minimum and maximum boundaries for the plot, including statistical and systematic errors
     yMax, yMin = histos[0][0].Clone(), histos[0][0].Clone()
