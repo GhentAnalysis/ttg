@@ -297,37 +297,39 @@ class Plot:
 
 
   #
-  # Adding systematics to MC (identified by 'stackForSys')
+  # Adding systematics to MC
+  # stackForSys       --> list of samples which are stacked
+  # systematics       --> dictionary of systematics, as given in systematics.py
+  # linearSystematics --> dictionary of linear systematics, as given in systematics.py
+  # resultsDir        --> directory where to find the .pkl files which should be filled before with histogram for all the systematic variations
+  # postFitInfo       --> dictionary (name, scalefactor) to apply scalefactors to specific samples
+  # addMCStat         --> include MC statistics in the uncertainty band
   #
-  def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None):
+  def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=False):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
-    def sumHistos(list):
-      sum = list[0].Clone()
-      for h in list[1:]: sum.Add(h)
-      return sum
-
-    histNames = [s.name+s.texName for s in stackForSys]
-
     histos_summed = {}
-    for sys in systematics.keys() + [None]:
-      plotName = self.name+(sys if sys else '')
-      if plotName not in allPlots.keys():
-        if 'sideBand' in sys: allPlots[plotName] = {}
+    for sys in [None] + systematics.keys():
+      plotName = self.name+(sys if sys else '')                                                                                        # in the 2D cache, the first key is plotname+sys
+      if plotName not in allPlots:
+        if 'sideBand' in sys: allPlots[plotName] = {}                                                                                  # special case for sideband unc
         else:                 log.error('No ' + sys + ' variation found for ' +  self.name)
-      for histName in histNames:
-        if sys and 'Scale' in sys: # Ugly hack to apply scale systematics on MC instead of data
+
+      histos_summed[sys] = None
+      for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
+        if sys and 'Scale' in sys:                                                                                                     # ugly hack to apply scale systematics on MC instead of data
           data, dataSys = None, None
-          for dataset in ['MuonEG','DoubleEG','DoubleMuon']:
-            if (dataset + 'data') not in allPlots[self.name]: continue
-            data    = addHist(data,    allPlots[self.name][dataset+'data'])
-            dataSys = addHist(dataSys, allPlots[self.name+sys][dataset+'data'])
-          if data: allPlots[plotName][histName] = applySysToOtherHist(data, dataSys, allPlots[plotName][histName])
-        if sys and 'sideBand' in sys: # Ugly hack to apply side band uncertainty
-          allPlots[plotName][histName] = applySidebandUnc(allPlots[self.name][histName], self.name, resultsDir, 'Up' in sys)
-        h = allPlots[plotName][histName]
-        if postFitInfo:
+          for dataset in ['MuonEG','DoubleEG','DoubleMuon'] if (dataset + 'data') in allPlots[self.name]:                              # for data (if available depending on ee, mumu, emu, SF)
+            data    = addHist(data,    allPlots[self.name][dataset+'data'])                                                            # get nominal for data
+            dataSys = addHist(dataSys, allPlots[self.name+sys][dataset+'data'])                                                        # and the eScale or phScale sys for data
+          h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName]) if data else None                                       # apply the eScale or phScale sys on MC
+        elif sys and 'sideBand' in sys:                                                                                                # ugly hack to apply side band uncertainty
+          h = applySidebandUnc(allPlots[self.name][histName], self.name, resultsDir, 'Up' in sys)
+        else:                                                                                                                          # normal case, simply taken from cache
+          h = allPlots[plotName][histName]
+
+        if postFitInfo:                                                                                                                # apply post-fit scalefactors if available
           for i in postFitInfo:
             if histName.count(i): h.Scale(postFitInfo[i])
         if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
@@ -335,12 +337,10 @@ class Plot:
         normalizeBinWidth(h, self.normBinWidth)
         self.addOverFlowBin1D(h, self.overflowBin)
 
-      histos_summed[sys] = sumHistos([allPlots[plotName][histName] for histName in histNames])
-
-    sysList = [sys.replace('Up','') for sys in systematics if sys.count('Up')]
+        addHist(histos_summed[sys], h)
 
     h_sys = {}
-    for sys in sysList:
+    for sys in [sys.replace('Up','') for sys in systematics if sys.count('Up')]:
       h_sys[sys] = histos_summed[sys+'Up'].Clone()
       h_sys[sys].Scale(-1)
       h_sys[sys].Add(histos_summed[sys+'Down'])
