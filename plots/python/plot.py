@@ -315,8 +315,8 @@ class Plot:
 
     histos_summed = {}
     for sys in [None] + [(s + 'Up') for s in sysKeys] + [(s + 'Down') for s in sysKeys]:
-      if sys and (not 'Stat' in sys) and (not 'sideBand' in sys) plotName = self.name+sys                                              # in the 2D cache, the first key is plotname+sys
-      else:                                                      plotName = self.name                                                  # for nominal and some exceptions 
+      if sys and not any(x in sys for x in ['Stat', 'sideBand', 'Scale']): plotName = self.name+sys                                    # in the 2D cache, the first key is plotname+sys
+      else:                                                                plotName = self.name                                        # for nominal and some exceptions 
 
       if plotName not in allPlots:                                                                                                     # check if sys variation has been run already
         log.error('No ' + sys + ' variation found for ' +  self.name)
@@ -325,9 +325,9 @@ class Plot:
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
         if sys and 'Scale' in sys:                                                                                                     # ugly hack to apply scale systematics on MC instead of data
           data, dataSys = None, None
-          for dataset in ['MuonEG','DoubleEG','DoubleMuon'] if (dataset + 'data') in allPlots[self.name]:                              # for data (if available depending on ee, mumu, emu, SF)
-            data    = addHist(data,    allPlots[self.name][dataset+'data'])                                                            # get nominal for data
-            dataSys = addHist(dataSys, allPlots[self.name+sys][dataset+'data'])                                                        # and the eScale or phScale sys for data
+          for d in [d for d in allPlots[self.name] if d.count('data')]:                                                                   # for data (if available depending on ee, mumu, emu, SF)
+            data    = addHist(data,    allPlots[self.name][d])                                                                         # get nominal for data
+            dataSys = addHist(dataSys, allPlots[self.name+sys][d])                                                                     # and the eScale or phScale sys for data
           h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName]) if data else None                                       # apply the eScale or phScale sys on MC
         elif sys and 'sideBand' in sys:                                                                                                # ugly hack to apply side band uncertainty
           h = applySidebandUnc(allPlots[self.name][histName], self.name, resultsDir, 'Up' in sys)
@@ -349,7 +349,7 @@ class Plot:
         normalizeBinWidth(h, self.normBinWidth)
         self.addOverFlowBin1D(h, self.overflowBin)
 
-        addHist(histos_summed[sys], h)
+        histos_summed[sys] = addHist(histos_summed[sys], h)
 
     h_sys = {}
     for sys in sysKeys:
