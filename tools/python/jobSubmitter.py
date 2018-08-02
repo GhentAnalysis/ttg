@@ -42,7 +42,7 @@ def launchLocal(command, logfile):
 #   dropArgs:   if some args need to be ignored
 #   subLog:     subdirectory for the logs
 #
-def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=''):
+def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=None):
   os.system("mkdir -p log")
 
   args         = argParser.parse_args()
@@ -58,7 +58,7 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=
 
     command = script + ' ' + ' '.join(['--' + arg + '=' + str(value) for arg, value in submitArgs.iteritems() if value != False])
     command = command.replace('=True','')
-    logdir  = os.path.join('log', os.path.basename(script).split('.')[0], *(str(s) for s in subJob[:-1]))
+    logdir  = os.path.join('log', os.path.basename(script).split('.')[0]+(('-'+subLog) if subLog else ''), *(str(s) for s in subJob[:-1]))
     logfile = os.path.join(logdir, str(subJob[-1]) + ".log")
 
     try:    os.makedirs(logdir)
