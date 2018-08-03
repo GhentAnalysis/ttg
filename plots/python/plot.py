@@ -323,12 +323,12 @@ class Plot:
 
       histos_summed[sys] = None
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
-        if sys and 'Scale' in sys:                                                                                                     # ugly hack to apply scale systematics on MC instead of data
+        if sys and 'Scale' in sys and not 'noData' in resultsDir:                                                                      # ugly hack to apply scale systematics on MC instead of data (only when data is available)
           data, dataSys = None, None
-          for d in [d for d in allPlots[self.name] if d.count('data')]:                                                                   # for data (if available depending on ee, mumu, emu, SF)
+          for d in [d for d in allPlots[self.name] if d.count('data')]:                                                                # for data (if available depending on ee, mumu, emu, SF)
             data    = addHist(data,    allPlots[self.name][d])                                                                         # get nominal for data
             dataSys = addHist(dataSys, allPlots[self.name+sys][d])                                                                     # and the eScale or phScale sys for data
-          h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName]) if data else None                                       # apply the eScale or phScale sys on MC
+          h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName])                                                         # apply the eScale or phScale sys on MC
         elif sys and 'sideBand' in sys:                                                                                                # ugly hack to apply side band uncertainty
           h = applySidebandUnc(allPlots[self.name][histName], self.name, resultsDir, 'Up' in sys)
         else:                                                                                                                          # normal case, simply taken from cache
