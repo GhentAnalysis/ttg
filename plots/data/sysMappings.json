@@ -87,6 +87,7 @@
   "fsr"         : "Final-state radiation",
   "isr"         : "Initial-state radiation",
   "lSF"         : "Lepton selection efficiency",
+  "phSF"        : "Photon selection efficiency",
   "trigger"     : "Trigger efficiency",
   "q2"          : "Factorization and renormalization scale",
   "lumi"        : "Luminosity",
