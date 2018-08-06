@@ -1,4 +1,5 @@
 {
+  STATERRORS,
   "fsr"         : "Final-state radiation",
   "isr"         : "Initial-state radiation",
   "lSF"         : "Lepton selection efficiency",
@@ -21,6 +22,5 @@
   "DY_norm"     : "Drell-Yan normalization",
   "other_norm"  : "Other normalization",
   "TTJets_norm" : "t#bar{t} normalization",
-  "SideBandUnc" : "Sideband uncertainty",
-  STATERRORS,
+  "SideBandUnc" : "Sideband uncertainty"
 }
