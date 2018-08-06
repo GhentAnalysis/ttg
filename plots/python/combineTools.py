@@ -44,7 +44,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
     newPath = os.path.join(combineRelease, 'src', f)
     shutil.copy('combine/' + f, newPath)
   shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
-  shutil.copy('../data/sysMappings.sys', combineRelease + '/src/CombineHarvester/CombineTools/scripts/sysMappings.json')
+  os.system('cp $CMSSW_BASE/src/ttg/plots/data/sysMappings.json ' + combineRelease + '/src/CombineHarvester/CombineTools/scripts/sysMappings.json')
   os.chdir(os.path.join(combineRelease, 'src'))
   if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine ', 'combine -v 2 ')
   os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + logFile + '.log')
