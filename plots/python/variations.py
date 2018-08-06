@@ -11,9 +11,11 @@ defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
                      ]
 
 onZSelections     = ['llg-looseLeptonVeto-mll40-njet1p-photonPt20',
+                     'llg-looseLeptonVeto-mll40-signalRegion-photonPt20',
                      'llg-looseLeptonVeto-mll40-orOnZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-onZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20',
+                     'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20',
                      'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-photonPt20',
                      'llg-looseLeptonVeto-mll40-llgOnZ-njet1-deepbtag0-photonPt20',
                      'llg-looseLeptonVeto-mll40-llgOnZ-njet1-deepbtag1p-photonPt20',
