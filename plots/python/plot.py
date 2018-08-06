@@ -328,11 +328,11 @@ class Plot:
           for d in [d for d in allPlots[self.name] if d.count('data')]:                                                                # for data (if available depending on ee, mumu, emu, SF)
             data    = addHist(data,    allPlots[self.name][d])                                                                         # get nominal for data
             dataSys = addHist(dataSys, allPlots[self.name+sys][d])                                                                     # and the eScale or phScale sys for data
-          h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName])                                                         # apply the eScale or phScale sys on MC
+          h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName].Clone())                                                 # apply the eScale or phScale sys on MC
         elif sys and 'sideBand' in sys:                                                                                                # ugly hack to apply side band uncertainty
-          h = applySidebandUnc(allPlots[self.name][histName], self.name, resultsDir, 'Up' in sys)
+          h = applySidebandUnc(allPlots[self.name][histName].Clone(), self.name, resultsDir, 'Up' in sys)
         else:                                                                                                                          # normal case, simply taken from cache
-          h = allPlots[plotName][histName]
+          h = allPlots[plotName][histName].Clone()
 
         if sys and 'StatUp' in sys and sys.replace('StatUp', '') in histName:                                                          # MC statistics for plots
           for i in range(0, h.GetNbinsX()+1):
