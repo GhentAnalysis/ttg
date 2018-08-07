@@ -88,7 +88,7 @@ def writeRootFileForZG(name, systematics):
   statVariations = []
   for sys in [''] + systematics:
     ZG    = getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF', baseSelection), 'njets', sys, ['ZG'])
-    other = getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF', baseSelection), 'njets', sys, ['TTJets_pow'], ['TTGamma'], ['WG'], ['Drell-Yan'], ['multiboson'],['single-t'],['t#bar{t}+V'])
+    other = getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF', baseSelection), 'njets', sys, ['TTJets_pow'], ['TTGamma'], ['Drell-Yan'], ['single-t'],['other'])
     writeHist(f, 'zg_SF' + sys, 'ZG',    ZG,    (statVariations if sys=='' else None), mergeBins=True)
     writeHist(f, 'zg_SF' + sys, 'other', other, (statVariations if sys=='' else None), mergeBins=True)
 
