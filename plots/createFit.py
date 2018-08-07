@@ -82,16 +82,15 @@ except: pass
 def writeRootFileForZG(name, systematics):
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
-  removeBins = [0,1]
-  baseSelection = 'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20'
-  writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF',  baseSelection), 'njets', '', ['DoubleEG'],['DoubleMuon']), removeBins=removeBins, mergeBins=True)
+  baseSelection = 'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20'
+  writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF',  baseSelection), 'njets', '', ['DoubleEG'],['DoubleMuon']), mergeBins=True)
 
   statVariations = []
   for sys in [''] + systematics:
     ZG    = getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF', baseSelection), 'njets', sys, ['ZG'])
     other = getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF', baseSelection), 'njets', sys, ['TTJets_pow'], ['TTGamma'], ['WG'], ['Drell-Yan'], ['multiboson'],['single-t'],['t#bar{t}+V'])
-    writeHist(f, 'zg_SF' + sys, 'ZG',    ZG,    (statVariations if sys=='' else None), removeBins=removeBins, mergeBins=True)
-    writeHist(f, 'zg_SF' + sys, 'other', other, (statVariations if sys=='' else None), removeBins=removeBins, mergeBins=True)
+    writeHist(f, 'zg_SF' + sys, 'ZG',    ZG,    (statVariations if sys=='' else None), mergeBins=True)
+    writeHist(f, 'zg_SF' + sys, 'other', other, (statVariations if sys=='' else None), mergeBins=True)
 
   f.Close()
   return set(statVariations)
