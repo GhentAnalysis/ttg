@@ -46,8 +46,9 @@ if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   from ttg.plots.variations   import getVariations
 
-  if args.sys: sysList = [args.sys]
-  else:        sysList = [None] + (systematics.keys() if args.runSys else [])
+  if args.showSys and args.runSys: sysList = [s.replace('Up','') for s in systematics.keys() if 'Up' in s] + ['stat']
+  elif args.sys:                   sysList = [args.sys]
+  else:                            sysList = [None] + (systematics.keys() if args.runSys else [])
 
   subJobArgs, subJobList = getVariations(args, sysList)
 
