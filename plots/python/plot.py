@@ -457,7 +457,7 @@ class Plot:
           ratioModifications = [],
           systematics = {},
           linearSystematics = {},
-          addMCStat = True,
+          addMCStat = False,
           resultsDir = None,
           postFitInfo = None,
           saveGitInfo = True,
@@ -517,7 +517,7 @@ class Plot:
     drawObjects += self.scaleStacks(histos, scaling)
 
     # Calculate the systematics on the first stack
-    if len(systematics) or len(linearSystematics):
+    if len(systematics) or len(linearSystematics) or addMCStat:
       histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)
 
     # Get minimum and maximum boundaries for the plot, including statistical and systematic errors

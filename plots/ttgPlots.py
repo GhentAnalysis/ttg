@@ -335,8 +335,8 @@ for plot in plots: # 1D plots
     if args.tag.count('onlydata'):
       extraArgs['resultsDir']  = os.path.join(plotDir, args.tag, args.channel, args.selection)
       extraArgs['systematics'] = {'sideBandUncUp' : [], 'sideBandUncDown' : []}
-      extraArgs['addMCStat']   = False
     elif args.showSys:
+      extraArgs['addMCStat']   = True
       if args.sys:
         extraArgs['addMCStat'] = (args.sys == 'stat')
         systematics            = {i: j for i,j in systematics.iteritems()       if i.count(args.sys)}
