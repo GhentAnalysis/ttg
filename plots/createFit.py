@@ -17,8 +17,7 @@ ROOT.gROOT.SetBatch(True)
 
 from math import sqrt
 
-samples     = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 30), ('DY', 30), ('other', 30)]
-samplesZG   = [('ZG',      None), ('other', 30)]
+samples     = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 10), ('DY', 10), ('other', 50)]
 
 #
 # Helper functions
@@ -30,6 +29,8 @@ def protectHist(hist):
   return hist
 
 def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
+  if not nonPromptSF: 
+    return histTemp
   hist = histTemp.Clone()
 # srMap = {1:'njet1-deepbtag1p', 2:'njet2p-deepbtag0', 3:'njet2p-deepbtag1', 4:'njet2p-deepbtag2p'}
   srMap = {1:'all', 2:'all', 3:'all', 4:'all'}
@@ -73,49 +74,6 @@ def writeHist(file, name, template, histTemp, statVariations=None, norm=None, re
 # Create combine directory
 try:    os.makedirs('combine')
 except: pass
-
-#############################################################################################################################################
-
-# 
-# ROOT file for Zgamma fit
-#
-def writeRootFileForZG(name, systematics):
-  f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
-
-  baseSelection = 'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20'
-  writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF',  baseSelection), 'njets', '', ['DoubleEG'],['DoubleMuon']), mergeBins=True)
-
-  statVariations = []
-  for sys in [''] + systematics:
-    ZG    = getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF', baseSelection), 'njets', sys, ['ZG'])
-    other = getHistFromPkl(('eleSusyLoose-phoCBfull', 'SF', baseSelection), 'njets', sys, ['TTJets_pow'], ['TTGamma'], ['Drell-Yan'], ['single-t'],['other'])
-    writeHist(f, 'zg_SF' + sys, 'ZG',    ZG,    (statVariations if sys=='' else None), mergeBins=True)
-    writeHist(f, 'zg_SF' + sys, 'other', other, (statVariations if sys=='' else None), mergeBins=True)
-
-  f.Close()
-  return set(statVariations)
-
-#
-# ZGamma fit
-#
-cardName    = 'zgFit'
-templates   = [s for s,_ in samplesZG]
-extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samplesZG[1:]]
-extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samplesZG[1:]]
-
-statVariations = writeRootFileForZG(cardName, systematics.keys())
-writeCard(cardName, ['zg_SF'], templates, [], extraLines, systematics.keys(), statVariations, linearSystematics)
-
-results = runFitDiagnostics(cardName, trackParameters = ['r'], toys=None, statOnly=False)
-zgSF = results['r']
-runFitDiagnostics(cardName, trackParameters = ['r'], toys=None, statOnly=True)
-runImpacts(cardName)
-
-log.info('ZGamma fit results in %.2f (+%.2f, %.2f)' % zgSF)
-
-
-
-#############################################################################################################################################
 
 
 #
@@ -241,8 +199,10 @@ def writeRootFile(name, systematics, nonPromptSF):
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
   baseSelection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'
+  onZSelection  = 'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20'
   writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'emu', baseSelection), 'signalRegionsSmall', '', ['MuonEG']))
   writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']))
+  writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  onZSelection),  'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']), mergeBins=True)
 
   statVariations = []
   for sample,_ in samples:
@@ -250,30 +210,29 @@ def writeRootFile(name, systematics, nonPromptSF):
     fakeSelectors     = [[sample, '(hadronicFake)']]
     hadronicSelectors = [[sample, '(hadronicPhoton)']]
     for sys in [''] + systematics:
-      for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF')]:
-        prompt   = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection), 'signalRegionsSmall', sys, *promptSelectors)
-        fake     = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection), 'signalRegionsSmall', sys, *fakeSelectors)
-        hadronic = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection), 'signalRegionsSmall', sys, *hadronicSelectors)
-        if nonPromptSF:
-          if sample=='TTJets' and sys=='':
-            fakeUp   = applyNonPromptSF(fake, nonPromptSF, 'Up')
-            fakeDown = applyNonPromptSF(fake, nonPromptSF, 'Down')
-          fake     = applyNonPromptSF(fake, nonPromptSF)
+      for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('zg_SF', 'SF')]:
+        prompt   = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *promptSelectors)
+        fake     = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *fakeSelectors)
+        hadronic = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *hadronicSelectors)
+        if sys=='':
+          fakeUp   = applyNonPromptSF(fake, nonPromptSF, 'Up')
+          fakeDown = applyNonPromptSF(fake, nonPromptSF, 'Down')
+        fake     = applyNonPromptSF(fake, nonPromptSF)
         total = prompt.Clone()
         total.Add(hadronic)
-        if sample=='TTJets' and sys=='':
+        if sys=='':
           totalUp   = total.Clone()
           totalDown = total.Clone()
           totalUp.Add(fakeUp)
           totalDown.Add(fakeDown)
-          writeHist(f, shape+'fakeUp',   sample, totalUp, None)
-          writeHist(f, shape+'fakeDown', sample, totalDown, None)
+          writeHist(f, shape+'fakeUp',   sample, totalUp, None, mergeBins = ('zg' in shape))
+          writeHist(f, shape+'fakeDown', sample, totalDown, None, mergeBins = ('zg' in shape))
         total.Add(fake)
 
-        if sample=='ZG':
+        if sample=='ZG' and False:
           for i in range(total.GetNbinsX()):
             total.SetBinContent(i, total.GetBinContent(i)*(zgSF[0]))
-        writeHist(f, shape+sys, sample, total, (statVariations if sys=='' else None))
+        writeHist(f, shape+sys, sample, total, (statVariations if sys=='' else None), mergeBins = ('zg' in shape))
 
   f.Close()
   return set(statVariations)
@@ -282,13 +241,12 @@ def writeRootFile(name, systematics, nonPromptSF):
 # Signal regions fit
 #
 cardName    = 'srFit'
-templates   = [s for s,_ in samples if s!='ZG']
+templates   = [s for s,_ in samples]
 extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
-extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:] if s!='ZG']
-extraLines += ['ZG_norm param 1.0 %.3f' % ((abs(zgSF[1])+abs(zgSF[2]))/2)]
+extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
 
 statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
-writeCard(cardName, ['sr_OF', 'sr_SF'], templates, ['ZG'], extraLines, systematics.keys() + ['TTJets:fakeUp'], statVariations, linearSystematics)
+writeCard(cardName, ['sr_OF', 'sr_SF', 'zg_SF'], templates, [], extraLines, systematics.keys() + ['fakeUp'], statVariations, linearSystematics)
 
 runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
 runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
