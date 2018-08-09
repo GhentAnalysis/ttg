@@ -23,6 +23,19 @@ def applySysToOtherHist(source, sourceVar, destination):
   return destinationVar
 
 #
+# Normalize binwidth when non-unifor bin width is used
+#
+def normalizeBinWidth(hist, norm=None):
+  if norm:
+    for i in range(hist.GetXaxis().GetNbins()+1):
+      val   = hist.GetBinContent(i)
+      err   = hist.GetBinError(i)
+      width = hist.GetBinWidth(i)
+      hist.SetBinContent(i, val/(width/norm))
+      hist.SetBinError(i, err/(width/norm))
+
+
+#
 # Load a histogram from pkl
 #
 loadedPkls = {}
@@ -30,6 +43,7 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
   global loadePkls
   hist = None
   resultFile = os.path.join(*((plotDir,)+subdirs+(plotName +'.pkl',)))
+
   if os.path.isdir(os.path.dirname(resultFile)):
     if resultFile not in loadedPkls:
       with lock(resultFile, 'rb') as f: loadedPkls[resultFile] = pickle.load(f)
@@ -52,8 +66,10 @@ def applySidebandUnc(hist, plot, resultsDir, up):
   selection     = resultsDir.split('/')[-1]
   ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets','hadronicFake','pass'])
   ttbarSideband = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets','hadronicFake,0.012'])
-  ttbarNominal.Scale(1/ttbarNominal.Integral())
-  ttbarSideband.Scale(1/ttbarSideband.Integral())
+  normalizeBinWidth(ttbarNominal, 1)
+  normalizeBinWidth(ttbarSideband, 1)
+  ttbarNominal.Scale(1./ttbarNominal.Integral("width"))
+  ttbarSideband.Scale(1./ttbarSideband.Integral("width"))
   if up: return applySysToOtherHist(ttbarNominal, ttbarSideband, hist)
   else:  return applySysToOtherHist(ttbarSideband, ttbarNominal, hist)
 
@@ -65,18 +81,6 @@ def xAxisLabels(labels):
     for i,l in enumerate(labels):
       h.GetXaxis().SetBinLabel(i+1, l)
   return [applyLabels]
-
-#
-# Normalize binwidth when non-unifor bin width is used
-#
-def normalizeBinWidth(hist, norm=None):
-  if norm:
-    for i in range(hist.GetXaxis().GetNbins()+1):
-      val   = hist.GetBinContent(i)
-      err   = hist.GetBinError(i)
-      width = hist.GetBinWidth(i)
-      hist.SetBinContent(i, val/(width/norm))
-      hist.SetBinError(i, err/(width/norm))
 
 
 #
