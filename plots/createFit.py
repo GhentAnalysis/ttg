@@ -83,19 +83,12 @@ def writeRootFileForChgIso(name, systematics, selection):
   tag       = 'eleSusyLoose-phoCBnoChgIso-match'
   plot      = 'photon_chargedIso_bins_NO'
 
-  if selection=='all':
-    selections = ['llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag1p-photonPt20', 
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag0-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1-photonPt20',
-                  'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20']
-  else:
-    selections = ['llg-looseLeptonVeto-mll40-offZ-llgNoZ-' + selection + '-photonPt20']
+  if selection=='all': selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'
+  else:                selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-' + selection + '-photonPt20'
 
   f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
 
-  dataHist = None
-  for selection in selections:
-    dataHist = addHist(dataHist, getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+  dataHist = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
   writeHist(f, 'chgIso' , 'data_obs', dataHist,norm=1)
 
   statVariations = []
@@ -106,24 +99,18 @@ def writeRootFileForChgIso(name, systematics, selection):
     elif splitType=='_h': selectors = [[sample, '(hadronicPhoton)']   for sample,_ in samples]
 
     if name.count('dd') and splitType=='_f':
-      sideBandShape = None
-      for selection in selections:
-        sideBandShape = addHist(sideBandShape, getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon']))
+      sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
       normalizeBinWidth(sideBandShape, 1)
       sideBandShapeUp   = applySidebandUnc(sideBandShape, plot, selection, True)
       sideBandShapeDown = applySidebandUnc(sideBandShape, plot, selection, False)
       
-      chgIsoHist = None
-      for selection in selections:
-        chgIsoHist = addHist(chgIsoHist, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors))
+      chgIsoHist = getHistFromPkl((tag, 'all', selection), plot, sys, *selectors)
       writeHist(f, 'chgIso',                'all' + splitType, chgIsoHist, (statVariations if sys=='' else None), norm=1, shape=sideBandShape)
       writeHist(f, 'chgIsoSideBandUncUp',   'all' + splitType, chgIsoHist, None,                                  norm=1, shape=sideBandShapeUp)
       writeHist(f, 'chgIsoSideBandUncDown', 'all' + splitType, chgIsoHist, None,                                  norm=1, shape=sideBandShapeDown)
     else:
       for sys in [''] + systematics:
-        chgIsoHist = None
-        for selection in selections:
-          chgIsoHist = addHist(chgIsoHist, getHistFromPkl((tag, 'all', selection), plot, sys, *selectors))
+        chgIsoHist = getHistFromPkl((tag, 'all', selection), plot, sys, *selectors)
         writeHist(f, 'chgIso'+sys,  'all' + splitType, chgIsoHist, (statVariations if sys=='' else None), norm=1)
 
   f.Close()
