@@ -38,9 +38,9 @@ def getCombineRelease():
 def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
   currentDir     = os.getcwd()
   combineRelease = getCombineRelease()
-  log.info('Moving to ' + combineRelease + ' to run combine')
+  log.debug('Moving to ' + combineRelease + ' to run combine')
   for f in [dataCard + '.txt', dataCard + '.root']:
-    log.info('Input file: ' + currentDir + '/combine/' + f)
+    log.debug('Input file: ' + currentDir + '/combine/' + f)
     newPath = os.path.join(combineRelease, 'src', f)
     shutil.copy('combine/' + f, newPath)
   shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
@@ -56,6 +56,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
 # Reads the fitted signal strength from the fitDiagnostics.root file
 #
 def getParam(filename, param):
+  if not os.path.isfile(filename): return None
   resultsFile = ROOT.TFile(filename)
   fitResults  = resultsFile.Get("fit_s").floatParsFinal()
   for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
@@ -82,11 +83,11 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
                     'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
                     'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex',
                     'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex',
-                    'mv fitDiagnostics.root ' + dataCard + '_fitDiagnostics.root']
+                    'mv fitDiagnostics.root ' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root &> /dev/null']
   log.info('Running FitDiagnostics')
   handleCombine(dataCard, logFile, combineCommand, otherCommands)
   try:
-    return {param : getParam('./combine/' + dataCard + '_fitDiagnostics.root', param) for param in ['r']+trackParameters}
+    return {param : getParam('./combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root', param) for param in ['r']+trackParameters}
   except:
     with open('./combine/' + dataCard + '.log') as f:
       for line in f: log.warning(line.rstrip())
@@ -98,24 +99,27 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
 #
 def runSignificance(dataCard, expected=False):
   command = 'combine -M Significance ' + dataCard + '.txt'
+  logFile = dataCard + '_sig' + ('_expected' if expected else '')
   if expected: command += ' -t -1 --expectSignal=1'
   log.info('Running Significance')
-  handleCombine(dataCard, dataCard + '_sig', command)
-  with open('./combine/' + dataCard + '.log') as f:
-    for line in f: log.info(line.rstrip())
+  handleCombine(dataCard, logFile, command)
+  with open('./combine/' + logFile + '.log') as f:
+    for line in f:
+      if 'Significance:' in line:
+        log.info(line.rstrip() + (' (expected)' if expected else ''))
 
 
 #
 # Run impacts (really need to find some real documentation for this)
 #
-def runImpacts(dataCard):
+def runImpacts(dataCard, perPage=30):
   command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
   command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doInitialFit;'
   command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doFits --parallel 8;'
   command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 -o impacts.json;'
-  command += 'plotImpacts.py -i impacts.json --per-page=30 --cms-label preliminary --translate sysMappings.json -o impacts;'
+  command += 'plotImpacts.py -i impacts.json --per-page=' + str(perPage) + ' --cms-label preliminary --translate sysMappings.json -o impacts;'
   command += 'mv impacts.pdf ../../../' + dataCard + '_impacts.pdf'
   log.info('Running Impacts')
   handleCombine(dataCard, dataCard + '_impacts', command)
