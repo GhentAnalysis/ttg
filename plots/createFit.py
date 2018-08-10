@@ -157,6 +157,7 @@ def plot(name, name2, results):
 #
 # Charged isolation fit
 #
+log.info(' --- Charged isolation fit --- ')
 templates   = ['all_f', 'all_g', 'all_h']
 extraLines  = ['prompt_norm   rateParam * all_g 1']
 
@@ -226,7 +227,8 @@ def writeRootFile(name, systematics, nonPromptSF):
 #
 # Signal regions fit
 #
-def doSignalRegionFit(cardName, shapes):
+def doSignalRegionFit(cardName, shapes, perPage=30):
+  log.info(' --- Signal regions fit (' + cardName + ') --- ')
   templates   = [s for s,_ in samples]
   extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
   extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
@@ -240,6 +242,6 @@ def doSignalRegionFit(cardName, shapes):
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
 
-doSignalRegionFit('srFit'    , ['sr_OF', 'sr_SF', 'zg_SF'])
-doSignalRegionFit('srFit_SF' , ['sr_SF', 'zg_SF'])
-doSignalRegionFit('srFit_OF' , ['sr_OF', 'zg_SF'])
+doSignalRegionFit('srFit'    , ['sr_OF', 'sr_SF', 'zg_SF'], 34)
+doSignalRegionFit('srFit_SF' , ['sr_SF', 'zg_SF'], 24)
+doSignalRegionFit('srFit_OF' , ['sr_OF', 'zg_SF'], 24)
