@@ -226,16 +226,20 @@ def writeRootFile(name, systematics, nonPromptSF):
 #
 # Signal regions fit
 #
-cardName    = 'srFit'
-templates   = [s for s,_ in samples]
-extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
-extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
+def doSignalRegionFit(cardName, shapes):
+  templates   = [s for s,_ in samples]
+  extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
+  extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
 
-statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
-writeCard(cardName, ['sr_OF', 'sr_SF', 'zg_SF'], templates, [], extraLines, systematics.keys() + ['fakeUp'], statVariations, linearSystematics)
+  statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
+  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], statVariations, linearSystematics)
 
-runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
-runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
-runImpacts(cardName)
-runSignificance(cardName)
-runSignificance(cardName, expected=True)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
+  runImpacts(cardName)
+  runSignificance(cardName)
+  runSignificance(cardName, expected=True)
+
+doSignalRegionFit('srFit'    , ['sr_OF', 'sr_SF', 'zg_SF'])
+doSignalRegionFit('srFit_SF' , ['sr_SF', 'zg_SF'])
+doSignalRegionFit('srFit_OF' , ['sr_OF', 'zg_SF'])
