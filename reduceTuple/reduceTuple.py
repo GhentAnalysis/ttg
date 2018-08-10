@@ -245,8 +245,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
       newVars.lTrackWeight      = 1.
 
     newVars.phWeight            = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
-    newVars.phWeightUp          = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
-    newVars.phWeightDown        = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.phWeightUp          = photonSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
+    newVars.phWeightDown        = photonSF.getSF(c, newVars.ph, sigma=-1) if len(c.photons) > 0 else 1
 
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
