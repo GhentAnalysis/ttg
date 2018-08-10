@@ -313,12 +313,13 @@ class Plot:
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
-    sysKeys = [sys.replace('Up', '') for sys in systematics.keys() if sys.count('Up')]
+    sysKeys = systematics.keys()
     if addMCStat:
-      sysKeys += [s.name + s.texName + 'Stat' for s in stackForSys]
+      sysKeys += [s.name + s.texName + 'StatUp'   for s in stackForSys]
+      sysKeys += [s.name + s.texName + 'StatDown' for s in stackForSys]
 
     histos_summed = {}
-    for sys in [None] + [(s + 'Up') for s in sysKeys] + [(s + 'Down') for s in sysKeys]:
+    for sys in [None] + sysKeys:
       if sys and not any(x in sys for x in ['Stat', 'sideBand', 'Scale']): plotName = self.name+sys                                    # in the 2D cache, the first key is plotname+sys
       else:                                                                plotName = self.name                                        # for nominal and some exceptions 
 
@@ -355,32 +356,33 @@ class Plot:
 
         histos_summed[sys] = addHist(histos_summed[sys], h)
 
-    h_sys = {}
-    for sys in sysKeys:
-      h_sys[sys] = histos_summed[sys+'Up'].Clone()
-      h_sys[sys].Scale(-1)
-      h_sys[sys].Add(histos_summed[sys+'Down'])
-
-    h_rel_err = histos_summed[None].Clone()
-    h_rel_err.Reset()
-
     # Adding the systematics in quadrature
-    for k in h_sys.keys():
-      for ib in range(h_rel_err.GetNbinsX()+1):
-        h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + (h_sys[k].GetBinContent(ib)/2)**2 )
+    relErrors = {}
+    for variation in ['Up', 'Down']:                                                                                                  # Consider both up and down variations separately
+      summedErrors = histos_summed[None].Clone()
+      summedErrors.Reset()
+      for sys in sysKeys:
+        sysOther = sys.replace('Up', 'Down') if 'Up' in sys else sys.replace('Down', 'Up')
+        for i in range(summedErrors.GetNbinsX()+1):
+          uncertainty      = histos_summed[sys].GetBinContent(i) - histos_summed[None].GetBinContent(i)
+          uncertaintyOther = histos_summed[sysOther].GetBinContent(i) - histos_summed[None].GetBinContent(i)
+          if uncertainty*uncertaintyOther > 0 and abs(uncertainty) < abs(uncertaintyOther): continue                                  # Check if both up and down go to same direction, only take the maximum
+          if (variation=='Up' and uncertainty > 0) or (variation=='Down' and uncertainty < 0):
+            summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
-    for sampleFilter, unc in linearSystematics.values():
-      for ib in range(h_rel_err.GetNbinsX()+1):
-        if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
-        else:            uncertainty = unc/100*sum([h.GetBinContent(ib) for s,h in self.histos.iteritems()])
-        h_rel_err.SetBinContent(ib, h_rel_err.GetBinContent(ib) + uncertainty**2)
+      for sampleFilter, unc in linearSystematics.values():
+        for i in range(summedErrors.GetNbinsX()+1):
+          if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
+          else:            uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems()])
+          summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
-    for ib in range(h_rel_err.GetNbinsX()+1):
-      h_rel_err.SetBinContent(ib, sqrt(h_rel_err.GetBinContent(ib)))
+      for i in range(summedErrors.GetNbinsX()+1):
+        summedErrors.SetBinContent(i, sqrt(summedErrors.GetBinContent(i)))
 
-    # Divide by the summed hist to get relative errors, and return
-    h_rel_err.Divide(histos_summed[None])
-    return h_rel_err
+      summedErrors.Divide(histos_summed[None])
+      relErrors[variation] = summedErrors
+
+    return relErrors
 
   #
   # Get the boxes for the systematic band
@@ -393,12 +395,13 @@ class Plot:
     for ib in range(1, 1 + totalMC.GetNbinsX()):
       val = totalMC.GetBinContent(ib)
       if val > 0:
-        sys   = totalMC.sysValues.GetBinContent(ib)
-        xmin  = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinLowEdge(ib))
-        xmax  = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinUpEdge(ib))
-        ymin  = constrain(self.yrmin if ratio else self.ymin, self.yrmax if ratio else self.ymax, (1-sys) if ratio else (1-sys)*val)
-        ymax  = constrain(self.yrmin if ratio else self.ymin, self.yrmax if ratio else self.ymax, (1+sys) if ratio else (1+sys)*val)
-        box   = ROOT.TBox(xmin, ymin,  xmax, ymax)
+        sysUp   = totalMC.sysValues['Up'].GetBinContent(ib)
+        sysDown = totalMC.sysValues['Down'].GetBinContent(ib)
+        xmin    = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinLowEdge(ib))
+        xmax    = constrain(self.xmin,  self.xmax,  totalMC.GetXaxis().GetBinUpEdge(ib))
+        ymin    = constrain(self.yrmin if ratio else self.ymin, self.yrmax if ratio else self.ymax, (1-sysDown) if ratio else (1-sysDown)*val)
+        ymax    = constrain(self.yrmin if ratio else self.ymin, self.yrmax if ratio else self.ymax, (1+sysUp)   if ratio else (1+sysUp)*val)
+        box     = ROOT.TBox(xmin, ymin,  xmax, ymax)
         box.SetLineColor(ROOT.kBlack)
         box.SetFillStyle(3444)
         box.SetFillColor(ROOT.kBlack)
@@ -528,8 +531,8 @@ class Plot:
     yMax, yMin = histos[0][0].Clone(), histos[0][0].Clone()
     for h in (s[0] for s in histos):
       for i in range(1, 1 + h.GetNbinsX()):
-        yMax.SetBinContent(i, max(yMax.GetBinContent(i), h.GetBinContent(i)*((1+h.sysValues.GetBinContent(i)) if hasattr(h, 'sysValues') else 1) + h.GetBinError(i)))
-        yMin.SetBinContent(i, min(yMin.GetBinContent(i), h.GetBinContent(i)*((1-h.sysValues.GetBinContent(i)) if hasattr(h, 'sysValues') else 1) - h.GetBinError(i)))
+        yMax.SetBinContent(i, max(yMax.GetBinContent(i), h.GetBinContent(i)*((1+h.sysValues['Up'].GetBinContent(i))   if hasattr(h, 'sysValues') else 1) + h.GetBinError(i)))
+        yMin.SetBinContent(i, min(yMin.GetBinContent(i), h.GetBinContent(i)*((1-h.sysValues['Down'].GetBinContent(i)) if hasattr(h, 'sysValues') else 1) - h.GetBinError(i)))
 
     # Check if at least two bins are filled, otherwise skip, unless yield
     if len(self.getFilledBins(yMax)) < 2 and self.name != 'yield':
