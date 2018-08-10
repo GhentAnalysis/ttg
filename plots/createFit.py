@@ -238,7 +238,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30):
 
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
-  runImpacts(cardName)
+  runImpacts(cardName, perPage)
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
 
