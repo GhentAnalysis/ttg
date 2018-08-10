@@ -25,3 +25,14 @@ ttgPlots.py and runs over reduced tuples (as produced by the reduceTuple/reduceT
 on the original heavyNeutrino tuples but skimmed for lepton and photon id requirements.
 The ttgPlots.py script creates plots in .png, .pdf, .root,.C and .pkl formats. The .pkl format is used as an
 input to the fitting script.
+
+## Analysis to do list
+ * AN systematic table + input range
+ * AN overlap removal discussion
+ * Review of trigger strategy
+ * Muon SF systematic uncertainties
+ * Make systematic band assymetric (already assymetric for the combine fit, but not in the plots)
+ * Post-fit signal region plot
+ * SF and OF separate measurements
+ * Separate stat and sys errors (need combine expert)
+ * Check ISR and FSR
