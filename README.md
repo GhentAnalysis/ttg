@@ -1,5 +1,16 @@
 Repository for tt+gamma analysis in the dilepton channel
 
+# Analysis to do list
+ * AN systematic table + input range
+ * AN overlap removal discussion
+ * Review of trigger strategy
+ * Muon SF systematic uncertainties
+ * Make systematic band assymetric (already assymetric for the combine fit, but not in the plots)
+ * Post-fit signal region plot
+ * SF and OF separate measurements
+ * Separate stat and sys errors (need combine expert)
+ * Check ISR and FSR
+
 # Input tuples
 Tuples are produced in the heavyNeutrino framework (https://github.com/GhentAnalysis/heavyNeutrino)
 using option 'dilep' (basic skim of 2 leptons without additional requirements). The branch used is
@@ -26,13 +37,4 @@ on the original heavyNeutrino tuples but skimmed for lepton and photon id requir
 The ttgPlots.py script creates plots in .png, .pdf, .root,.C and .pkl formats. The .pkl format is used as an
 input to the fitting script.
 
-## Analysis to do list
- * AN systematic table + input range
- * AN overlap removal discussion
- * Review of trigger strategy
- * Muon SF systematic uncertainties
- * Make systematic band assymetric (already assymetric for the combine fit, but not in the plots)
- * Post-fit signal region plot
- * SF and OF separate measurements
- * Separate stat and sys errors (need combine expert)
- * Check ISR and FSR
+
