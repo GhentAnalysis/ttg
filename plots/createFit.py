@@ -166,7 +166,7 @@ for selection in ['all']:
   for dataDriven in [True]:
     cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
     statVariations = writeRootFileForChgIso(cardName, [], selection)
-    writeCard(cardName, ['chgIso'], templates, [], extraLines, ['SideBandUncUp:all_f'], statVariations, {})
+    writeCard(cardName, ['chgIso'], templates, [], extraLines, ['all_f:SideBandUncUp'], statVariations, {})
     results = runFitDiagnostics(cardName, toys=None, statOnly=False, trackParameters = ['prompt_norm'])
     nonPromptSF[selection] = results['r']
     plot(cardName, '_prefit',  None)
@@ -175,7 +175,6 @@ for selection in ['all']:
 
 for i,j in nonPromptSF.iteritems():
   log.info('Charged isolation fit for ' + i + ' results in %.2f (+%.2f, %.2f)' % j)
-
 
 #############################################################################################################################################
 
