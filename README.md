@@ -8,12 +8,12 @@ Implemented, but not yet propagated to plots and/or final results
  * SF and OF separate measurements
 
 ## To do
- * AN systematic table + input range
+ * AN systematic table (duplicate of impact parameter plots, need to find a way to extract the numbers)
  * AN overlap removal discussion
  * Review of trigger strategy
  * Post-fit signal region plot
  * Separate stat and sys errors (need combine expert)
- * Check ISR and FSR
+ * Scale FSR to sqrt(2)
 
 
 # Input tuples
