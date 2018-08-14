@@ -1,14 +1,15 @@
 from ttg.tools.logger import getLogger, logLevel
 log = getLogger()
 
-import os,shutil,ROOT
+import os,shutil,ROOT,socket
 
 #
 # Combine settings
 #
 release        = 'CMSSW_8_1_0'
 arch           = 'slc6_amd64_gcc530'
-version        = 'v7.0.7'
+version        = 'v7.0.10'
+
 
 #
 # Setup combine release and combineTool.py if not yet present, and returns its path
@@ -19,7 +20,7 @@ def getCombineRelease():
     log.info('Setting up combine release')
     setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
     setupCommand += 'export SCRAM_ARCH=' + arch + ';'
-    setupCommand += 'source $VO_CMS_SW_DIR/cmsset_default.sh;'
+    setupCommand += 'source $VO_CMS_SW_DIR/cmsset_default.sh;' if 'lxp' not in socket.gethostname() else ''
     setupCommand += 'scramv1 project CMSSW ' + release + ';'
     setupCommand += 'cd ' + combineRelease + '/src;'
     setupCommand += 'eval `scramv1 runtime -sh`;'
@@ -31,6 +32,7 @@ def getCombineRelease():
     setupCommand += 'scramv1 b -j 8;'
     os.system(setupCommand)
   return combineRelease
+
 
 #
 # Handle a combine command
@@ -51,6 +53,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
   os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands))
   os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
   os.chdir(currentDir)
+
 
 #
 # Reads the fitted signal strength from the fitDiagnostics.root file
@@ -92,7 +95,6 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
     with open('./combine/' + dataCard + '.log') as f:
       for line in f: log.warning(line.rstrip())
 
-  return None
 
 #
 # Run significance
@@ -116,10 +118,10 @@ def runImpacts(dataCard, perPage=30):
   command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
-  command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doInitialFit;'
-  command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doFits --parallel 8;'
-  command += 'combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 -o impacts.json;'
-  command += 'plotImpacts.py -i impacts.json --per-page=' + str(perPage) + ' --cms-label preliminary --translate sysMappings.json -o impacts;'
+  command += './combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doInitialFit;'
+  command += './combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 --doFits --parallel 8;'
+  command += './combineTool.py -M Impacts -d ' + dataCard + '.root -m 125 -o impacts.json;'
+  command += './plotImpacts.py -i impacts.json --per-page=' + str(perPage) + ' --cms-label preliminary --translate sysMappings.json -o impacts;'
   command += 'mv impacts.pdf ../../../' + dataCard + '_impacts.pdf'
   log.info('Running Impacts')
   handleCombine(dataCard, dataCard + '_impacts', command)
@@ -130,7 +132,10 @@ def runImpacts(dataCard, perPage=30):
   os.system("cp $CMSSW_BASE/src/ttg/tools/php/index.php ~/www/ttG/combinePlots/")
   os.system("mv " + dataCard + "_impacts*.png ~/www/ttG/combinePlots/")
 
+
+#
 # Write the card including all systematics and shapes
+#
 def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, mcStatistics, linearSystematics):
   def tab(list):
     return ''.join(['%25s' % list[0]] + [('%12s' % i) for i in list[1:]]) + '\n'
@@ -165,7 +170,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
 
     for sys in [s.replace('Up','') for s in systematics if 'Up' in s]:
       if ':' in sys: sample, sys = sys.split(':')
-      else :         sample, sys = None, sys
+      else:          sample, sys = None, sys
       f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else '1') for s in shapes for t in templates+templatesNoSys]))
 
     for sys in sorted(mcStatistics):
