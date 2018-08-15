@@ -234,7 +234,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30):
   extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
 
   statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
-  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], statVariations, linearSystematics)
+  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], statVariations, linearSystematics, scaleShape={'fsr':str(1/sqrt(2))})
 
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
