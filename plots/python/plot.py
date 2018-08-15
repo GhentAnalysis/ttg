@@ -73,6 +73,18 @@ def applySidebandUnc(hist, plot, resultsDir, up):
   if up: return applySysToOtherHist(ttbarNominal, ttbarSideband, hist)
   else:  return applySysToOtherHist(ttbarSideband, ttbarNominal, hist)
 
+
+#
+# Scale uncertainty wrt nominal
+#
+def scaleUnc(uncertainty, nominal, scale):
+  newUncertainty = newUncertainty.Clone()
+  newUncertainty.Add(nominal, -1)
+  newUncertainty.Scale(scale)
+  newUncertainty.Add(nominal)
+  return newUncertainty
+
+
 #
 # Returns histmodificator which applies labels to x-axis
 #
