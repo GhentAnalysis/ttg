@@ -118,15 +118,17 @@ def runImpacts(dataCard, perPage=30):
   command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
-  command += './combineTool.py -M Impacts -d ' + dataCard + '.root --doInitialFit;'
-  command += './combineTool.py -M Impacts -d ' + dataCard + '.root --doFits --parallel 8;'
-  command += './combineTool.py -M Impacts -d ' + dataCard + '.root -o impacts.json;'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit;'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8;'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json;'
   command += './plotImpacts.py -i impacts.json --per-page=' + str(perPage) + ' --cms-label preliminary --translate sysMappings.json -o impacts;'
   command += 'mv impacts.pdf ../../../' + dataCard + '_impacts.pdf'
   log.info('Running Impacts')
   handleCombine(dataCard, dataCard + '_impacts', command)
-  with open('./combine/' + dataCard + '.log') as f:
-    for line in f: log.debug(line.rstrip())
+  with open('./combine/' + dataCard + '_impacts.log') as f:
+    for line in f:
+      if "mv: cannot stat `impacts.pdf': No such file or directory" in line: log.error("Problem with running impacts")
+      log.debug(line.rstrip())
   os.system("pdftoppm combine/" + dataCard + "_impacts.pdf " + dataCard + "_impacts -png;mogrify -trim " + dataCard + "_impacts*.png")
   os.system("mkdir -p ~/www/ttG/combinePlots/")
   os.system("cp $CMSSW_BASE/src/ttg/tools/php/index.php ~/www/ttG/combinePlots/")
@@ -171,7 +173,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     for sys in [s.replace('Up','') for s in systematics if 'Up' in s]:
       if ':' in sys: sample, sys = sys.split(':')
       else:          sample, sys = None, sys
-      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else (scaleShape[sys] if sys in scaleShape else '1')) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else ('%.4f' % scaleShape[sys] if sys in scaleShape else '1')) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in sorted(mcStatistics):
       f.write(tab([sys, 'shape'] + [('1' if t in templates and sys.count(s) and sys.count(t) else '-') for s in shapes for t in templates+templatesNoSys]))
