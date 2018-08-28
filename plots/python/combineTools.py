@@ -40,8 +40,9 @@ def getCombineRelease():
 def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
   currentDir     = os.getcwd()
   combineRelease = getCombineRelease()
+  os.system('rm ' + combineRelease + '/src/*.root &> /dev/null')
   log.debug('Moving to ' + combineRelease + ' to run combine')
-  for f in [dataCard + '.txt', dataCard + '.root']:
+  for f in [dataCard + '.txt', dataCard + '_shapes.root']:
     log.debug('Input file: ' + currentDir + '/combine/' + f)
     newPath = os.path.join(combineRelease, 'src', f)
     shutil.copy('combine/' + f, newPath)
@@ -59,7 +60,6 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
 # Reads the fitted signal strength from the fitDiagnostics.root file
 #
 def getParam(filename, param):
-  if not os.path.isfile(filename): return None
   resultsFile = ROOT.TFile(filename)
   fitResults  = resultsFile.Get("fit_s").floatParsFinal()
   for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
@@ -73,7 +73,7 @@ def getParam(filename, param):
 # Run fit diagnostics
 #
 def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=False, alsoBOnly=False):
-  extraOptions = ' --robustFit=1 --rMax=100'
+  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerTolerance=0.00001' # --cminDefaultMinimizerStrategy=0'
   if toys:                 extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
   if statOnly:             extraOptions += ' --justFit --profilingMode=none'
   if not alsoBOnly:        extraOptions += ' --skipBOnlyFit'
@@ -81,18 +81,19 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
   if statOnly: logFile = dataCard + '_statOnly'
   elif toys:   logFile = dataCard + '_toys'
   else:        logFile = dataCard
-  combineCommand = 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.txt'
+  combineCommand = 'text2workspace.py ' + dataCard + '.txt;'
+  combineCommand+= 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root'
   otherCommands  = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
                     'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
                     'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex',
                     'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex',
-                    'cp fitDiagnostics.root ' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root']
-  log.info('Running FitDiagnostics')
+                    'cp fitDiagnostics.root ' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root &> /dev/null']
+  log.info('Running FitDiagnostics' + (' (stat only)' if statOnly else ''))
   handleCombine(dataCard, logFile, combineCommand, otherCommands)
   try:
     return {param : getParam('./combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root', param) for param in ['r']+trackParameters}
   except:
-    with open('./combine/' + dataCard + '.log') as f:
+    with open('./combine/' + logFile + '.log') as f:
       for line in f: log.warning(line.rstrip())
 
 
@@ -156,7 +157,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     f.write('jmax *\n')
     f.write('kmax *\n')
     f.write('-'*400 + '\n')
-    f.write('shapes * * '+cardName+'.root $CHANNEL/$PROCESS $CHANNEL$SYSTEMATIC/$PROCESS'+'\n')
+    f.write('shapes * * '+cardName+'_shapes.root $CHANNEL/$PROCESS $CHANNEL$SYSTEMATIC/$PROCESS'+'\n')
     f.write('-'*400 + '\n')
     f.write(tab(['bin']+shapes))
     f.write(tab(['observation']+['-1']*len(shapes)))

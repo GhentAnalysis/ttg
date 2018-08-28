@@ -86,7 +86,7 @@ def writeRootFileForChgIso(name, systematics, selection):
   if selection=='all': selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'
   else:                selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-' + selection + '-photonPt20'
 
-  f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
+  f = ROOT.TFile('combine/' + name + '_shapes.root', 'RECREATE')
 
   dataHist = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
   writeHist(f, 'chgIso' , 'data_obs', dataHist,norm=1)
@@ -122,8 +122,8 @@ def writeRootFileForChgIso(name, systematics, selection):
 from ttg.plots.plot import Plot
 from ttg.tools.style import drawLumi
 import ttg.tools.style as styles
-def plot(name, name2, results):
-  f = ROOT.TFile('combine/' + name + '.root')
+def plotChgIso(name, name2, results):
+  f = ROOT.TFile('combine/' + name + '_shapes.root')
   all_f      = f.Get('chgIso/all_f')
   all_g      = f.Get('chgIso/all_g')
   all_h      = f.Get('chgIso/all_h')
@@ -160,6 +160,7 @@ def plot(name, name2, results):
 log.info(' --- Charged isolation fit --- ')
 templates   = ['all_f', 'all_g', 'all_h']
 extraLines  = ['prompt_norm   rateParam * all_g 1']
+extraLines += ['* autoMCStats 0 1 1']
 
 nonPromptSF = {}
 #for selection in ['njet1-deepbtag1p', 'njet2p-deepbtag0', 'njet2p-deepbtag1', 'njet2p-deepbtag2p','njet2p-deepbtag1p','all']:
@@ -167,11 +168,12 @@ for selection in ['all']:
   for dataDriven in [True]:
     cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
     statVariations = writeRootFileForChgIso(cardName, [], selection)
+    statVariations = []
     writeCard(cardName, ['chgIso'], templates, [], extraLines, ['all_f:SideBandUncUp'], statVariations, {})
     results = runFitDiagnostics(cardName, toys=None, statOnly=False, trackParameters = ['prompt_norm'])
     nonPromptSF[selection] = results['r']
-    plot(cardName, '_prefit',  None)
-    plot(cardName, '_postfit', results)
+    plotChgIso(cardName, '_prefit',  None)
+    plotChgIso(cardName, '_postfit', results)
     runImpacts(cardName)
 
 for i,j in nonPromptSF.iteritems():
@@ -183,7 +185,7 @@ for i,j in nonPromptSF.iteritems():
 # ROOT file for a signal regions fit
 #
 def writeRootFile(name, systematics, nonPromptSF):
-  f = ROOT.TFile('combine/' + name + '.root', 'RECREATE')
+  f = ROOT.TFile('combine/' + name + '_shapes.root', 'RECREATE')
 
   baseSelection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'
   onZSelection  = 'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20'
@@ -232,16 +234,18 @@ def doSignalRegionFit(cardName, shapes, perPage=30):
   templates   = [s for s,_ in samples]
   extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
   extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
+  extraLines += ['* autoMCStats 0 1 1']
 
   statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
+  statVariations = []
   writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], statVariations, linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
-  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
+# runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
   runImpacts(cardName, perPage)
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
 
-doSignalRegionFit('srFit'    , ['sr_OF', 'sr_SF', 'zg_SF'], 34)
-doSignalRegionFit('srFit_SF' , ['sr_SF', 'zg_SF'], 24)
-doSignalRegionFit('srFit_OF' , ['sr_OF', 'zg_SF'], 24)
+doSignalRegionFit('srFit'    , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
+doSignalRegionFit('srFit_SF' , ['sr_SF', 'zg_SF'], 28)
+doSignalRegionFit('srFit_OF' , ['sr_OF', 'zg_SF'], 28)
