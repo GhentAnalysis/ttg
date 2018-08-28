@@ -75,17 +75,6 @@ def applySidebandUnc(hist, plot, resultsDir, up):
 
 
 #
-# Scale uncertainty wrt nominal
-#
-def scaleUnc(uncertainty, nominal, scale):
-  newUncertainty = newUncertainty.Clone()
-  newUncertainty.Add(nominal, -1)
-  newUncertainty.Scale(scale)
-  newUncertainty.Add(nominal)
-  return newUncertainty
-
-
-#
 # Returns histmodificator which applies labels to x-axis
 #
 def xAxisLabels(labels):
@@ -380,6 +369,7 @@ class Plot:
           uncertaintyOther = histos_summed[sysOther].GetBinContent(i) - histos_summed[None].GetBinContent(i)
           if uncertainty*uncertaintyOther > 0 and abs(uncertainty) < abs(uncertaintyOther): continue                                  # Check if both up and down go to same direction, only take the maximum
           if (variation=='Up' and uncertainty > 0) or (variation=='Down' and uncertainty < 0):
+            if sys.count('fsr'): uncertainty *= 1/sqrt(2)                                                                             # Hacky, scale fsr uncertainty with 1/sqrt(2) as recommended for TOP pag (in the fit this is handled in the cards)
             summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
       for sampleFilter, unc in linearSystematics.values():
