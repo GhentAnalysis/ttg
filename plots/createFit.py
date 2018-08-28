@@ -47,7 +47,7 @@ def replaceShape(hist, shape):
   hist.Scale(normalization)
   return hist
 
-def writeHist(file, name, template, histTemp, statVariations=None, norm=None, removeBins = [], shape=None, mergeBins=False):
+def writeHist(file, name, template, histTemp, norm=None, removeBins = [], shape=None, mergeBins=False):
   hist = histTemp.Clone()
   if norm:  normalizeBinWidth(hist, norm)
   if shape: hist = replaceShape(hist, shape)
@@ -59,17 +59,6 @@ def writeHist(file, name, template, histTemp, statVariations=None, norm=None, re
   if not file.GetDirectory(name): file.mkdir(name)
   file.cd(name)
   protectHist(hist).Write(template)
-  file.cd()
-  if statVariations is not None:
-    for i in range(1, hist.GetNbinsX()+1):
-      if hist.GetBinContent(i) == 0 and hist.GetBinError(i) == 0: continue
-      up   = hist.Clone()
-      down = hist.Clone()
-      up.SetBinContent(  i, hist.GetBinContent(i)+hist.GetBinError(i))
-      down.SetBinContent(i, hist.GetBinContent(i)-hist.GetBinError(i))
-      writeHist(file, name + name + template + 'Stat' + str(i) + 'Up',   template, up)
-      writeHist(file, name + name + template + 'Stat' + str(i) + 'Down', template, down)
-      statVariations.append(name + template + 'Stat' + str(i))
 
 # Create combine directory
 try:    os.makedirs('combine')
@@ -91,7 +80,6 @@ def writeRootFileForChgIso(name, systematics, selection):
   dataHist = getHistFromPkl(('eleSusyLoose-phoCBnoChgIso', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
   writeHist(f, 'chgIso' , 'data_obs', dataHist,norm=1)
 
-  statVariations = []
   from ttg.plots.plot import applySidebandUnc
   for splitType in ['_g', '_f', '_h']:
     if   splitType=='_g': selectors = [[sample, '(genuine,misIdEle)'] for sample,_ in samples]
@@ -105,16 +93,15 @@ def writeRootFileForChgIso(name, systematics, selection):
       sideBandShapeDown = applySidebandUnc(sideBandShape, plot, selection, False)
       
       chgIsoHist = getHistFromPkl((tag, 'all', selection), plot, sys, *selectors)
-      writeHist(f, 'chgIso',                'all' + splitType, chgIsoHist, (statVariations if sys=='' else None), norm=1, shape=sideBandShape)
-      writeHist(f, 'chgIsoSideBandUncUp',   'all' + splitType, chgIsoHist, None,                                  norm=1, shape=sideBandShapeUp)
-      writeHist(f, 'chgIsoSideBandUncDown', 'all' + splitType, chgIsoHist, None,                                  norm=1, shape=sideBandShapeDown)
+      writeHist(f, 'chgIso',                'all' + splitType, chgIsoHist, norm=1, shape=sideBandShape)
+      writeHist(f, 'chgIsoSideBandUncUp',   'all' + splitType, chgIsoHist, norm=1, shape=sideBandShapeUp)
+      writeHist(f, 'chgIsoSideBandUncDown', 'all' + splitType, chgIsoHist, norm=1, shape=sideBandShapeDown)
     else:
       for sys in [''] + systematics:
         chgIsoHist = getHistFromPkl((tag, 'all', selection), plot, sys, *selectors)
-        writeHist(f, 'chgIso'+sys,  'all' + splitType, chgIsoHist, (statVariations if sys=='' else None), norm=1)
+        writeHist(f, 'chgIso'+sys,  'all' + splitType, chgIsoHist, norm=1)
 
   f.Close()
-  return set(statVariations)
 
 #
 # Post-fit plots for charged isolation fit
@@ -167,9 +154,8 @@ nonPromptSF = {}
 for selection in ['all']:
   for dataDriven in [True]:
     cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
-    statVariations = writeRootFileForChgIso(cardName, [], selection)
-    statVariations = []
-    writeCard(cardName, ['chgIso'], templates, [], extraLines, ['all_f:SideBandUncUp'], statVariations, {})
+    writeRootFileForChgIso(cardName, [], selection)
+    writeCard(cardName, ['chgIso'], templates, [], extraLines, ['all_f:SideBandUncUp'], {})
     results = runFitDiagnostics(cardName, toys=None, statOnly=False, trackParameters = ['prompt_norm'])
     nonPromptSF[selection] = results['r']
     plotChgIso(cardName, '_prefit',  None)
@@ -193,7 +179,6 @@ def writeRootFile(name, systematics, nonPromptSF):
   writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']))
   writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  onZSelection),  'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']), mergeBins=True)
 
-  statVariations = []
   for sample,_ in samples:
     promptSelectors   = [[sample, '(genuine,misIdEle)']]
     fakeSelectors     = [[sample, '(hadronicFake)']]
@@ -214,17 +199,16 @@ def writeRootFile(name, systematics, nonPromptSF):
           totalDown = total.Clone()
           totalUp.Add(fakeUp)
           totalDown.Add(fakeDown)
-          writeHist(f, shape+'fakeUp',   sample, totalUp, None, mergeBins = ('zg' in shape))
-          writeHist(f, shape+'fakeDown', sample, totalDown, None, mergeBins = ('zg' in shape))
+          writeHist(f, shape+'fakeUp',   sample, totalUp, mergeBins = ('zg' in shape))
+          writeHist(f, shape+'fakeDown', sample, totalDown, mergeBins = ('zg' in shape))
         total.Add(fake)
 
         if sample=='ZG' and False:
           for i in range(total.GetNbinsX()):
             total.SetBinContent(i, total.GetBinContent(i)*(zgSF[0]))
-        writeHist(f, shape+sys, sample, total, (statVariations if sys=='' else None), mergeBins = ('zg' in shape))
+        writeHist(f, shape+sys, sample, total, mergeBins = ('zg' in shape))
 
   f.Close()
-  return set(statVariations)
 
 #
 # Signal regions fit
@@ -236,9 +220,8 @@ def doSignalRegionFit(cardName, shapes, perPage=30):
   extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
   extraLines += ['* autoMCStats 0 1 1']
 
-  statVariations = writeRootFile(cardName, systematics.keys(), nonPromptSF)
-  statVariations = []
-  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], statVariations, linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+  writeRootFile(cardName, systematics.keys(), nonPromptSF)
+  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
 # runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)

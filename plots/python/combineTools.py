@@ -139,7 +139,7 @@ def runImpacts(dataCard, perPage=30):
 #
 # Write the card including all systematics and shapes
 #
-def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, mcStatistics, linearSystematics, scaleShape = {}):
+def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = {}):
   def tab(list):
     return ''.join(['%25s' % list[0]] + [('%12s' % i) for i in list[1:]]) + '\n'
 
@@ -175,9 +175,6 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       if ':' in sys: sample, sys = sys.split(':')
       else:          sample, sys = None, sys
       f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else ('%.4f' % scaleShape[sys] if sys in scaleShape else '1')) for s in shapes for t in templates+templatesNoSys]))
-
-    for sys in sorted(mcStatistics):
-      f.write(tab([sys, 'shape'] + [('1' if t in templates and sys.count(s) and sys.count(t) else '-') for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
