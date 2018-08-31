@@ -2,19 +2,20 @@ Repository for tt+gamma analysis in the dilepton channel
 
 # Analysis to do list
 ## In progress
-Implemented, but not yet propagated to plots and/or final results
- * Muon SF systematic uncertainties
- * Make systematic band assymetric (already assymetric for the combine fit, but not in the plots)
- * SF and OF separate measurements
+ * AN systematic table (some table duplicate of impact parameter plots, so low priority right now)
+ * Trying NLO MC sample
 
 ## To do
- * AN systematic table (duplicate of impact parameter plots, need to find a way to extract the numbers)
- * AN overlap removal discussion
  * Review of trigger strategy
  * Post-fit signal region plot
- * Separate stat and sys errors (need combine expert)
- * Scale FSR to sqrt(2)
+ * Separate stat and sys errors (need to find combine expert which knows a solution, if any solution exists)
 
+## Recently finished
+ * Scale FSR to sqrt(2)
+ * AN overlap removal discussion
+ * SF and OF separate measurements
+ * Muon SF systematic uncertainties
+ * Make systematic band assymetric (already assymetric for the combine fit, but not in the plots)
 
 # Input tuples
 Tuples are produced in the heavyNeutrino framework (https://github.com/GhentAnalysis/heavyNeutrino)
