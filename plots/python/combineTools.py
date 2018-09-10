@@ -73,9 +73,9 @@ def getParam(filename, param):
 # Run fit diagnostics
 #
 def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=False, alsoBOnly=False):
-  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerTolerance=0.00001' # --cminDefaultMinimizerStrategy=0'
+  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001'
   if toys:                 extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
-  if statOnly:             extraOptions += ' --justFit --profilingMode=none'
+  if statOnly:             extraOptions += ' --justFit --profilingMode=none -v 2 '
   if not alsoBOnly:        extraOptions += ' --skipBOnlyFit'
   if len(trackParameters): extraOptions += ' --trackParameters ' + ','.join(trackParameters)
   if statOnly: logFile = dataCard + '_statOnly'
@@ -87,14 +87,23 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
                     'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
                     'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex',
                     'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex',
-                    'cp fitDiagnostics.root ' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root &> /dev/null']
+                    'cp fitDiagnostics.root ' + dataCard + '_fitDiagnostics.root'] if not statOnly else []
   log.info('Running FitDiagnostics' + (' (stat only)' if statOnly else ''))
   handleCombine(dataCard, logFile, combineCommand, otherCommands)
-  try:
-    return {param : getParam('./combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root', param) for param in ['r']+trackParameters}
-  except:
+  if statOnly:
     with open('./combine/' + logFile + '.log') as f:
-      for line in f: log.warning(line.rstrip())
+      resultCount = 0
+      for line in f:
+        if 'FinalValue +/-  Error' in line: resultCount += 1
+        if resultCount==2 and '<none>' in line:
+          log.info('Stat result for r: %s %s %s' % tuple(line.split()[2:5]))
+          break
+  else:
+    try:
+      return {param : getParam('./combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root', param) for param in ['r']+trackParameters}
+    except:
+      with open('./combine/' + logFile + '.log') as f:
+        for line in f: log.warning(line.rstrip())
 
 
 #
