@@ -142,18 +142,12 @@ if not sample.isData:
   newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
 
 from ttg.tools.makeBranches import makeBranches
+from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
 newVars = makeBranches(outputTree, newBranches)
 
+setIDSelection(c, args.type)
 minLeptons            = 0 if args.QCD else (1 if args.singleLep else 2)
 doPhotonCut           = args.type.count('pho')
-c.photonCutBased      = args.type.count('phoCB')
-c.photonMva           = args.type.count('photonMva')
-c.eleMva              = args.type.count('eleMva')
-c.cbLoose             = args.type.count('eleCBLoose')
-c.cbMedium            = args.type.count('eleCBMedium')
-c.cbVeto              = args.type.count('eleCBVeto')
-c.susyLoose           = args.type.count('eleSusyLoose')
-c.noPixelSeedVeto     = args.type.count('noPixelSeedVeto')
 jetPtCut              = 40 if args.type.count('jetPt40') else 30
 
 def switchBranches(c, default, variation):
@@ -168,7 +162,6 @@ for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
 # Loop over the tree and make new vars
 #
 log.info('Starting event loop')
-from ttg.reduceTuple.objectSelection import selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
 from math import sqrt
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)

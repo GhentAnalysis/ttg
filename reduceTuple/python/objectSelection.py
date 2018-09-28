@@ -1,13 +1,26 @@
 from ttg.tools.logger  import getLogger
 from ttg.tools.helpers import deltaR
+from math import sqrt,pi
+import ROOT
 log = getLogger()
 
 #
 # All functions to select objects, as well as some functions which add new variables based on the selected objects to the tree
 #
 
-from math import sqrt,pi
-import ROOT
+#
+# Set ID options on chain using type string
+#
+def setIDSelection(c, reducedTupleType):
+  c.photonCutBased      = reducedTupleType.count('phoCB')
+  c.photonMva           = reducedTupleType.count('photonMva')
+  c.eleMva              = reducedTupleType.count('eleMva')
+  c.cbLoose             = reducedTupleType.count('eleCBLoose')
+  c.cbMedium            = reducedTupleType.count('eleCBMedium')
+  c.cbVeto              = reducedTupleType.count('eleCBVeto')
+  c.susyLoose           = reducedTupleType.count('eleSusyLoose')
+  c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
+
 
 #
 # Helper functions
