@@ -167,24 +167,34 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   c.GetEntry(i)
   for s in branchModifications: s(c)
 
-  if not selectLeptons(c, newVars, minLeptons):                                            continue
-  if not selectPhotons(c, newVars, doPhotonCut, minLeptons, sample.isData):                continue
+  if not selectLeptons(c, newVars, minLeptons):                                              continue
+  if not selectPhotons(c, newVars, doPhotonCut, minLeptons, sample.isData):                  continue
 
-  if sample.isData and minLeptons > 1:
-    if not c._passMETFilters:                                                              continue
-    if sample.name.count('DoubleMuon') and not c._passTTG_mm:                              continue
-    if sample.name.count('DoubleEG')   and not c._passTTG_ee:                              continue
-    if sample.name.count('MuonEG')     and not c._passTTG_em:                              continue
-    if sample.name.count('SingleMuon'):
-      if newVars.isMuMu and not (not c._passTTG_mm and c._passTTG_m):                      continue
-      if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_m):                      continue
-    if sample.name.count('SingleElectron'):
-      if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
-      if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
+  if minLeptons > 1:
+    if sample.isData:
+      if not c._passMETFiltersData:                                                          continue
+      if sample.name.count('DoubleMuon') and not c._passTTG_mm:                              continue
+      if sample.name.count('DoubleEG')   and not c._passTTG_ee:                              continue
+      if sample.name.count('MuonEG')     and not c._passTTG_em:                              continue
+      if sample.name.count('SingleMuon'):
+        if newVars.isMuMu and not (not c._passTTG_mm and c._passTTG_m):                      continue
+        if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_m):                      continue
+      if sample.name.count('SingleElectron'):
+        if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
+        if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
+    else:
+      if not c._passMETFiltersMC:                                                            continue
+      if c.isEE   and not (c._passTTG_ee or c._passTTG_e):                                   continue 
+      if c.isEMu  and not (c._passTTG_em or c._passTTG_e or c._passTTG_m):                   continue
+      if c.isMuMu and not (c._passTTG_mm or c._passTTG_m):                                   continue
 
-  if sample.isData and minLeptons == 1:
-    if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m: continue
-    if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e: continue
+  if minLeptons == 1:
+    if sample.isData:
+      if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m:          continue
+      if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e:          continue
+    else:
+      if c.isMu and not c.passTTG_m:                                                         continue
+      if c.isE  and not c.passTTG_e:                                                         continue
 
   goodJets(c, newVars, jetPtCut)
   bJets(c, newVars)
