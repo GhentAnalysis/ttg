@@ -37,14 +37,14 @@ if not args.isChild and not args.sample:
   for sample in sampleList:
     for select in ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
       for corr in [True, False]:
-        for pu in [True, False]:
+        for pu in [True, False] if sample.name != 'MET' else [False]:
           jobs += [(sample.name, select, corr, pu)]
 
   submitJobs(__file__, ('sample', 'select', 'corr', 'pu'), jobs, argParser)
   exit(0)
 
 
-if args.select != '': args.select = '-' + args.select
+if args.select != '':    args.select = '-' + args.select
 
 # Get sample, chain and event loop
 sample    = getSampleFromList(sampleList, args.sample)
@@ -72,12 +72,15 @@ ROOT.gROOT.ForceStyle()
 # Select for which the trigger efficiencies are measured
 def passSelection(c):
   if not selectLeptons(c, c, 2): return False
-  if args.select.count('ph')   and not selectPhotons(c, c, True, 2, False): return False
+  if args.select.count('ph'):
+    if selectPhotons(c, c, True, 2, True): return False
   if args.select.count('offZ') and not c.isEMu:
+    selectPhotons(c, c, False, 2, True)
     makeInvariantMasses(c, c)
     if abs(c.mll  - 91.1876) < 15 : return False
     if abs(c.mllg - 91.1876) < 15 : return False
   if args.select.count('jet'):
+    selectPhotons(c, c, False, 2, True)
     goodJets(c, c, 30)
     if args.select.count('1p') and not c.njets >= 1: return False
     if args.select.count('2p') and not c.njets >= 2: return False
@@ -176,7 +179,7 @@ else:
 
       canvas = ROOT.TCanvas(eff.GetName(), eff.GetName())
       canvas.cd()
-      ROOT.gStyle.SetPaintTextFormat("2.2f")
+      ROOT.gStyle.SetPaintTextFormat("2.5f" if 'integral' in type else "2.2f")
       commonStyle(effDraw)
       effDraw.GetXaxis().SetTitle("leading lepton p_{T} [Gev]")
       effDraw.GetYaxis().SetTitle("trailing lepton p_{T} [Gev]")
@@ -184,12 +187,15 @@ else:
       effDraw.SetMarkerSize(0.8)
       effDraw.Draw("COLZ TEXT")
       canvas.RedrawAxis()
-      canvas.SetLogy()
-      canvas.SetLogx()
-      effDraw.GetXaxis().SetMoreLogLabels()
-      effDraw.GetYaxis().SetMoreLogLabels()
-      effDraw.GetXaxis().SetNoExponent()
-      effDraw.GetYaxis().SetNoExponent()
+      if not ('etaBinning' in type or 'integral' in type):
+        canvas.SetLogy()
+        canvas.SetLogx()
+        effDraw.GetXaxis().SetMoreLogLabels()
+        effDraw.GetYaxis().SetMoreLogLabels()
+        effDraw.GetXaxis().SetNoExponent()
+        effDraw.GetYaxis().SetNoExponent()
+      effDraw.SetMinimum(0.)
+      effDraw.SetMaximum(1.)
       effDraw.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
       dir = '/user/tomc/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + sample.name + '/' + args.select
