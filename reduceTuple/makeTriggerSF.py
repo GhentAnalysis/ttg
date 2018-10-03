@@ -68,6 +68,8 @@ for type in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l
       hist.GetYaxis().SetMoreLogLabels()
       hist.GetXaxis().SetNoExponent()
       hist.GetYaxis().SetNoExponent()
+    hist.SetMinimum(0.8)
+    hist.SetMaximum(1.2)
     hist.Draw("COLZ TEXTE")
     canvas.RedrawAxis()
     dir = '/user/tomc/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF' + '/' + args.select
