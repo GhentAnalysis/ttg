@@ -184,17 +184,17 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
         if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
     else:
       if not c._passMETFiltersMC:                                                            continue
-      if c.isEE   and not (c._passTTG_ee or c._passTTG_e):                                   continue 
-      if c.isEMu  and not (c._passTTG_em or c._passTTG_e or c._passTTG_m):                   continue
-      if c.isMuMu and not (c._passTTG_mm or c._passTTG_m):                                   continue
+      if newVars.isEE   and not (c._passTTG_ee or c._passTTG_e):                             continue
+      if newVars.isEMu  and not (c._passTTG_em or c._passTTG_e or c._passTTG_m):             continue
+      if newVars.isMuMu and not (c._passTTG_mm or c._passTTG_m):                             continue
 
   if minLeptons == 1:
     if sample.isData:
       if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m:          continue
       if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e:          continue
     else:
-      if c.isMu and not c.passTTG_m:                                                         continue
-      if c.isE  and not c.passTTG_e:                                                         continue
+      if newVars.isMu and not c.passTTG_m:                                                   continue
+      if newVars.isE  and not c.passTTG_e:                                                   continue
 
   goodJets(c, newVars, jetPtCut)
   bJets(c, newVars)
