@@ -75,7 +75,7 @@ if not sample.isData:
 #
 # Create new reduced tree
 #
-reducedTupleDir = os.path.join('/user/tomc/public/TTG/reducedTuples', sample.productionLabel, args.type, sample.name)
+reducedTupleDir = os.path.join('/user/tomc/public/reducedTuples', sample.productionLabel, args.type, sample.name)
 try:    os.makedirs(reducedTupleDir)
 except: pass
 
