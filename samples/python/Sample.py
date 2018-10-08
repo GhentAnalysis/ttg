@@ -76,7 +76,7 @@ class Sample:
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
-      baseDir           = '/afs/cern.ch/work/t/' + getpass.getuser() + '/public/reducedTuples/' if 'lxp' in socket.gethostname() else '/user/' + getpass.getuser() + '/public/reducedTuples/'
+      baseDir           = ('/afs/cern.ch/work/t/' + getpass.getuser() + '/public/reducedTuples/') if 'lxp' in socket.gethostname() else ('/user/' + getpass.getuser() + '/public/reducedTuples/')
       for s in self.addSamples:
         self.listOfFiles += glob.glob(os.path.join(baseDir, self.productionLabel, reducedType, s+'_'+sys if sys else s, '*.root'))
     else:
