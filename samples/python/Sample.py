@@ -13,7 +13,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-import glob, os, copy, ROOT, uuid, socket
+import glob, os, copy, ROOT, uuid, socket, getpass
 
 from ttg.tools.progressBar import progressbar
 import ttg.tools.style as styles
@@ -76,16 +76,17 @@ class Sample:
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
-      baseDir           = '/afs/cern.ch/work/t/tomc/public/reducedTuples/' if 'lxp' in socket.gethostname() else '/user/tomc/public/TTG/reducedTuples/'
+      baseDir           = '/afs/cern.ch/work/t/' + getpass.getuser() + '/public/reducedTuples/' if 'lxp' in socket.gethostname() else '/user/' + getpass.getuser() + '/public/reducedTuples/'
       for s in self.addSamples:
         self.listOfFiles += glob.glob(os.path.join(baseDir, self.productionLabel, reducedType, s+'_'+sys if sys else s, '*.root'))
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
       if self.isData and splitData:
         label = self.productionLabel + (subProductionLabel if subProductionLabel else '')
-        print os.path.join(self.path, '*2016' + splitData + '*' + label, '*', '*', '*.root')
-        self.listOfFiles  = glob.glob(os.path.join(self.path, '*2016' + splitData + '*' + label, '*', '*', '*.root'))
-        self.listOfFiles += glob.glob(os.path.join(self.path, '*2016' + splitData + '*' + label, '*', '*.root'))
+        self.listOfFiles  = glob.glob(os.path.join(self.path, '*Run2016' + splitData + '*' + label, '*', '*', '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2017' + splitData + '*' + label, '*', '*', '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2016' + splitData + '*' + label, '*', '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2017' + splitData + '*' + label, '*', '*.root'))
       else:
         self.listOfFiles  = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
         self.listOfFiles += glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
