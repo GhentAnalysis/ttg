@@ -229,6 +229,30 @@ def doSignalRegionFit(cardName, shapes, perPage=30):
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
 
-doSignalRegionFit('srFit'    , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
-doSignalRegionFit('srFit_SF' , ['sr_SF', 'zg_SF'], 28)
-doSignalRegionFit('srFit_OF' , ['sr_OF', 'zg_SF'], 28)
+doSignalRegionFit('srFit'      , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
+doSignalRegionFit('srFit_SF'   , ['sr_SF', 'zg_SF'], 28)
+doSignalRegionFit('srFit_OF'   , ['sr_OF', 'zg_SF'], 28)
+
+def doRatioFit(cardName, shapes, perPage=30):
+  log.info(' --- Ratio ttGamma/ttBar fit (' + cardName + ') --- ')
+  templates   = [s for s,_ in samples]
+  extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
+  extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
+  extraLines += ['* autoMCStats 0 1 1']
+  from ttg.samples.Sample import createSampleList,getSampleFromList
+  sampleList   = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
+  xsec_ttGamma = sum([getSampleFromList(sampleList, s).xsec for s in ['TTGamma', 'TTGamma_t', 'TTGamma_tbar', 'TTGamma_had']])
+  xsec_tt      = getSampleFromList(sampleList, 'TTJets_pow').xsec
+  extraLines += ['renormTTGamma rateParam * TTGamma* %.7f' % (1./xsec_ttGamma), 'nuisance edit freeze renormTTGamma ifexists']
+  extraLines += ['renormTTbar rateParam * TTJets* %.7f' % (1./xsec_tt),         'nuisance edit freeze renormTTbar ifexists']
+  extraLines += ['TTbar_norm rateParam * TT* %.7f' % xsec_tt]
+
+  writeRootFile(cardName, systematics.keys(), nonPromptSF)
+  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
+
+
+doRatioFit('ratioFit'   , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
+doRatioFit('ratioFit_SF', ['sr_SF', 'zg_SF'], 28)
+doRatioFit('ratioFit_OF', ['sr_OF', 'zg_SF'], 28)

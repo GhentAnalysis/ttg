@@ -149,8 +149,8 @@ def runImpacts(dataCard, perPage=30):
 # Write the card including all systematics and shapes
 #
 def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = {}):
-  def tab(list):
-    return ''.join(['%25s' % list[0]] + [('%12s' % i) for i in list[1:]]) + '\n'
+  def tab(list, column='12'):
+    return ''.join(['%25s' % list[0]] + [(('%'+column+'s') % i) for i in list[1:]]) + '\n'
 
   def linSys(info, template):
     if template not in templates: return '-'
@@ -187,4 +187,4 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
-      f.write(tab([x for x in extraLine.split()]))
+      f.write(tab([x for x in extraLine.split()], column='18'))
