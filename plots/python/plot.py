@@ -553,7 +553,7 @@ class Plot:
     self.yrmin, self.yrmax = ratio['yRange'] if ratio else (None, None)
 
     # Remove empty bins from the edges (or when they are too small to see)
-    self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/100.)
+    self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/150.)
 
     # If legend is in the form (tuple, int) then the number of columns is provided
     if len(legend) == 2: legendColumns, legend = legend[1], legend[0]

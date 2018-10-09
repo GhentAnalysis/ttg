@@ -243,8 +243,8 @@ def doRatioFit(cardName, shapes, perPage=30):
   sampleList   = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
   xsec_ttGamma = sum([getSampleFromList(sampleList, s).xsec for s in ['TTGamma', 'TTGamma_t', 'TTGamma_tbar', 'TTGamma_had']])
   xsec_tt      = getSampleFromList(sampleList, 'TTJets_pow').xsec
-  extraLines += ['renormTTGamma rateParam * TTGamma* %.7f' % (1./xsec_ttGamma), 'nuisance edit freeze renormTTGamma ifexists']
-  extraLines += ['renormTTbar rateParam * TTJets* %.7f' % (1./xsec_tt),         'nuisance edit freeze renormTTbar ifexists']
+  extraLines += ['renormTTGamma rateParam * TTGamma* %.7f' % (1./(100*xsec_ttGamma)), 'nuisance edit freeze renormTTGamma ifexists']
+  extraLines += ['renormTTbar rateParam * TTJets* %.7f' % (1./xsec_tt),               'nuisance edit freeze renormTTbar ifexists']
   extraLines += ['TTbar_norm rateParam * TT* %.7f' % xsec_tt]
 
   writeRootFile(cardName, systematics.keys(), nonPromptSF)
