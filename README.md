@@ -2,15 +2,16 @@ Repository for tt+gamma analysis in the dilepton channel
 
 # Analysis to do list
 ## In progress
+ * Ratio ttgamma/ttbar fit
  * AN systematic table (some table duplicate of impact parameter plots, so low priority right now)
- * Trying NLO MC sample
+ * Trying NLO MC sample [failed because of computing time]
 
 ## To do
- * Review of trigger strategy
  * Post-fit signal region plot
- * Separate stat and sys errors (need to find combine expert which knows a solution, if any solution exists)
 
 ## Recently finished
+ * Separate stat and sys errors
+ * Review of trigger strategy
  * Scale FSR to sqrt(2)
  * AN overlap removal discussion
  * SF and OF separate measurements
