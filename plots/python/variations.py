@@ -63,8 +63,8 @@ def getVariations(args, sysList):
   variations = []
   for s in sysList:
     for c in channels:
-      if c != 'SF': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
-      else:         selections_ = selections
+      if c != 'SF' and c != 'noData': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
+      else:                           selections_ = selections
       variations += [(sel, c, s) for sel in selections_]
 
   return ('selection', 'channel', 'sys'), variations
