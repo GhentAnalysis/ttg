@@ -242,3 +242,14 @@ def makeDeltaR(t, n):
   n.phL1DeltaR  = deltaR(t._lEta[n.l1], t._phEta[n.ph], t._lPhi[n.l1], t._phPhi[n.ph])                              if len(t.photons) > 0 and len(t.leptons) > 0 else -1
   n.phL2DeltaR  = deltaR(t._lEta[n.l2], t._phEta[n.ph], t._lPhi[n.l2], t._phPhi[n.ph])                              if len(t.photons) > 0 and len(t.leptons) > 1 else -1
   n.phJetDeltaR = min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in t.jets] + [999]) if len(t.photons) > 0 else -1
+
+
+#
+# Pre-fire check
+#
+def prefireRemoval(t):
+  for i in xrange(ord(t._nJets)):
+    if abs(t._jetEta[i]) > 2.25 and abs(t._jetEta[i]) < 3.0 and t._jetPt[i] > 100: return True
+  for i in xrange(ord(t._nPh)):
+    if abs(t._phEta[i]) > 2.25 and abs(t._phEta[i]) < 3.0 and t._phPt[i] > 50: return True
+  return False

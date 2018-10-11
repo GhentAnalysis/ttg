@@ -140,9 +140,10 @@ if not sample.isData:
   for sys in ['pdfUp','pdfDown','pdfShapeUp','pdfShapeDown']: newBranches += ['weight_' + sys + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
   newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
+  newBranches += ['prefireCheck/O']
 
 from ttg.tools.makeBranches import makeBranches
-from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
+from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR, prefireRemoval
 newVars = makeBranches(outputTree, newBranches)
 
 setIDSelection(c, args.type)
@@ -203,6 +204,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   if not sample.isData:
     newVars.genWeight           = c._weight*lumiWeights[0]
+    newVars.prefireCheck        = prefireRemoval(c)
 
     try:    q2Weights           = [c._lheWeight[i]*lumiWeights[i] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
     except: q2Weights           = [newVars.genWeight]
