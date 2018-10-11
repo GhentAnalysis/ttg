@@ -5,7 +5,7 @@ Script to transform the heavyNeutrino tuples into reducedTuples which only retai
 Also adds additional often-used kinematic variables and calculates/stores the needed weights for systematic variations. This makes the reducedTuples perfectly suited to perform
 the analysis and make plots.
 
-The reduceTuple.py script uses following helper codes
+The reduceTuple.py script uses following helper code which are residing in the python subdirectory code
  * python/objectSelection.py defines the used lepton, photon and jet object selections as well as the calculation of some higher level variables based on them
  * python/btagEfficiency.py provides the class to return b-tagging efficiencies and uncertainties 
  * python/leptonSF.py provides the class to return lepton scale factors and uncertainties

@@ -170,13 +170,13 @@ for i,j in nonPromptSF.iteritems():
 #
 # ROOT file for a signal regions fit
 #
-def writeRootFile(name, systematics, nonPromptSF):
+def writeRootFile(name, systematics, nonPromptSF, merged=False):
   f = ROOT.TFile('combine/' + name + '_shapes.root', 'RECREATE')
 
   baseSelection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'
   onZSelection  = 'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20'
-  writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'emu', baseSelection), 'signalRegionsSmall', '', ['MuonEG']))
-  writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']))
+  writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'emu', baseSelection), 'signalRegionsSmall', '', ['MuonEG']), mergeBins=merged)
+  writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']), mergeBins=merged, removeBins=([1,2] if merged else []))
   writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl(('eleSusyLoose-phoCBfull-match', 'SF',  onZSelection),  'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']), mergeBins=True)
 
   for sample,_ in samples:
@@ -199,28 +199,25 @@ def writeRootFile(name, systematics, nonPromptSF):
           totalDown = total.Clone()
           totalUp.Add(fakeUp)
           totalDown.Add(fakeDown)
-          writeHist(f, shape+'fakeUp',   sample, totalUp, mergeBins = ('zg' in shape))
-          writeHist(f, shape+'fakeDown', sample, totalDown, mergeBins = ('zg' in shape))
+          writeHist(f, shape+'fakeUp',   sample, totalUp, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+          writeHist(f, shape+'fakeDown', sample, totalDown, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
         total.Add(fake)
 
-        if sample=='ZG' and False:
-          for i in range(total.GetNbinsX()):
-            total.SetBinContent(i, total.GetBinContent(i)*(zgSF[0]))
-        writeHist(f, shape+sys, sample, total, mergeBins = ('zg' in shape))
+        writeHist(f, shape+sys, sample, total, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
 
   f.Close()
 
 #
 # Signal regions fit
 #
-def doSignalRegionFit(cardName, shapes, perPage=30):
+def doSignalRegionFit(cardName, shapes, perPage=30, merged=False):
   log.info(' --- Signal regions fit (' + cardName + ') --- ')
   templates   = [s for s,_ in samples]
   extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
   extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
   extraLines += ['* autoMCStats 0 1 1']
 
-  writeRootFile(cardName, systematics.keys(), nonPromptSF)
+  writeRootFile(cardName, systematics.keys(), nonPromptSF, merged)
   writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
@@ -229,9 +226,19 @@ def doSignalRegionFit(cardName, shapes, perPage=30):
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
 
-doSignalRegionFit('srFit'      , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
-doSignalRegionFit('srFit_SF'   , ['sr_SF', 'zg_SF'], 28)
-doSignalRegionFit('srFit_OF'   , ['sr_OF', 'zg_SF'], 28)
+doSignalRegionFit('srFit'        , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
+doSignalRegionFit('srFit_SF'     , ['sr_SF', 'zg_SF'], 28)
+doSignalRegionFit('srFit_OF'     , ['sr_OF', 'zg_SF'], 28)
+doSignalRegionFit('srFit_noZG'   , ['sr_OF', 'sr_SF'], 32)
+doSignalRegionFit('srFit_SF_noZG', ['sr_SF'], 28)
+doSignalRegionFit('srFit_OF_noZG', ['sr_OF'], 28)
+
+doSignalRegionFit('mergedFit'        , ['sr_OF', 'sr_SF', 'zg_SF'], 32, merged=True)
+doSignalRegionFit('mergedFit_SF'     , ['sr_SF', 'zg_SF'], 28, merged=True)
+doSignalRegionFit('mergedFit_OF'     , ['sr_OF', 'zg_SF'], 28, merged=True)
+doSignalRegionFit('mergedFit_noZG'   , ['sr_OF', 'sr_SF'], 32, merged=True)
+doSignalRegionFit('mergedFit_SF_noZG', ['sr_SF'], 28, merged=True)
+doSignalRegionFit('mergedFit_OF_noZG', ['sr_OF'], 28, merged=True)
 
 def doRatioFit(cardName, shapes, perPage=30):
   log.info(' --- Ratio ttGamma/ttBar fit (' + cardName + ') --- ')
