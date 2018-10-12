@@ -67,6 +67,7 @@ ROOT.gROOT.SetBatch(True)
 
 sample = getSampleFromList(sampleList, args.sample)
 c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData)
+forSys = (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr'))  # Tuple is created for specific sys
 
 if not sample.isData:
   lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
@@ -133,11 +134,12 @@ if args.singleLep: newBranches += ['isE/O','isMu/O']
 elif not args.QCD: newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
-  for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:        newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
   for sys in ['', 'Up', 'Down']:                              newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
   for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:            newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
-  for sys in ['q2Up','q2Down','q2ShapeUp', 'q2ShapeDown']:    newBranches += ['weight_' + sys + '/F']
-  for sys in ['pdfUp','pdfDown','pdfShapeUp','pdfShapeDown']: newBranches += ['weight_' + sys + '/F']
+  if not forSys:
+    for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:        newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
+    for var in ['Ru','Fu','RFu','Rd','Fd','RFd']:               newBranches += ['weight_q2_' + var + '/F']
+    for i in range(0,100):                                      newBranches += ['weight_pdf_' + str(i) + '/F']
   newBranches += ['genWeight/F', 'lTrackWeight/F']
   newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
   newBranches += ['prefireCheck/O']
@@ -206,25 +208,15 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.genWeight           = c._weight*lumiWeights[0]
     newVars.prefireCheck        = prefireRemoval(c)
 
-    try:    q2Weights           = [c._lheWeight[i]*lumiWeights[i] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
-    except: q2Weights           = [newVars.genWeight]
-    newVars.weight_q2Down       = c._weight*min(q2Weights)
-    newVars.weight_q2Up         = c._weight*max(q2Weights)
+    # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
+    if not forSys:
+      for var, i in [('Fu', 1), ('Fd', 2), ('Ru', 3), ('RFu', 4), ('Rd', 6), ('RFd', 8)]:
+        try:    setattr(newVars, 'weight_q2_' + var, c._lheWeight[i]*lumiWeights[i])
+        except: setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
 
-    try:    q2Weights           = [c._lheWeight[i]*lumiWeights[0] for i in [1,2,3,4,6,8]]  # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
-    except: q2Weights           = [newVars.genWeight]
-    newVars.weight_q2ShapeDown  = c._weight*min(q2Weights)
-    newVars.weight_q2ShapeUp    = c._weight*max(q2Weights)
-
-    try:    pdfVarRms           = sqrt(sum([(lumiWeights[0] - c._lheWeight[i]*lumiWeights[i])**2 for i in range(9,109)])/100)   # Using RMS of 100 pdf's
-    except: pdfVarRms           = 0
-    newVars.weight_pdfDown      = c._weight*(lumiWeights[0] - pdfVarRms)
-    newVars.weight_pdfUp        = c._weight*(lumiWeights[0] + pdfVarRms)
-
-    try:    pdfVarRms           = sqrt(sum([(1 - c._lheWeight[i])**2 for i in range(9,109)])/100)   # Using RMS of 100 pdf's
-    except: pdfVarRms           = 0
-    newVars.weight_pdfShapeDown = newVars.genWeight*(1 - pdfVarRms)
-    newVars.weight_pdfShapeUp   = newVars.genWeight*(1 + pdfVarRms)
+      for i in range(0,100):
+        try:    setattr(newVars, 'weight_pdf_' + str(i), c._lheWeight[i+9]*lumiWeights[i+9])
+        except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
 
     newVars.puWeight            = puReweighting(c._nTrueInt)
     newVars.puWeightUp          = puReweightingUp(c._nTrueInt)
