@@ -12,6 +12,7 @@ log = getLogger()
 # Set ID options on chain using type string
 #
 def setIDSelection(c, reducedTupleType):
+  c.doPhotonCut         = reducedTupleType.count('pho')
   c.photonCutBased      = reducedTupleType.count('phoCB')
   c.photonMva           = reducedTupleType.count('photonMva')
   c.eleMva              = reducedTupleType.count('eleMva')
@@ -20,6 +21,7 @@ def setIDSelection(c, reducedTupleType):
   c.cbVeto              = reducedTupleType.count('eleCBVeto')
   c.susyLoose           = reducedTupleType.count('eleSusyLoose')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
+  c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
 
 
 #
@@ -182,14 +184,14 @@ def addGenPhotonInfo(t, n, index):
       n.genPhPt            = t._gen_phPt[i]
       n.genPhEta           = t._gen_phEta[i]
 
-def selectPhotons(t, n, doCut, minLeptons, isData):
+def selectPhotons(t, n, minLeptons, isData):
   t.photons  = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, minLeptons)]
   n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
   if len(t.photons):
     n.ph    = t.photons[0]
     n.ph_pt = t._phPtCorr[n.ph]
     if not isData: addGenPhotonInfo(t, n, n.ph)
-  return (len(t.photons) > 0 or not doCut)
+  return (len(t.photons) > 0 or not t.doPhotonCut)
 
 
 #
@@ -218,10 +220,10 @@ def isGoodJet(tree, index):
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True
 
-def goodJets(t, n, ptCut=30):
+def goodJets(t, n):
   allGoodJets = [i for i in xrange(ord(t._nJets)) if isGoodJet(t, i)]
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
-    setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > ptCut])
+    setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > t.jetPtCut])
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
     setattr(n, 'j1'+var,    getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
     setattr(n, 'j2'+var,    getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)

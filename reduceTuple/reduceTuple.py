@@ -71,21 +71,22 @@ if not sample.isData:
 
 
 #
-# Create new reduced tree
+# Create new reduced tree (except if it already exists and overwrite option is not used)
 #
-from ttg.tools.heplers import reducedTupleDir
-reducedTupleDir = os.path.join(reducedTupleDir, sample.productionLabel, args.type, sample.name)
-try:    os.makedirs(reducedTupleDir)
+from ttg.tools.helpers import reducedTupleDir, isValidRootFile
+outputId   = (args.splitData if args.splitData in ['B','C','D','E','F','G','H'] else '') + str(args.subJob)
+outputName = os.path.join(reducedTupleDir, sample.productionLabel, args.type, sample.name, sample.name + '_' + outputId + '.root')
+
+try:    os.makedirs(os.path.dirname(outputName))
 except: pass
 
-outputId   = (args.splitData if args.splitData in ['B','C','D','E','F','G','H'] else '') + str(args.subJob)
-outputName = os.path.join(reducedTupleDir, sample.name + '_' + outputId + '.root')
-from ttg.tools.helpers import isValidRootFile
 if not args.overwrite and isValidRootFile(outputName):
   log.info('Finished: valid outputfile already exists')
   exit(0)
+
 outputFile = ROOT.TFile(outputName ,"RECREATE")
 outputFile.cd()
+
 
 #
 # Switch off unused branches, avoid copying of branches we want to delete
@@ -130,24 +131,23 @@ newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F'
 newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
-  for sys in ['', 'Up', 'Down']:                              newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
-  for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:            newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
-  if not forSys:
-    for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:        newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
-    for var in ['Ru','Fu','RFu','Rd','Fd','RFd']:               newBranches += ['weight_q2_' + var + '/F']
-    for i in range(0,100):                                      newBranches += ['weight_pdf_' + str(i) + '/F']
-  newBranches += ['genWeight/F', 'lTrackWeight/F']
+  newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeightCSV/F', 'bTagWeight/F']
   newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
   newBranches += ['prefireCheck/O']
+  if not forSys:
+    for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
+    for var in ['Ru','Fu','RFu','Rd','Fd','RFd']:        newBranches += ['weight_q2_' + var + '/F']
+    for i in range(0,100):                               newBranches += ['weight_pdf_' + str(i) + '/F']
+    for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
+    for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
-from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR, prefireRemoval
 newVars = makeBranches(outputTree, newBranches)
 
-setIDSelection(c, args.type)
-doPhotonCut           = args.type.count('pho')
-jetPtCut              = 40 if args.type.count('jetPt40') else 30
 
+#
+# Replace branches for systematic runs
+#
 def switchBranches(c, default, variation):
   return lambda c: setattr(c, default, getattr(c, variation))
 
@@ -156,17 +156,25 @@ for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
   if args.type.count('e'  + var): branchModifications += [switchBranches(c, '_lPtCorr',  '_lPt' + var),  switchBranches(c, '_lECorr',  '_lE' + var)]
   if args.type.count('ph' + var): branchModifications += [switchBranches(c, '_phPtCorr', '_phPt' + var), switchBranches(c, '_phECorr', '_phE' + var)]
 
+
 #
-# Loop over the tree and make new vars
+# Get function calls to object selections and set selections based on the reducedTuple type
+#
+from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR, prefireRemoval
+setIDSelection(c, args.type)
+
+
+#
+# Loop over the tree, skim, make new vars and add the weights
+# --> for more details about the skims and new variables check the called functions in ttg.reduceTuple.objectSelection
 #
 log.info('Starting event loop')
-from math import sqrt
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   c.GetEntry(i)
   for s in branchModifications: s(c)
 
-  if not selectLeptons(c, newVars, 2):                             continue
-  if not selectPhotons(c, newVars, doPhotonCut, 2, sample.isData): continue
+  if not selectLeptons(c, newVars, 2):                continue
+  if not selectPhotons(c, newVars, 2, sample.isData): continue
 
   if sample.isData:
     if not c._passMETFiltersData:                                                          continue
@@ -185,16 +193,17 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     if newVars.isEMu  and not (c._passTTG_em or c._passTTG_e or c._passTTG_m):             continue
     if newVars.isMuMu and not (c._passTTG_mm or c._passTTG_m):                             continue
 
-  goodJets(c, newVars, jetPtCut)
+  goodJets(c, newVars)
   bJets(c, newVars)
   makeInvariantMasses(c, newVars)
   makeDeltaR(c, newVars)
 
   if not sample.isData:
-    newVars.genWeight           = c._weight*lumiWeights[0]
-    newVars.prefireCheck        = prefireRemoval(c)
+    newVars.genWeight    = c._weight*lumiWeights[0]
+    newVars.prefireCheck = prefireRemoval(c)
 
     # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
+    # Except when a sample does not have those weights stored (could occur for the minor backgrounds)
     if not forSys:
       for var, i in [('Fu', 1), ('Fd', 2), ('Ru', 3), ('RFu', 4), ('Rd', 6), ('RFd', 8)]:
         try:    setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
@@ -204,20 +213,19 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
         try:    setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+9]*lumiWeights[i+9])
         except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
 
-    newVars.puWeight            = puReweighting(c._nTrueInt)
-    newVars.puWeightUp          = puReweightingUp(c._nTrueInt)
-    newVars.puWeightDown        = puReweightingDown(c._nTrueInt)
+    newVars.puWeight     = puReweighting(c._nTrueInt)
+    newVars.puWeightUp   = puReweightingUp(c._nTrueInt)
+    newVars.puWeightDown = puReweightingDown(c._nTrueInt)
 
-    l1 = newVars.l1
-    l2 = newVars.l2
-    newVars.lWeight           = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
-    newVars.lWeightUp         = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
-    newVars.lWeightDown       = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
-    newVars.lTrackWeight      = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
+    l1, l2               = newVars.l1, newVars.l2
+    newVars.lWeight      = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
+    newVars.lWeightUp    = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
+    newVars.lWeightDown  = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
+    newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
 
-    newVars.phWeight            = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
-    newVars.phWeightUp          = photonSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
-    newVars.phWeightDown        = photonSF.getSF(c, newVars.ph, sigma=-1) if len(c.photons) > 0 else 1
+    newVars.phWeight     = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.phWeightUp   = photonSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
+    newVars.phWeightDown = photonSF.getSF(c, newVars.ph, sigma=-1) if len(c.photons) > 0 else 1
 
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:

@@ -73,15 +73,18 @@ ROOT.gROOT.ForceStyle()
 def passSelection(c):
   if not selectLeptons(c, c, 2): return False
   if args.select.count('ph'):
-    if selectPhotons(c, c, True, 2, True): return False
+    c.doPhotonCut = True
+    if selectPhotons(c, c, 2, True): return False
   if args.select.count('offZ') and not c.isEMu:
-    selectPhotons(c, c, False, 2, True)
+    c.doPhotonCut = False
+    selectPhotons(c, c, 2, True)
     makeInvariantMasses(c, c)
     if abs(c.mll  - 91.1876) < 15 : return False
     if abs(c.mllg - 91.1876) < 15 : return False
   if args.select.count('jet'):
-    selectPhotons(c, c, False, 2, True)
-    goodJets(c, c, 30)
+    c.doPhotonCut = False
+    selectPhotons(c, c, 2, True)
+    goodJets(c, c)
     if args.select.count('1p') and not c.njets >= 1: return False
     if args.select.count('2p') and not c.njets >= 2: return False
   return True
