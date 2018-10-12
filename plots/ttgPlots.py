@@ -36,7 +36,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import systematics, linearSystematics, applySysToTree, applySysToString, showSysList
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList
 
 #
 # Submit subjobs
@@ -74,12 +74,8 @@ ROOT.gROOT.SetBatch(True)
 phoCB       = args.tag.count('phoCB')
 phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
-zeroLep     = args.tag.count('QCD')
-singleLep   = args.tag.count('singleLep')
 prefire     = args.tag.count('prefireCheck')
 normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay'])
-
-
 
 
 #
@@ -94,13 +90,11 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
 
 log.info('Using stackFile ' + stackFile)
 
-if zeroLep:     tuples = 'tuplesQCD.conf'
-elif singleLep: tuples = 'tuplesSingleLep.conf'
-else:           tuples = 'tuples.conf'
 
-stack = createStack(tuplesFile = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + tuples),
-                    styleFile  = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '.stack'),
-                    channel    = args.channel)
+stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'),
+                    styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '.stack'),
+                    channel      = args.channel,
+                    replacements = getReplacementsForStack(args.sys))
 
 
 #
@@ -112,8 +106,7 @@ Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'))
 Plot2D.setDefaults(stack=stack)
 
 def channelNumbering(c):
-  if singleLep: return (1 if c.isMu else 2)
-  else:         return (1 if c.isMuMu else (2 if c.isEMu else 3))
+  return (1 if c.isMuMu else (2 if c.isEMu else 3))
 
 def createSignalRegions(c):
   if c.njets == 1:
@@ -157,7 +150,7 @@ if args.tag.count('randomConeCheck'):
 else:
  #plots.append(Plot2D('chIso_vs_sigmaIetaIeta', 'chargedIso(#gamma) (GeV)', lambda c : c._phChargedIsolation[c.ph], (40,0,20), '#sigma_{i#etai#eta}(#gamma)', lambda c : c._phSigmaIetaIeta[c.ph], (50,0,0.04)))
 
-  plots.append(Plot('yield',                      'yield',                                lambda c : channelNumbering(c),                                (3, 0.5, 2.5 if singleLep else 3.5), histModifications=xAxisLabels(['#mu','e'] if singleLep else ['#mu#mu', 'e#mu', 'ee'])))
+  plots.append(Plot('yield',                      'yield',                                lambda c : channelNumbering(c),                                (3, 0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
   plots.append(Plot('nVertex',                    'vertex multiplicity',                  lambda c : ord(c._nVertex),                                    (50, 0, 50)))
   plots.append(Plot('nTrueInt',                   'nTrueInt',                             lambda c : c._nTrueInt,                                        (50, 0, 50)))
   plots.append(Plot('nphoton',                    'number of photons',                    lambda c : c.nphotons,                                         (4, -0.5, 3.5)))
@@ -244,16 +237,14 @@ lumiScale = 35.9
 # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
 #
 if not args.showSys:
-  if   args.tag.count('QCD'):                                                       reduceType = 'phoCB'
-  elif args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
+  if   args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
   elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
   else:                                                                             reduceType = 'eleSusyLoose-phoCB'
 
   from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
   for sample in sum(stack, []):
     cutString, passingFunctions = cutInterpreter.cutString(args.selection, args.channel)
-    if args.sys:
-      cutString = applySysToString(sample.name, args.sys, cutString)
+    cutString = applySysToString(sample.name, args.sys, cutString)
     if args.sys and 'Scale' not in args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep', sys=args.sys)
 
@@ -285,11 +276,7 @@ if not args.showSys:
 
     for i in sample.eventLoop(cutString):
       c.GetEntry(i)
-      if zeroLep:
-        c.lWeight = 1.
-        c.lTrackWeight = 1.
-        c.triggerWeight = 1.
-      elif not sample.isData and args.sys:
+      if not sample.isData and args.sys:
         applySysToTree(sample.name, args.sys, c)
 
       if prefire and c.prefireCheck: continue
@@ -349,7 +336,7 @@ for plot in plots: # 1D plots
       extraArgs['postFitInfo']       = postFitInfo
 
 
-    if args.channel!='noData' and not args.tag.count('singleLep'):
+    if args.channel!='noData':
       extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'obs/pred'}
 
     if(normalize or args.tag.count('compareChannels')):
