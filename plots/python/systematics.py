@@ -1,6 +1,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
+
 #
 # Defining shape systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
 #
@@ -18,14 +19,11 @@ for i in ('Up', 'Down'):
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
   systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
-#  systematics['pdfTTGamma'+i] = [('genWeight',     'TTGamma:weight_pdf'+i)]
-#  systematics['pdfTTbar'+i]   = [('genWeight',     'TTJets_pow:weight_pdf'+i)]
-#  systematics['q2'+i]         = [('genWeight',     'weight_q2'+i)]
   systematics['JEC'+i]        = [('njets',         'njets_JEC'+i),     ('ndbjets',    'ndbjets_JEC'+i), ('j1', 'j1_JEC'+i), ('j2', 'j2_JEC'+i), ('_jetPt', '_jetPt_JEC'+i)]
   systematics['JER'+i]        = [('njets',         'njets_JER'+i),     ('ndbjets',    'ndbjets_JER'+i), ('j1', 'j1_JER'+i), ('j2', 'j2_JER'+i), ('_jetPt', '_jetPt_JER'+i)]
 
 #
-# For the complicated and CPU-intensive q2/pdf weights running
+# Special case for q2 and PDF: multiple variations of which an envelope has to be taken
 #
 for i in ('Ru','Fu','RFu','Rd','Fd','RFd'):
   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
@@ -37,6 +35,7 @@ for i in range(0,100):
 #
 showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in systematics.keys()))
 
+
 #
 # Defining linear systematics as "name : (sampleList, %)"
 #
@@ -46,15 +45,16 @@ linearSystematics['lumi']       = (None, 2.5)
 
 
 #
-# Function to apply the systematic to the cutstring or tree
+# Function to apply the systematic to the cutstring, tree branches, reduceType
 # When ':' is used in the sysVar, the first part selects a specific sample on which the sysVar should be applied
 #
 def applySysToString(sample, sys, string):
-  for var, sysVar in systematics[sys]:
-    if sysVar.count(':'):
-      s, sysVar = sysVar.split(':')
-      if sample!=s: return string
-    string = string.replace(var, sysVar)
+  if sys:
+    for var, sysVar in systematics[sys]:
+      if sysVar.count(':'):
+        s, sysVar = sysVar.split(':')
+        if sample!=s: return string
+      string = string.replace(var, sysVar)
   return string
 
 def applySysToTree(sample, sys, tree):
@@ -63,6 +63,20 @@ def applySysToTree(sample, sys, tree):
       s, sysVar = sysVar.split(':')
       if sample!=s: return
     setattr(tree, var, getattr(tree, sysVar))
+
+def applySysToReduceType(reduceType, sys):
+  if sys:
+    if (sys.count('Scale') or sys.count('Res')) and reducedType.count('pho'): reducedType += '-' + sys
+  return reduceType
+
+#
+# Special systematic samples for FSR and ISR
+#
+def getReplacementsForStack(sys):
+  if sys and ('fsr' in sys or 'isr' in sys):
+    return {'TTGamma' : 'TTGamma_' + sys.lower(), 'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
+  else:
+    return {}
 
 
 #

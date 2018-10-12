@@ -35,14 +35,14 @@ class Sample:
     self.style           = None 
     self.listOfFiles     = None
     self.selectionString = None
-    self.addSamples      = [name]
+    self.addSamples      = [(name, self.productionLabel)]
 
   def addStyle(self, texName, style):
     self.texName = texName
     self.style   = style
 
-  def addSample(self, name):
-    self.addSamples += [name]
+  def addSample(self, name, productionLabel):
+    self.addSamples += [(name, productionLabel)]
 
   def addSelectionString(self, selectionString):
     self.selectionString = selectionString
@@ -71,14 +71,11 @@ class Sample:
 
   # init the chain and return it
   def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None, sys=None):
-    if sys and (sys.count('Scale') or sys.count('Res')) and reducedType.count('pho'):                reducedType += '-' + sys
-    if sys and (self.name=='TTGamma' or self.name=='TTJets_pow') and ('fsr' in sys or 'isr' in sys): sys=sys.lower()
-    else:                                                                                            sys=None
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
-      for s in self.addSamples:
-        self.listOfFiles += glob.glob(os.path.join(reducedTupleDir, self.productionLabel, reducedType, s+'_'+sys if sys else s, '*.root'))
+      for sample, productionLabel in self.addSamples:
+        self.listOfFiles += glob.glob(os.path.join(reducedTupleDir, productionLabel, reducedType, sample, '*.root'))
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
       if self.isData and splitData:
@@ -133,7 +130,7 @@ def createSampleList(file):
 #
 # Create stack from configuration file
 #
-def createStack(tuplesFile, styleFile, channel):
+def createStack(tuplesFile, styleFile, channel, replacements = {}):
   sampleList  = [s for s in createSampleList(tuplesFile)]
   sampleInfos = [line.split('%')[0].strip() for line in open(styleFile)]                    # Strip % comments and \n charachters
   sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
@@ -141,13 +138,17 @@ def createStack(tuplesFile, styleFile, channel):
   stack       = []
   skip        = False
   for info in sampleInfos:
+    for i,j in replacements.iteritems():
+      if info[0] == i: info[0] = j
     if '--' in info:
       if len(stack):                                                                        # When "--", start a new stack
         allStacks.append(stack)
         stack = []
     else:
       if info[0].startswith('+'):                                                           # Add more subsamples to legend item (unless we skip the dataset)
-        if not skip: stack[-1].addSample(info[0].strip('+'))
+        if not skip:
+          sample = getSampleFromList(sampleList, info[0].strip('+'))
+          stack[-1].addSample(sample.name, sample.productionLabel)
       else:
         selectionString = None
         try:    name, texName, style, color, selectionString = info
@@ -174,7 +175,7 @@ def createStack(tuplesFile, styleFile, channel):
         if not sample: sample = getSampleFromStack(allStacks, name)                         # or other stack
         if sample:                                                                          # if yes, take it from there and make a deepcopy with different name
           sample = copy.deepcopy(sample)
-          sample.addSamples = [sample.name]
+          sample.addSamples = [sample.name, sample.productionLabel]
           sample.name += '_' + texName
         else:                                   
           sample = getSampleFromList(sampleList, name)
