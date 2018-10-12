@@ -211,11 +211,11 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
     if not forSys:
       for var, i in [('Fu', 1), ('Fd', 2), ('Ru', 3), ('RFu', 4), ('Rd', 6), ('RFd', 8)]:
-        try:    setattr(newVars, 'weight_q2_' + var, c._lheWeight[i]*lumiWeights[i])
+        try:    setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
         except: setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
 
       for i in range(0,100):
-        try:    setattr(newVars, 'weight_pdf_' + str(i), c._lheWeight[i+9]*lumiWeights[i+9])
+        try:    setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+9]*lumiWeights[i+9])
         except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
 
     newVars.puWeight            = puReweighting(c._nTrueInt)
