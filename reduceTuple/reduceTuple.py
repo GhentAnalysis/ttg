@@ -15,8 +15,6 @@ argParser.add_argument('--sample',         action='store',      default=None,   
 argParser.add_argument('--type',           action='store',      default='eleSusyLoose-phoCB', help='Specify type of reducedTuple')
 argParser.add_argument('--subJob',         action='store',      default=None,                 help='The xth subjob for a sample, number of subjobs is defined by split parameter in tuples.conf')
 argParser.add_argument('--splitData',      action='store',      default=None,                 help='Splits the data in its separate runs')
-argParser.add_argument('--QCD',            action='store_true', default=False,                help='use tuplesQCD.conf instead of tuples.conf')
-argParser.add_argument('--singleLep',      action='store_true', default=False,                help='use tuplesSingleLep.conf instead of tuples.conf')
 argParser.add_argument('--runLocal',       action='store_true', default=False,                help='use local resources instead of Cream02')
 argParser.add_argument('--debug',          action='store_true', default=False,                help='only run over first three files for debugging')
 argParser.add_argument('--dryRun',         action='store_true', default=False,                help='do not launch subjobs, only show them')
@@ -32,10 +30,7 @@ log = getLogger(args.logLevel)
 # Create sample list
 #
 from ttg.samples.Sample import createSampleList,getSampleFromList
-if args.QCD:         tuples = 'tuplesQCD.conf'
-elif args.singleLep: tuples = 'tuplesSingleLep.conf'
-else:                tuples = 'tuples.conf'
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + tuples))
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
 
 #
 # Submit subjobs: for each sample split in args.splitJobs
@@ -66,7 +61,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 sample = getSampleFromList(sampleList, args.sample)
-c      = sample.initTree(skimType=('singlePhoton' if args.QCD else 'dilepton'), shortDebug=args.debug, splitData=args.splitData)
+c      = sample.initTree(skimType='dilepton', shortDebug=args.debug, splitData=args.splitData)
 forSys = (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr'))  # Tuple is created for specific sys
 
 if not sample.isData:
@@ -129,9 +124,7 @@ newBranches  = ['ph/I','ph_pt/F','phJetDeltaR/F','matchedGenPh/I', 'matchedGenEl
 newBranches += ['njets/I','j1/I','j2/I','nbjets/I','ndbjets/I']
 newBranches += ['l1/I','l2/I','looseLeptonVeto/O','l1_pt/F','l2_pt/F']
 newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F']
-
-if args.singleLep: newBranches += ['isE/O','isMu/O']
-elif not args.QCD: newBranches += ['isEE/O','isMuMu/O','isEMu/O']
+newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
   for sys in ['', 'Up', 'Down']:                              newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
@@ -149,7 +142,6 @@ from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selec
 newVars = makeBranches(outputTree, newBranches)
 
 setIDSelection(c, args.type)
-minLeptons            = 0 if args.QCD else (1 if args.singleLep else 2)
 doPhotonCut           = args.type.count('pho')
 jetPtCut              = 40 if args.type.count('jetPt40') else 30
 
@@ -170,34 +162,25 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   c.GetEntry(i)
   for s in branchModifications: s(c)
 
-  if not selectLeptons(c, newVars, minLeptons):                                              continue
-  if not selectPhotons(c, newVars, doPhotonCut, minLeptons, sample.isData):                  continue
+  if not selectLeptons(c, newVars, 2):                             continue
+  if not selectPhotons(c, newVars, doPhotonCut, 2, sample.isData): continue
 
-  if minLeptons > 1:
-    if sample.isData:
-      if not c._passMETFiltersData:                                                          continue
-      if sample.name.count('DoubleMuon') and not c._passTTG_mm:                              continue
-      if sample.name.count('DoubleEG')   and not c._passTTG_ee:                              continue
-      if sample.name.count('MuonEG')     and not c._passTTG_em:                              continue
-      if sample.name.count('SingleMuon'):
-        if newVars.isMuMu and not (not c._passTTG_mm and c._passTTG_m):                      continue
-        if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_m):                      continue
-      if sample.name.count('SingleElectron'):
-        if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
-        if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
-    else:
-      if not c._passMETFiltersMC:                                                            continue
-      if newVars.isEE   and not (c._passTTG_ee or c._passTTG_e):                             continue
-      if newVars.isEMu  and not (c._passTTG_em or c._passTTG_e or c._passTTG_m):             continue
-      if newVars.isMuMu and not (c._passTTG_mm or c._passTTG_m):                             continue
-
-  if minLeptons == 1:
-    if sample.isData:
-      if sample.name.count('SingleMuon')     and newVars.isMu and not c._passTTG_m:          continue
-      if sample.name.count('SingleElectron') and newVars.isE  and not c._passTTG_e:          continue
-    else:
-      if newVars.isMu and not c.passTTG_m:                                                   continue
-      if newVars.isE  and not c.passTTG_e:                                                   continue
+  if sample.isData:
+    if not c._passMETFiltersData:                                                          continue
+    if sample.name.count('DoubleMuon') and not c._passTTG_mm:                              continue
+    if sample.name.count('DoubleEG')   and not c._passTTG_ee:                              continue
+    if sample.name.count('MuonEG')     and not c._passTTG_em:                              continue
+    if sample.name.count('SingleMuon'):
+      if newVars.isMuMu and not (not c._passTTG_mm and c._passTTG_m):                      continue
+      if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_m):                      continue
+    if sample.name.count('SingleElectron'):
+      if newVars.isEE   and not (not c._passTTG_ee and c._passTTG_e):                      continue
+      if newVars.isEMu  and not (not c._passTTG_em and c._passTTG_e and not c._passTTG_m): continue
+  else:
+    if not c._passMETFiltersMC:                                                            continue
+    if newVars.isEE   and not (c._passTTG_ee or c._passTTG_e):                             continue
+    if newVars.isEMu  and not (c._passTTG_em or c._passTTG_e or c._passTTG_m):             continue
+    if newVars.isMuMu and not (c._passTTG_mm or c._passTTG_m):                             continue
 
   goodJets(c, newVars, jetPtCut)
   bJets(c, newVars)
@@ -222,24 +205,12 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.puWeightUp          = puReweightingUp(c._nTrueInt)
     newVars.puWeightDown        = puReweightingDown(c._nTrueInt)
 
-    if minLeptons > 1:
-      l1 = newVars.l1
-      l2 = newVars.l2
-      newVars.lWeight           = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
-      newVars.lWeightUp         = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
-      newVars.lWeightDown       = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
-      newVars.lTrackWeight      = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
-    elif minLeptons > 0:
-      l1 = newVars.l1
-      newVars.lWeight           = leptonSF.getSF(c, l1)
-      newVars.lWeightUp         = leptonSF.getSF(c, l1, sigma=+1)
-      newVars.lWeightDown       = leptonSF.getSF(c, l1, sigma=-1)
-      newVars.lTrackWeight      = leptonTrackingSF.getSF(c, l1)
-    else:
-      newVars.lWeight           = 1.
-      newVars.lWeightUp         = 1.
-      newVars.lWeightDown       = 1.
-      newVars.lTrackWeight      = 1.
+    l1 = newVars.l1
+    l2 = newVars.l2
+    newVars.lWeight           = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
+    newVars.lWeightUp         = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
+    newVars.lWeightDown       = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
+    newVars.lTrackWeight      = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
 
     newVars.phWeight            = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
     newVars.phWeightUp          = photonSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
@@ -250,7 +221,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
       setattr(newVars, 'bTagWeightCSV' + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = True))
       setattr(newVars, 'bTagWeight'    + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = False))
 
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2) if minLeptons > 1 else (1., 0.)
+    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2)
     newVars.triggerWeight      = trigWeight
     newVars.triggerWeightUp    = trigWeight+trigErr
     newVars.triggerWeightDown  = trigWeight-trigErr
