@@ -36,7 +36,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import systematics, linearSystematics, applySysToTree, applySysToString
+from ttg.plots.systematics import systematics, linearSystematics, applySysToTree, applySysToString, showSysList
 
 #
 # Submit subjobs
@@ -46,7 +46,7 @@ if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   from ttg.plots.variations   import getVariations
 
-  if args.showSys and args.runSys: sysList = [s.replace('Up','') for s in systematics.keys() if 'Up' in s] + ['stat']
+  if args.showSys and args.runSys: sysList = showSysList + ['stat']
   elif args.sys:                   sysList = [args.sys]
   else:                            sysList = [None] + (systematics.keys() if args.runSys else [])
 
@@ -76,6 +76,7 @@ phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
 zeroLep     = args.tag.count('QCD')
 singleLep   = args.tag.count('singleLep')
+prefire     = args.tag.count('prefireCheck')
 normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay'])
 
 
@@ -291,6 +292,7 @@ if not args.showSys:
       elif not sample.isData and args.sys:
         applySysToTree(sample.name, args.sys, c)
 
+      if prefire and c.prefireCheck: continue
       if not passingFunctions(c): continue
 
       if selectPhoton:
@@ -334,14 +336,14 @@ for plot in plots: # 1D plots
     normalizeToMC = [False,True] if args.channel!='noData' else [False]
     if args.tag.count('onlydata'):
       extraArgs['resultsDir']  = os.path.join(plotDir, args.tag, args.channel, args.selection)
-      extraArgs['systematics'] = {'sideBandUncUp' : [], 'sideBandUncDown' : []}
+      extraArgs['systematics'] = ['sideBandUnc']
     elif args.showSys:
       extraArgs['addMCStat']   = True
       if args.sys:
         extraArgs['addMCStat'] = (args.sys == 'stat')
-        systematics            = {i: j for i,j in systematics.iteritems()       if i.count(args.sys)}
+        showSysList            = [args.sys] if args.sys != 'stat' else []
         linearSystematics      = {i: j for i,j in linearSystematics.iteritems() if i.count(args.sys)}
-      extraArgs['systematics']       = systematics
+      extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
       extraArgs['postFitInfo']       = postFitInfo

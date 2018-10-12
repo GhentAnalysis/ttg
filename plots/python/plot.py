@@ -314,10 +314,14 @@ class Plot:
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
-    sysKeys = systematics.keys()
+    sysKeys = [i + 'Up' for i in systematics] + [i + 'Down' for i in systematics]
     if addMCStat:
       sysKeys += [s.name + s.texName + 'StatUp'   for s in stackForSys]
       sysKeys += [s.name + s.texName + 'StatDown' for s in stackForSys]
+
+    from ttg.plots.systematics import constructQ2Sys, constructPdfSys
+    if 'q2'  in systematics: constructQ2Sys(allPlots, self.name, stackForSys)
+    if 'pdf' in systematics: constructPdfSys(allPlots, self.name, stackForSys)
 
     histos_summed = {}
     for sys in [None] + sysKeys:
@@ -464,7 +468,7 @@ class Plot:
           canvasModifications = [],
           histModifications = [],
           ratioModifications = [],
-          systematics = {},
+          systematics = [],
           linearSystematics = {},
           addMCStat = False,
           resultsDir = None,

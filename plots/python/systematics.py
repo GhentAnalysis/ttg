@@ -1,3 +1,6 @@
+from ttg.tools.logger import getLogger
+log = getLogger()
+
 #
 # Defining shape systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
 #
@@ -15,12 +18,24 @@ for i in ('Up', 'Down'):
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
   systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
-  systematics['pdfTTGamma'+i] = [('genWeight',     'TTGamma:weight_pdf'+i)]
-  systematics['pdfTTbar'+i]   = [('genWeight',     'TTJets_pow:weight_pdf'+i)]
-  systematics['q2'+i]         = [('genWeight',     'weight_q2'+i)]
+#  systematics['pdfTTGamma'+i] = [('genWeight',     'TTGamma:weight_pdf'+i)]
+#  systematics['pdfTTbar'+i]   = [('genWeight',     'TTJets_pow:weight_pdf'+i)]
+#  systematics['q2'+i]         = [('genWeight',     'weight_q2'+i)]
   systematics['JEC'+i]        = [('njets',         'njets_JEC'+i),     ('ndbjets',    'ndbjets_JEC'+i), ('j1', 'j1_JEC'+i), ('j2', 'j2_JEC'+i), ('_jetPt', '_jetPt_JEC'+i)]
   systematics['JER'+i]        = [('njets',         'njets_JER'+i),     ('ndbjets',    'ndbjets_JER'+i), ('j1', 'j1_JER'+i), ('j2', 'j2_JER'+i), ('_jetPt', '_jetPt_JER'+i)]
 
+#
+# For the complicated and CPU-intensive q2/pdf weights running
+#
+for i in ('Ru','Fu','RFu','Rd','Fd','RFd'):
+  systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
+for i in range(0,100):
+  systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
+
+#
+# Compile list to systematic to show
+#
+showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in systematics.keys()))
 
 #
 # Defining linear systematics as "name : (sampleList, %)"
@@ -48,3 +63,50 @@ def applySysToTree(sample, sys, tree):
       s, sysVar = sysVar.split(':')
       if sample!=s: return
     setattr(tree, var, getattr(tree, sysVar))
+
+
+#
+# Function for the q2 envelope using input histogram
+#
+def q2Sys(variations):
+  upHist, downHist = variations[0].Clone(), variations[0].Clone()
+  for i in range(0, variations[0].GetNbinsX()+1):
+    upHist.SetBinContent(  i, max([var.GetBinContent(i) for var in variations]))
+    downHist.SetBinContent(i, min([var.GetBinContent(i) for var in variations]))
+    print i, [var.GetBinContent(i) for var in variations], upHist.GetBinContent(i), downHist.GetBinContent(i)
+  return upHist, downHist
+
+def constructQ2Sys(allPlots, plotName, stack):
+  allPlots[plotName + 'q2Up'] = {}
+  allPlots[plotName + 'q2Down'] = {}
+  for histName in [s.name+s.texName for s in stack]:
+    print histName
+    try:
+      variations = [allPlots[plotName + 'q2_' + i][histName] for i in ('Ru','Fu','RFu','Rd','Fd','RFd')]
+      allPlots[plotName + 'q2Up'][histName], allPlots[plotName + 'q2Down'][histName] = q2Sys(variations)
+    except:
+      log.warning('Missing q2 variations for ' + plotName + ' ' + histName + '!')
+      allPlots[plotName + 'q2Up'][histName], allPlots[plotName + 'q2Down'][histName] = allPlots[plotName][histName], allPlots[plotName][histName]
+
+#
+# Function for the pdf RMS envelope using input histogram
+#
+from math import sqrt
+def pdfSys(variations, nominal):
+  upHist, downHist = variations[0].Clone(), variations[0].Clone()
+  for i in range(0, variations[0].GetNbinsX()+1):
+    pdfVarRms = sqrt(sum((nominal.GetBinContent(i) - var.GetBinContent(i))**2 for var in variations))
+    upHist.SetBinContent(  i, nominal.GetBinContent(i) + pdfVarRms)
+    downHist.SetBinContent(i, nominal.GetBinContent(i) - pdfVarRms)
+  return upHist, downHist
+
+def constructPdfSys(allPlots, plotName, stack):
+  allPlots[plotName + 'pdfUp'] = {}
+  allPlots[plotName + 'pdfDown'] = {}
+  for histName in [s.name+s.texName for s in stack]:
+    try:
+      variations = [allPlots[plotName + 'pdf_' + str(i)][histName] for i in range(0, 100)]
+      allPlots[plotName + 'pdfUp'][histName], allPlots[plotName + 'pdfDown'][histName] = pdfSys(variations, allPlots[plotName][histName])
+    except:
+      log.warning('Missing pdf variations for ' + plotName + ' ' + histName + '!')
+      allPlots[plotName + 'pdfUp'][histName], allPlots[plotName + 'pdfDown'][histName] = allPlots[plotName][histName], allPlots[plotName][histName]
