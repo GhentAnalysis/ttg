@@ -170,6 +170,7 @@ for i,j in nonPromptSF.iteritems():
 #
 # ROOT file for a signal regions fit
 #
+from ttg.plots.systematics import q2Sys, pdfSys
 def writeRootFile(name, systematics, nonPromptSF, merged=False):
   f = ROOT.TFile('combine/' + name + '_shapes.root', 'RECREATE')
 
@@ -183,8 +184,10 @@ def writeRootFile(name, systematics, nonPromptSF, merged=False):
     promptSelectors   = [[sample, '(genuine,misIdEle)']]
     fakeSelectors     = [[sample, '(hadronicFake)']]
     hadronicSelectors = [[sample, '(hadronicPhoton)']]
-    for sys in [''] + systematics:
-      for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('zg_SF', 'SF')]:
+    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('zg_SF', 'SF')]:
+      q2Variations = []
+      pdfVariations = []
+      for sys in [''] + systematics:
         prompt   = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *promptSelectors)
         fake     = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *fakeSelectors)
         hadronic = getHistFromPkl(('eleSusyLoose-phoCBfull-match', channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *hadronicSelectors)
@@ -203,7 +206,20 @@ def writeRootFile(name, systematics, nonPromptSF, merged=False):
           writeHist(f, shape+'fakeDown', sample, totalDown, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
         total.Add(fake)
 
-        writeHist(f, shape+sys, sample, total, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        if sys=='':       nominal = total
+        if 'pdf' in sys:  pdfVariations += [total]
+        elif 'q2' in sys: q2Variations += [total]
+        else:             writeHist(f, shape+sys, sample, total, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+
+      if len(pdfVariations) > 0:
+        up, down = pdfSys(pdfVariations, nominal)
+        writeHist(f, shape+'pdfUp',   sample, up,   mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        writeHist(f, shape+'pdfDown', sample, down, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+
+      if len(q2Variations) > 0:
+        up, down = q2Sys(q2Variations)
+        writeHist(f, shape+'q2Up',   sample, up,   mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        writeHist(f, shape+'q2Down', sample, down, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
 
   f.Close()
 
