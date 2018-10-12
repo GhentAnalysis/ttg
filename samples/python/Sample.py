@@ -16,6 +16,7 @@ log = getLogger()
 import glob, os, copy, ROOT, uuid, socket, getpass
 
 from ttg.tools.progressBar import progressbar
+from ttg.tools.helpers import reducedTupleDir
 import ttg.tools.style as styles
 
 #
@@ -76,9 +77,8 @@ class Sample:
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
-      baseDir           = ('/afs/cern.ch/work/t/' + getpass.getuser() + '/public/reducedTuples/') if 'lxp' in socket.gethostname() else ('/user/' + getpass.getuser() + '/public/reducedTuples/')
       for s in self.addSamples:
-        self.listOfFiles += glob.glob(os.path.join(baseDir, self.productionLabel, reducedType, s+'_'+sys if sys else s, '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(reducedTupleDir, self.productionLabel, reducedType, s+'_'+sys if sys else s, '*.root'))
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
       if self.isData and splitData:

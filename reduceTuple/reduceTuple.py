@@ -27,13 +27,16 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 #
-# Create sample list
+# Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
 #
 from ttg.samples.Sample import createSampleList,getSampleFromList
 sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
 
 #
-# Submit subjobs: for each sample split in args.splitJobs
+# Submit subjobs:
+#   - each sample is splitted by the splitJobs parameter defined in tuples.conf, if a sample runs too slow raise the splitJobs parameter
+#   - data is additional splitted per run to avoid too heavy chains to be loaded
+#   - skips the isr and fsr systematic samples when tuples for scale and resolution systematics are prepared
 #
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
@@ -44,7 +47,7 @@ if not args.isChild and not args.subJob:
     if (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr')): continue
 
     if sample.isData:
-      runs = ['B','C','D','E','F','G','H'] # Chains become very slow for data, so we split them
+      runs = ['B','C','D','E','F','G','H']
       if args.splitData in runs: splitData = [args.splitData]
       else:                      splitData = runs
     else:                        splitData = [None]
@@ -56,7 +59,6 @@ if not args.isChild and not args.subJob:
 #
 # From here on we are in the subjob, first init the chain and the lumiWeight
 #
-
 import ROOT
 ROOT.gROOT.SetBatch(True)
 
@@ -71,7 +73,8 @@ if not sample.isData:
 #
 # Create new reduced tree
 #
-reducedTupleDir = os.path.join('/user/tomc/public/reducedTuples', sample.productionLabel, args.type, sample.name)
+from ttg.tools.heplers import reducedTupleDir
+reducedTupleDir = os.path.join(reducedTupleDir, sample.productionLabel, args.type, sample.name)
 try:    os.makedirs(reducedTupleDir)
 except: pass
 
