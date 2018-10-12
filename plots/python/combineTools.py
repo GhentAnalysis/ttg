@@ -73,7 +73,7 @@ def getParam(filename, param):
 # Run fit diagnostics
 #
 def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=False, alsoBOnly=False):
-  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001'
+  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001 --saveShapes'
   if toys:                 extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
   if statOnly:             extraOptions += ' --justFit --profilingMode=none -v 2 '
   if not alsoBOnly:        extraOptions += ' --skipBOnlyFit'
