@@ -2,9 +2,11 @@ import ROOT, socket, os, shutil, subprocess
 from math import pi, sqrt
 
 #
-# Get plot directory
+# Get some fixed paths
 #
-plotDir = os.path.expandvars('/eos/user/t/tomc/www/ttG/' if 'lxp' in socket.gethostname() else '/user/$USER/www/ttG/')
+userGroup       = os.path.expandvars('$USER')[0:1]
+plotDir         = os.path.expandvars(('/eos/user/' + userGroup + '/$USER/www/ttG/')       if 'lxp' in socket.gethostname() else '/user/$USER/www/ttG/')
+reducedTupleDir = os.path.expandvars(('/eos/user/' + userGroup + '/$USER/reducedTuples/') if 'lxp' in socket.gethostname() else '/user/$USER/public/reducedTuples/') 
 
 #
 # Check if valid ROOT file exists
@@ -34,18 +36,17 @@ def getObjFromFile(fname, hname):
     f.Close()
 
 #
-# Copy the index.php file to plotting directory
+# Copy the index.php file to plotting directory and all mother directories within the plotDir
 #
 def copyIndexPHP(directory):
-  index_php = os.path.join(directory, 'index.php' )
   if not os.path.exists(directory): os.makedirs(directory)
-  if not directory[-1] == '/': directory = directory+'/'
   subdirs = directory.split('/')
   for i in range(1,len(subdirs)):
     p = '/'.join(subdirs[:-i])
-    if not (p.count('plots') or p.count('ttG')): continue
+    if not plotDir in p: continue
     index_php = os.path.join(p, 'index.php')
-    shutil.copyfile(os.path.expandvars( '$CMSSW_BASE/src/ttg/tools/php/index.php'), index_php)
+    if os.path.exists(index_php): continue
+    shutil.copyfile(os.path.expandvars('$CMSSW_BASE/src/ttg/tools/php/index.php'), index_php)
 
 #
 # Update the latest git information
