@@ -25,13 +25,16 @@ def getLogs(logDir):
 
 jobsToSubmit = []
 for logfile in getLogs('./log'):
-  finished = False
-  command  = None
+  finished  = False
+  rootError = False
+  command   = None
   with open(logfile) as f:
     for line in f:
-      if 'Finished' in line or 'finished' in line: finished = True
-      if 'Command:' in line:                       command  = line.split('Command: ')[-1].rstrip()
-  if not finished and command: jobsToSubmit.append((command, logfile))
+      if 'SysError in <TFile::ReadBuffer>' in line: rootError = True
+      if 'Error in <TChain::LoadTree>' in line:     rootError = True
+      if 'Finished' in line or 'finished' in line:  finished  = True
+      if 'Command:' in line:                        command   = line.split('Command: ')[-1].rstrip()
+  if (not finished or rootError) and command: jobsToSubmit.append((command, logfile))
 
 from ttg.tools.helpers import updateGitInfo
 updateGitInfo()
