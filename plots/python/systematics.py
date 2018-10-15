@@ -66,14 +66,14 @@ def applySysToTree(sample, sys, tree):
 
 def applySysToReduceType(reduceType, sys):
   if sys:
-    if (sys.count('Scale') or sys.count('Res')) and reducedType.count('pho'): reducedType += '-' + sys
+    if (sys.count('Scale') or sys.count('Res')) and reduceType.count('pho'): reduceType += '-' + sys
   return reduceType
 
 #
 # Special systematic samples for FSR and ISR
 #
 def getReplacementsForStack(sys):
-  if sys and ('fsr' in sys or 'isr' in sys):
+  if sys and any([i==sys for i in ['fsrUp', 'fsrDown', 'isrUp', 'isrDown']]):
     return {'TTGamma' : 'TTGamma_' + sys.lower(), 'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
   else:
     return {}
@@ -87,14 +87,12 @@ def q2Sys(variations):
   for i in range(0, variations[0].GetNbinsX()+1):
     upHist.SetBinContent(  i, max([var.GetBinContent(i) for var in variations]))
     downHist.SetBinContent(i, min([var.GetBinContent(i) for var in variations]))
-    print i, [var.GetBinContent(i) for var in variations], upHist.GetBinContent(i), downHist.GetBinContent(i)
   return upHist, downHist
 
 def constructQ2Sys(allPlots, plotName, stack):
   allPlots[plotName + 'q2Up'] = {}
   allPlots[plotName + 'q2Down'] = {}
   for histName in [s.name+s.texName for s in stack]:
-    print histName
     try:
       variations = [allPlots[plotName + 'q2_' + i][histName] for i in ('Ru','Fu','RFu','Rd','Fd','RFd')]
       allPlots[plotName + 'q2Up'][histName], allPlots[plotName + 'q2Down'][histName] = q2Sys(variations)

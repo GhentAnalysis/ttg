@@ -133,7 +133,7 @@ class Plot:
 
     self.histos = {}
     for s in sum(self.stack, []):
-      name           = self.name + s.name
+      name           = self.name + (s.nameNoSys if hasattr(s, 'nameNoSys') else s.name)
       self.histos[s] = ROOT.TH1F(name, name, *self.binning)
 
 
@@ -217,7 +217,7 @@ class Plot:
     except: pass
 
     resultFile = os.path.join(dir, self.name + '.pkl')
-    histos     = {s.name+s.texName: h for s, h in self.histos.iteritems()}
+    histos     = {s.nameNoSys+s.texName: h for s, h in self.histos.iteritems()}
     plotName   = self.name+(sys if sys else '')
     try:
       with lock(resultFile, 'rb', keepLock=True) as f: allPlots = pickle.load(f)

@@ -70,7 +70,7 @@ class Sample:
     return trueInteractions
 
   # init the chain and return it
-  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None, sys=None):
+  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None):
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
@@ -175,7 +175,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = {}):
         if not sample: sample = getSampleFromStack(allStacks, name)                         # or other stack
         if sample:                                                                          # if yes, take it from there and make a deepcopy with different name
           sample = copy.deepcopy(sample)
-          sample.addSamples = [sample.name, sample.productionLabel]
+          sample.addSamples = [(sample.name, sample.productionLabel)]
           sample.name += '_' + texName
         else:                                   
           sample = getSampleFromList(sampleList, name)
@@ -185,6 +185,10 @@ def createStack(tuplesFile, styleFile, channel, replacements = {}):
         sample.addStyle(texName, style)
         stack.append(sample)
   if len(stack): allStacks.append(stack)
+  for s in sum(allStacks, []):
+    s.nameNoSys = s.name
+    for i,j in replacements.iteritems():                                                    # Still use original name when using replacement samples like ISR and FSR
+      s.nameNoSys = s.nameNoSys.replace(j, i)
   return allStacks
 
 

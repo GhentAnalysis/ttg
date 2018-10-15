@@ -240,13 +240,14 @@ if not args.showSys:
   if   args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
   elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
   else:                                                                             reduceType = 'eleSusyLoose-phoCB'
+  reduceType = applySysToReduceType(reduceType, args.sys)
 
   from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
   for sample in sum(stack, []):
     cutString, passingFunctions = cutInterpreter.cutString(args.selection, args.channel)
     cutString = applySysToString(sample.name, args.sys, cutString)
     if args.sys and 'Scale' not in args.sys and sample.isData: continue
-    c = sample.initTree(reducedType = reduceType, skimType='singlePhoton' if args.tag.count('QCD') else 'dilep', sys=args.sys)
+    c = sample.initTree(reducedType = reduceType, skimType='dilep')
 
     c.data = sample.isData
 
@@ -279,7 +280,7 @@ if not args.showSys:
       if not sample.isData and args.sys:
         applySysToTree(sample.name, args.sys, c)
 
-      if prefire and c.prefireCheck: continue
+      if prefire and not sample.isData and c.prefireCheck: continue
       if not passingFunctions(c): continue
 
       if selectPhoton:
