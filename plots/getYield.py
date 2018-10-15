@@ -9,5 +9,5 @@ from ttg.tools.logger       import getLogger
 log = getLogger(args.logLevel)
 
 for sample in ['TTGamma', 'TTJets']: 
-  print sample + ':\t\t\t'            + str(getHistFromPkl(('eleSusyLoose-phoCBfull',               'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'yield', '', [sample]).Integral())
-  print sample + '(pixelSeedVeto):\t' + str(getHistFromPkl(('eleSusyLoose-phoCBfull-pixelSeedVeto', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'yield', '', [sample]).Integral())
+  print sample + ':\t\t\t'           + str(getHistFromPkl(('eleSusyLoose-phoCBfull',              'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'yield', '', [sample]).Integral())
+  print sample + '(prefireCheck):\t' + str(getHistFromPkl(('eleSusyLoose-phoCBfull-prefireCheck', 'all', 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'), 'yield', '', [sample]).Integral())
