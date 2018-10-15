@@ -10,7 +10,7 @@ log = getLogger(logLevel=args.logLevel)
 from ttg.tools.helpers      import addHist
 from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
 from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts
-from ttg.plots.systematics  import systematics, linearSystematics
+from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys
 
 import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
@@ -170,7 +170,6 @@ for i,j in nonPromptSF.iteritems():
 #
 # ROOT file for a signal regions fit
 #
-from ttg.plots.systematics import q2Sys, pdfSys
 def writeRootFile(name, systematics, nonPromptSF, merged=False):
   f = ROOT.TFile('combine/' + name + '_shapes.root', 'RECREATE')
 
@@ -234,7 +233,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False):
   extraLines += ['* autoMCStats 0 1 1']
 
   writeRootFile(cardName, systematics.keys(), nonPromptSF, merged)
-  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+  writeCard(cardName, shapes, templates, [], extraLines, showSysList + ['fake'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)

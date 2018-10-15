@@ -180,7 +180,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     for sys, info in linearSystematics.iteritems():
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
-    for sys in [s.replace('Up','') for s in systematics if 'Up' in s]:
+    for sys in systematics:
       if ':' in sys: sample, sys = sys.split(':')
       else:          sample, sys = None, sys
       f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else ('%.4f' % scaleShape[sys] if sys in scaleShape else '1')) for s in shapes for t in templates+templatesNoSys]))
