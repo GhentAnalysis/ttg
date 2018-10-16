@@ -12,6 +12,7 @@ reducedTupleDir = os.path.expandvars(('/eos/user/' + userGroup + '/$USER/reduced
 # Check if valid ROOT file exists
 #
 def isValidRootFile(fname):
+  if not os.path.exists(os.path.expandvars(fname)): return False
   f = ROOT.TFile(fname)
   if not f: return False
   try:
