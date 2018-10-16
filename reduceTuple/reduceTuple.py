@@ -91,8 +91,8 @@ outputFile.cd()
 #
 # Switch off unused branches, avoid copying of branches we want to delete
 #
-unusedBranches = ["HLT","Flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
-deleteBranches = ["Scale","Res","pass","flag","met","POG"]
+unusedBranches = ["HLT","Flag","flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
+deleteBranches = ["Scale","Res","pass","met","POG"]
 if not sample.isData:
   unusedBranches += ["gen_nL", "gen_l","gen_met","gen_HT"]
   deleteBranches += ["heWeight","gen_ph"]
@@ -239,10 +239,5 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   outputTree.Fill()
 outputTree.AutoSave()
-
-if not sample.isData:
-  trueIntHist = sample.getTrueInteractions()
-  outputFile.cd()
-  trueIntHist.Write('nTrue')
 outputFile.Close()
 log.info('Finished')
