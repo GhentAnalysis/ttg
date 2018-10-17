@@ -33,9 +33,13 @@ qcdSelections     = ['pho-photonPt20',
                      ]
 
 dilepSelections   = ['ll-looseLeptonVeto-mll40', 
+                     'll-looseLeptonVeto-mll40-nphoton0',
                      'll-looseLeptonVeto-mll40-offZ', 
-                     'll-looseLeptonVeto-mll40-offZ-njet2p', 
-                     'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p']
+                     'll-looseLeptonVeto-mll40-offZ-nphoton0',
+                     'll-looseLeptonVeto-mll40-offZ-njet2p',
+                     'll-looseLeptonVeto-mll40-offZ-njet2p-nphoton0',
+                     'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p',
+                     'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p-nphoton0']
 
 silepSelections   = ['lg-looseLeptonVeto-photonPt20',
                      'lg-looseLeptonVeto-njet3p-photonPt20', 
