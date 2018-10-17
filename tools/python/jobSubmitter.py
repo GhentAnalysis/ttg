@@ -21,7 +21,7 @@ def checkQueueOnCream02():
 def launchCream02(command, logfile, checkQueue=False):
   if checkQueue: checkQueueOnCream02()
   log.info('Launching ' + command + ' on cream02')
-  try:    out = system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=15:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh")
+  try:    out = system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=35:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh")
   except: out = 'failed'
   if not out.count('.cream02.iihe.ac.be'):
       time.sleep(10)
