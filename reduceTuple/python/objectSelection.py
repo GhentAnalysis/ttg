@@ -111,9 +111,9 @@ def select2l(t, n):
   n.l2              = ptAndIndex[1][1]
   n.l1_pt           = ptAndIndex[0][0]
   n.l2_pt           = ptAndIndex[1][0]
-  n.isEE            = (t._lFlavor[n.l1] + t._lFlavor[n.l2]) == 0
-  n.isEMu           = (t._lFlavor[n.l1] + t._lFlavor[n.l2]) == 1
-  n.isMuMu          = (t._lFlavor[n.l1] + t._lFlavor[n.l2]) == 2 # note: assuming no taus are kept
+  n.isEE            = (t._lFlavor[n.l1]==0 and t._lFlavor[n.l2]==0)
+  n.isEMu           = (t._lFlavor[n.l1]==0 and t._lFlavor[n.l2]==1) or (t._lFlavor[n.l1]==1 and t._lFlavor[n.l2]==0)
+  n.isMuMu          = (t._lFlavor[n.l1]==1 and t._lFlavor[n.l2]==1)
   n.isOS            = t._lCharge[n.l1] != t._lCharge[n.l2]
   n.looseLeptonVeto = len([i for i in xrange(ord(t._nLight)) if looseLeptonSelector(t, i)]) <= 2
   return leptonPt(t, n.l1) > 25 and n.isOS
