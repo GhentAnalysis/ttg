@@ -112,11 +112,13 @@ puReweightingDown = getReweightingFunction(data="PU_2016_36000_XSecDown")
 from ttg.reduceTuple.leptonTrackingEfficiency import leptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import leptonSF as leptonSF_
 from ttg.reduceTuple.photonSF import photonSF as photonSF_
+from ttg.reduceTuple.prefire  import prefire  as prefire_
 from ttg.reduceTuple.triggerEfficiency import triggerEfficiency
 from ttg.reduceTuple.btagEfficiency import btagEfficiency
 leptonTrackingSF = leptonTrackingEfficiency()
 leptonSF         = leptonSF_()
 photonSF         = photonSF_()
+prefire          = prefire_()
 triggerEff       = triggerEfficiency()
 btagSF           = btagEfficiency()
 
@@ -133,7 +135,7 @@ newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 if not sample.isData:
   newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeightCSV/F', 'bTagWeight/F']
   newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
-  newBranches += ['prefireCheck/O']
+  newBranches += ['prefireSF/F']
   if not forSys:
     for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
     for var in ['Ru','Fu','RFu','Rd','Fd','RFd']:        newBranches += ['weight_q2_' + var + '/F']
@@ -160,7 +162,7 @@ for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
 #
 # Get function calls to object selections and set selections based on the reducedTuple type
 #
-from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR, prefireRemoval
+from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
 setIDSelection(c, args.type)
 
 
@@ -200,7 +202,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   if not sample.isData:
     newVars.genWeight    = c._weight*lumiWeights[0]
-    newVars.prefireCheck = prefireRemoval(c)
+    newVars.prefireSF    = prefire.getSF(c)
 
     # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
     # Except when a sample does not have those weights stored (could occur for the minor backgrounds)
