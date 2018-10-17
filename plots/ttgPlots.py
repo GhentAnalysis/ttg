@@ -280,7 +280,6 @@ if not args.showSys:
       if not sample.isData and args.sys:
         applySysToTree(sample.name, args.sys, c)
 
-      if prefire and not sample.isData and c.prefireCheck: continue
       if not passingFunctions(c): continue
 
       if selectPhoton:
@@ -296,6 +295,9 @@ if not args.showSys:
 
       if sample.isData: eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
+
+      if prefire and not sample.isData: eventWeight *= c.prefireSF
+
 
       fillPlots(plots, c, sample, eventWeight)
 
@@ -338,7 +340,7 @@ for plot in plots: # 1D plots
 
 
     if args.channel!='noData':
-      extraArgs['ratio']   = {'yRange':(0.1,1.9), 'texY': 'obs/pred'}
+      extraArgs['ratio']   = {'yRange':(0.4,1.6), 'texY': 'obs/pred'}
 
     if(normalize or args.tag.count('compareChannels')):
       extraArgs['scaling'] = 'unity'
