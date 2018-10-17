@@ -36,7 +36,7 @@ def photonPt(tree, min, max):
   return True
 
 continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt',(None, photonPt))]
-discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets")]
+discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets"),("nphoton","nphotons")]
 
 class cutInterpreter:
 
