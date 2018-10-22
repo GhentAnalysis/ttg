@@ -32,19 +32,20 @@ qcdSelections     = ['pho-photonPt20',
                      'pho-njet2p-deepbtag1p-photonPt20',
                      ]
 
-dilepSelections   = ['ll-looseLeptonVeto-mll40', 
+dilepSelections   = ['ll-looseLeptonVeto-mll40',
                      'll-looseLeptonVeto-mll40-nphoton0',
-                     'll-looseLeptonVeto-mll40-offZ', 
+                     'll-looseLeptonVeto-mll40-offZ',
                      'll-looseLeptonVeto-mll40-offZ-nphoton0',
                      'll-looseLeptonVeto-mll40-offZ-njet2p',
                      'll-looseLeptonVeto-mll40-offZ-njet2p-nphoton0',
                      'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p',
-                     'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p-nphoton0']
+                     'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p-nphoton0'
+                     ]
 
 silepSelections   = ['lg-looseLeptonVeto-photonPt20',
-                     'lg-looseLeptonVeto-njet3p-photonPt20', 
-                     'lg-looseLeptonVeto-njet4p-photonPt20', 
-                     'lg-looseLeptonVeto-njet4p-deepbtag1p-photonPt20', 
+                     'lg-looseLeptonVeto-njet3p-photonPt20',
+                     'lg-looseLeptonVeto-njet4p-photonPt20',
+                     'lg-looseLeptonVeto-njet4p-deepbtag1p-photonPt20',
                      'lg-looseLeptonVeto-njet4p-deepbtag2p-photonPt20']
 
 def getVariations(args, sysList):
