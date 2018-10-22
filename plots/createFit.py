@@ -284,3 +284,4 @@ def doRatioFit(cardName, shapes, perPage=30):
 
 samples = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 10), ('DY', 10), ('other', 50), ('single-t', 10)]
 doSignalRegionFit('srFit_withSingleT', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True)
+doSignalRegionFit('srFit_withSingleT', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True, toys=True)
