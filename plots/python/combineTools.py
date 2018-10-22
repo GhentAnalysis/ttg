@@ -68,14 +68,21 @@ def getParam(filename, param):
     log.info('Result for ' + param + ': %.2f %.2f/+%.2f' % result)
     return result
 
+def getCovariance(filename):
+  resultsFile = ROOT.TFile(filename)
+  covMatrix   = resultsFile.Get("fit_s").covarianceMatrix()
+  results     = resultsFile.Get("fit_s").floatParsFinal()
+  fitResults  = resultsFile.Get("fit_s").floatParsFinal()
+  names       = [r.GetName() for r in [fitResults.at(i) for i in range(fitResults.getSize())]]
+  # make 2D
 
 #
 # Run fit diagnostics
 #
-def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=False, alsoBOnly=False):
-  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001 --saveShapes'
-  if toys:                 extraOptions += ' --toysFrequentist --noErrors --minos none --expectSignal 1 -t ' + str(toys)
-  if statOnly:             extraOptions += ' --justFit --profilingMode=none -v 2 '
+def runFitDiagnostics(dataCard, trackParameters = [], toys = False, statOnly=False, alsoBOnly=False):
+  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001 --saveShapes --saveWithUncertainties'
+  if toys:                 extraOptions += ' --expectSignal 1 -t -1'
+  if statOnly:             extraOptions += ' --justFit --profilingMode=none -v 2'
   if not alsoBOnly:        extraOptions += ' --skipBOnlyFit'
   if len(trackParameters): extraOptions += ' --trackParameters ' + ','.join(trackParameters)
   if statOnly: logFile = dataCard + '_statOnly'
@@ -100,10 +107,14 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = None, statOnly=Fals
           break
   else:
     try:
-      return {param : getParam('./combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root', param) for param in ['r']+trackParameters}
+      diagnosticsFile = './combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root'
+      getCovariance(diagnosticsFile)
+      return {param : getParam(diagnosticsFile, param) for param in ['r']+trackParameters}
     except:
       with open('./combine/' + logFile + '.log') as f:
         for line in f: log.warning(line.rstrip())
+  import ROOT
+  f = ROOT.TFile()
 
 
 #
@@ -122,24 +133,25 @@ def runSignificance(dataCard, expected=False):
 
 
 #
-# Run impacts (really need to find some real documentation for this)
+# Run impacts
 #
-def runImpacts(dataCard, perPage=30):
+def runImpacts(dataCard, perPage=30, toys=False):
+  extraArg = ' -t -1 --expectSignal=1' if toys else ''
   command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
-  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit;'
-  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8;'
-  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json;'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit' + extraArg + ';'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8' + extraArg + ';'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json' + extraArg + ';'
   command += './plotImpacts.py -i impacts.json --per-page=' + str(perPage) + ' --cms-label preliminary --translate sysMappings.json -o impacts;'
-  command += 'mv impacts.pdf ../../../' + dataCard + '_impacts.pdf'
+  command += 'mv impacts.pdf ../../../' + dataCard + '_impacts' + ('_asimov' if toys else '') + '.pdf'
   log.info('Running Impacts')
   handleCombine(dataCard, dataCard + '_impacts', command)
   with open('./combine/' + dataCard + '_impacts.log') as f:
     for line in f:
       if "mv: cannot stat `impacts.pdf': No such file or directory" in line: log.error("Problem with running impacts")
       log.debug(line.rstrip())
-  os.system("pdftoppm combine/" + dataCard + "_impacts.pdf " + dataCard + "_impacts -png;mogrify -trim " + dataCard + "_impacts*.png")
+  os.system("pdftoppm combine/" + dataCard + "_impacts" + ('_asimov' if toys else '') + ".pdf " + dataCard + "_impacts" + ('_asimov' if toys else '') + " -png;mogrify -trim " + dataCard + "_impacts*.png")
   os.system("mkdir -p ~/www/ttG/combinePlots/")
   os.system("cp $CMSSW_BASE/src/ttg/tools/php/index.php ~/www/ttG/combinePlots/")
   os.system("mv " + dataCard + "_impacts*.png ~/www/ttG/combinePlots/")
