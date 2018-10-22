@@ -244,3 +244,5 @@ def makeDeltaR(t, n):
   n.phL1DeltaR  = deltaR(t._lEta[n.l1], t._phEta[n.ph], t._lPhi[n.l1], t._phPhi[n.ph])                              if len(t.photons) > 0 and len(t.leptons) > 0 else -1
   n.phL2DeltaR  = deltaR(t._lEta[n.l2], t._phEta[n.ph], t._lPhi[n.l2], t._phPhi[n.ph])                              if len(t.photons) > 0 and len(t.leptons) > 1 else -1
   n.phJetDeltaR = min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in t.jets] + [999]) if len(t.photons) > 0 else -1
+  n.l1JetDeltaR = min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in t.jets] + [999])  if len(t.leptons) > 0 else -1
+  n.l2JetDeltaR = min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in t.jets] + [999])  if len(t.leptons) > 1 else -1
