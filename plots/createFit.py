@@ -156,7 +156,7 @@ for selection in ['all']:
     cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
     writeRootFileForChgIso(cardName, [], selection)
     writeCard(cardName, ['chgIso'], templates, [], extraLines, ['all_f:SideBandUncUp'], {})
-    results = runFitDiagnostics(cardName, toys=None, statOnly=False, trackParameters = ['prompt_norm'])
+    results = runFitDiagnostics(cardName, toys=False, statOnly=False, trackParameters = ['prompt_norm'])
     nonPromptSF[selection] = results['r']
     plotChgIso(cardName, '_prefit',  None)
     plotChgIso(cardName, '_postfit', results)
@@ -236,9 +236,10 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
   writeRootFile(cardName, systematics.keys(), nonPromptSF, merged, withSingleTop)
   writeCard(cardName, shapes, templates, [], extraLines, showSysList + ['fake'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
-  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
-  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=True)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=False, statOnly=False)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=False, statOnly=True)
   runImpacts(cardName, perPage)
+  runImpacts(cardName, perPage, toys=True)
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
 
@@ -274,12 +275,12 @@ def doRatioFit(cardName, shapes, perPage=30):
   writeRootFile(cardName, systematics.keys(), nonPromptSF)
   writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['fakeUp'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
-  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=None, statOnly=False)
+  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=False, statOnly=False)
 
 
 #doRatioFit('ratioFit'   , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
 #doRatioFit('ratioFit_SF', ['sr_SF', 'zg_SF'], 28)
 #doRatioFit('ratioFit_OF', ['sr_OF', 'zg_SF'], 28)
 
-samples     = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 10), ('DY', 10), ('other', 50), ('single-t', 20)]
+samples = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 10), ('DY', 10), ('other', 50), ('single-t', 10)]
 doSignalRegionFit('srFit_withSingleT', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True)
