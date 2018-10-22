@@ -107,7 +107,7 @@ from math import sqrt
 def pdfSys(variations, nominal):
   upHist, downHist = variations[0].Clone(), variations[0].Clone()
   for i in range(0, variations[0].GetNbinsX()+1):
-    pdfVarRms = sqrt(sum((nominal.GetBinContent(i) - var.GetBinContent(i))**2 for var in variations))
+    pdfVarRms = sqrt(sum((nominal.GetBinContent(i) - var.GetBinContent(i))**2 for var in variations)/100)
     upHist.SetBinContent(  i, nominal.GetBinContent(i) + pdfVarRms)
     downHist.SetBinContent(i, nominal.GetBinContent(i) - pdfVarRms)
   return upHist, downHist
