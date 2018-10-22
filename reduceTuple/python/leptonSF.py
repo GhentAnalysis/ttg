@@ -36,7 +36,7 @@ class leptonSF:
     eta    = abs(tree._lEta[index])
 
     if abs(flavor)==1:   
-      if pt >= 200: pt = 199 # last bin is valid to infinity
+      if pt >= 150: pt = 149 # last bin is valid to infinity
       sf = self.mult([self.getPartialSF(effMap, pt, eta) for effMap in self.mu])
     elif abs(flavor)==0:
       if pt >= 200: pt = 199 # last bin is valid to infinity

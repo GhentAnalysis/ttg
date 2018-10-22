@@ -129,7 +129,7 @@ btagSF           = btagEfficiency()
 newBranches  = ['ph/I','ph_pt/F','phJetDeltaR/F','matchedGenPh/I', 'matchedGenEle/I', 'nphotons/I']
 newBranches += ['njets/I','j1/I','j2/I','nbjets/I','ndbjets/I']
 newBranches += ['l1/I','l2/I','looseLeptonVeto/O','l1_pt/F','l2_pt/F']
-newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F']
+newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F','l1JetDeltaR/F','l2JetDeltaR/F']
 newBranches += ['isEE/O','isMuMu/O','isEMu/O']
 
 if not sample.isData:
