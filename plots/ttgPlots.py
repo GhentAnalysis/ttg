@@ -176,16 +176,18 @@ else:
   plots.append(Plot('photon_SigmaIetaIeta',       '#sigma_{i#etai#eta}(#gamma)',          lambda c : c._phSigmaIetaIeta[c.ph],                           (20,0,0.04)))
   plots.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',               lambda c : c._phHadronicOverEm[c.ph],                          (20,0,.025)))
   plots.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                   lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
-  plots.append(Plot('l1_pt',                      'p_{T}(l_{1}) (GeV)',                   lambda c : c.l1_pt,                                            (20,0,200)))
+  plots.append(Plot('l1_pt',                      'p_{T}(l_{1}) (GeV)',                   lambda c : c.l1_pt,                                            (20,25,225)))
   plots.append(Plot('l1_eta',                     '|#eta|(l_{1})',                        lambda c : abs(c._lEta[c.l1]),                                 (15,0,2.4)))
   plots.append(Plot('l1_eta_small',               '|#eta|(l_{1})',                        lambda c : abs(c._lEta[c.l1]),                                 (50,0,2.4)))
   plots.append(Plot('l1_phi',                     '#phi(l_{1})',                          lambda c : c._lPhi[c.l1],                                      (10,-pi,pi)))
   plots.append(Plot('l1_relIso',                  'relIso(l_{1})',                        lambda c : c._relIso[c.l1],                                    (10,0,0.12)))
-  plots.append(Plot('l2_pt',                      'p_{T}(l_{2}) (GeV)',                   lambda c : c.l2_pt,                                            (20,0,200)))
+  plots.append(Plot('l1_jetDeltaR',               '#DeltaR(l_{1}, j)',                    lambda c : c.l1JetDeltaR,                                      (20,0,5)))
+  plots.append(Plot('l2_pt',                      'p_{T}(l_{2}) (GeV)',                   lambda c : c.l2_pt,                                            (20,15,215)))
   plots.append(Plot('l2_eta',                     '|#eta|(l_{2})',                        lambda c : abs(c._lEta[c.l2]),                                 (15,0,2.4)))
   plots.append(Plot('l2_eta_small',               '|#eta|(l_{2})',                        lambda c : abs(c._lEta[c.l2]),                                 (50,0,2.4)))
   plots.append(Plot('l2_phi',                     '#phi(l_{2})',                          lambda c : c._lPhi[c.l2],                                      (10,-pi,pi)))
   plots.append(Plot('l2_relIso',                  'relIso(l_{2})',                        lambda c : c._relIso[c.l2],                                    (10,0,0.12)))
+  plots.append(Plot('l2_jetDeltaR',               '#DeltaR(l_{2}, j)',                    lambda c : c.l2JetDeltaR,                                      (20,0,5)))
   plots.append(Plot('dl_mass',                    'm(ll) (GeV)',                          lambda c : c.mll,                                              (20,0,200)))
   plots.append(Plot('dl_mass_small',              'm(ll) (GeV)',                          lambda c : c.mll,                                              (40,0,200)))
   plots.append(Plot('ll_deltaPhi',                '#Delta#phi(ll)',                       lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),             (10,0,pi)))
@@ -297,7 +299,6 @@ if not args.showSys:
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
 
       if prefire and not sample.isData: eventWeight *= c.prefireSF
-
 
       fillPlots(plots, c, sample, eventWeight)
 
