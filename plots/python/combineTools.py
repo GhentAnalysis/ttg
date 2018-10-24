@@ -1,7 +1,10 @@
 from ttg.tools.logger import getLogger, logLevel
 log = getLogger()
 
+from ttg.tools.helpers import plotDir
+from ttg.tools.style import commonStyle, setDefault2D
 import os,shutil,ROOT,socket
+
 
 #
 # Combine settings
@@ -68,13 +71,31 @@ def getParam(filename, param):
     log.info('Result for ' + param + ': %.2f %.2f/+%.2f' % result)
     return result
 
-def getCovariance(filename):
+def getMatrix(filename, type='covariance'):
+  import json
+  with open(os.path.expandvars('$CMSSW_BASE/src/ttg/plots/data/sysMappings.json')) as jsonFile:
+    mappings = json.load(jsonFile)
   resultsFile = ROOT.TFile(filename)
-  covMatrix   = resultsFile.Get("fit_s").covarianceMatrix()
+  matrix      = resultsFile.Get("fit_s").covarianceMatrix() if type=='covariance' else resultsFile.Get("fit_s").correlationMatrix()
   results     = resultsFile.Get("fit_s").floatParsFinal()
   fitResults  = resultsFile.Get("fit_s").floatParsFinal()
   names       = [r.GetName() for r in [fitResults.at(i) for i in range(fitResults.getSize())]]
-  # make 2D
+  names       = [(mappings[i] if i in mappings else i) for i in names]
+  matrix   = ROOT.TH2D(matrix)
+  for i in range(matrix.GetNbinsX()):
+    matrix.GetXaxis().SetBinLabel(i+1, names[i])
+  for j in range(matrix.GetNbinsY()):
+    matrix.GetYaxis().SetBinLabel(j+1, names[j])
+  setDefault2D()
+  canvas = ROOT.TCanvas(type + 'Matrix', type + 'Matrix', 2000, 2000)
+  canvas.SetRightMargin(0.15)
+  commonStyle(matrix)
+  matrix.GetXaxis().SetLabelSize(10)
+  matrix.GetYaxis().SetLabelSize(10)
+  matrix.SetMarkerSize(0.3)
+  matrix.Draw("COLZ TEXT")
+  canvas.Print(os.path.join(plotDir, 'combinePlots', filename.split('/')[-1].replace('.root', '_' + type + 'Matrix.png')))
+  canvas.Print(os.path.join(plotDir, 'combinePlots', filename.split('/')[-1].replace('.root', '_' + type + 'Matrix.pdf')))
 
 #
 # Run fit diagnostics
@@ -108,13 +129,12 @@ def runFitDiagnostics(dataCard, trackParameters = [], toys = False, statOnly=Fal
   else:
     try:
       diagnosticsFile = './combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root'
-      getCovariance(diagnosticsFile)
+      getMatrix(diagnosticsFile, 'covariance')
+      getMatrix(diagnosticsFile, 'correlation')
       return {param : getParam(diagnosticsFile, param) for param in ['r']+trackParameters}
     except:
       with open('./combine/' + logFile + '.log') as f:
         for line in f: log.warning(line.rstrip())
-  import ROOT
-  f = ROOT.TFile()
 
 
 #
@@ -193,9 +213,11 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      if ':' in sys: sample, sys = sys.split(':')
-      else:          sample, sys = None, sys
-      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys else ('%.4f' % scaleShape[sys] if sys in scaleShape else '1')) for s in shapes for t in templates+templatesNoSys]))
+      if ':' in sys:
+        try:         sample, shape, sys   = sys.split(':')
+        except:      (sample, sys), shape = sys.split(':'), None
+      else:          sample, shape, sys   = None, None, sys
+      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys or (shape and s != shape) else ('%.4f' % scaleShape[sys] if sys in scaleShape else '1')) for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
