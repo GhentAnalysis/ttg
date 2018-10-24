@@ -409,7 +409,7 @@ class Plot:
         ymax    = constrain(self.yrmin if ratio else self.ymin, self.yrmax if ratio else self.ymax, (1+sysUp)   if ratio else (1+sysUp)*val)
         box     = ROOT.TBox(xmin, ymin,  xmax, ymax)
         box.SetLineColor(ROOT.kBlack)
-        box.SetFillStyle(3444)
+        box.SetFillStyle(3005)
         box.SetFillColor(ROOT.kBlack)
         boxes.append(box)
     return boxes
@@ -499,6 +499,7 @@ class Plot:
       defaultRatioStyle.update(ratio)
       ratio = defaultRatioStyle
 
+    drawObjects = [i.Clone() for i in drawObjects] # Need to do this otherwise the objects become None after loading the cache, probably some strange garbage collecting bug we don't want
     # If a results directory is given, we can load the histograms from former runs
     if resultsDir:
       err = self.loadFromCache(resultsDir)
@@ -605,7 +606,6 @@ class Plot:
       same = "same"
 
     canvas.topPad.RedrawAxis()
-
     for h in (s[0] for s in histos):
       if hasattr(h, 'sysValues'):
         drawObjects                     += self.getSystematicBoxes(h)
