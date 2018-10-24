@@ -341,7 +341,7 @@ for plot in plots: # 1D plots
 
 
     if args.channel!='noData':
-      extraArgs['ratio']   = {'yRange':(0.4,1.6), 'texY': 'obs/pred'}
+      extraArgs['ratio']   = {'yRange':(0.4,1.6), 'texY': 'data/MC'}
 
     if(normalize or args.tag.count('compareChannels')):
       extraArgs['scaling'] = 'unity'
