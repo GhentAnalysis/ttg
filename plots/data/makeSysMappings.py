@@ -18,5 +18,7 @@ with open('sysMappingsTemplate.json', 'r') as template:
             mapping.write('  "prop_binzg_SF_bin' + bin + '" : "Stats ' + mult + ' (Z#gamma CR)",\n')
         for i in range(7):
           mapping.write('  "prop_binchgIso_bin' + str(i) + '" : "Stats bin ' + str(i) + '",\n')
+        for i in range(4):
+          mapping.write('  "prop_binsigEtaEta_bin' + str(i+6) + '" : "#sigma_{i#etai#eta} stats bin ' + str(i) + '",\n')
       else:
         mapping.write(line)
