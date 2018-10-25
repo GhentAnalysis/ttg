@@ -9,7 +9,7 @@ log = getLogger(logLevel=args.logLevel)
 
 from ttg.tools.helpers      import addHist
 from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
-from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts
+from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts, goodnessOfFit
 from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys
 
 import os, ROOT, shutil
@@ -301,6 +301,7 @@ def doRatioFit(cardName, shapes, perPage=30):
   writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=False, statOnly=False)
+  ddgoodnessOfFit('srFit')
 
 
 #doRatioFit('ratioFit'   , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
@@ -311,3 +312,4 @@ samples = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 10), ('DY', 10), ('other',
 doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True)
 doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 32, withSingleTop=True)
 doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 32, withSingleTop=True)
+goodnessOfFit('srFit')

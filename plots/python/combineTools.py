@@ -178,6 +178,19 @@ def runImpacts(dataCard, perPage=30, toys=False):
 
 
 #
+# Goodness of fit
+#
+def goodnessOfFit(dataCard, algo='saturated'):
+  command  = 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ';'
+  command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 1000' + (' --toysFreq' if algo=='saturated' else '') + ';'
+  log.info('Running goodness of fit')
+  handleCombine(dataCard, dataCard + '_gof', command)
+  with open('./combine/' + dataCard + '_gof.log') as f:
+    for line in f:
+      log.debug(line.rstrip())
+
+
+#
 # Write the card including all systematics and shapes
 #
 def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = {}):
