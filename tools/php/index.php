@@ -1,6 +1,6 @@
 <html>
 <head>
-<title><?php echo str_replace('/eos/user/t/tomc/www','',getcwd()); ?></title>
+<title><?php $user = get_current_user(); echo str_replace('/eos/user/'.$user[0].'/'.$user.'/www','',getcwd()); ?></title>
 <style type='text/css'>
 body {
     font-family: "Helvetica", sans-serif;
@@ -86,7 +86,8 @@ a:hover { text-decoration: underline; color: #D08504; }
   function showIfExists($path, $name){
     if(file_exists($path)){
       if(realpath('./')!=realpath($path)){
-        $webPath = str_replace('eos/user/t/tomc/www', 'tomc', $path).'/?'.$_SERVER['QUERY_STRING'];
+        $user = get_current_user();
+        $webPath = str_replace('eos/user/'.$user[0].'/'.$user.'/www', $user, $path).'/?'.$_SERVER['QUERY_STRING'];
         print "<span><a class=\"bar\" href=\"$webPath\">$name</a></span>";
       } else {
         print "<span><div class=\"bar\">$name</div></span>";
