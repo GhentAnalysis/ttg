@@ -10,14 +10,15 @@ log = getLogger(logLevel=args.logLevel)
 from ttg.tools.helpers      import addHist
 from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
 from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts, goodnessOfFit
-from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys
+from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys, rateParameters
 
 import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
 
 from math import sqrt
 
-samples     = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 10), ('DY', 10), ('other', 50)]
+templates       = ['TTGamma', 'TTJets', 'ZG', 'DY', 'other', 'single-t']
+templatesChgIso = ['TTGamma', 'TTJets', 'ZG', 'DY', 'other'] # Stacks for chgIso fit have single-t merged into other
 
 #
 # Helper functions
@@ -83,9 +84,9 @@ def writeRootFileForChgIso(name, systematics, selection):
 
   from ttg.plots.plot import applySidebandUnc
   for splitType in ['_g', '_f', '_h']:
-    if   splitType=='_g': selectors = [[sample, '(genuine,misIdEle)'] for sample,_ in samples]
-    elif splitType=='_f': selectors = [[sample, '(hadronicFake)']     for sample,_ in samples]
-    elif splitType=='_h': selectors = [[sample, '(hadronicPhoton)']   for sample,_ in samples]
+    if   splitType=='_g': selectors = [[t, '(genuine,misIdEle)'] for t in templatesChgIso]
+    elif splitType=='_f': selectors = [[t, '(hadronicFake)']     for t in templatesChgIso]
+    elif splitType=='_h': selectors = [[t, '(hadronicPhoton)']   for t in templatesChgIso]
 
     if name.count('dd') and splitType=='_f':
       sideBandShape = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
@@ -159,7 +160,7 @@ def plotPostFit(file, name, name2, results):
 # Charged isolation fit
 #
 log.info(' --- Charged isolation fit --- ')
-templates   = ['all_g','all_f', 'all_h']
+templatesPh = ['all_g','all_f', 'all_h']
 extraLines  = ['fake_norm     rateParam * all_f 1']
 extraLines += ['hadronic_norm rateParam * all_h 1']#, 'hadronic_norm param 1.0 0.3']
 extraLines += ['* autoMCStats 0 1 1']
@@ -170,7 +171,7 @@ for selection in ['all']:
   for dataDriven in [True]:
     cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
     writeRootFileForChgIso(cardName, [], selection)
-    writeCard(cardName, ['chgIso', 'sigEtaEta'], templates, [], extraLines, ['all_f:chgIso:SideBandUnc'], {})
+    writeCard(cardName, ['chgIso', 'sigEtaEta'], templatesPh, [], extraLines, ['all_f:chgIso:SideBandUnc'], {})
     results = runFitDiagnostics(cardName, toys=False, statOnly=False, trackParameters = ['hadronic_norm','fake_norm'])
     fakeSF[selection]     = results['fake_norm']
     hadronicSF[selection] = results['hadronic_norm']
@@ -200,10 +201,10 @@ def writeRootFile(name, systematics, fakeSF, hadronicSF, merged=False, withSingl
   writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl((tag, 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']), mergeBins=merged, removeBins=([1,2] if merged else []))
   writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl((tag, 'SF',  onZSelection),  'signalRegionsSmall', '', ['DoubleEG'],['DoubleMuon']), mergeBins=True)
 
-  for sample,_ in samples:
-    promptSelectors   = [[sample, '(genuine,misIdEle)']]
-    fakeSelectors     = [[sample, '(hadronicFake)']]
-    hadronicSelectors = [[sample, '(hadronicPhoton)']]
+  for t in templates:
+    promptSelectors   = [[t, '(genuine,misIdEle)']]
+    fakeSelectors     = [[t, '(hadronicFake)']]
+    hadronicSelectors = [[t, '(hadronicPhoton)']]
     for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('zg_SF', 'SF')]:
       q2Variations = []
       pdfVariations = []
@@ -225,8 +226,8 @@ def writeRootFile(name, systematics, fakeSF, hadronicSF, merged=False, withSingl
           totalDown.Add(fakeDown)
           totalUp.Add(hadronicUp)
           totalDown.Add(hadronicDown)
-          writeHist(f, shape+'nonPromptUp',   sample, totalUp, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
-          writeHist(f, shape+'nonPromptDown', sample, totalDown, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+          writeHist(f, shape+'nonPromptUp',   t, totalUp, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+          writeHist(f, shape+'nonPromptDown', t, totalDown, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
         total = prompt.Clone()
         total.Add(hadronic)
         total.Add(fake)
@@ -234,17 +235,17 @@ def writeRootFile(name, systematics, fakeSF, hadronicSF, merged=False, withSingl
         if sys=='':       nominal = total
         if 'pdf' in sys:  pdfVariations += [total]
         elif 'q2' in sys: q2Variations += [total]
-        else:             writeHist(f, shape+sys, sample, total, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        else:             writeHist(f, shape+sys, t, total, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
 
       if len(pdfVariations) > 0:
         up, down = pdfSys(pdfVariations, nominal)
-        writeHist(f, shape+'pdfUp',   sample, up,   mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
-        writeHist(f, shape+'pdfDown', sample, down, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        writeHist(f, shape+'pdfUp',   t, up,   mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        writeHist(f, shape+'pdfDown', t, down, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
 
       if len(q2Variations) > 0:
         up, down = q2Sys(q2Variations)
-        writeHist(f, shape+'q2Up',   sample, up,   mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
-        writeHist(f, shape+'q2Down', sample, down, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        writeHist(f, shape+'q2Up',   t, up,   mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
+        writeHist(f, shape+'q2Down', t, down, mergeBins = ('zg' in shape or merged), removeBins=([1,2] if (merged and 'sr_SF' in shape) else []))
 
   f.Close()
 
@@ -253,16 +254,15 @@ def writeRootFile(name, systematics, fakeSF, hadronicSF, merged=False, withSingl
 #
 def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=False):
   log.info(' --- Signal regions fit (' + cardName + ') --- ')
-  templates   = [s for s,_ in samples]
-  extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
-  extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
+  extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:]]
+  extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:]]
   extraLines += ['* autoMCStats 0 1 1']
 
   writeRootFile(cardName, systematics.keys(), fakeSF, hadronicSF, merged, withSingleTop)
   writeCard(cardName, shapes, templates, [], extraLines, showSysList + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
-  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=False, statOnly=False)
-  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=False, statOnly=True)
+  runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
+  runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True)
   runImpacts(cardName, perPage)
   runImpacts(cardName, perPage, toys=True)
   runSignificance(cardName)
@@ -285,9 +285,8 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
 
 def doRatioFit(cardName, shapes, perPage=30):
   log.info(' --- Ratio ttGamma/ttBar fit (' + cardName + ') --- ')
-  templates   = [s for s,_ in samples]
-  extraLines  = [(s + '_norm rateParam * ' + s + '* 1')   for s,_   in samples[1:]]
-  extraLines += [(s + '_norm param 1.0 ' + str(unc/100.)) for s,unc in samples[1:]]
+  extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:]]
+  extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:]]
   extraLines += ['* autoMCStats 0 1 1']
   from ttg.samples.Sample import createSampleList,getSampleFromList
   sampleList   = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
@@ -300,7 +299,7 @@ def doRatioFit(cardName, shapes, perPage=30):
   writeRootFile(cardName, systematics.keys(), fakeSF, hadronicSF)
   writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
-  runFitDiagnostics(cardName, trackParameters = ['TTJets_norm', 'ZG_norm','DY_norm','other_norm','r'], toys=False, statOnly=False)
+  runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
   ddgoodnessOfFit('srFit')
 
 
@@ -308,7 +307,6 @@ def doRatioFit(cardName, shapes, perPage=30):
 #doRatioFit('ratioFit_SF', ['sr_SF', 'zg_SF'], 28)
 #doRatioFit('ratioFit_OF', ['sr_OF', 'zg_SF'], 28)
 
-samples = [('TTGamma', None), ('TTJets', 5.5), ('ZG', 10), ('DY', 10), ('other', 50), ('single-t', 10)]
 doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True)
 doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 32, withSingleTop=True)
 doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 32, withSingleTop=True)

@@ -40,8 +40,17 @@ showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in 
 # Defining linear systematics as "name : (sampleList, %)"
 #
 linearSystematics = {}
-linearSystematics['lumi']       = (None, 2.5)
-#linearSystematics['TTbar_norm'] = (['TTbar'], 5.5)]
+linearSystematics['lumi'] = (None, 2.5)
+
+#
+# Define linear systematics implemented as rate parameters
+#
+rateParameters = {}
+rateParameters['TTJets']   = 5.5
+rateParameters['ZG']       = 10
+rateParameters['DY']       = 10
+rateParameters['single-t'] = 10
+rateParameters['other']    = 50
 
 
 #
