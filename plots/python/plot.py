@@ -11,7 +11,7 @@ from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
-from ttg.plots.postFitInfo import applyPostFitScaling
+from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
 
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
@@ -41,7 +41,7 @@ def normalizeBinWidth(hist, norm=None):
 #
 loadedPkls = {}
 def getHistFromPkl(subdirs, plotName, sys, *selectors):
-  global loadePkls
+  global loadedPkls
   hist = None
   resultFile = os.path.join(*((plotDir,)+subdirs+(plotName +'.pkl',)))
 
@@ -291,38 +291,33 @@ class Plot:
     return legend
 
 
-
-
   #
-  # Adding systematics to MC
-  # stackForSys       --> list of samples which are stacked
-  # systematics       --> dictionary of systematics, as given in systematics.py
-  # linearSystematics --> dictionary of linear systematics, as given in systematics.py
-  # resultsDir        --> directory where to find the .pkl files which should be filled before with histogram for all the systematic variations
-  # postFitInfo       --> dictionary name --> (pull, constrain) to apply scalefactors to specific samples
-  # addMCStat         --> include MC statistics in the uncertainty band
+  # Calculate full or splitted per sample histogram for each up/down of the systematics
   #
-  def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=True):
+  def getSysHistos(self, stackForSys, resultsDir, systematics, postFitInfo=None, addMCStat=True):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
 
     if postFitInfo:                                                                                                                    # Apply postfit scaling
       for p in allPlots:
-        applyPostFitScaling(allPlots[p], postFitInfo)
+        _, sysHistos = self.getSysHistos(stackForSys, resultsDir, systematics)                                                         # Get first the sys histos without post-fit scaling
+        allPlots[p] = applyPostFitScaling(allPlots[p], postFitInfo, sysHistos)                                                         # Then use it to apply the same post-fit as for the central value
 
     sysKeys = [i + 'Up' for i in systematics] + [i + 'Down' for i in systematics]
     if addMCStat:
       sysKeys += [s.name + s.texName + 'StatUp'   for s in stackForSys]
       sysKeys += [s.name + s.texName + 'StatDown' for s in stackForSys]
 
-    from ttg.plots.systematics import constructQ2Sys, constructPdfSys
+    from ttg.plots.systematics import constructQ2Sys, constructPdfSys                                                                  # Construct q2 and pdf up/down variations
     if 'q2'  in systematics: constructQ2Sys(allPlots, self.name, stackForSys)
     if 'pdf' in systematics: constructPdfSys(allPlots, self.name, stackForSys)
 
     histos_summed = {}
+    histos_splitted = {}
     for sys in [None] + sysKeys:
+      histos_splitted[sys] = {}
       if sys and not any(x in sys for x in ['Stat', 'sideBand', 'Scale']): plotName = self.name+sys                                    # in the 2D cache, the first key is plotname+sys
-      else:                                                                plotName = self.name                                        # for nominal and some exceptions 
+      else:                                                                plotName = self.name                                        # for nominal and some exceptions
 
       if plotName not in allPlots:                                                                                                     # check if sys variation has been run already
         log.error('No ' + sys + ' variation found for ' +  self.name)
@@ -352,14 +347,29 @@ class Plot:
         normalizeBinWidth(h, self.normBinWidth)
         self.addOverFlowBin1D(h, self.overflowBin)
 
+        histos_splitted[sys][histName] = h
         histos_summed[sys] = addHist(histos_summed[sys], h)
 
-    # Adding the systematics in quadrature
+    return histos_summed, histos_splitted
+
+
+  #
+  # Adding systematics to MC
+  # stackForSys       --> list of samples which are stacked
+  # systematics       --> dictionary of systematics, as given in systematics.py
+  # linearSystematics --> dictionary of linear systematics, as given in systematics.py
+  # resultsDir        --> directory where to find the .pkl files which should be filled before with histogram for all the systematic variations
+  # postFitInfo       --> dictionary name --> (pull, constrain) to apply scalefactors to specific samples
+  # addMCStat         --> include MC statistics in the uncertainty band
+  #
+  def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=True):
+    histos_summed,_ = self.getSysHistos(stackForSys, resultsDir, systematics, postFitInfo, addMCStat)                                 # Get the summed sys histograms, to be added in quadrature below
+
     relErrors = {}
     for variation in ['Up', 'Down']:                                                                                                  # Consider both up and down variations separately
       summedErrors = histos_summed[None].Clone()
       summedErrors.Reset()
-      for sys in sysKeys:
+      for sys in [s for s in histos_summed.keys() if s]:
         sysOther = sys.replace('Up', 'Down') if 'Up' in sys else sys.replace('Down', 'Up')
         for i in range(summedErrors.GetNbinsX()+1):
           uncertainty      = histos_summed[sys].GetBinContent(i) - histos_summed[None].GetBinContent(i)
@@ -367,16 +377,14 @@ class Plot:
           if uncertainty*uncertaintyOther > 0 and abs(uncertainty) < abs(uncertaintyOther): continue                                  # Check if both up and down go to same direction, only take the maximum
           if (variation=='Up' and uncertainty > 0) or (variation=='Down' and uncertainty < 0):
             if sys.count('fsr'): uncertainty *= 1/sqrt(2)                                                                             # Hacky, scale fsr uncertainty with 1/sqrt(2) as recommended for TOP pag (in the fit this is handled in the cards)
-            if postFitInfo:
-              log.warning('Implement this')
+            if postFitInfo:      uncertainty  = applyPostFitConstraint(sys, uncertainty, postFitInfo)
             summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
       for sampleFilter, unc in linearSystematics.values():
         for i in range(summedErrors.GetNbinsX()+1):
           if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
           else:            uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems()])
-          if postFitInfo:
-            log.warning('Implement this')
+          if postFitInfo:  uncertainty = applyPostFitConstraint(sys, uncertainty, postFitInfo)
           summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
       for i in range(summedErrors.GetNbinsX()+1):
@@ -503,7 +511,8 @@ class Plot:
       if err: return True
 
     if postFitInfo:
-      applyPostFitScaling(self.histos, postFitInfo)
+      _, sysHistos = self.getSysHistos(self.stack[0], resultsDir, systematics)                     # Get sys variations for each sample
+      self.histos = applyPostFitScaling(self.histos, postFitInfo, sysHistos)
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
