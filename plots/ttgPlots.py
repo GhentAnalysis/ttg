@@ -306,12 +306,6 @@ if not args.showSys:
 #
 # Drawing the plots
 #
-postFitInfo = None
-if args.post:
-  if args.tag.count('match'):
-    from ttg.plots.postFitInfoChgIso import postFitInfo
-  else:
-    from ttg.plots.postFitInfo import postFitInfo
 noWarnings = True
 from ttg.tools.style import drawLumi
 for plot in plots: # 1D plots
@@ -337,7 +331,7 @@ for plot in plots: # 1D plots
       extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
-      extraArgs['postFitInfo']       = postFitInfo
+      extraArgs['postFitInfo']       = 'srFit' if args.post else None
 
 
     if args.channel!='noData':

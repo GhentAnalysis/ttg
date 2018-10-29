@@ -11,6 +11,7 @@ from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
+from ttg.plots.postFitInfo import applyPostFitScaling
 
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
@@ -290,15 +291,6 @@ class Plot:
     return legend
 
 
-  #
-  # Applying post-fit values
-  #
-  def applyPostFitScaling(self, postFitInfo):
-    for sample, h in self.histos.iteritems():
-      for key,value in postFitInfo.iteritems():
-        if key in sample.name or key in sample.texName:
-          log.debug('Applying post-fit scaling value of ' + str(value) + ' to ' + sample.name)
-          h.Scale(value)
 
 
   #
@@ -307,12 +299,16 @@ class Plot:
   # systematics       --> dictionary of systematics, as given in systematics.py
   # linearSystematics --> dictionary of linear systematics, as given in systematics.py
   # resultsDir        --> directory where to find the .pkl files which should be filled before with histogram for all the systematic variations
-  # postFitInfo       --> dictionary (name, scalefactor) to apply scalefactors to specific samples
+  # postFitInfo       --> dictionary name --> (pull, constrain) to apply scalefactors to specific samples
   # addMCStat         --> include MC statistics in the uncertainty band
   #
   def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=True):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
+
+    if postFitInfo:                                                                                                                    # Apply postfit scaling
+      for p in allPlots:
+        applyPostFitScaling(allPlots[p], postFitInfo)
 
     sysKeys = [i + 'Up' for i in systematics] + [i + 'Down' for i in systematics]
     if addMCStat:
@@ -351,9 +347,6 @@ class Plot:
           for i in range(0, h.GetNbinsX()+1):
             h.SetBinContent(i, h.GetBinContent(i)-h.GetBinError(i))
 
-        if postFitInfo:                                                                                                                # apply post-fit scalefactors if available
-          for i in postFitInfo:
-            if histName.count(i): h.Scale(postFitInfo[i])
         if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         if self.scaleFactor: h.Scale(self.scaleFactor)
         normalizeBinWidth(h, self.normBinWidth)
@@ -374,12 +367,16 @@ class Plot:
           if uncertainty*uncertaintyOther > 0 and abs(uncertainty) < abs(uncertaintyOther): continue                                  # Check if both up and down go to same direction, only take the maximum
           if (variation=='Up' and uncertainty > 0) or (variation=='Down' and uncertainty < 0):
             if sys.count('fsr'): uncertainty *= 1/sqrt(2)                                                                             # Hacky, scale fsr uncertainty with 1/sqrt(2) as recommended for TOP pag (in the fit this is handled in the cards)
+            if postFitInfo:
+              log.warning('Implement this')
             summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
       for sampleFilter, unc in linearSystematics.values():
         for i in range(summedErrors.GetNbinsX()+1):
           if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
           else:            uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems()])
+          if postFitInfo:
+            log.warning('Implement this')
           summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
       for i in range(summedErrors.GetNbinsX()+1):
@@ -505,7 +502,8 @@ class Plot:
       err = self.loadFromCache(resultsDir)
       if err: return True
 
-    if postFitInfo: self.applyPostFitScaling(postFitInfo)
+    if postFitInfo:
+      applyPostFitScaling(self.histos, postFitInfo)
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
