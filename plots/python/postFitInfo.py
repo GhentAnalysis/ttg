@@ -42,7 +42,7 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):
             var = nuisanceHist.GetBinContent(j)
             nom = histos[sample].GetBinContent(j)
             h.SetBinContent(j, nom + abs(var-nom)*value)
-          log.debug('Applying pull for nuisance ' + i + ' with ' + str(value) + ' to ' + name)
+          log.trace('Applying pull for nuisance ' + i + ' with ' + str(value) + ' to ' + name)
       except:
         if not ('prop' in i or 'nonPrompt' in i):
           log.warning('Cannot apply pull for nuisance ' + i)

@@ -344,8 +344,6 @@ class Plot:
 
         if h.Integral()==0: log.debug("Found empty histogram %s:%s in %s/%s.pkl", plotName, histName, resultsDir, self.name)
         if self.scaleFactor: h.Scale(self.scaleFactor)
-        normalizeBinWidth(h, self.normBinWidth)
-        self.addOverFlowBin1D(h, self.overflowBin)
 
         histos_splitted[sys][histName] = h
         histos_summed[sys] = addHist(histos_summed[sys], h)
@@ -364,6 +362,9 @@ class Plot:
   #
   def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=True):
     histos_summed,_ = self.getSysHistos(stackForSys, resultsDir, systematics, postFitInfo, addMCStat)                                 # Get the summed sys histograms, to be added in quadrature below
+    for h in histos_summed.values():                                                                                                  # Normalize for bin width and add overflow bin
+      normalizeBinWidth(h, self.normBinWidth)
+      self.addOverFlowBin1D(h, self.overflowBin)
 
     relErrors = {}
     for variation in ['Up', 'Down']:                                                                                                  # Consider both up and down variations separately
@@ -510,16 +511,16 @@ class Plot:
       err = self.loadFromCache(resultsDir)
       if err: return True
 
+    # Check if at least one entry is present
+    if not sum([h.Integral() for h in self.histos.values()]) > 0:
+      log.info('Empty histograms for ' + self.name + ', skipping')
+      return
+
     if postFitInfo:
       _, sysHistos = self.getSysHistos(self.stack[0], resultsDir, systematics)                     # Get sys variations for each sample
       self.histos = applyPostFitScaling(self.histos, postFitInfo, sysHistos)
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
-
-    # Check if at least one entry is present
-    if not sum([h.Integral() for h in self.histos.values()]) > 0:
-      log.info('Empty histograms for ' + self.name + ', skipping')
-      return
 
     # Apply style to histograms + normalize bin width + add overflow bin
     for s, h in histDict.iteritems():
