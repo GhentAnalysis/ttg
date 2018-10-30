@@ -35,6 +35,9 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):
         for sample, h in postHistos.iteritems():
           try:    name = sample.name + sample.texName
           except: name = sample
+          try:    isData = sample.isData                                                                         # Skip data
+          except: isData = name.count('data')
+          if isData: continue
           value = pullsAndConstraints[i][0]
           if i in linearSystematics:
             h.Scale(1+value*linearSystematics[i][1]/100.)
