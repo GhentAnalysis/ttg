@@ -301,8 +301,8 @@ class Plot:
     allPlots = {i : {k : l.Clone() for k,l in j.iteritems()} for i,j in loadedPkls[resultsFile].iteritems()}
 
     if postFitInfo:                                                                                                                    # Apply postfit scaling
+      _, sysHistos = self.getSysHistos(stackForSys, resultsDir, systematics)                                                           # Get first the sys histos without post-fit scaling
       for p in allPlots:
-        _, sysHistos = self.getSysHistos(stackForSys, resultsDir, systematics)                                                         # Get first the sys histos without post-fit scaling
         allPlots[p] = applyPostFitScaling(allPlots[p], postFitInfo, sysHistos)                                                         # Then use it to apply the same post-fit as for the central value
 
     sysKeys = [i + 'Up' for i in systematics] + [i + 'Down' for i in systematics]
