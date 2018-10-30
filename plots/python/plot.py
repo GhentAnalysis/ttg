@@ -296,7 +296,9 @@ class Plot:
   #
   def getSysHistos(self, stackForSys, resultsDir, systematics, postFitInfo=None, addMCStat=True):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
-    with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
+    if resultsFile not in loadedPkls:                                                                                                  # Speed optimization: check if plots already loaded
+      with lock(resultsFile, 'rb') as f: loadedPkls[resultsFile] = pickle.load(f)
+    allPlots = {i : {k : l.Clone() for k,l in j.iteritems()} for i,j in loadedPkls[resultsFile].iteritems()}
 
     if postFitInfo:                                                                                                                    # Apply postfit scaling
       for p in allPlots:

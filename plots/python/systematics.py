@@ -93,21 +93,22 @@ def getReplacementsForStack(sys):
 #
 def q2Sys(variations):
   upHist, downHist = variations[0].Clone(), variations[0].Clone()
-  for i in range(0, variations[0].GetNbinsX()+1):
+  for i in range(0, variations[0].GetNbinsX()+2):
     upHist.SetBinContent(  i, max([var.GetBinContent(i) for var in variations]))
     downHist.SetBinContent(i, min([var.GetBinContent(i) for var in variations]))
   return upHist, downHist
 
-def constructQ2Sys(allPlots, plotName, stack):
+def constructQ2Sys(allPlots, plotName, stack, force=False):
+  if (plotName + 'q2Up') in allPlots and not force: return
   allPlots[plotName + 'q2Up'] = {}
   allPlots[plotName + 'q2Down'] = {}
   for histName in [s.name+s.texName for s in stack]:
     try:
       variations = [allPlots[plotName + 'q2_' + i][histName] for i in ('Ru','Fu','RFu','Rd','Fd','RFd')]
-      allPlots[plotName + 'q2Up'][histName], allPlots[plotName + 'q2Down'][histName] = q2Sys(variations)
     except:
       log.warning('Missing q2 variations for ' + plotName + ' ' + histName + '!')
-      allPlots[plotName + 'q2Up'][histName], allPlots[plotName + 'q2Down'][histName] = allPlots[plotName][histName], allPlots[plotName][histName]
+      variations = [allPlots[plotName][histName]]
+    allPlots[plotName + 'q2Up'][histName], allPlots[plotName + 'q2Down'][histName] = q2Sys(variations)
 
 #
 # Function for the pdf RMS envelope using input histogram
@@ -115,19 +116,20 @@ def constructQ2Sys(allPlots, plotName, stack):
 from math import sqrt
 def pdfSys(variations, nominal):
   upHist, downHist = variations[0].Clone(), variations[0].Clone()
-  for i in range(0, variations[0].GetNbinsX()+1):
+  for i in range(0, variations[0].GetNbinsX()+2):
     pdfVarRms = sqrt(sum((nominal.GetBinContent(i) - var.GetBinContent(i))**2 for var in variations)/len(variations))
     upHist.SetBinContent(  i, nominal.GetBinContent(i) + pdfVarRms)
     downHist.SetBinContent(i, nominal.GetBinContent(i) - pdfVarRms)
   return upHist, downHist
 
 def constructPdfSys(allPlots, plotName, stack):
+  if (plotName + 'pdfUp') in allPlots and not force: return
   allPlots[plotName + 'pdfUp'] = {}
   allPlots[plotName + 'pdfDown'] = {}
   for histName in [s.name+s.texName for s in stack]:
     try:
       variations = [allPlots[plotName + 'pdf_' + str(i)][histName] for i in range(0, 100)]
-      allPlots[plotName + 'pdfUp'][histName], allPlots[plotName + 'pdfDown'][histName] = pdfSys(variations, allPlots[plotName][histName])
     except:
       log.warning('Missing pdf variations for ' + plotName + ' ' + histName + '!')
-      allPlots[plotName + 'pdfUp'][histName], allPlots[plotName + 'pdfDown'][histName] = allPlots[plotName][histName], allPlots[plotName][histName]
+      variations = [allPlots[plotName][histName]]
+    allPlots[plotName + 'pdfUp'][histName], allPlots[plotName + 'pdfDown'][histName] = pdfSys(variations, allPlots[plotName][histName])
