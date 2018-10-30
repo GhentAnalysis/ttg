@@ -36,7 +36,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, rateParameters, applySysToTree, applySysToString, applySysToReduceType, showSysList
 
 #
 # Submit subjobs
@@ -302,6 +302,8 @@ if not args.showSys:
 
       fillPlots(plots, c, sample, eventWeight)
 
+# In case of plots: treat the rateParameters similar as the linearSystematics
+linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
 
 #
 # Drawing the plots
