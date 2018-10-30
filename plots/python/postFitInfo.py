@@ -1,7 +1,7 @@
 from ttg.tools.logger import getLogger, logLevel
 log = getLogger()
 import ROOT, os
-from ttg.plots.systematics import rateParameters
+from ttg.plots.systematics import rateParameters, linearSystematics
 
 def mapName(name):
   if name=='r': return 'TTGamma_norm'
@@ -36,12 +36,15 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):
           try:    name = sample.name + sample.texName
           except: name = sample
           value = pullsAndConstraints[i][0]
-          if value > 0: nuisanceHist = sysHistos[i + 'Up'][name]
-          else:         nuisanceHist = sysHistos[i + 'Down'][name]
-          for j in range(h.GetNbinsX()+1):
-            var = nuisanceHist.GetBinContent(j)
-            nom = histos[sample].GetBinContent(j)
-            h.SetBinContent(j, nom + abs(var-nom)*value)
+          if i in linearSystematics:
+            h.Scale(1+value*linearSystematics[i][1]/100.)
+          else:
+            if value > 0: nuisanceHist = sysHistos[i + 'Up'][name]
+            else:         nuisanceHist = sysHistos[i + 'Down'][name]
+            for j in range(h.GetNbinsX()+1):
+              var = nuisanceHist.GetBinContent(j)
+              nom = histos[sample].GetBinContent(j)
+              h.SetBinContent(j, nom + abs(var-nom)*value)
           log.trace('Applying pull for nuisance ' + i + ' with ' + str(value) + ' to ' + name)
       except:
         if not ('prop' in i or 'nonPrompt' in i):
