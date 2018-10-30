@@ -60,7 +60,7 @@ if not args.isChild:
 #
 # Initializing
 #
-import os, ROOT
+import ROOT
 from ttg.plots.plot           import Plot, xAxisLabels, fillPlots
 from ttg.plots.plot2D         import Plot2D
 from ttg.plots.cutInterpreter import cutInterpreter

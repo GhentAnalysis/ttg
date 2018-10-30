@@ -4,7 +4,7 @@ log = getLogger()
 #
 # PU reweighting class
 #
-import ROOT
+import ROOT, sys, os
 from ttg.tools.helpers import getObjFromFile
 
 dataDir = '$CMSSW_BASE/src/ttg/reduceTuple/data/puReweightingData/'
@@ -19,7 +19,6 @@ def getReweightingFunction(data="PU_2016_36000_XSecCentral", useMC=None):
   # MC
   if not useMC:
     mcProfile = ROOT.TH1D('mc', 'mc', 100, 0, 100)
-    import sys, os
     sys.stdout = open(os.devnull, 'w')
     from SimGeneral.MixingModule.mix_2016_25ns_Moriond17MC_PoissonOOTPU_cfi import mix
     sys.stdout = sys.__stdout__

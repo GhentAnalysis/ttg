@@ -12,6 +12,7 @@ from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
 from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
+from ttg.plots.systematics import constructQ2Sys, constructPdfSys
 
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
@@ -310,7 +311,6 @@ class Plot:
       sysKeys += [s.name + s.texName + 'StatUp'   for s in stackForSys]
       sysKeys += [s.name + s.texName + 'StatDown' for s in stackForSys]
 
-    from ttg.plots.systematics import constructQ2Sys, constructPdfSys                                                                  # Construct q2 and pdf up/down variations
     if 'q2'  in systematics: constructQ2Sys(allPlots, self.name, stackForSys)
     if 'pdf' in systematics: constructPdfSys(allPlots, self.name, stackForSys)
 
