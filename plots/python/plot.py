@@ -579,7 +579,7 @@ class Plot:
 
       if legend=="auto":
         maxEntryLength = max([len(h.texName) for h in sum(histos, [])])
-        legendWidth    = max(min(maxEntryLength*1.5, 0.35), 0.7)
+        legendWidth    = max(min(maxEntryLength*1.5, 0.35), 0.65)
         left           = canvas.topPad.GetLeftMargin() + yMax.GetTickLength('Y') + 0.01
         right          = 1 - canvas.topPad.GetRightMargin() - yMax.GetTickLength('Y') - 0.01
         top            = 1 - canvas.topPad.GetTopMargin() - yMax.GetTickLength() - 0.01
