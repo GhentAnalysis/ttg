@@ -579,12 +579,12 @@ class Plot:
 
       if legend=="auto":
         maxEntryLength = max([len(h.texName) for h in sum(histos, [])])
-        legendWidth    = max(min(maxEntryLength, 0.35), 0.7)
+        legendWidth    = max(min(maxEntryLength*1.5, 0.35), 0.7)
         left           = canvas.topPad.GetLeftMargin() + yMax.GetTickLength('Y') + 0.01
         right          = 1 - canvas.topPad.GetRightMargin() - yMax.GetTickLength('Y') - 0.01
         top            = 1 - canvas.topPad.GetTopMargin() - yMax.GetTickLength() - 0.01
         bottom         = max(0.4, top - 0.045*sum(map(len, histos)))
-        tryCoordinates = [(left, bottom, left+0.35, top), (right-0.35, bottom, right, top)]
+        tryCoordinates = [(left, bottom, left+legendWidth, top), (right-legendWidth, bottom, right, top)]
       else:
         tryCoordinates = [legend]
 
