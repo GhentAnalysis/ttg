@@ -27,8 +27,8 @@ jobsToSubmit = []
 for logfile in getLogs('./log'):
   finished = False
   command  = None
-  with open(logfile) as f:
-    for line in f:
+  with open(logfile) as logf:
+    for line in logf:
       if 'Finished' in line or 'finished' in line: finished = True
       if 'Command:' in line:                       command  = line.split('Command: ')[-1].rstrip()
   if not finished and command: jobsToSubmit.append((command, logfile))

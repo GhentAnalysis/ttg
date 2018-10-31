@@ -1,6 +1,5 @@
 from ttg.tools.logger  import getLogger
 from ttg.tools.helpers import deltaR
-from math import sqrt,pi
 import ROOT
 log = getLogger()
 
@@ -28,7 +27,7 @@ def setIDSelection(c, reducedTupleType):
 # Helper functions
 #
 def slidingCut(pt, low, high):
-  slope = (high - low)/10.;
+  slope = (high - low)/10.
   return min(low, max(high, low + slope*(pt-15)))
 
 def getLorentzVector(pt, eta, phi, e):

@@ -2,10 +2,10 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-import glob, os, ROOT, sys
+import glob, ROOT, sys
 
-def testT2(dir):
-  for i in glob.glob(dir + '/*.root'):
+def testT2(directory):
+  for i in glob.glob(directory + '/*.root'):
     log.info('Trying ' + str(i))
     chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
     chain.Add('dcap://maite.iihe.ac.be/' + i)

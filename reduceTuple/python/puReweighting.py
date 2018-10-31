@@ -22,7 +22,7 @@ def getReweightingFunction(data="PU_2016_36000_XSecCentral", useMC=None):
     sys.stdout = open(os.devnull, 'w')
     from SimGeneral.MixingModule.mix_2016_25ns_Moriond17MC_PoissonOOTPU_cfi import mix
     sys.stdout = sys.__stdout__
-    for i,value in enumerate(mix.input.nbPileupEvents.probValue): mcProfile.SetBinContent(i+1, value)
+    for i, value in enumerate(mix.input.nbPileupEvents.probValue): mcProfile.SetBinContent(i+1, value)   # pylint: disable=E1101
   else:
     mcProfile = useMC
   mcProfile.Scale(1./mcProfile.Integral())

@@ -1,5 +1,6 @@
 import ROOT, socket, os, shutil, subprocess
 from math import pi, sqrt
+from operator import mul
 
 #
 # Get some fixed paths
@@ -90,3 +91,9 @@ def addHist(first, second):
   if first and second: first.Add(second)
   elif second:         first = second.Clone()
   return first
+
+#
+# multiply all elements in list
+#
+def multiply(mylist):
+  return reduce(mul, mylist, 1.)

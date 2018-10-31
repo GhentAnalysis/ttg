@@ -10,16 +10,16 @@
 #
 import os, argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
-argParser.add_argument('--logLevel',       action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
-argParser.add_argument('--sample',         action='store',      default=None,                 help='Sample for which to produce reducedTuple, as listed in samples/data/tuples.conf')
-argParser.add_argument('--type',           action='store',      default='eleSusyLoose-phoCB', help='Specify type of reducedTuple')
-argParser.add_argument('--subJob',         action='store',      default=None,                 help='The xth subjob for a sample, number of subjobs is defined by split parameter in tuples.conf')
-argParser.add_argument('--splitData',      action='store',      default=None,                 help='Splits the data in its separate runs')
-argParser.add_argument('--runLocal',       action='store_true', default=False,                help='use local resources instead of Cream02')
-argParser.add_argument('--debug',          action='store_true', default=False,                help='only run over first three files for debugging')
-argParser.add_argument('--dryRun',         action='store_true', default=False,                help='do not launch subjobs, only show them')
-argParser.add_argument('--isChild',        action='store_true', default=False,                help='mark as subjob, will never submit subjobs by itself')
-argParser.add_argument('--overwrite',      action='store_true', default=False,                help='overwrite if valid output file already exists')
+argParser.add_argument('--logLevel',  action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
+argParser.add_argument('--sample',    action='store',      default=None,                 help='Sample for which to produce reducedTuple, as listed in samples/data/tuples.conf')
+argParser.add_argument('--type',      action='store',      default='eleSusyLoose-phoCB', help='Specify type of reducedTuple')
+argParser.add_argument('--subJob',    action='store',      default=None,                 help='The xth subjob for a sample, number of subjobs is defined by split parameter in tuples.conf')
+argParser.add_argument('--splitData', action='store',      default=None,                 help='Splits the data in its separate runs')
+argParser.add_argument('--runLocal',  action='store_true', default=False,                help='use local resources instead of Cream02')
+argParser.add_argument('--debug',     action='store_true', default=False,                help='only run over first three files for debugging')
+argParser.add_argument('--dryRun',    action='store_true', default=False,                help='do not launch subjobs, only show them')
+argParser.add_argument('--isChild',   action='store_true', default=False,                help='mark as subjob, will never submit subjobs by itself')
+argParser.add_argument('--overwrite', action='store_true', default=False,                help='overwrite if valid output file already exists')
 args = argParser.parse_args()
 
 
@@ -29,7 +29,7 @@ log = getLogger(args.logLevel)
 #
 # Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
 #
-from ttg.samples.Sample import createSampleList,getSampleFromList
+from ttg.samples.Sample import createSampleList, getSampleFromList
 sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
 
 #
@@ -40,20 +40,20 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/da
 #
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
-  if args.sample: sampleList = filter(lambda s: s.name == args.sample, sampleList)
+  if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
 
   jobs = []
   for sample in sampleList:
     if (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr')): continue
 
     if sample.isData:
-      runs = ['B','C','D','E','F','G','H']
+      runs = ['B', 'C', 'D', 'E', 'F', 'G', 'H']
       if args.splitData in runs: splitData = [args.splitData]
       else:                      splitData = runs
     else:                        splitData = [None]
     jobs += [(sample.name, str(i), j) for i in xrange(sample.splitJobs) for j in splitData]
 
-  submitJobs(__file__, ('sample','subJob','splitData'), jobs, argParser, subLog=args.type)
+  submitJobs(__file__, ('sample', 'subJob', 'splitData'), jobs, argParser, subLog=args.type)
   exit(0)
 
 #
@@ -63,7 +63,7 @@ import ROOT
 ROOT.gROOT.SetBatch(True)
 
 sample = getSampleFromList(sampleList, args.sample)
-c      = sample.initTree(skimType='dilepton', shortDebug=args.debug, splitData=args.splitData)
+c      = sample.initTree(shortDebug=args.debug, splitData=args.splitData)
 forSys = (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr'))  # Tuple is created for specific sys
 
 if not sample.isData:
@@ -74,7 +74,7 @@ if not sample.isData:
 # Create new reduced tree (except if it already exists and overwrite option is not used)
 #
 from ttg.tools.helpers import reducedTupleDir, isValidRootFile
-outputId   = (args.splitData if args.splitData in ['B','C','D','E','F','G','H'] else '') + str(args.subJob)
+outputId   = (args.splitData if args.splitData in ['B', 'C', 'D', 'E', 'F', 'G', 'H'] else '') + str(args.subJob)
 outputName = os.path.join(reducedTupleDir, sample.productionLabel, args.type, sample.name, sample.name + '_' + outputId + '.root')
 
 try:    os.makedirs(os.path.dirname(outputName))
@@ -91,11 +91,11 @@ outputFile.cd()
 #
 # Switch off unused branches, avoid copying of branches we want to delete
 #
-unusedBranches = ["HLT","Flag","flag","HN","tau","Ewk","lMuon","miniIso","WOIso","leptonMva","closest","_pt","decay"]
-deleteBranches = ["Scale","Res","pass","met","POG"]
+unusedBranches = ["HLT", "Flag", "flag", "HN", "tau", "Ewk", "lMuon", "miniIso", "WOIso", "leptonMva", "closest", "_pt", "decay"]
+deleteBranches = ["Scale", "Res", "pass", "met", "POG"]
 if not sample.isData:
-  unusedBranches += ["gen_nL", "gen_l","gen_met","gen_HT"]
-  deleteBranches += ["heWeight","gen_ph"]
+  unusedBranches += ["gen_nL", "gen_l", "gen_met", "gen_HT"]
+  deleteBranches += ["heWeight", "gen_ph"]
 for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
 for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
@@ -109,37 +109,37 @@ puReweighting     = getReweightingFunction(data="PU_2016_36000_XSecCentral")
 puReweightingUp   = getReweightingFunction(data="PU_2016_36000_XSecUp")
 puReweightingDown = getReweightingFunction(data="PU_2016_36000_XSecDown")
 
-from ttg.reduceTuple.leptonTrackingEfficiency import leptonTrackingEfficiency
-from ttg.reduceTuple.leptonSF import leptonSF as leptonSF_
-from ttg.reduceTuple.photonSF import photonSF as photonSF_
-from ttg.reduceTuple.prefire  import prefire  as prefire_
-from ttg.reduceTuple.triggerEfficiency import triggerEfficiency
-from ttg.reduceTuple.btagEfficiency import btagEfficiency
-leptonTrackingSF = leptonTrackingEfficiency()
-leptonSF         = leptonSF_()
-photonSF         = photonSF_()
-prefire          = prefire_()
-triggerEff       = triggerEfficiency()
-btagSF           = btagEfficiency()
+from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
+from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
+from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
+from ttg.reduceTuple.prefire  import Prefire  as Prefire
+from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
+from ttg.reduceTuple.btagEfficiency import BtagEfficiency
+leptonTrackingSF = LeptonTrackingEfficiency()
+leptonSF         = LeptonSF()
+photonSF         = PhotonSF()
+prefire          = Prefire()
+triggerEff       = TriggerEfficiency()
+btagSF           = BtagEfficiency()
 
 
 #
 # Define new branches
 #
-newBranches  = ['ph/I','ph_pt/F','phJetDeltaR/F','matchedGenPh/I', 'matchedGenEle/I', 'nphotons/I']
-newBranches += ['njets/I','j1/I','j2/I','nbjets/I','ndbjets/I']
-newBranches += ['l1/I','l2/I','looseLeptonVeto/O','l1_pt/F','l2_pt/F']
-newBranches += ['mll/F','mllg/F','ml1g/F','ml2g/F','phL1DeltaR/F','phL2DeltaR/F','l1JetDeltaR/F','l2JetDeltaR/F']
-newBranches += ['isEE/O','isMuMu/O','isEMu/O']
+newBranches  = ['ph/I', 'ph_pt/F', 'phJetDeltaR/F', 'matchedGenPh/I', 'matchedGenEle/I', 'nphotons/I']
+newBranches += ['njets/I', 'j1/I', 'j2/I', 'nbjets/I', 'ndbjets/I']
+newBranches += ['l1/I', 'l2/I', 'looseLeptonVeto/O', 'l1_pt/F', 'l2_pt/F']
+newBranches += ['mll/F', 'mllg/F', 'ml1g/F', 'ml2g/F', 'phL1DeltaR/F', 'phL2DeltaR/F', 'l1JetDeltaR/F', 'l2JetDeltaR/F']
+newBranches += ['isEE/O', 'isMuMu/O', 'isEMu/O']
 
 if not sample.isData:
   newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeightCSV/F', 'bTagWeight/F']
-  newBranches += ['genPhDeltaR/F','genPhPassParentage/O','genPhMinDeltaR/F','genPhRelPt/F','genPhPt/F','genPhEta/F']
+  newBranches += ['genPhDeltaR/F', 'genPhPassParentage/O', 'genPhMinDeltaR/F', 'genPhRelPt/F', 'genPhPt/F', 'genPhEta/F']
   newBranches += ['prefireSF/F']
   if not forSys:
     for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
-    for var in ['Ru','Fu','RFu','Rd','Fd','RFd']:        newBranches += ['weight_q2_' + var + '/F']
-    for i in range(0,100):                               newBranches += ['weight_pdf_' + str(i) + '/F']
+    for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
+    for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
     for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
     for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
 
@@ -150,11 +150,11 @@ newVars = makeBranches(outputTree, newBranches)
 #
 # Replace branches for systematic runs
 #
-def switchBranches(c, default, variation):
-  return lambda c: setattr(c, default, getattr(c, variation))
+def switchBranches(chain, default, variation):
+  return lambda chain: setattr(chain, default, getattr(chain, variation))
 
 branchModifications = []
-for var in ['ScaleUp','ScaleDown','ResUp','ResDown']:
+for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
   if args.type.count('e'  + var): branchModifications += [switchBranches(c, '_lPtCorr',  '_lPt' + var),  switchBranches(c, '_lECorr',  '_lE' + var)]
   if args.type.count('ph' + var): branchModifications += [switchBranches(c, '_phPtCorr', '_phPt' + var), switchBranches(c, '_phECorr', '_phE' + var)]
 
@@ -211,7 +211,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
         try:    setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
         except: setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
 
-      for i in range(0,100):
+      for i in range(0, 100):
         try:    setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+9]*lumiWeights[i+9])
         except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
 

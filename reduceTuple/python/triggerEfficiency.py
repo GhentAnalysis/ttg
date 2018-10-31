@@ -4,7 +4,6 @@ log = getLogger()
 #
 # Class for trigger efficiencies
 #
-import ROOT
 from ttg.tools.helpers import getObjFromFile
 from math import sqrt
 import os
@@ -12,7 +11,7 @@ import os
 
 scaleFactorFile = "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root"
 
-class triggerEfficiency:
+class TriggerEfficiency:
   def __init__(self):
     self.mumu   = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-mumu")
     self.ee     = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-ee")
@@ -25,8 +24,8 @@ class triggerEfficiency:
     self.ptMax = self.mumu.GetXaxis().GetXmax()
 
   def __getSF(self, map_, pt1, pt2, sysUnc):
-    if pt1>self.ptMax: pt1=self.ptMax - 1 
-    if pt2>self.ptMax: pt2=self.ptMax - 1 
+    if pt1 > self.ptMax: pt1 = self.ptMax - 1 
+    if pt2 > self.ptMax: pt2 = self.ptMax - 1 
     val    = map_.GetBinContent(map_.FindBin(pt1, pt2))
     valErr = map_.GetBinError(  map_.FindBin(pt1, pt2))
     valErr = sqrt(valErr**2+sysUnc**2)
@@ -40,7 +39,7 @@ class triggerEfficiency:
     pt1     = tree._lPt[l1] if flavor1 else tree._lPtCorr[l1]
     pt2     = tree._lPt[l2] if flavor2 else tree._lPtCorr[l2]
 
-    if pt1<pt2: raise ValueError ( "Sort leptons wrt pt." )
+    if pt1 < pt2: raise ValueError ( "Sort leptons wrt pt." )
 
     # Uncertainty: 0.01 + 0.03 for each muon above > 1.2 (studies show only slight eta dependence of SF for muons, not for electrons)
     if abs(flavor1)==abs(flavor2)==1:         return self.__getSF(self.mumu, pt1, pt2, 0.01 + (0.03 if eta1>1.2 and pt1>50 else 0.) + (0.03 if eta2>1.2 and pt2>50 else 0.))
