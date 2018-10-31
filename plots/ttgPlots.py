@@ -249,7 +249,7 @@ if not args.showSys:
     cutString, passingFunctions = cutInterpreter.cutString(args.selection, args.channel)
     cutString = applySysToString(sample.name, args.sys, cutString)
     if args.sys and 'Scale' not in args.sys and sample.isData: continue
-    c = sample.initTree(reducedType = reduceType, skimType='dilep')
+    c = sample.initTree(reducedType = reduceType)
 
     c.data = sample.isData
 
@@ -303,7 +303,7 @@ if not args.showSys:
       fillPlots(plots, c, sample, eventWeight)
 
 # In case of plots: treat the rateParameters similar as the linearSystematics
-linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
+# linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
 
 #
 # Drawing the plots
