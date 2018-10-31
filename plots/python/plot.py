@@ -570,13 +570,16 @@ class Plot:
     # Remove empty bins from the edges (or when they are too small to see)
     self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/150.)
 
-    # If legend is in the form (tuple, int) then the number of columns is provided
-    if len(legend) == 2: legendColumns, legend = legend[1], legend[0]
-    else:                legendColumns, legend = 1, legend
-
     # Legend coordinates + optimization of y-axis, try both left and right corner in case of auto legend + auto y-axis
     if legend:
+
+      # If legend is in the form (tuple, int) then the number of columns is provided
+      if len(legend) == 2: legendColumns, legend = legend[1], legend[0]
+      else:                legendColumns, legend = 1, legend
+
       if legend=="auto":
+        maxEntryLength = max([len(h.texName) for h in sum(histos, [])])
+        legendWidth    = max(min(maxEntryLength, 0.35), 0.7)
         left           = canvas.topPad.GetLeftMargin() + yMax.GetTickLength('Y') + 0.01
         right          = 1 - canvas.topPad.GetRightMargin() - yMax.GetTickLength('Y') - 0.01
         top            = 1 - canvas.topPad.GetTopMargin() - yMax.GetTickLength() - 0.01
@@ -595,6 +598,8 @@ class Plot:
             legendCoordinates = coordinates
       else:
         legendCoordinates = tryCoordinates[0]
+
+      drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
 
     # Draw the histos
     same = ""
@@ -621,7 +626,6 @@ class Plot:
         drawObjects                     += self.getSystematicBoxes(h)
         if ratio: ratio['drawObjects']  += self.getSystematicBoxes(h, ratio=True)
 
-    if legend: drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
     for o in drawObjects:
       try:    o.Draw()
       except: log.debug( "drawObjects has something I can't Draw(): %r", o)
