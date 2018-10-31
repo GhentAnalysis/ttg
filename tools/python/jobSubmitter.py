@@ -9,11 +9,11 @@ def system(command):
 # Check the cream02 queue, do not submit new jobs when over 2000 (limit is 2500)
 def checkQueueOnCream02():
   try:
-   queue = int(system('qstat -u $USER | wc -l'))
-   if queue > 2000:
-    log.info('Too much jobs in queue (' + str(queue) + '), sleeping')
-    time.sleep(500)
-    checkQueueOnCream02()
+    queue = int(system('qstat -u $USER | wc -l'))
+    if queue > 2000:
+      log.info('Too much jobs in queue (' + str(queue) + '), sleeping')
+      time.sleep(500)
+      checkQueueOnCream02()
   except:
     checkQueueOnCream02()
 
@@ -21,11 +21,16 @@ def checkQueueOnCream02():
 def launchCream02(command, logfile, checkQueue=False):
   if checkQueue: checkQueueOnCream02()
   log.info('Launching ' + command + ' on cream02')
-  try:    out = system("qsub -v dir=" + os.getcwd() + ",command=\"" + command + "\" -q localgrid@cream02 -o " + logfile + " -e " + logfile + " -l walltime=35:00:00 $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh")
+  qsubOptions = ['-v dir=' + os.getcwd() + ',command="' + command + '"',
+                 '-q localgrid@cream02',
+                 '-o ' + logfile,
+                 '-e ' + logfile,
+                 '-l walltime=15:00:00']
+  try:    out = system('qsub ' + ' '.join(qsubOptions) + ' $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh')
   except: out = 'failed'
   if not out.count('.cream02.iihe.ac.be'):
-      time.sleep(10)
-      launchCream02(command, logfile)
+    time.sleep(10)
+    launchCream02(command, logfile)
 
 # Local running: limit to 8 jobs running simultaneously
 def launchLocal(command, logfile):
@@ -42,13 +47,12 @@ def launchLocal(command, logfile):
 #   dropArgs:   if some args need to be ignored
 #   subLog:     subdirectory for the logs
 #
-def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs = [], subLog=None):
-  os.system("mkdir -p log")
-
+def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=None):
   args         = argParser.parse_args()
   args.isChild = True
-  changedArgs  = [arg for arg in vars(args) if getattr(args, arg) and argParser.get_default(arg) != getattr(args,arg)]
-  submitArgs   = {arg: getattr(args, arg) for arg in changedArgs if arg not in dropArgs}
+  changedArgs  = [arg for arg in vars(args) if getattr(args, arg) and argParser.get_default(arg) != getattr(args, arg)]
+  submitArgs   = {arg: getattr(args, arg) for arg in changedArgs if (not dropArgs or arg not in dropArgs)}
+
   for i, subJob in enumerate(subJobList):
     for arg, value in zip(subJobArgs, subJob):
       if value: submitArgs[arg] = str(value)

@@ -19,11 +19,10 @@ cType = {
 
 def makeBranches(tree, branches):
   branches = [tuple(branch.split('/')) for branch in branches]
-  ROOT.gROOT.ProcessLine('struct newVars {' + ';'.join([cType[type] + ' ' + name for name, type in branches]) + ';};')
+  ROOT.gROOT.ProcessLine('struct newVars {' + ';'.join([cType[t] + ' ' + name for name, t in branches]) + ';};')
   from ROOT import newVars
   newVars = newVars()
 
-  for name, type in branches:
-    tree.Branch(name, ROOT.AddressOf(newVars, name), name+ '/' + type)
-    from ctypes import py_object
+  for name, t in branches:
+    tree.Branch(name, ROOT.AddressOf(newVars, name), name+ '/' + t)
   return newVars

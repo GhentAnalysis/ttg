@@ -1,4 +1,4 @@
-import ROOT, uuid
+import ROOT, uuid, math
 ROOT.TH1.SetDefaultSumw2()
 
 #
@@ -36,7 +36,7 @@ def getDefaultCanvas(xWidth, yWidth, yRatioWidth=None):
     bottomMargin      = yWidth/float(yRatioWidth)*ROOT.gStyle.GetPadBottomMargin()
     yBorder           = yRatioWidth/float(yWidth)
 
-  canvas = ROOT.TCanvas(str(uuid.uuid4()), "canvas", 200,10, xWidth, yWidth)
+  canvas = ROOT.TCanvas(str(uuid.uuid4()), "canvas", 200, 10, xWidth, yWidth)
 
   def getPad(canvas, number):
     pad = canvas.cd(number)
@@ -47,7 +47,7 @@ def getDefaultCanvas(xWidth, yWidth, yRatioWidth=None):
     return pad
 
   if yRatioWidth:
-    canvas.Divide(1,2,0,0)
+    canvas.Divide(1, 2, 0, 0)
     canvas.topPad = getPad(canvas, 1)
     canvas.topPad.SetBottomMargin(0)
     canvas.topPad.SetPad(canvas.topPad.GetX1(), yBorder, canvas.topPad.GetX2(), canvas.topPad.GetY2())
@@ -81,13 +81,13 @@ def errorStyle(color, markerStyle = 20, markerSize = 1):
     commonStyle(histo)
     histo.SetLineColor(color)
     histo.SetMarkerSize(markerSize)
-    histo.SetMarkerStyle(20)
+    histo.SetMarkerStyle(markerStyle)
     histo.SetMarkerColor(color)
     histo.SetLineWidth(1)
     histo.SetFillColor(0)
     histo.SetFillStyle(0)
-    histo.drawOption  ="e1"
-    histo.legendStyle ='ep'
+    histo.drawOption  = "e1"
+    histo.legendStyle = 'ep'
     return
   return func
 
@@ -134,7 +134,7 @@ def drawTex(line, align=11, size=0.04):
 # Common CMS information
 #
 def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
-  lines =[
+  lines = [
     (11, (0.15, 0.95, 'CMS Simulation' if isOnlySim else 'CMS Preliminary')),
     (31, (0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
   ]

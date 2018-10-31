@@ -33,7 +33,7 @@ load-plugins=
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=C0321,C0111
+disable=C0321,C0111,W0142,W0233,E0611,W0702
 
 [REPORTS]
 
@@ -139,7 +139,7 @@ required-attributes=
 bad-functions=map,filter,apply,input
 
 # Regular expression which should only match correct module names
-module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
+module-rgx=(([a-z_][a-zA-Z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
 
 # Regular expression which should only match correct module level names
 #const-rgx=(([A-Z_][A-Z0-9_]*)|(__.*__))$
@@ -158,10 +158,10 @@ method-rgx=[a-z_][a-zA-Z0-9_]{2,30}$
 attr-rgx=[a-z_][a-zA-Z0-9_]{2,30}$
 
 # Regular expression which should only match correct argument names
-argument-rgx=[a-z_][a-zA-Z0-9_]{2,30}$
+argument-rgx=[a-z_][a-zA-Z0-9_]{1,30}$
 
 # Regular expression which should only match correct variable names
-variable-rgx=[a-z0-9_][a-zA-Z0-9_]{1,30}$
+variable-rgx=[a-z0-9_][a-zA-Z0-9_]{0,30}$
 
 # Regular expression which should only match correct list comprehension /
 # generator expression variable names
@@ -199,14 +199,14 @@ int-import-graph=
 [DESIGN]
 
 # Maximum number of arguments for function / method
-max-args=5
+max-args=6
 
 # Argument names that match this expression will be ignored. Default to name
 # with leading underscore
 ignored-argument-names=_.*
 
 # Maximum number of locals for function / method body
-max-locals=15
+max-locals=16
 
 # Maximum number of return / yield for function / method body
 max-returns=6
@@ -224,7 +224,8 @@ max-parents=7
 max-attributes=7
 
 # Minimum number of public methods for a class (see R0903).
-min-public-methods=2
+# Set to 0, as it does not count methods like __add__ in the UncFloat class
+min-public-methods=0
 
 # Maximum number of public methods for a class (see R0904).
 max-public-methods=20

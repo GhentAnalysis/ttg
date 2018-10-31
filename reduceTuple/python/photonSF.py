@@ -4,7 +4,7 @@
 
 import ROOT, os
 from ttg.tools.helpers import getObjFromFile
-from ttg.tools.u_float import u_float
+from ttg.tools.uncFloat import UncFloat
 from math import sqrt
 
 dataDir = "$CMSSW_BASE/src/ttg/reduceTuple/data/photonSFData"
@@ -19,7 +19,7 @@ class photonSF:
   def getPartialSF(self, effMap, pt, eta):
     sf  = effMap.GetBinContent(effMap.GetXaxis().FindBin(eta), effMap.GetYaxis().FindBin(pt))
     err = effMap.GetBinError(  effMap.GetXaxis().FindBin(eta), effMap.GetYaxis().FindBin(pt))
-    return u_float(sf, err)
+    return UncFloat(sf, err)
 
   def mult(self, list):
     res = list[0]

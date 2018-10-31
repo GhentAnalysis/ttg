@@ -6,8 +6,8 @@ log = getLogger()
 #
 
 import ROOT, os
-from ttg.tools.u_float import u_float
-from ttg.tools.helpers import getObjFromFile
+from ttg.tools.uncFloat import UncFloat
+from ttg.tools.helpers  import getObjFromFile
 from math import sqrt
 
 dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
@@ -23,7 +23,7 @@ class leptonSF:
   def getPartialSF(self, effMap, pt, eta):
     sf  = effMap.GetBinContent(effMap.GetXaxis().FindBin(pt), effMap.GetYaxis().FindBin(abs(eta)))
     err = effMap.GetBinError(  effMap.GetXaxis().FindBin(pt), effMap.GetYaxis().FindBin(abs(eta)))
-    return u_float(sf, err)
+    return UncFloat(sf, err)
 
   def mult(self, list):
     res = list[0]

@@ -4,7 +4,7 @@
 import logging, sys, ROOT
 ROOT.gErrorIgnoreLevel = ROOT.kWarning
 
-def getLogger(logLevel='INFO', logFile=None):
+def getLogger(level='INFO', logFile=None):
   # If it already exist, return it
   logger = logging.getLogger('main')
   if logger.handlers:
@@ -18,9 +18,9 @@ def getLogger(logLevel='INFO', logFile=None):
   logging.Logger.trace = lambda inst, msg, *args, **kwargs: inst.log(logging.TRACE, msg, *args, **kwargs)
   logging.trace        = lambda msg, *args, **kwargs: logging.log(logging.TRACE, msg, *args, **kwargs)
 
-  numeric_level = getattr(logging, logLevel.upper(), None)
+  numeric_level = getattr(logging, level.upper(), None)
   if not isinstance(numeric_level, int):
-    raise ValueError("Invalid log level: %s" % logLevel)
+    raise ValueError("Invalid log level: %s" % level)
 
   logger.setLevel(numeric_level)
   formatter = logging.Formatter('%(asctime)s %(module)20s %(levelname)7s - %(message)s')

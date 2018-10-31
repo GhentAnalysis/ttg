@@ -42,7 +42,7 @@ def getObjFromFile(fname, hname):
 def copyIndexPHP(directory):
   if not os.path.exists(directory): os.makedirs(directory)
   subdirs = directory.split('/')
-  for i in range(1,len(subdirs)):
+  for i in range(1, len(subdirs)):
     p = '/'.join(subdirs[:-i])
     if not plotDir in p: continue
     index_php = os.path.join(p, 'index.php')
