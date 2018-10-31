@@ -13,7 +13,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-import glob, os, copy, ROOT, uuid, socket, getpass
+import glob, os, copy, ROOT, uuid
 
 from ttg.tools.progressBar import progressbar
 from ttg.tools.helpers import reducedTupleDir
@@ -22,7 +22,7 @@ import ttg.tools.style as styles
 #
 # Sample class
 #
-class Sample:
+class Sample:                                                                                # pylint: disable=R0902
 
   def __init__(self, name, path, productionLabel, splitJobs, xsec):
     self.name            = name
@@ -36,6 +36,7 @@ class Sample:
     self.listOfFiles     = None
     self.selectionString = None
     self.addSamples      = [(name, self.productionLabel)]
+    self.chain           = None
 
   def addStyle(self, texName, style):
     self.texName = texName
@@ -55,8 +56,8 @@ class Sample:
         maxVar = f.Get('blackJackAndHookers/lheCounter').GetNbinsX()
         totals = [0 for i in range(maxVar)]
       for i in range(maxVar):
-        if i==0: totals[i] += f.Get('blackJackAndHookers/hCounter').GetBinContent(i+1)    # should be no difference, but more precise
-        else:    totals[i] += f.Get('blackJackAndHookers/lheCounter').GetBinContent(i+1)
+        if i == 0: totals[i] += f.Get('blackJackAndHookers/hCounter').GetBinContent(i+1)    # should be no difference, but more precise
+        else:      totals[i] += f.Get('blackJackAndHookers/lheCounter').GetBinContent(i+1)
     totals = [(t if t > 0 else totals[0]) for t in totals]
     return totals
 
@@ -70,7 +71,7 @@ class Sample:
     return trueInteractions
 
   # init the chain and return it
-  def initTree(self, skimType='dilep', shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None):
+  def initTree(self, shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None):
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
@@ -97,13 +98,13 @@ class Sample:
     return self.chain
 
   # Helper function when sample is split in subjobs
-  def getEventRange(self, entries, totalJobs, subJob):
+  def getEventRange(self, entries, totalJobs, subJob):                                                                # pylint: disable=R0201
     thresholds = [i*entries/totalJobs for i in range(totalJobs)]+[entries]
     return xrange(thresholds[subJob], thresholds[subJob+1])
 
   # Make eventlist for selectionstring
-  def getEventList(self, chain, selectionString, totalJobs, subJob):
-    tmp=str(uuid.uuid4())
+  def getEventList(self, selectionString, totalJobs, subJob):
+    tmp = str(uuid.uuid4())
     log.info("Making event list for sample %s and selectionString %s", self.name, selectionString)
     self.chain.Draw('>>'+tmp, selectionString)
     eventList = ROOT.gDirectory.Get(tmp)
@@ -113,7 +114,7 @@ class Sample:
   def eventLoop(self, selectionString = None, totalJobs=1, subJob = 0):
     if self.selectionString and selectionString: selectionString += "&&" + self.selectionString
     elif self.selectionString:                   selectionString  = self.selectionString
-    if selectionString: entries = self.getEventList(self.chain, selectionString, totalJobs, subJob)
+    if selectionString: entries = self.getEventList(selectionString, totalJobs, subJob)
     else:               entries = self.getEventRange(self.chain.GetEntries(), totalJobs, subJob)
     return progressbar(entries, self.name, 100)
 
@@ -121,16 +122,18 @@ class Sample:
 #
 # Create basic sample (without style options)
 #
-def createSampleList(file):
-  sampleInfos = [line.split('%')[0].strip() for line in open(file)]                         # Strip % comments and \n charachters
+def createSampleList(filename):
+  sampleInfos = [line.split('%')[0].strip() for line in open(filename)]                     # Strip % comments and \n charachters
   sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
   for name, path, productionLabel, splitJobs, xsec in sampleInfos:
     yield Sample(name, path, productionLabel, int(splitJobs), xsec)
 
 #
 # Create stack from configuration file
+# Refactoring needed
 #
-def createStack(tuplesFile, styleFile, channel, replacements = {}):
+def createStack(tuplesFile, styleFile, channel, replacements = None):                       # pylint: disable=R0912,R0914,R0915
+  if not replacements: replacements = {}
   sampleList  = [s for s in createSampleList(tuplesFile)]
   sampleInfos = [line.split('%')[0].strip() for line in open(styleFile)]                    # Strip % comments and \n charachters
   sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
@@ -138,7 +141,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = {}):
   stack       = []
   skip        = False
   for info in sampleInfos:
-    for i,j in replacements.iteritems():
+    for i, j in replacements.iteritems():
       if info[0] == i: info[0] = j
     if '--' in info:
       if len(stack):                                                                        # When "--", start a new stack
@@ -159,7 +162,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = {}):
         if style == 'fillStyle':       style = styles.fillStyle(color)
         elif style == 'errorStyle':    style = styles.errorStyle(color)
         elif style.count('lineStyle'): style = styles.lineStyle(color, width=2)
-        else:                          raise('Unkown style')
+        else:                          raise ValueError('Unkown style')
 
         if texName.count('data'):                                                           # If data, skip if not needed for this channel, fix texName
           if not texName.count(channel):
@@ -187,7 +190,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = {}):
   if len(stack): allStacks.append(stack)
   for s in sum(allStacks, []):
     s.nameNoSys = s.name
-    for i,j in replacements.iteritems():                                                    # Still use original name when using replacement samples like ISR and FSR
+    for i, j in replacements.iteritems():                                                   # Still use original name when using replacement samples like ISR and FSR
       s.nameNoSys = s.nameNoSys.replace(j, i)
   return allStacks
 
@@ -195,8 +198,8 @@ def createStack(tuplesFile, styleFile, channel, replacements = {}):
 #
 # Get sample from list or stack using its name
 #
-def getSampleFromList(list, name):
-  return next((s for s in list if s.name==name), None)
+def getSampleFromList(sampleList, name):
+  return next((s for s in sampleList if s.name==name), None)
 
 def getSampleFromStack(stack, name):
   return next((s for s in sum(stack, []) if s.name==name), None)

@@ -33,7 +33,7 @@ load-plugins=
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
-disable=C0321,C0111,W0142,W0233,E0611,W0702
+disable=I,C0321,C0111,W0142,W0233,E0611,W0702
 
 [REPORTS]
 
@@ -221,7 +221,7 @@ max-statements=50
 max-parents=7
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=7
+max-attributes=10
 
 # Minimum number of public methods for a class (see R0903).
 # Set to 0, as it does not count methods like __add__ in the UncFloat class
