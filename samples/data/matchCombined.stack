@@ -1,5 +1,5 @@
 -- MC
-TTGamma                    MC_(genuine)                 fillStyle     kOrange
+TTGamma                    MC_(genuine_photons)         fillStyle     kOrange
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
@@ -43,11 +43,11 @@ TTGamma                    MC_(genuine)                 fillStyle     kOrange
 +GluGluToZZ_4e
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
-TTJets_pow                 MC_(genuine)                 fillStyle     kOrange                  _ttgEventType<3
-DY_M10to50_NLO             MC_(genuine)                 fillStyle     kOrange                  _zgEventType<3
+TTJets_pow                 MC_(genuine_photons)         fillStyle     kOrange                  _ttgEventType<3
+DY_M10to50_NLO             MC_(genuine_photons)         fillStyle     kOrange                  _zgEventType<3
 +DY_M50_NLO
 
-TTGamma                    MC_(hadronicPhoton)          fillStyle     kRed
+TTGamma                    MC_(hadronic_photons)        fillStyle     kRed
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
@@ -91,11 +91,11 @@ TTGamma                    MC_(hadronicPhoton)          fillStyle     kRed
 +GluGluToZZ_4e
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
-TTJets_pow                 MC_(hadronicPhoton)          fillStyle     kRed                     _ttgEventType<3
-DY_M10to50_NLO             MC_(hadronicPhoton)          fillStyle     kRed                     _zgEventType<3
+TTJets_pow                 MC_(hadronic_photons)        fillStyle     kRed                     _ttgEventType<3
+DY_M10to50_NLO             MC_(hadronic_photons)        fillStyle     kRed                     _zgEventType<3
 +DY_M50_NLO
 
-TTGamma                    MC_(misIdEle)                fillStyle     kBlue
+TTGamma                    MC_(misidentified_electrons) fillStyle     kBlue
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
@@ -139,11 +139,11 @@ TTGamma                    MC_(misIdEle)                fillStyle     kBlue
 +GluGluToZZ_4e
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
-TTJets_pow                 MC_(misIdEle)                fillStyle     kBlue                    _ttgEventType<3
-DY_M10to50_NLO             MC_(misIdEle)                fillStyle     kBlue                    _zgEventType<3
+TTJets_pow                 MC_(misidentified_electrons) fillStyle     kBlue                    _ttgEventType<3
+DY_M10to50_NLO             MC_(misidentified_electrons) fillStyle     kBlue                    _zgEventType<3
 +DY_M50_NLO
 
-TTGamma                    MC_(hadronicFake)            fillStyle     kGreen
+TTGamma                    MC_(hadronic_fakes)          fillStyle     kGreen
 +TTGamma_t
 +TTGamma_tbar
 +TTGamma_had
@@ -187,8 +187,8 @@ TTGamma                    MC_(hadronicFake)            fillStyle     kGreen
 +GluGluToZZ_4e
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
-TTJets_pow                 MC_(hadronicFake)            fillStyle     kGreen                   _ttgEventType<3
-DY_M10to50_NLO             MC_(hadronicFake)            fillStyle     kGreen                   _zgEventType<3
+TTJets_pow                 MC_(hadronic_fakes)          fillStyle     kGreen                   _ttgEventType<3
+DY_M10to50_NLO             MC_(hadronic_fakes)          fillStyle     kGreen                   _zgEventType<3
 +DY_M50_NLO
 
 

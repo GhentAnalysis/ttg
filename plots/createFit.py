@@ -109,9 +109,9 @@ def writeRootFileForChgIso(name, systematics, selection):
   dataHist = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta-matchCombined', 'all', selection), plot, '', ['MuonEG'],['DoubleEG'],['DoubleMuon'])
   writeHist(f, 'sigEtaEta'+sys, 'data_obs', dataHist)
   for splitType in ['_g', '_f', '_h']:
-    if   splitType=='_g': selectors = [[sample, '(genuine)'] for sample in ['TTGamma', 'TTJets', 'DY']] + [[sample, '(misIdEle)'] for sample in ['TTGamma', 'TTJets', 'DY']]
-    if   splitType=='_h': selectors = [[sample, '(hadronicPhoton)'] for sample in ['TTGamma', 'TTJets', 'DY']]
-    if   splitType=='_f': selectors = [[sample, '(hadronicFake)'] for sample in ['TTGamma', 'TTJets', 'DY']]
+    if   splitType=='_g': selectors = [[sample, '(genuine photons)'] for sample in ['TTGamma', 'TTJets', 'DY']] + [[sample, '(misidentified electrons)'] for sample in ['TTGamma', 'TTJets', 'DY']]
+    if   splitType=='_h': selectors = [[sample, '(hadronic photons)'] for sample in ['TTGamma', 'TTJets', 'DY']]
+    if   splitType=='_f': selectors = [[sample, '(hadronic fakes)'] for sample in ['TTGamma', 'TTJets', 'DY']]
     for sys in [''] + systematics:
       hist = getHistFromPkl(('eleSusyLoose-phoCB-sidebandSigmaIetaIeta-matchCombined', 'all', selection), plot, sys, *selectors)
       writeHist(f, 'sigEtaEta'+sys,  'all' + splitType, hist)

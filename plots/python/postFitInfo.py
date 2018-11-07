@@ -3,9 +3,14 @@ log = getLogger()
 import ROOT, os
 from ttg.plots.systematics import rateParameters, linearSystematics
 
+#
+# A few mappings when the combine nuisance name does not exactly match with the name of the samples in the plots
+#
 def mapName(name):
-  if name=='r': return 'TTGamma_norm'
-  else:         return name
+  if name=='r':              return 'TTGamma_norm'
+  if name.count('hadronic'): return 'hadronic photons_norm'
+  if name.count('fake'):     return 'hadronic fakes_norm'
+  else:                      return name
 
 
 #
@@ -23,6 +28,23 @@ def updatePullsAndConstraints(newDataCard = 'srFit'):
     for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
       pullsAndConstraints[mapName(r.GetName())] = (r.getVal(), r.getAsymErrorHi())
     log.info('Loaded pulls and constrains from ' + filename)
+
+#
+# To avoid too much repeated logging
+#
+alreadyShownDebug = []
+def showLogDebugOnce(logMsg):
+  global alreadyShownDebug
+  if logMsg not in alreadyShownDebug:
+    log.info(logMsg)
+    alreadyShownDebug.append(logMsg)
+
+alreadyShownWarning = []
+def showLogWarningOnce(logMsg):
+  global alreadyShownWarning
+  if logMsg not in alreadyShownWarning:
+    log.warning(logMsg)
+    alreadyShownWarning.append(logMsg)
 
 #
 # Applying post-fit values, given a dictionary of sample --> histogram or pkl-histname --> histogram
@@ -47,20 +69,21 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):
               var = nuisanceHist.GetBinContent(j)
               nom = histos[sample].GetBinContent(j)
               h.SetBinContent(j, h.GetBinContent(j) + abs(var-nom)*value)
-          log.trace('Applying pull for nuisance ' + i + ' with ' + str(value) + ' to ' + name)
+          showLogDebugOnce('Applying pull for nuisance ' + i + ' with ' + str(value) + ' to ' + name)
         except:
-          log.warning('Cannot apply pull for nuisance ' + i + ' to ' + name)
+          showLogWarningOnce('Cannot apply pull for nuisance ' + i + ' to ' + name)
   for i in pullsAndConstraints:
     if 'norm' in i:                                                                                              # Then scale each MC given the pull on the rate parameter
+      foundSampleToScale = False
       for sample, h in postHistos.iteritems():
         name = sample if isinstance(sample, str) else (sample.name + sample.texName)
         if name.count(i.split('_')[0]):
           value = pullsAndConstraints[i][0]
           h.Scale(value)
-          log.trace('Applying post-fit scaling value of ' + str(value) + ' to ' + name)
-          break
-      else:
-        log.warning('Could not find where to apply post-fit scaling for ' + i)
+          showLogDebugOnce('Applying post-fit scaling value of ' + str(value) + ' to ' + name)
+          foundSampleToScale = True
+      if not foundSampleToScale:
+        showLogWarningOnce('Could not find where to apply post-fit scaling for ' + i)
 
   return postHistos
 
@@ -71,8 +94,8 @@ def applyPostFitConstraint(sys, uncertainty, postFitInfo):
   updatePullsAndConstraints(postFitInfo)
   for i in pullsAndConstraints:
     if i in sys:
-      log.debug('Applying constraint ' + str(pullsAndConstraints[i][1]) + ' on ' + sys + ' (taking constraint from ' + i + ')')
+      showLogDebugOnce('Applying constraint ' + str(pullsAndConstraints[i][1]) + ' on ' + sys + ' (taking constraint from ' + i + ')')
       return uncertainty*pullsAndConstraints[i][1]
   else:
-    if not 'Stat' in sys: log.warning('Could not find constrain for ' + sys)
+    if not 'Stat' in sys and postFitInfo.count('srFit'): log.warning('Could not find constrain for ' + sys)
     return uncertainty
