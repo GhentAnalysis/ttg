@@ -35,7 +35,7 @@ def photonPt(tree, min, max):
   if max and tree.ph_pt > max: return False
   return True
 
-continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt',(None, photonPt))]
+continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt', photonPt)]
 discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets"),("nphoton","nphotons")]
 
 class cutInterpreter:
@@ -54,19 +54,15 @@ class cutInterpreter:
         elif len(num_str)==1: lower = num_str[0]
         else:                 raise ValueError("Can't interpret string %s" % string)
 
-        if type(tree_var)==type(()):
-          tree_var, function = tree_var
-          function_ = lambda t : function(t, float(lower), float(upper) if upper else None)
+        if callable(tree_var): # Can also use a function(tree, min, max) in case more complex variables want to be tested
+          cutString = None
+          function_ = lambda t : (t, float(lower), float(upper) if upper else None)
         else:
-          function_ = None
-
-        if tree_var:
           res_string = []
           if lower: res_string.append(tree_var+">="+lower)
           if upper: res_string.append(tree_var+"<"+upper)
           cutString = "&&".join(res_string)
-        else:
-          cutString = None
+          function_ = None
         return (cutString, function_)
 
     # discrete Variables
