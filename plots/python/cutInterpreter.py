@@ -31,7 +31,7 @@ special_cuts = {
   }
 
 def phLepDeltaR(tree, min, max):
-  return (min < min(c.phL1DeltaR, c.phL2DeltaR) < max)
+  return (min <= min(c.phL1DeltaR, c.phL2DeltaR) < max)
 
 continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt', 'ph_pt'), ('phJetDeltaR', 'phJetDeltaR'), ('phLepDeltaR', phLepDeltaR)]
 discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets"),("nphoton","nphotons")]
@@ -39,71 +39,55 @@ discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjet
 class cutInterpreter:
 
   @staticmethod
+  def buildString(tree_var, lower, upper):
+    res_string = []
+    if lower: res_string.append(tree_var+">="+lower)
+    if upper: res_string.append(tree_var+"<"+upper)
+    return "&&".join(res_string)
+
+
+  @staticmethod
   def translate_cut(string):
-    if string in special_cuts.keys(): return (special_cuts[string], None)
+    if string in special_cuts.keys(): return special_cuts[string]
 
     # continous Variables
     for var, tree_var in continous_variables:
       if string.startswith(var):
         num_str = string[len(var):].replace("to","To").split("To")
-        upper = None
-        lower = None
         if len(num_str)==2:   lower, upper = num_str
-        elif len(num_str)==1: lower = num_str[0]
+        elif len(num_str)==1: lower, upper = num_str[0], None
         else:                 raise ValueError("Can't interpret string %s" % string)
 
-        if callable(tree_var): # Can also use a function(tree, min, max) in case more complex variables want to be tested
-          cutString = None
-          function_ = lambda t : (t, float(lower), float(upper) if upper else None)
-        else:
-          res_string = []
-          if lower: res_string.append(tree_var+">="+lower)
-          if upper: res_string.append(tree_var+"<"+upper)
-          cutString = "&&".join(res_string)
-          function_ = None
-        return (cutString, function_)
+        # Can also use a function(tree, min, max) in case more complex variables want to be tested
+        if callable(tree_var): return (lambda t : tree_var(t, float(lower), float(upper) if upper else None))
+        else:                  return buildString(tree_var, lower, upper)
 
     # discrete Variables
     for var, tree_var in discrete_variables:
-      log.debug("Reading discrete cut %s as %s"%(var, tree_var))
       if string.startswith( var ):
         if string[len( var ):].replace("to","To").count("To"):
-            raise NotImplementedError( "Can't interpret string with 'to' for discrete variable: %s. You just volunteered." % string )
-
-        if type(tree_var)==type(()):
-          tree_var, function = tree_var
           num_str = string[len(var):].replace("to","To").replace("p","").split("To")
-          upper = None
-          lower = None
           if len(num_str)==2:   lower, upper = num_str
-          elif len(num_str)==1: lower = num_str[0]
-          function_ = lambda t: function(t, int(lower), int(upper) if upper else None)
+          elif len(num_str)==1: lower, upper = num_str[0], None
+          else:                 raise ValueError("Can't interpret string %s" % string)
         else:
-          function_ = None
-
-        if tree_var:
           num_str = string[len(var):]
-          if num_str[-1] == 'p' and len(num_str)==2:
-            cutString = tree_var+">="+num_str[0]
-          else:
-            vls = [ tree_var+"=="+c for c in num_str ]
-            if len(vls)==1: cutString = vls[0]
-            else:           cutString = '('+'||'.join(vls)+')'
-        else:
-          cutString = None
-        return (cutString, function_)
+          if num_str[-1] == 'p': lower, upper = num_str.split('p')[0], None
+          else:                  lower, upper = num_str, str(int(num_str)+1)
+
+        if callable(tree_var): return (lambda t: tree_var(t, int(lower), int(upper) if upper else None))
+        else:                  return buildString(tree_var, lower, upper)
 
     raise ValueError( "Can't interpret string %s. All cuts %s" % (string,  ", ".join( [ c[0] for c in continous_variables + discrete_variables] +  special_cuts.keys() ) ) )
 
   @staticmethod
   def cutString(cuts, channel):
-    strings   = []
-    functions = []
+    strings, functions = [], []
     for cut in cuts.split('-'):
-      (string, function) = cutInterpreter.translate_cut(cut)
-      if string and string.count('||'): string = '(' + string + ')'                                                 #protect
-      if string and string!='(1)':      strings.append(string)
-      if function:                      functions.append(function)
+      interpretedCut = cutInterpreter.translate_cut(cut)
+      if callable(interpretedCut):      functions.append(interpretedCut)
+      elif interpretedCut.count('||'):  strings.append('(' + interpretedCut + ')') #protect for ||
+      else interpretedCut != '(1)':     strings.append(interpretedCut)
 
     cutString        = "&&".join(strings) if len(strings) else '(1)'
     passingFunctions = (lambda t: all(f(t) for f in functions)) if len(functions) else (lambda t : True)
