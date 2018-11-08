@@ -152,13 +152,13 @@ newVars = makeBranches(outputTree, newBranches)
 #
 # Replace branches for systematic runs
 #
-def switchBranches(chain, default, variation):
+def switchBranches(default, variation):
   return lambda chain: setattr(chain, default, getattr(chain, variation))
 
 branchModifications = []
 for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
-  if args.type.count('e'  + var): branchModifications += [switchBranches(c, '_lPtCorr',  '_lPt' + var),  switchBranches(c, '_lECorr',  '_lE' + var)]
-  if args.type.count('ph' + var): branchModifications += [switchBranches(c, '_phPtCorr', '_phPt' + var), switchBranches(c, '_phECorr', '_phE' + var)]
+  if args.type.count('e'  + var): branchModifications += [switchBranches('_lPtCorr',  '_lPt' + var),  switchBranches('_lECorr',  '_lE' + var)]
+  if args.type.count('ph' + var): branchModifications += [switchBranches('_phPtCorr', '_phPt' + var), switchBranches('_phECorr', '_phE' + var)]
 
 
 #
