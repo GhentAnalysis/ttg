@@ -30,8 +30,10 @@ special_cuts = {
     "signalRegion":        "(njets>1)||(njets==1&&ndbjets==1)",   # signal regions small
   }
 
+def phLepDeltaR(tree, min, max):
+  return (min < min(c.phL1DeltaR, c.phL2DeltaR) < max)
 
-continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt', 'ph_pt')]
+continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt', 'ph_pt'), ('phJetDeltaR', 'phJetDeltaR'), ('phLepDeltaR', phLepDeltaR)]
 discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets"),("nphoton","nphotons")]
 
 class cutInterpreter:
