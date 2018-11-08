@@ -11,6 +11,7 @@ from ttg.tools.helpers      import addHist
 from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
 from ttg.plots.combineTools import writeCard, runFitDiagnostics, runSignificance, runImpacts, goodnessOfFit
 from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys, rateParameters
+from ttg.plots.replaceShape import replaceShape
 
 import os, ROOT, shutil
 ROOT.gROOT.SetBatch(True)
@@ -41,12 +42,6 @@ def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
     elif sys and sys=="Down": sf = nonPromptSF[sr][0] - err
     else:                     sf = nonPromptSF[sr][0]
     hist.SetBinContent(bin, hist.GetBinContent(bin)*sf)
-  return hist
-
-def replaceShape(hist, shape):
-  normalization = hist.Integral("width")/shape.Integral("width")
-  hist = shape.Clone()
-  hist.Scale(normalization)
   return hist
 
 def writeHist(file, name, template, histTemp, norm=None, removeBins = [], shape=None, mergeBins=False):

@@ -63,6 +63,7 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
 
 #
 # Get systematic uncertainty on sideband template: based on shape difference of ttbar hadronicFakes in sideband and nominal region
+# (broken - unused)
 #
 def applySidebandUnc(hist, plot, resultsDir, up):
   selection     = resultsDir.split('/')[-1]
@@ -482,6 +483,7 @@ class Plot:
           resultsDir = None,
           postFitInfo = None,
           saveGitInfo = True,
+          fakesFromSideband = False,
           ):
     ''' yRange: 'auto' (default) or [low, high] where low/high can be 'auto'
         extensions: ["pdf", "png", "root"] (default)
@@ -493,6 +495,7 @@ class Plot:
         drawObjects = [] Additional ROOT objects that are called by .Draw()
         widths = {} (default) to update the widths. Values are {'y_width':500, 'x_width':500, 'y_ratio_width':200}
         canvasModifications = [] could be used to pass on lambdas to modify the canvas
+        fakesForSideband = False, if True replaces the fakes of the matchCombined stack by the data from the sideband
     '''
 
     self.textNDC = 1
@@ -518,6 +521,11 @@ class Plot:
       log.info('Empty histograms for ' + self.name + ', skipping')
       return
 
+    legendReplacements = {}
+    if fakesFromSideband and self.name == 'photon_chargedIso_bins_NO':
+      from ttg.plots.replaceShape import replaceShapeForFakes
+      legendReplacements.update(replaceShapeForFakes(self))
+
     if postFitInfo:
       _, sysHistos = self.getSysHistos(self.stack[0], resultsDir, systematics)                     # Get sys variations for each sample
       self.histos = applyPostFitScaling(self.histos, postFitInfo, sysHistos)
@@ -528,6 +536,7 @@ class Plot:
     for s, h in histDict.iteritems():
       if hasattr(s, 'style'): s.style(h)
       h.texName = s.texName
+      for i,j in legendReplacements.iteritems(): h.texName = h.texName.replace(i, j)
       normalizeBinWidth(h, self.normBinWidth)
       self.addOverFlowBin1D(h, self.overflowBin)
 

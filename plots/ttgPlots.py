@@ -158,18 +158,18 @@ else:
   plots.append(Plot('photon_eta',                 '|#eta|(#gamma)',                       lambda c : abs(c._phEta[c.ph]),                                (15,0,2.5)))
   plots.append(Plot('photon_phi',                 '#phi(#gamma)',                         lambda c : c._phPhi[c.ph],                                     (10,-pi,pi)))
   plots.append(Plot('photon_mva',                 '#gamma-MVA',                           lambda c : c._phMva[c.ph],                                     (20,-1,1)))
-  plots.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_NO',       'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_bins',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_bins_NO',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_small_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_wide',     'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,2,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_wide_NO',  'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,2,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_bins2',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_bins2_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
-  plots.append(Plot('photon_chargedIso_bins3',    'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1,21), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-  plots.append(Plot('photon_chargedIso_bins3_NO', 'chargedIso(#gamma) (GeV)',             lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1,21), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso',          'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_NO',       'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        (20,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_bins',     'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_bins_NO',  'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_small',    'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_small_NO', 'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        (80,0,20), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_wide',     'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,2,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_wide_NO',  'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,2,5,10,20], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_bins2',    'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_bins2_NO', 'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441,1,2,3,5,10], normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
+  plots.append(Plot('photon_chargedIso_bins3',    'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1,21), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+  plots.append(Plot('photon_chargedIso_bins3_NO', 'Photon Ch. Had. Isolation (GeV)',      lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1,21), normBinWidth=1, texY=('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin=None))
   plots.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)',     lambda c : c._phChargedIsolation[c.ph]/c.ph_pt,                (20,0,2)))
   plots.append(Plot('photon_neutralIso',          'neutralIso(#gamma) (GeV)',             lambda c : c._phNeutralHadronIsolation[c.ph],                  (25,0,5)))
   plots.append(Plot('photon_photonIso',           'photonIso(#gamma) (GeV)',              lambda c : c._phPhotonIsolation[c.ph],                         (32,0,8)))
@@ -360,6 +360,7 @@ for plot in plots: # 1D plots
                   sorting           = True,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
+                  fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                   **extraArgs
         )
         extraArgs['saveGitInfo'] = False
