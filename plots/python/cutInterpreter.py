@@ -30,12 +30,8 @@ special_cuts = {
     "signalRegion":        "(njets>1)||(njets==1&&ndbjets==1)",   # signal regions small
   }
 
-def photonPt(tree, min, max):
-  if tree.ph_pt < min:         return False
-  if max and tree.ph_pt > max: return False
-  return True
 
-continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt', photonPt)]
+continous_variables = [("mll", "mll"),("ml1g","ml1g"),('photonPt', 'ph_pt')]
 discrete_variables  = [("njet", "njets"), ("btag", "nbjets"),("deepbtag","ndbjets"),("nphoton","nphotons")]
 
 class cutInterpreter:
