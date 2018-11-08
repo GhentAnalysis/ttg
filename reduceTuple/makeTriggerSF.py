@@ -19,14 +19,12 @@ args = argParser.parse_args()
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
-from ttg.tools.style import commonStyle
+from ttg.tools.style import commonStyle, setDefault
 from ttg.tools.helpers import copyIndexPHP
 from math import sqrt
 import ROOT
-ROOT.gROOT.SetBatch(True)
-ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/ttg/tools/scripts/tdrstyle.C")
-ROOT.setTDRStyle()
-ROOT.gROOT.SetStyle('tdrStyle')
+
+setDefault()
 ROOT.gStyle.SetPadRightMargin(0.15)
 ROOT.gStyle.SetPadBottomMargin(0.15)
 ROOT.gROOT.ForceStyle()

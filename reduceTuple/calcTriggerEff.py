@@ -55,16 +55,14 @@ log.info('Sample: ' + sample.name)
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets
 setIDSelection(c, 'eleSusyLoose-phoCB')
 
-from ttg.tools.style import commonStyle
+from ttg.tools.style import commonStyle, setDefault
 from ttg.tools.helpers import copyIndexPHP
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 puReweighting = getReweightingFunction(data="PU_2016_36000_XSecCentral")
 
 import ROOT, numpy
-ROOT.gROOT.SetBatch(True)
-ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/ttg/tools/scripts/tdrstyle.C")
-ROOT.setTDRStyle()
-ROOT.gROOT.SetStyle('tdrStyle')
+
+setDefault()
 ROOT.gStyle.SetPadRightMargin(0.15)
 ROOT.gStyle.SetPadBottomMargin(0.15)
 ROOT.gROOT.ForceStyle()
