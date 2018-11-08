@@ -1,6 +1,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
+varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetPt', 'dbj1', 'dbj2', 'l1_jetDeltaR', 'l2_jetDeltaR', 'phJetDeltaR', 'phBJetDeltaR']
 
 #
 # Defining shape systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
@@ -19,8 +20,8 @@ for i in ('Up', 'Down'):
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
   systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
-  systematics['JEC'+i]        = [('njets',         'njets_JEC'+i),     ('ndbjets',    'ndbjets_JEC'+i), ('j1', 'j1_JEC'+i), ('j2', 'j2_JEC'+i), ('_jetPt', '_jetPt_JEC'+i)]
-  systematics['JER'+i]        = [('njets',         'njets_JER'+i),     ('ndbjets',    'ndbjets_JER'+i), ('j1', 'j1_JER'+i), ('j2', 'j2_JER'+i), ('_jetPt', '_jetPt_JER'+i)]
+  systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
+  systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
 
 #
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
