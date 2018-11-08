@@ -224,24 +224,25 @@ def goodJets(t, n):
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
     setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > t.jetPtCut])
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
-    setattr(n, 'j1'+var,    getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
-    setattr(n, 'j2'+var,    getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)
+    setattr(n, 'j1'+var, getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
+    setattr(n, 'j2'+var, getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)
 
 def bJets(t, n):
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
-    setattr(t, 'bjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetCsvV2[i] > 0.8484])
-    setattr(n, 'nbjets'+var, len(getattr(t, 'bjets'+var)))
-  for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
     setattr(t, 'dbjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > 0.6324])
     setattr(n, 'ndbjets'+var, len(getattr(t, 'dbjets'+var)))
+    setattr(n, 'dbj1'+var, getattr(t, 'dbjets'+var)[0] if getattr(n, 'ndbjets'+var) > 0 else -1)
+    setattr(n, 'dbj2'+var, getattr(t, 'dbjets'+var)[1] if getattr(n, 'ndbjets'+var) > 1 else -1)
 
 
 #
 # delta R
 #
 def makeDeltaR(t, n):
-  n.phL1DeltaR  = deltaR(t._lEta[n.l1], t._phEta[n.ph], t._lPhi[n.l1], t._phPhi[n.ph])                              if len(t.photons) > 0 and len(t.leptons) > 0 else -1
-  n.phL2DeltaR  = deltaR(t._lEta[n.l2], t._phEta[n.ph], t._lPhi[n.l2], t._phPhi[n.ph])                              if len(t.photons) > 0 and len(t.leptons) > 1 else -1
-  n.phJetDeltaR = min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in t.jets] + [999]) if len(t.photons) > 0 else -1
-  n.l1JetDeltaR = min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in t.jets] + [999])  if len(t.leptons) > 0 else -1
-  n.l2JetDeltaR = min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in t.jets] + [999])  if len(t.leptons) > 1 else -1
+  n.phL1DeltaR   = deltaR(t._lEta[n.l1], t._phEta[n.ph], t._lPhi[n.l1], t._phPhi[n.ph]) if len(t.photons) > 0 and len(t.leptons) > 0 else -1
+  n.phL2DeltaR   = deltaR(t._lEta[n.l2], t._phEta[n.ph], t._lPhi[n.l2], t._phPhi[n.ph]) if len(t.photons) > 0 and len(t.leptons) > 1 else -1
+  for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
+    setattr(n, 'phJetDeltaR'+var,  min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'jets'+var)] + [999])   if len(t.photons) > 0 else -1)
+    setattr(n, 'phBJetDeltaR'+var, min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'dbjets'+var)] + [999]) if len(t.photons) > 0 else -1)
+    setattr(n, 'l1JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 0 else -1)
+    setattr(n, 'l2JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 1 else -1)

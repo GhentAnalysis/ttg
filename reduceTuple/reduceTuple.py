@@ -92,7 +92,7 @@ outputFile.cd()
 # Switch off unused branches, avoid copying of branches we want to delete
 #
 unusedBranches = ["HLT", "Flag", "flag", "HN", "tau", "Ewk", "lMuon", "miniIso", "WOIso", "leptonMva", "closest", "_pt", "decay"]
-deleteBranches = ["Scale", "Res", "pass", "met", "POG"]
+deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron"]
 if not sample.isData:
   unusedBranches += ["gen_nL", "gen_l", "gen_met", "gen_HT"]
   deleteBranches += ["heWeight", "gen_ph"]
@@ -126,22 +126,24 @@ btagSF           = BtagEfficiency()
 #
 # Define new branches
 #
-newBranches  = ['ph/I', 'ph_pt/F', 'phJetDeltaR/F', 'matchedGenPh/I', 'matchedGenEle/I', 'nphotons/I']
-newBranches += ['njets/I', 'j1/I', 'j2/I', 'nbjets/I', 'ndbjets/I']
+newBranches  = ['ph/I', 'ph_pt/F', 'phJetDeltaR/F', 'phBJetDeltaR/F', 'matchedGenPh/I', 'matchedGenEle/I', 'nphotons/I']
+newBranches += ['njets/I', 'j1/I', 'j2/I', 'ndbjets/I', 'dbj1/I', 'dbj2/I']
 newBranches += ['l1/I', 'l2/I', 'looseLeptonVeto/O', 'l1_pt/F', 'l2_pt/F']
 newBranches += ['mll/F', 'mllg/F', 'ml1g/F', 'ml2g/F', 'phL1DeltaR/F', 'phL2DeltaR/F', 'l1JetDeltaR/F', 'l2JetDeltaR/F']
 newBranches += ['isEE/O', 'isMuMu/O', 'isEMu/O']
 
 if not sample.isData:
-  newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeightCSV/F', 'bTagWeight/F']
+  newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeight/F']
   newBranches += ['genPhDeltaR/F', 'genPhPassParentage/O', 'genPhMinDeltaR/F', 'genPhRelPt/F', 'genPhPt/F', 'genPhEta/F']
   newBranches += ['prefireSF/F']
   if not forSys:
-    for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']: newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I']
+    for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:
+      newBranches += ['njets_' + sys + '/I', 'nbjets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I', 'dbj1_' + sys + '/I', 'dbj2_' + sys + '/I']
+      newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
     for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
-    for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeightCSV' + sys + '/F', 'bTagWeight' + sys + '/F']
+    for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
@@ -231,8 +233,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
-      setattr(newVars, 'bTagWeightCSV' + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = True))
-      setattr(newVars, 'bTagWeight'    + sys, btagSF.getBtagSF_1a(sys, c, c.bjets, isCSV = False))
+      setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets, isCSV = False))
 
     trigWeight, trigErr        = triggerEff.getSF(c, l1, l2)
     newVars.triggerWeight      = trigWeight
