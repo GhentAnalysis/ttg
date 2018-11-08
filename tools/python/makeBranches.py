@@ -23,6 +23,6 @@ def makeBranches(tree, branches):
   from ROOT import newVars
   newVars = newVars()
 
-  for name, t in branches:
+  for name, t in sorted(branches):
     tree.Branch(name, ROOT.AddressOf(newVars, name), name+ '/' + t)
   return newVars
