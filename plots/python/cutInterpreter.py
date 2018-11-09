@@ -36,6 +36,7 @@ def phLepDeltaR(tree, lower, upper):
 continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR}
 discrete_variables  = {'njet': 'njets', 'btag': 'nbjets', 'deepbtag': 'ndbjets', 'nphoton': 'nphotons'}
 
+# Need to disable the too many branches function because CMSSW has some ancient pylint release which does not exclude nested functions
 def cutStringAndFunctions(cuts, channel): # pylint: disable=R0912
 
   def buildString(tree_var, lower, upper):
