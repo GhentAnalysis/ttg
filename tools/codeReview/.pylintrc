@@ -12,7 +12,7 @@ profile=no
 
 # Add files or directories to the blacklist. They should be base names, not
 # paths.
-ignore=CVS
+ignore=
 
 # Pickle collected data for later comparisons.
 persistent=yes
@@ -33,13 +33,15 @@ load-plugins=
 # can either give multiple identifier separated by comma (,) or put this option
 # multiple time (only on the command line, not in the configuration file where
 # it should appear only once).
+# Often there was a good reason to disable those, though might consider to
+# disable them for specific files only
 disable=I,C0321,C0111,W0142,W0233,E0611,W0702,W0212
 
 [REPORTS]
 
 # Set the output format. Available formats are text, parseable, colorized, msvs
 # (visual studio) and html
-output-format=text
+output-format=colorized
 
 # Include message's id in output
 include-ids=no

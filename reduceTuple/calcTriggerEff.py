@@ -56,7 +56,7 @@ from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selec
 setIDSelection(c, 'eleSusyLoose-phoCB')
 
 from ttg.tools.style import commonStyle, setDefault
-from ttg.tools.helpers import copyIndexPHP
+from ttg.tools.helpers import printCanvas 
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 puReweighting = getReweightingFunction(data="PU_2016_36000_XSecCentral")
 
@@ -89,10 +89,11 @@ def passSelection():
 
 # How to pass our triggers
 def passTrigger():
-  if c.isEE   and (c._passTTG_ee or c._passTTG_e):                 return True 
+  if c.isEE   and (c._passTTG_ee or c._passTTG_e):                 return True
   if c.isEMu  and (c._passTTG_em or c._passTTG_e or c._passTTG_m): return True
   if c.isMuMu and (c._passTTG_mm or c._passTTG_m):                 return True
   return False
+
 
 # Efficiency and correlation for the whole selection
 if args.corr:
@@ -106,7 +107,7 @@ if args.corr:
   for i in eventLoop:
     c.GetEntry(i)
     if not passSelection(): continue
- 
+
     if c.isEE:   channel = 'ee'
     if c.isEMu:  channel = 'emu'
     if c.isMuMu: channel = 'mumu'
@@ -114,9 +115,9 @@ if args.corr:
 
     countAll[channel] += puWeight
     if c._passTTG_cross:                   countMET[channel] += puWeight
-    if passTrigger():                      countLep[channel] += puWeight 
+    if passTrigger():                      countLep[channel] += puWeight
     if c._passTTG_cross and passTrigger(): countBoth[channel] += puWeight
-    
+
   for channel in ['ee', 'emu', 'mumu']:
     log.info('Efficiency  for channel ' + channel + ' is ' + str(countBoth[channel]/countMET[channel]))
     log.info('Correlation for channel ' + channel + ' is ' + str((countMET[channel]*countLep[channel])/(countBoth[channel]*countAll[channel])))
@@ -128,7 +129,7 @@ else:
     hPass[t], hTotal[t] = {}, {}
     for channel in ['ee', 'emu', 'mue', 'mumu']:
       if 'etaBinning' in t:
-        binningX = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.startswith('e') else numpy.array([0., 0.9, 1.2, 2.1, 2.4]) 
+        binningX = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.startswith('e') else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
         binningY = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.endswith('e')   else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
       elif 'integral' in t:
         binningX = numpy.array([25., 9999.])
@@ -139,7 +140,7 @@ else:
       name    = sample.name + ' ' + channel + ' ' + t
       hPass[t][channel]  = ROOT.TH2D(name + 'Pass',  name, len(binningX)-1, binningX, len(binningY)-1, binningY)
       hTotal[t][channel] = ROOT.TH2D(name + 'Total', name, len(binningX)-1, binningX, len(binningY)-1, binningY)
-      
+
 
   for i in eventLoop:
     c.GetEntry(i)
@@ -200,13 +201,8 @@ else:
       effDraw.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
       directory = '/user/tomc/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + sample.name + '/' + args.select
-      try:    os.makedirs(directory)
-      except: pass
-      copyIndexPHP(directory)
-      canvas.Print(os.path.join(directory, channel + t + '.pdf'))
-      canvas.Print(os.path.join(directory, channel + t + '.png'))
+      printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       eff.Write(sample.name + '-' + channel + t)
-
 
 log.info('Finished')

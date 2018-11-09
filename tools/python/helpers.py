@@ -97,3 +97,13 @@ def addHist(first, second):
 #
 def multiply(mylist):
   return reduce(mul, mylist, 1.)
+
+#
+# Output a canvas to directory/name with following extensions
+#
+def printCanvas(canvas, directory, name, extensions):
+  try:    os.makedirs(directory)
+  except: pass
+  copyIndexPHP(directory)
+  for ext in extensions:
+    canvas.Print(os.path.join(directory, name + '.' + ext))

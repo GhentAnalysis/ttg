@@ -20,7 +20,7 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 from ttg.tools.style import commonStyle, setDefault
-from ttg.tools.helpers import copyIndexPHP
+from ttg.tools.helpers import printCanvas
 from math import sqrt
 import ROOT
 
@@ -71,11 +71,7 @@ for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c'
     hist.Draw("COLZ TEXTE")
     canvas.RedrawAxis()
     directory = '/user/tomc/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF' + '/' + args.select
-    try:    os.makedirs(directory)
-    except: pass
-    copyIndexPHP(directory)
-    canvas.Print(os.path.join(directory, channel + t + '.pdf'))
-    canvas.Print(os.path.join(directory, channel + t + '.png'))
+    printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
     outFile.cd()
     hist.Write('SF-' + channel + t)
 
