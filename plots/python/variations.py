@@ -1,4 +1,5 @@
 defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
+                     'llg-looseLeptonVeto-mll40-signalRegion-photonPt20:SYS',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20:SYS,POST',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20:SYS,POST',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag0-photonPt20',
@@ -8,10 +9,6 @@ defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag2p-photonPt20',
-                     ]
-
-onZSelections     = ['llg-looseLeptonVeto-mll40-njet1p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-signalRegion-photonPt20:SYS',
                      'llg-looseLeptonVeto-mll40-orOnZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-onZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20:SYS,POST',
@@ -41,32 +38,39 @@ dilepSelections   = ['ll-looseLeptonVeto-mll40-offZ:SYS',
                      'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p-nphoton0'
                      ]
 
+#
+# Get the selections to consider for a given tag/channel
+# On-Z selection only retained for SF/noData with the default phoCBfull tag
+# When running sys or post-fit plots, reduce the selection
+#
+def getSelections(tag, channel, sys, post):
+  if not tag.count('pho') and tag.count('eleSusyLoose'): selections = dilepSelections
+  elif tag == 'eleSusyLoose-phoCBfull':                  selections = [(s+':SYS,POST') for s in defaultSelections] + diffSelections
+  else:                                                  selections = defaultSelections
 
+  if channel not in ['SF', 'noData'] or not tag.count('phoCBfull'):
+    selections = [s for s in selections if not s.lower().count('onz')]
 
+  if sys:  selections = [s for s in selections if 'SYS'  in s]
+  if post: selections = [s for s in selections if 'POST' in s]
+
+  return [s.split(':')[0] for s in selections]
+
+#
+# Get the (selection, channel, sys) variations to consider for the ttgPlots.py script
+#
 def getVariations(args, sysList):
-  if args.selection:                                                 selections = [args.selection]
-  elif not args.tag.count('pho') and args.tag.count('eleSusyLoose'): selections = dilepSelections
-  elif args.tag=='eleSusyLoose-phoCBfull':                           selections = [(s+':SYS,POST') for s in defaultSelections + onZSelections] + diffSelections
-  elif args.tag.count('phoCBfull'):                                  selections = defaultSelections + onZSelections
-  else:                                                              selections = defaultSelections
-
-  # When running sys or post-fit plots, reduce the selection
-  if args.runSys or args.showSys: selections = [s for s in selections if 'SYS'  in s]
-  if args.post:                   selections = [s for s in selections if 'POST' in s]
-  selections = [s.split(':')[0] for s in selections]
-
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('splitOverlay'):    channels = ['noData']
-  elif args.tag.count('randomConeCheck'): channels = ['ee','mumu','emu','SF','all']
-  elif args.tag.count('igmaIetaIeta'):    channels = ['ee','mumu','emu','SF','all']
-  else:                                   channels = ['ee','mumu','emu','SF','all','noData']
+  elif args.tag.count('randomConeCheck'): channels = ['ee', 'mumu', 'emu', 'SF', 'all']
+  elif args.tag.count('igmaIetaIeta'):    channels = ['ee', 'mumu', 'emu', 'SF', 'all']
+  else:                                   channels = ['ee', 'mumu', 'emu', 'SF', 'all', 'noData']
 
   variations = []
-  for s in sysList:
-    for c in channels:
-      if c != 'SF' and c != 'noData': selections_ = [sel for sel in selections if not (('onZ' in sel) or ('OnZ' in sel))]
-      else:                           selections_ = selections
-      variations += [(sel, c, s) for sel in selections_]
+  for c in channels:
+    if args.selection: selections = [args.selection]
+    else:              selections = getSelections(args.tag, c, args.runSys or args.showSys, args.post)
+    variations += [(sel, c, s) for sel in selections for s in sysList]
 
   return ('selection', 'channel', 'sys'), variations
