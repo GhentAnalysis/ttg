@@ -5,6 +5,7 @@ varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetPt', 'dbj1', 'dbj2'
 
 #
 # Defining shape systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
+# pylint: disable=W0621
 #
 systematics = {}
 for i in ('Up', 'Down'):
@@ -26,9 +27,9 @@ for i in ('Up', 'Down'):
 #
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
 #
-for i in ('Ru','Fu','RFu','Rd','Fd','RFd'):
+for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
-for i in range(0,100):
+for i in range(0, 100):
   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 
 #
@@ -63,7 +64,7 @@ def applySysToString(sample, sys, string):
     for var, sysVar in systematics[sys]:
       if sysVar.count(':'):
         s, sysVar = sysVar.split(':')
-        if sample!=s: return string
+        if sample != s: return string
       string = string.replace(var, sysVar)
   return string
 
@@ -71,7 +72,7 @@ def applySysToTree(sample, sys, tree):
   for var, sysVar in systematics[sys]:
     if sysVar.count(':'):
       s, sysVar = sysVar.split(':')
-      if sample!=s: return
+      if sample != s: return
     setattr(tree, var, getattr(tree, sysVar))
 
 def applySysToReduceType(reduceType, sys):
@@ -105,7 +106,7 @@ def constructQ2Sys(allPlots, plotName, stack, force=False):
   allPlots[plotName + 'q2Down'] = {}
   for histName in [s.name+s.texName for s in stack]:
     try:
-      variations = [allPlots[plotName + 'q2_' + i][histName] for i in ('Ru','Fu','RFu','Rd','Fd','RFd')]
+      variations = [allPlots[plotName + 'q2_' + i][histName] for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
     except:
       log.warning('Missing q2 variations for ' + plotName + ' ' + histName + '!')
       variations = [allPlots[plotName][histName]]
@@ -123,7 +124,7 @@ def pdfSys(variations, nominal):
     downHist.SetBinContent(i, nominal.GetBinContent(i) - pdfVarRms)
   return upHist, downHist
 
-def constructPdfSys(allPlots, plotName, stack):
+def constructPdfSys(allPlots, plotName, stack, force=False):
   if (plotName + 'pdfUp') in allPlots and not force: return
   allPlots[plotName + 'pdfUp'] = {}
   allPlots[plotName + 'pdfDown'] = {}
