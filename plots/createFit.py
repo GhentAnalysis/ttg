@@ -295,7 +295,7 @@ def doRatioFit(cardName, shapes, perPage=30):
   writeCard(cardName, shapes, templates, None, extraLines, systematics.keys() + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
-  ddgoodnessOfFit('srFit')
+  goodnessOfFit('srFit')
 
 
 #doRatioFit('ratioFit'   , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
