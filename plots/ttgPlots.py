@@ -224,7 +224,7 @@ else:
   plots.append(Plot('genPhoton_minDeltaR',        'min #DeltaR(gen #gamma, other)',       lambda c : c.genPhMinDeltaR,                                   (15,0,1.5)))
   plots.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, #gamma)',          lambda c : c.genPhDeltaR,                                      (15,0,0.3)))
   plots.append(Plot('genPhoton_relPt',            'rel p_{T}',                            lambda c : c.genPhRelPt,                                       (20,-0.2,0.2)))
-  plots.append(Plot('photonCategory',             'photonCategory',                       lambda c : photonCategoryNumber(c, c.ph),                      (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
+  plots.append(Plot('photonCategory',             'photonCategory',                       lambda c : photonCategoryNumber(c),                            (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
 
 
 if args.filterPlot:
@@ -251,7 +251,6 @@ if not args.showSys:
     c.data = sample.isData
 
     # Filter booleans
-    oldDefinition       = args.tag.count('oldMatch')
     c.genuine           = sample.texName.count('genuine')
     c.misIdEle          = sample.texName.count('misidentified')
     c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons')
@@ -286,9 +285,9 @@ if not args.showSys:
         if forward and abs(c._phEta[c.ph]) < 1.566:      continue
         if not forward and abs(c._phEta[c.ph]) > 1.4442: continue
 
-        if not checkSigmaIetaIeta(c, c.ph):        continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
-        if not checkChgIso(c, c.ph):               continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
-        if not checkMatch(c, c.ph, oldDefinition): continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
+        if not checkSigmaIetaIeta(c): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+        if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
+        if not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
 
       if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
 
