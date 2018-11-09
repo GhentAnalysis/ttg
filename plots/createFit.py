@@ -5,7 +5,7 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 args = argParser.parse_args()
 
 from ttg.tools.logger       import getLogger
-log = getLogger(logLevel=args.logLevel)
+log = getLogger(args.logLevel)
 
 from ttg.tools.helpers      import addHist
 from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
@@ -89,7 +89,7 @@ def writeRootFileForChgIso(name, systematics, selection):
       sideBandShapeUp   = applySidebandUnc(sideBandShape, plot, selection, True)
       sideBandShapeDown = applySidebandUnc(sideBandShape, plot, selection, False)
       
-      chgIsoHist = getHistFromPkl((tag, 'all', selection), plot, sys, *selectors)
+      chgIsoHist = getHistFromPkl((tag, 'all', selection), plot, '', *selectors)
       writeHist(f, 'chgIso',                'all' + splitType, chgIsoHist, norm=1, shape=sideBandShape)
       writeHist(f, 'chgIsoSideBandUncUp',   'all' + splitType, chgIsoHist, norm=1, shape=sideBandShapeUp)
       writeHist(f, 'chgIsoSideBandUncDown', 'all' + splitType, chgIsoHist, norm=1, shape=sideBandShapeDown)

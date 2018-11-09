@@ -140,7 +140,7 @@ def runFitDiagnostics(dataCard, trackParameters = None, toys = False, statOnly=F
   handleCombine(dataCard, logFile, combineCommand, otherCommands)
 
   if statOnly: getStatResult(logFile)
-  else:        analyzeDiagnosticsFile('./combine/' + dataCard + '_fitDiagnostics.root', logFile)
+  else:        return analyzeDiagnosticsFile('./combine/' + dataCard + '_fitDiagnostics.root', logFile)
 
 
 #
