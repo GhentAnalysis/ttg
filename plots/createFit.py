@@ -166,7 +166,7 @@ for selection in ['all']:
   for dataDriven in [True]:
     cardName = 'chgIsoFit_' + ('dd_' if dataDriven else '') + selection
     writeRootFileForChgIso(cardName, [], selection)
-    writeCard(cardName, ['chgIso', 'sigEtaEta'], templatesPh, [], extraLines, ['all_f:chgIso:SideBandUnc'], {})
+    writeCard(cardName, ['chgIso', 'sigEtaEta'], templatesPh, None, extraLines, ['all_f:chgIso:SideBandUnc'], {})
     results = runFitDiagnostics(cardName, toys=False, statOnly=False, trackParameters = ['hadronic_norm','fake_norm'])
     fakeSF[selection]     = results['fake_norm']
     hadronicSF[selection] = results['hadronic_norm']
@@ -254,7 +254,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
   extraLines += ['* autoMCStats 0 1 1']
 
   writeRootFile(cardName, systematics.keys(), fakeSF, hadronicSF, merged, withSingleTop)
-  writeCard(cardName, shapes, templates, [], extraLines, showSysList + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+  writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True)
@@ -292,7 +292,7 @@ def doRatioFit(cardName, shapes, perPage=30):
   extraLines += ['TTbar_norm rateParam * TT* %.7f' % xsec_tt]
 
   writeRootFile(cardName, systematics.keys(), fakeSF, hadronicSF)
-  writeCard(cardName, shapes, templates, [], extraLines, systematics.keys() + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+  writeCard(cardName, shapes, templates, None, extraLines, systematics.keys() + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
   ddgoodnessOfFit('srFit')

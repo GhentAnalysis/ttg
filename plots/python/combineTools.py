@@ -3,7 +3,7 @@ log = getLogger()
 
 from ttg.tools.helpers import plotDir
 from ttg.tools.style import commonStyle, setDefault2D
-import os,shutil,ROOT,socket
+import os, shutil, ROOT, socket
 
 
 #
@@ -18,7 +18,7 @@ version        = 'v7.0.10'
 # Setup combine release and combineTool.py if not yet present, and returns its path
 #
 def getCombineRelease():
-  combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE','..', release)))
+  combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE', '..', release)))
   if not os.path.exists(combineRelease):
     log.info('Setting up combine release')
     setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
@@ -40,7 +40,7 @@ def getCombineRelease():
 #
 # Handle a combine command
 #
-def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
+def handleCombine(dataCard, logFile, combineCommand, otherCommands = None):
   currentDir     = os.getcwd()
   combineRelease = getCombineRelease()
   os.system('rm ' + combineRelease + '/src/*.root &> /dev/null')
@@ -54,87 +54,93 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = []):
   os.chdir(os.path.join(combineRelease, 'src'))
   if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine ', 'combine -v 2 ')
   os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + logFile + '.log')
-  os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands))
+  os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands) if otherCommands else '')
   os.system('mv *' + dataCard + '* ' + currentDir + '/combine/')
   os.chdir(currentDir)
 
 
 #
-# Reads the fitted signal strength from the fitDiagnostics.root file
-#
-def getParam(filename, param):
-  resultsFile = ROOT.TFile(filename)
-  fitResults  = resultsFile.Get("fit_s").floatParsFinal()
-  for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
-    if r.GetName() != param: continue
-    result = (r.getVal(), r.getAsymErrorLo(), r.getAsymErrorHi())
-    log.info('Result for ' + param + ': %.2f %.2f/+%.2f' % result)
-    return result
-
-def getMatrix(filename, type='covariance'):
-  import json
-  with open(os.path.expandvars('$CMSSW_BASE/src/ttg/plots/data/sysMappings.json')) as jsonFile:
-    mappings = json.load(jsonFile)
-  resultsFile = ROOT.TFile(filename)
-  matrix      = resultsFile.Get("fit_s").covarianceMatrix() if type=='covariance' else resultsFile.Get("fit_s").correlationMatrix()
-  results     = resultsFile.Get("fit_s").floatParsFinal()
-  fitResults  = resultsFile.Get("fit_s").floatParsFinal()
-  names       = [r.GetName() for r in [fitResults.at(i) for i in range(fitResults.getSize())]]
-  names       = [(mappings[i] if i in mappings else i) for i in names]
-  matrix   = ROOT.TH2D(matrix)
-  for i in range(matrix.GetNbinsX()):
-    matrix.GetXaxis().SetBinLabel(i+1, names[i])
-  for j in range(matrix.GetNbinsY()):
-    matrix.GetYaxis().SetBinLabel(j+1, names[j])
-  setDefault2D()
-  canvas = ROOT.TCanvas(type + 'Matrix', type + 'Matrix', 2000, 2000)
-  canvas.SetRightMargin(0.15)
-  commonStyle(matrix)
-  matrix.GetXaxis().SetLabelSize(10)
-  matrix.GetYaxis().SetLabelSize(10)
-  matrix.SetMarkerSize(0.3)
-  matrix.Draw("COLZ TEXT")
-  canvas.Print(os.path.join(plotDir, 'combinePlots', filename.split('/')[-1].replace('.root', '_' + type + 'Matrix.png')))
-  canvas.Print(os.path.join(plotDir, 'combinePlots', filename.split('/')[-1].replace('.root', '_' + type + 'Matrix.pdf')))
-
-#
 # Run fit diagnostics
+# Disable pylint "too many branches" until CMSSW has a recent pylint version which takes nested functions into account
 #
-def runFitDiagnostics(dataCard, trackParameters = [], toys = False, statOnly=False, alsoBOnly=False):
-  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001 --saveShapes --saveWithUncertainties'
-  if toys:                 extraOptions += ' --expectSignal 1 -t -1'
-  if statOnly:             extraOptions += ' --justFit --profilingMode=none -v 2'
-  if not alsoBOnly:        extraOptions += ' --skipBOnlyFit'
-  if len(trackParameters): extraOptions += ' --trackParameters ' + ','.join(trackParameters)
-  if statOnly: logFile = dataCard + '_statOnly'
-  elif toys:   logFile = dataCard + '_toys'
-  else:        logFile = dataCard
-  combineCommand = 'text2workspace.py ' + dataCard + '.txt;'
-  combineCommand+= 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root'
-  otherCommands  = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
-                    'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
-                    'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex',
-                    'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex',
-                    'cp fitDiagnostics.root ' + dataCard + '_fitDiagnostics.root'] if not statOnly else []
-  log.info('Running FitDiagnostics' + (' (stat only)' if statOnly else ''))
-  handleCombine(dataCard, logFile, combineCommand, otherCommands)
-  if statOnly:
+def runFitDiagnostics(dataCard, trackParameters = None, toys = False, statOnly=False, alsoBOnly=False):  # pylint: disable=R0912
+
+  def getParam(filename, param):
+    resultsFile = ROOT.TFile(filename)
+    fitResults  = resultsFile.Get("fit_s").floatParsFinal()
+    for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
+      if r.GetName() != param: continue
+      result = (r.getVal(), r.getAsymErrorLo(), r.getAsymErrorHi())
+      log.info('Result for ' + param + ': %.2f %.2f/+%.2f' % result)
+      return result
+
+  def getMatrix(filename, matrixType='covariance'):
+    import json
+    with open(os.path.expandvars('$CMSSW_BASE/src/ttg/plots/data/sysMappings.json')) as jsonFile:
+      mappings = json.load(jsonFile)
+    resultsFile = ROOT.TFile(filename)
+    matrix      = resultsFile.Get("fit_s").covarianceMatrix() if matrixType=='covariance' else resultsFile.Get("fit_s").correlationMatrix()
+    fitResults  = resultsFile.Get("fit_s").floatParsFinal()
+    names       = [r.GetName() for r in [fitResults.at(i) for i in range(fitResults.getSize())]]
+    names       = [(mappings[i] if i in mappings else i) for i in names]
+    matrix   = ROOT.TH2D(matrix)
+    for i in range(matrix.GetNbinsX()):
+      matrix.GetXaxis().SetBinLabel(i+1, names[i])
+    for j in range(matrix.GetNbinsY()):
+      matrix.GetYaxis().SetBinLabel(j+1, names[j])
+    setDefault2D()
+    canvas = ROOT.TCanvas(matrixType + 'Matrix', matrixType + 'Matrix', 2000, 2000)
+    canvas.SetRightMargin(0.15)
+    commonStyle(matrix)
+    matrix.GetXaxis().SetLabelSize(10)
+    matrix.GetYaxis().SetLabelSize(10)
+    matrix.SetMarkerSize(0.3)
+    matrix.Draw("COLZ TEXT")
+    canvas.Print(os.path.join(plotDir, 'combinePlots', filename.split('/')[-1].replace('.root', '_' + matrixType + 'Matrix.png')))
+    canvas.Print(os.path.join(plotDir, 'combinePlots', filename.split('/')[-1].replace('.root', '_' + matrixType + 'Matrix.pdf')))
+
+  def getStatResult(logFile):
     with open('./combine/' + logFile + '.log') as f:
       resultCount = 0
       for line in f:
         if 'FinalValue +/-  Error' in line: resultCount += 1
-        if resultCount==2 and '<none>' in line:
+        if resultCount == 2 and '<none>' in line:
           log.info('Stat result for r: %s %s %s' % tuple(line.split()[2:5]))
           break
-  else:
+ 
+  def analyzeDiagnosticsFile(diagnosticsFile, logFile):
     try:
-      diagnosticsFile = './combine/' + dataCard + '_fitDiagnostics' + ('_stat' if statOnly else '') + '.root'
       getMatrix(diagnosticsFile, 'covariance')
       getMatrix(diagnosticsFile, 'correlation')
       return {param : getParam(diagnosticsFile, param) for param in ['r']+trackParameters}
     except:
       with open('./combine/' + logFile + '.log') as f:
         for line in f: log.warning(line.rstrip())
+
+  # Main block of runFitDiagnostics
+  extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001 --saveShapes --saveWithUncertainties'
+  if toys:            extraOptions += ' --expectSignal 1 -t -1'
+  if statOnly:        extraOptions += ' --justFit --profilingMode=none -v 2'
+  if not alsoBOnly:   extraOptions += ' --skipBOnlyFit'
+  if trackParameters: extraOptions += ' --trackParameters ' + ','.join(trackParameters)
+
+  if statOnly: logFile = dataCard + '_statOnly'
+  elif toys:   logFile = dataCard + '_toys'
+  else:        logFile = dataCard
+
+  combineCommand  = 'text2workspace.py ' + dataCard + '.txt;'
+  combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root'
+  otherCommands   = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
+                     'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
+                     'python diffNuisances.py    -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances.tex',
+                     'python diffNuisances.py -a -f latex fitDiagnostics.root &> ' + dataCard + '_nuisances_full.tex',
+                     'cp fitDiagnostics.root ' + dataCard + '_fitDiagnostics.root'] if not statOnly else []
+
+  log.info('Running FitDiagnostics' + (' (stat only)' if statOnly else ''))
+  handleCombine(dataCard, logFile, combineCommand, otherCommands)
+
+  if statOnly: getStatResult(logFile)
+  else:        analyzeDiagnosticsFile('./combine/' + dataCard + '_fitDiagnostics.root', logFile)
 
 
 #
@@ -156,6 +162,7 @@ def runSignificance(dataCard, expected=False):
 # Run impacts
 #
 def runImpacts(dataCard, perPage=30, toys=False):
+  outName  = dataCard + '_impacts' + ('_asimov' if toys else '')
   extraArg = ' -t -1 --expectSignal=1' if toys else ''
   command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
@@ -164,17 +171,17 @@ def runImpacts(dataCard, perPage=30, toys=False):
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8' + extraArg + ';'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json' + extraArg + ';'
   command += './plotImpacts.py -i impacts.json --per-page=' + str(perPage) + ' --cms-label preliminary --translate sysMappings.json -o impacts;'
-  command += 'mv impacts.pdf ../../../' + dataCard + '_impacts' + ('_asimov' if toys else '') + '.pdf'
+  command += 'mv impacts.pdf ../../../' + outName + '.pdf'
   log.info('Running Impacts')
   handleCombine(dataCard, dataCard + '_impacts', command)
   with open('./combine/' + dataCard + '_impacts.log') as f:
     for line in f:
       if "mv: cannot stat `impacts.pdf': No such file or directory" in line: log.error("Problem with running impacts")
       log.debug(line.rstrip())
-  os.system("pdftoppm combine/" + dataCard + "_impacts" + ('_asimov' if toys else '') + ".pdf " + dataCard + "_impacts" + ('_asimov' if toys else '') + " -png;mogrify -trim " + dataCard + "_impacts*.png")
+  os.system("pdftoppm combine/" + outName + ".pdf " + outName + " -png;mogrify -trim " + outName + "*.png")
   os.system("mkdir -p ~/www/ttG/combinePlots/")
   os.system("cp $CMSSW_BASE/src/ttg/tools/php/index.php ~/www/ttG/combinePlots/")
-  os.system("mv " + dataCard + "_impacts*.png ~/www/ttG/combinePlots/")
+  os.system("mv " + outName + "*.png ~/www/ttG/combinePlots/")
 
 
 #
@@ -192,10 +199,12 @@ def goodnessOfFit(dataCard, algo='saturated'):
 
 #
 # Write the card including all systematics and shapes
+# Might need refactoring
 #
-def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = {}):
-  def tab(list, column='12'):
-    return ''.join(['%25s' % list[0]] + [(('%'+column+'s') % i) for i in list[1:]]) + '\n'
+def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None): # pylint: disable=R0914,R0913,R0912
+
+  def tab(entries, column='12'):
+    return ''.join(['%25s' % entries[0]] + [(('%'+column+'s') % i) for i in entries[1:]]) + '\n'
 
   def linSys(info, template):
     if template not in templates: return '-'
@@ -205,6 +214,18 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       if template.count(sample): return value
       else:                      return '-'
     else:                        return value
+
+  def shapeSys(shape, template, sys):
+    if ':' in sys:
+      try:    selectTemplate, selectShape, sys   = sys.split(':')
+      except: (selectTemplate, sys), selectShape = sys.split(':'), None
+    else:     selectTemplate, selectShape, sys   = None, None, sys
+
+    if t in templatesNoSys:                             return '-'
+    elif selectShape    and selectShape    != shape:    return '-'
+    elif selectTemplate and selectTemplate != template: return '-'
+    elif scaleShape and sys in scaleShape:              return '%.4f' % scaleShape[sys]
+    else:                                               return '1'
 
   with open('combine/' + cardName + '.txt', 'w') as f:
     f.write('imax ' + str(len(shapes)) + '\n')
@@ -226,11 +247,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      if ':' in sys:
-        try:         sample, shape, sys   = sys.split(':')
-        except:      (sample, sys), shape = sys.split(':'), None
-      else:          sample, shape, sys   = None, None, sys
-      f.write(tab([sys, 'shape'] + [('-' if (sample and t!=sample) or t in templatesNoSys or (shape and s != shape) else ('%.4f' % scaleShape[sys] if sys in scaleShape else '1')) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab([sys, 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
