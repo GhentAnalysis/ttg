@@ -1,13 +1,13 @@
-from ttg.tools.logger import getLogger, logLevel
+from ttg.tools.logger import getLogger
 log = getLogger()
 import ROOT, os
-from ttg.plots.systematics import rateParameters, linearSystematics
+from ttg.plots.systematics import linearSystematics
 
 #
 # A few mappings when the combine nuisance name does not exactly match with the name of the samples in the plots
 #
 def mapName(name):
-  if name=='r':              return 'TTGamma_norm'
+  if name == 'r':            return 'TTGamma_norm'
   if name.count('hadronic'): return 'hadronic photons_norm'
   if name.count('fake'):     return 'hadronic fakes_norm'
   else:                      return name
@@ -19,7 +19,7 @@ def mapName(name):
 pullsAndConstraints = {}
 dataCard = None
 def updatePullsAndConstraints(newDataCard = 'srFit'):
-  global pullsAndConstraints, dataCard
+  global dataCard  # pylint: disable=W0603
   if not dataCard or dataCard != newDataCard:
     dataCard    = newDataCard
     filename    = os.path.expandvars('$CMSSW_BASE/src/ttg/plots/combine/' + dataCard + '_fitDiagnostics.root')
@@ -34,14 +34,12 @@ def updatePullsAndConstraints(newDataCard = 'srFit'):
 #
 alreadyShownDebug = []
 def showLogDebugOnce(logMsg):
-  global alreadyShownDebug
   if logMsg not in alreadyShownDebug:
     log.info(logMsg)
     alreadyShownDebug.append(logMsg)
 
 alreadyShownWarning = []
 def showLogWarningOnce(logMsg):
-  global alreadyShownWarning
   if logMsg not in alreadyShownWarning:
     log.warning(logMsg)
     alreadyShownWarning.append(logMsg)
@@ -49,11 +47,11 @@ def showLogWarningOnce(logMsg):
 #
 # Applying post-fit values, given a dictionary of sample --> histogram or pkl-histname --> histogram
 #
-def applyPostFitScaling(histos, postFitInfo, sysHistos=None):
+def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable=R0912
   updatePullsAndConstraints(postFitInfo)
   postHistos = {s : h.Clone() for s, h in histos.iteritems()}                                                    # Create clones (such that we still can access the prefit values below)
-  if sysHistos:                                                                                                  # First add pulls of the nuisances to each sample (real post-fit plots are impossible, but this is as close as it gets)
-    for sample, h in postHistos.iteritems():
+  if sysHistos:                                                                                                  # First add pulls of the nuisances to each sample (real post-fit plots are impossible,
+    for sample, h in postHistos.iteritems():                                                                     # but this is as close as it gets)
       name = sample if isinstance(sample, str) else (sample.name + sample.texName)
       if name.count('data'): continue                                                                            # Skip data
       for i in pullsAndConstraints:
