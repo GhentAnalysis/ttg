@@ -1,20 +1,17 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-#
-# Plot2D class
-# Still messy but it works reasonably
-# Maybe to be merged with the 1D plot class
-#
-import ROOT, os, pickle, uuid
+import ROOT, os, numpy
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo
 from ttg.plots.plot import Plot
 
 #
-# Plot class
+# Plot class for 2D
+# Disable warnings about different number of arguments for overriden method 
+# pylint: disable=W0221
 #
 class Plot2D(Plot):
-  def __init__(self, name, texX, varX, binningX, texY, varY, binningY, stack=None):
+  def __init__(self, name, texX, varX, binningX, texY, varY, binningY, stack=None):  # pylint: disable=R0913
     Plot.__init__(self, name, texX, varX, binningX, stack=stack, texY=texY)
     self.varY        = varY
     self.binningX    = self.binning
@@ -39,55 +36,29 @@ class Plot2D(Plot):
     if sorting: histsToStack.sort(key=lambda h  : -h.Integral())
 
     # Add up stacks
-    for i, h in enumerate(histsToStack):
+    for i, _ in enumerate(histsToStack):
       for j in range(i+1, len(histsToStack)):
         histsToStack[i].Add(histsToStack[j])
 
     return histsToStack[:1] # do not show sub-contributions in 2D
 
-
-  #
-  # Scaling options, optionally called from the draw function
-  #
-  def scaleStacks(self, histos, scaling):
-    if scaling=="unity":
-      for stack in histos:
-        factor = 1./stack[0].Integral()
-        for h in stack: h.Scale(factor)
-    else:
-      if not isinstance(scaling, dict):
-        raise ValueError( "'scaling' must be of the form {0:1, 2:3} which normalizes stack[0] to stack[1] etc. Got '%r'" % scaling )
-      for source, target in scaling.iteritems():
-        if not (isinstance(source, int) and isinstance(target, int) ):
-          raise ValueError( "Scaling should be {0:1, 1:2, ...}. Expected ints, got %r %r"%( source, target ) )
-
-        source_yield = histos[source][0].Integral()
-
-        if source_yield == 0:
-          log.warning( "Requested to scale empty Stack? Do nothing." )
-          continue
-
-        factor = histos[target][0].Integral()/source_yield
-        for h in histos[source]: h.Scale(factor)
-
-
   def getYields(self, binX=None, binY=None):
-    if binX and binY: return {s.name : h.GetBinContent(binX, binY) for s,h in self.histos.iteritems()}
-    else:             return {s.name : h.Integral()                for s,h in self.histos.iteritems()}
+    if binX and binY: return {s.name : h.GetBinContent(binX, binY) for s, h in self.histos.iteritems()}
+    else:             return {s.name : h.Integral()                for s, h in self.histos.iteritems()}
 
 
   #
-  # Draw function roughly stolen from Robert's RootTools, might need some cleanup, very lengthy
+  # Draw function, might need some refactoring
+  # pylint: disable=R0913,R0914,R0915
   #
   def draw(self, \
           zRange = None,
-          scaling = {}, 
-          extensions = ["pdf", "png", "root","C"], 
+          extensions = None, 
           plot_directory = ".", 
           logX = False, logY = False, logZ = True, 
-          drawObjects = [],
+          drawObjects = None,
           drawOption = 'COLZ',
-          widths = {},
+          widths = None,
           ):
     ''' plot: a Plot2D instance
         zRange: None ( = ROOT default) or [low, high] 
@@ -102,7 +73,7 @@ class Plot2D(Plot):
 
     # default_widths    
     default_widths = {'y_width':500, 'x_width':500, 'y_ratio_width':200}
-    default_widths.update(widths)
+    if widths: default_widths.update(widths)
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
@@ -118,11 +89,9 @@ class Plot2D(Plot):
       histsToStack = [histDict[s] for s in stack]
       histos.append(self.stackHists(histsToStack))
 
-#   self.scaleStacks(histos, scaling)
-
     # delete canvas if it exists
     if hasattr("ROOT","c1"): del ROOT.c1 
-    c1 = ROOT.TCanvas("ROOT.c1", "drawHistos", 200,10, default_widths['x_width'], default_widths['y_width'])
+    c1 = ROOT.TCanvas("ROOT.c1", "drawHistos", 200, 10, default_widths['x_width'], default_widths['y_width'])
 
     c1.SetLogx(logX)
     c1.SetLogy(logY)
@@ -134,7 +103,7 @@ class Plot2D(Plot):
       histo.GetXaxis().SetTitle(self.texX)
       histo.GetYaxis().SetTitle(self.texY)
       if zRange is not None:
-          histo.GetZaxis().SetRangeUser( *zRange )
+        histo.GetZaxis().SetRangeUser( *zRange )
       # precision 3 fonts. see https://root.cern.ch/root/htmldoc//TAttText.html#T5
       histo.GetXaxis().SetTitleFont(43)
       histo.GetYaxis().SetTitleFont(43)
@@ -152,9 +121,10 @@ class Plot2D(Plot):
 
     c1.RedrawAxis()
 
-    for o in drawObjects:
-      try:    o.Draw()
-      except: log.debug( "drawObjects has something I can't Draw(): %r", o)
+    if drawObjects:
+      for o in drawObjects:
+        try:    o.Draw()
+        except: log.debug( "drawObjects has something I can't Draw(): %r", o)
 
     try:    os.makedirs(plot_directory)
     except: pass
@@ -162,7 +132,7 @@ class Plot2D(Plot):
 
     copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
     log.info('Creating output files for ' + self.name)
-    for extension in extensions:
+    for extension in (extensions if extensions else ["pdf", "png", "root","C"]):
       ofile = os.path.join( plot_directory, "%s.%s"%(self.name, extension) )
       c1.Print( ofile )
     del c1
