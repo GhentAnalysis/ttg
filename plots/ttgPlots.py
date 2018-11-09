@@ -63,7 +63,7 @@ if not args.isChild:
 import ROOT
 from ttg.plots.plot           import Plot, xAxisLabels, fillPlots
 from ttg.plots.plot2D         import Plot2D
-from ttg.plots.cutInterpreter import cutInterpreter
+from ttg.plots.cutInterpreter import cutStringAndFunctions
 from ttg.samples.Sample       import createStack
 from ttg.plots.photonCategories import photonCategoryNumber
 from math import pi
@@ -243,7 +243,7 @@ if not args.showSys:
 
   from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
   for sample in sum(stack, []):
-    cutString, passingFunctions = cutInterpreter.cutString(args.selection, args.channel)
+    cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
     cutString = applySysToString(sample.name, args.sys, cutString)
     if args.sys and 'Scale' not in args.sys and sample.isData: continue
     c = sample.initTree(reducedType = reduceType)
