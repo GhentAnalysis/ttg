@@ -1,7 +1,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
-varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetPt', 'dbj1', 'dbj2', 'l1_jetDeltaR', 'l2_jetDeltaR', 'phJetDeltaR', 'phBJetDeltaR']
+varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetPt', 'dbj1', 'dbj2', 'phJetDeltaR', 'phBJetDeltaR']
 
 #
 # Defining shape systematics as "name : ([var, sysVar], [var2, sysVar2],...)"
