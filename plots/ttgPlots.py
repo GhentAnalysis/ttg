@@ -252,9 +252,9 @@ if not args.showSys:
 
     # Filter booleans
     c.genuine           = sample.texName.count('genuine')
-    c.misIdEle          = sample.texName.count('misidentified')
-    c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons')
-    c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronic fakes')
+    c.misIdEle          = sample.texName.count('misidentified') or sample.texName.count('misIdEle')
+    c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons') or sample.texName.count('hadronicPhoton')
+    c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronic fakes') or sample.texName.count('hadronicFake')
     c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
     c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail')     or args.tag.count("failSigmaIetaIeta")
     c.sideSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} sideband') or args.tag.count("sidebandSigmaIetaIeta")
