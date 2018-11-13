@@ -202,6 +202,7 @@ def goodnessOfFit(dataCard, algo='saturated'):
 # Might need refactoring
 #
 def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None): # pylint: disable=R0914,R0913,R0912
+  if not templatesNoSys: templatesNoSys = []
 
   def tab(entries, column='12'):
     return ''.join(['%25s' % entries[0]] + [(('%'+column+'s') % i) for i in entries[1:]]) + '\n'
@@ -220,6 +221,8 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       try:    selectTemplate, selectShape, sys   = sys.split(':')
       except: (selectTemplate, sys), selectShape = sys.split(':'), None
     else:     selectTemplate, selectShape, sys   = None, None, sys
+
+    if not shape and not template: return sys
 
     if t in templatesNoSys:                             return '-'
     elif selectShape    and selectShape    != shape:    return '-'
@@ -247,7 +250,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      f.write(tab([sys, 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
