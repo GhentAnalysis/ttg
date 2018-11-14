@@ -280,14 +280,53 @@ class Plot:
     return line
 
   #
+  # Find legend coordinates with target height (0.045 per entry) and width [but limit for too large width]
+  # Try two sets of coordinates (one with legend left, one with legend right)
+  # Set self.ymax to avoid overlap
+  #
+  def getLegendCoordinates(self, histos, canvas, yMax, columns, logY, legend):
+    if legend=="auto":
+      targetHeight  = 0.045*sum(map(len, histos))
+      entriesHeight = sum(ROOT.TLatex(0, 0, h.texName).GetYsize() for h in sum(histos, []))
+      entriesWidth  = max(ROOT.TLatex(0, 0, h.texName).GetXsize() for h in sum(histos, []))
+      targetWidth   = min(0.65, entriesWidth*(1+ROOT.TLegend().GetMargin())*columns/entriesHeight*targetHeight)
+
+      left           = canvas.topPad.GetLeftMargin() + yMax.GetTickLength('Y') + 0.01
+      right          = 1 - canvas.topPad.GetRightMargin() - yMax.GetTickLength('Y') - 0.01
+      top            = 1 - canvas.topPad.GetTopMargin() - yMax.GetTickLength() - 0.01
+      bottom         = max(0.4, top - targetHeight)
+
+      tryCoordinates = [(left, bottom, left + targetWidth, top), (right - targetWidth, bottom, right, top)]
+    else:
+      tryCoordinates = [legend]
+
+    if not self.ymax:
+      self.ymax = None
+      for coordinates in tryCoordinates:
+        ymax = self.avoidLegendOverlap(canvas.topPad, yMax, coordinates, logY)
+        if (not self.ymax) or ymax < self.ymax:
+          self.ymax = ymax
+          legendCoordinates = coordinates
+    else:
+      legendCoordinates = tryCoordinates[0]
+
+    return legendCoordinates
+
+  #
   # Get legend
   #
-  def getLegend(self, columns, coordinates, histos):
+  def getLegend(self, legend, canvas, histos, yMax, logY):
+    if len(legend) == 2: columns, legend = legend[1], legend[0]            # if legend is tuple, first argument is columns
+    else:                columns, legend = 1, legend
+
+    coordinates = self.getLegendCoordinates(histos, canvas, yMax, columns, logY, legend)
+
     legend = ROOT.TLegend(*coordinates)
     legend.SetNColumns(columns)
     legend.SetFillStyle(0)
     legend.SetShadowColor(ROOT.kWhite)
     legend.SetBorderSize(0)
+
     for h in sum(histos, []): legend.AddEntry(h, h.texName, h.legendStyle)
     return legend
 
@@ -572,42 +611,15 @@ class Plot:
 
     # Range on y axis and remove empty bins
     self.ymin = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
-    self.ymax = yRange[1] if (yRange!="auto" and yRange[1]!="auto") else (1.2*yMax.GetMaximum())
+    self.ymax = yRange[1] if (yRange!="auto" and yRange[1]!="auto") else (None if legend else (1.2*yMax.GetMaximum())) # if auto and legend: yMax wll be set in getLegendCoordinates
     self.yrmin, self.yrmax = ratio['yRange'] if ratio else (None, None)
 
     # Remove empty bins from the edges (or when they are too small to see)
     self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/150.)
 
-    # Legend coordinates + optimization of y-axis, try both left and right corner in case of auto legend + auto y-axis
+    # If legend specified, add it to the drawObjects
     if legend:
-
-      # If legend is in the form (tuple, int) then the number of columns is provided
-      if len(legend) == 2: legendColumns, legend = legend[1], legend[0]
-      else:                legendColumns, legend = 1, legend
-
-      if legend=="auto":
-        maxEntryLength = max([len(h.texName) for h in sum(histos, [])])
-        legendWidth    = max(min(maxEntryLength*1.5, 0.35), 0.65)
-        left           = canvas.topPad.GetLeftMargin() + yMax.GetTickLength('Y') + 0.01
-        right          = 1 - canvas.topPad.GetRightMargin() - yMax.GetTickLength('Y') - 0.01
-        top            = 1 - canvas.topPad.GetTopMargin() - yMax.GetTickLength() - 0.01
-        bottom         = max(0.4, top - 0.045*sum(map(len, histos)))
-        tryCoordinates = [(left, bottom, left+legendWidth, top), (right-legendWidth, bottom, right, top)]
-      else:
-        tryCoordinates = [legend]
-
-      #Avoid overlap with the legend
-      if yRange=="auto" or yRange[1]=="auto":
-        self.ymax = None
-        for coordinates in tryCoordinates:
-          ymax = self.avoidLegendOverlap(canvas.topPad, yMax, coordinates, logY)
-          if (not self.ymax) or ymax < self.ymax:
-            self.ymax = ymax
-            legendCoordinates = coordinates
-      else:
-        legendCoordinates = tryCoordinates[0]
-
-      drawObjects += [self.getLegend(legendColumns, legendCoordinates, histos)]
+      drawObjects += [self.getLegend(legend, canvas, histos, yMax, logY)]
 
     # Draw the histos
     same = ""
