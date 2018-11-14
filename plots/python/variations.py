@@ -13,6 +13,8 @@ defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
                      'llg-looseLeptonVeto-mll40-onZ-photonPt20',
                      'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20:SYS,POST',
                      'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20:SYS,POST',
+                     'llg-looseLeptonVeto-mll40-llgOnZ-njet1p',
+                     'llg-looseLeptonVeto-mll40-llgOnZ-njet2p',
                      ]
 
 diffSelections    = ['llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20to30',
@@ -32,6 +34,8 @@ diffSelections    = ['llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonP
 
 dilepSelections   = ['ll-looseLeptonVeto-mll40-offZ:SYS',
                      'll-looseLeptonVeto-mll40-offZ-nphoton0:SYS',
+                     'll-looseLeptonVeto-mll40-offZ-signalRegion:SYS',
+                     'll-looseLeptonVeto-mll40-offZ-signalRegion-nphoton0:SYS',
                      'll-looseLeptonVeto-mll40-offZ-njet2p',
                      'll-looseLeptonVeto-mll40-offZ-njet2p-nphoton0',
                      'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p',
