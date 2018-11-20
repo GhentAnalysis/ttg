@@ -58,7 +58,7 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable
         if any(x in i for x in ['norm', 'prop', 'nonPrompt']): continue                                          # Skip warning for these cases
         try:
           value = pullsAndConstraints[i][0]
-          if i in linearSystematics:
+          if i in linearSystematics and False:
             h.Scale(1+value*linearSystematics[i][1]/100.)
           else:
             if value > 0: nuisanceHist = sysHistos[i + 'Up'][name]
@@ -95,5 +95,5 @@ def applyPostFitConstraint(sys, uncertainty, postFitInfo):
       showLogDebugOnce('Applying constraint ' + str(pullsAndConstraints[i][1]) + ' on ' + sys + ' (taking constraint from ' + i + ')')
       return uncertainty*pullsAndConstraints[i][1]
   else:
-    if not 'Stat' in sys and postFitInfo.count('srFit'): log.warning('Could not find constrain for ' + sys)
+    if not 'Stat' in sys and postFitInfo.count('srFit'): showLogWarningOnce('Could not find constrain for ' + sys)
     return uncertainty
