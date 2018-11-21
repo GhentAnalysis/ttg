@@ -3,7 +3,7 @@ log = getLogger()
 
 from ttg.tools.helpers import plotDir
 from ttg.tools.style import commonStyle, setDefault2D
-import os, shutil, ROOT, socket
+import os, shutil, ROOT, socket, json
 
 
 #
@@ -63,7 +63,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = None):
 # Run fit diagnostics
 # Disable pylint "too many branches" until CMSSW has a recent pylint version which takes nested functions into account
 #
-def runFitDiagnostics(dataCard, trackParameters = None, toys = False, statOnly=False, alsoBOnly=False):  # pylint: disable=R0912
+def runFitDiagnostics(dataCard, trackParameters = None, toys = False, toyR = 1, statOnly=False, alsoBOnly=False):  # pylint: disable=R0912
 
   def getParam(filename, param):
     resultsFile = ROOT.TFile(filename)
@@ -75,7 +75,6 @@ def runFitDiagnostics(dataCard, trackParameters = None, toys = False, statOnly=F
       return result
 
   def getMatrix(filename, matrixType='covariance'):
-    import json
     with open(os.path.expandvars('$CMSSW_BASE/src/ttg/plots/data/sysMappings.json')) as jsonFile:
       mappings = json.load(jsonFile)
     resultsFile = ROOT.TFile(filename)
@@ -119,7 +118,7 @@ def runFitDiagnostics(dataCard, trackParameters = None, toys = False, statOnly=F
 
   # Main block of runFitDiagnostics
   extraOptions = ' --robustFit=1 --rMax=100 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001 --saveShapes --saveWithUncertainties'
-  if toys:            extraOptions += ' --expectSignal 1 -t -1'
+  if toys:            extraOptions += ' --expectSignal ' + str(toyR) + ' -t -1'
   if statOnly:        extraOptions += ' --justFit --profilingMode=none -v 2'
   if not alsoBOnly:   extraOptions += ' --skipBOnlyFit'
   if trackParameters: extraOptions += ' --trackParameters ' + ','.join(trackParameters)
@@ -159,17 +158,46 @@ def runSignificance(dataCard, expected=False):
 
 
 #
-# Run impacts
+# Get r + uncertainties from JSON (because the impact version does always converge)
 #
-def runImpacts(dataCard, perPage=30, toys=False):
-  outName  = dataCard + '_impacts' + ('_asimov' if toys else '')
-  extraArg = ' -t -1 --expectSignal=1' if toys else ''
+def extractSignalFromJSON(jsonFile):
+  with open(jsonFile) as f:
+    impacts = json.load(f)
+    for p in impacts['POIs']:
+      if p['name'] == 'r':
+        return p['fit']
+
+
+
+#
+# Command to create impacts.json
+#
+def commandForImpactsJSON(dataCard, toys=False, toyR=1):
+  extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else ''
   command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit' + extraArg + ';'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8' + extraArg + ';'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json' + extraArg + ';'
+  return command
+
+
+#
+# Linearity check
+#
+def doLinearityCheck(dataCard):
+  for r in [i/10. for i in xrange(5, 15)]:
+    handleCombine(dataCard, dataCard + '_linCheck', commandForImpactsJSON(dataCard, toys=True, toyR=r))
+    signalStrength = extractSignalFromJSON(os.path.join(getCombineRelease(), 'src/CombineHarvester/CombineTools/scripts/impacts.json'))
+    print str(r) + ' --> ' + str(signalStrength)
+
+#
+# Run impacts
+#
+def runImpacts(dataCard, perPage=30, toys=False, toyR=1):
+  outName  = dataCard + '_impacts' + ('_asimov' if toys else '')
+  command  = commandForImpactsJSON(dataCard, toys, toyR)
   command += './plotImpacts.py -i impacts.json --per-page=' + str(perPage) + ' --cms-label preliminary --translate sysMappings.json -o impacts;'
   command += 'mv impacts.pdf ../../../' + outName + '.pdf'
   log.info('Running Impacts')
