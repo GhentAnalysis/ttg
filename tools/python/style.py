@@ -1,6 +1,8 @@
 import ROOT, uuid, math
 ROOT.TH1.SetDefaultSumw2()
 
+ttgStyle = True # Set to False to return back to original style
+
 #
 # Set default ROOT style script
 #
@@ -26,10 +28,56 @@ def setDefault2D(isColZ=False):
 
 
 #
+# General style as provided by the 1l group [but most of it seems to get overwritten later on]
+#
+def ttgGeneralStyle():
+  ROOT.gStyle.SetFrameBorderMode(0)
+  ROOT.gStyle.SetCanvasBorderMode(0)
+  ROOT.gStyle.SetPadBorderMode(0)
+
+  ROOT.gStyle.SetFrameFillColor(0)
+  ROOT.gStyle.SetPadColor(0)
+  ROOT.gStyle.SetCanvasColor(0)
+  ROOT.gStyle.SetTitleColor(1)
+  ROOT.gStyle.SetStatColor(0)
+
+  ROOT.gStyle.SetPaperSize(20,26)
+  ROOT.gStyle.SetPadTopMargin(0.08)
+  ROOT.gStyle.SetPadRightMargin(0.12)
+  ROOT.gStyle.SetPadBottomMargin(0.11)
+  ROOT.gStyle.SetPadLeftMargin(0.12)
+  ROOT.gStyle.SetPadTickX(1)
+  ROOT.gStyle.SetPadTickY(1)
+
+  ROOT.gStyle.SetTextFont(42) #132
+  ROOT.gStyle.SetTextSize(0.09)
+  ROOT.gStyle.SetLabelFont(42,"xyz")
+  ROOT.gStyle.SetTitleFont(42,"xyz")
+  ROOT.gStyle.SetLabelSize(0.055,"xyz") #0.035
+  ROOT.gStyle.SetTitleSize(0.055,"xyz")
+  ROOT.gStyle.SetTitleOffset(1.18,"y")
+
+  ROOT.gStyle.SetMarkerStyle(8)
+  ROOT.gStyle.SetHistLineWidth(2)
+  ROOT.gStyle.SetLineWidth(1)
+
+  ROOT.gStyle.SetOptTitle(0)
+  ROOT.gStyle.SetOptStat(0) #("m")
+  ROOT.gStyle.SetOptFit(0)
+
+  ROOT.gStyle.cd()
+  ROOT.gROOT.ForceStyle()
+
+
+
+#
 # A default canvas style, if yRatioWidth is specified a canvas.topPad and canvas.bottomPad are also created
 #
-def getDefaultCanvas(xWidth, yWidth, yRatioWidth=None):
+def getDefaultCanvas(ratio):
+  if ttgStyle: xWidth, yWidth, yRatioWidth = 800, 600, (0 if ratio else None)
+  else:        xWidth, yWidth, yRatioWidth = 520, 500, (200 if ratio else None)
   setDefault()
+  ttgGeneralStyle()
 
   if yRatioWidth:
     yWidth           += yRatioWidth
@@ -38,15 +86,24 @@ def getDefaultCanvas(xWidth, yWidth, yRatioWidth=None):
 
   canvas = ROOT.TCanvas(str(uuid.uuid4()), "canvas", 200, 10, xWidth, yWidth)
 
+  def ttgPadStyle(pad):
+    pad.SetFillColor(0)
+    pad.SetBorderMode(0)
+    pad.SetFrameFillStyle(0)
+    pad.SetFrameBorderMode(0)
+    pad.SetTickx(0)
+    pad.SetTicky(0)
+
   def getPad(canvas, number):
     pad = canvas.cd(number)
     pad.SetLeftMargin(ROOT.gStyle.GetPadLeftMargin())
     pad.SetRightMargin(ROOT.gStyle.GetPadRightMargin())
     pad.SetTopMargin(ROOT.gStyle.GetPadTopMargin())
     pad.SetBottomMargin(ROOT.gStyle.GetPadBottomMargin())
+    if ttgStyle: ttgPadStyle(pad)
     return pad
 
-  if yRatioWidth:
+  def defaultRatioDivision(canvas):
     canvas.Divide(1, 2, 0, 0)
     canvas.topPad = getPad(canvas, 1)
     canvas.topPad.SetBottomMargin(0)
@@ -55,8 +112,25 @@ def getDefaultCanvas(xWidth, yWidth, yRatioWidth=None):
     canvas.bottomPad.SetTopMargin(0)
     canvas.bottomPad.SetBottomMargin(bottomMargin)
     canvas.bottomPad.SetPad(canvas.bottomPad.GetX1(), canvas.bottomPad.GetY1(), canvas.bottomPad.GetX2(), yBorder)
-  else:
-    canvas.topPad = canvas
+
+  def ttgRatioDivision(canvas):
+    padRatio   = 0.25
+    padOverlap = 0 # this is much larger for the 1l group, but simply adds a huge blank space for us
+    padGap     = 0.01
+    canvas.Divide(1, 2, 0, 0)
+    canvas.topPad = getPad(canvas, 1)
+    canvas.topPad.SetPad(canvas.topPad.GetX1(), padRatio-padOverlap, canvas.topPad.GetX2(), canvas.topPad.GetY2())
+    canvas.bottomPad = getPad(canvas, 2)
+    canvas.bottomPad.SetTopMargin(0)
+    canvas.bottomPad.SetPad(canvas.bottomPad.GetX1(), canvas.bottomPad.GetY1(), canvas.bottomPad.GetX2(), padRatio+padOverlap)
+    canvas.topPad.SetTopMargin(0.08/(1-padRatio+padOverlap))
+    canvas.topPad.SetBottomMargin((padOverlap+padGap)/(1-padRatio+padOverlap))
+    canvas.bottomPad.SetTopMargin((padOverlap)/(padRatio+padOverlap))
+    canvas.bottomPad.SetBottomMargin(0.12/(padRatio+padOverlap))
+
+  if ratio and ttgStyle: ttgRatioDivision(canvas)
+  elif yRatioWidth:      defaultRatioDivision(canvas)
+  else:                  canvas.topPad = canvas
 
   return canvas
 
@@ -74,7 +148,7 @@ def commonStyle(histo):
   histo.GetYaxis().SetTitleSize(24)
   histo.GetXaxis().SetLabelSize(20)
   histo.GetYaxis().SetLabelSize(20)
-
+  histo.GetYaxis().SetTitleOffset(1.5 if ttgStyle else 2)
 
 def errorStyle(color, markerStyle = 20, markerSize = 1):
   def func(histo):
@@ -135,8 +209,8 @@ def drawTex(line, align=11, size=0.04):
 #
 def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
   lines = [
-    (11, (0.15, 0.95, 'CMS Simulation' if isOnlySim else 'CMS Preliminary')),
-    (31, (0.95, 0.95, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
+    (11, (ROOT.gStyle.GetPadLeftMargin(),  1-ROOT.gStyle.GetPadTopMargin(), 'CMS Simulation' if isOnlySim else 'CMS Preliminary')),
+    (31, (1-ROOT.gStyle.GetPadRightMargin(), 1-ROOT.gStyle.GetPadTopMargin(), ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
   ]
   return [drawTex(l, align) for align, l in lines]
 
@@ -145,7 +219,7 @@ def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
 #
 def fromAxisToNDC(pad, axisRange, coordinate, isY=False):
   log     = pad.GetLogy()           if isY else pad.GetLogx()
-  minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin() 
+  minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin()
   maxPad  = (1.-pad.GetTopMargin()) if isY else (1.-pad.GetRightMargin())
   maxPad  = 1.-pad.GetTopMargin()   if isY else 1.-pad.GetRightMargin()
   minAxis = axisRange[0]
@@ -156,7 +230,7 @@ def fromAxisToNDC(pad, axisRange, coordinate, isY=False):
 
 def fromNDCToAxis(pad, axisRange, coordinate, isY=False):
   log     = pad.GetLogy()           if isY else pad.GetLogx()
-  minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin() 
+  minPad  = pad.GetBottomMargin()   if isY else pad.GetLeftMargin()
   maxPad  = (1.-pad.GetTopMargin()) if isY else (1.-pad.GetRightMargin())
   minAxis = axisRange[0]
   maxAxis = axisRange[1]

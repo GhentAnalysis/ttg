@@ -208,7 +208,7 @@ class Plot:
         for h in histos[source]: h.Scale(self.scaleFactor)
         if len(scaling) == 1:
           self.textNDC = 0.82
-          return [drawTex((0.2, 0.85, 'Scaling: %.2f' % self.scaleFactor))]
+          return [drawTex((0.5, 1-ROOT.gStyle.GetPadTopMargin(), 'Scaling: %.2f' % self.scaleFactor), 21)]
     return []
 
   #
@@ -511,7 +511,6 @@ class Plot:
           sorting = False,
           legend = "auto",
           drawObjects = [],
-          widths = {},
           canvasModifications = [],
           histModifications = [],
           ratioModifications = [],
@@ -531,15 +530,11 @@ class Plot:
         sorting: True/False(default) Whether or not to sort the components of a stack wrt Integral
         legend: "auto" (default) or [x_low, y_low, x_high, y_high] or None. ([<legend_coordinates>], n) divides the legend into n columns.
         drawObjects = [] Additional ROOT objects that are called by .Draw()
-        widths = {} (default) to update the widths. Values are {'y_width':500, 'x_width':500, 'y_ratio_width':200}
         canvasModifications = [] could be used to pass on lambdas to modify the canvas
         fakesForSideband = False, if True replaces the fakes of the matchCombined stack by the data from the sideband
     '''
 
     self.textNDC = 1
-    # Canvas widths
-    default_widths = {'y_width':500, 'x_width': 520, 'y_ratio_width': (200 if ratio else None)}
-    default_widths.update(widths)
 
     # Make sure ratio dict has all the keys by updating the default
     if ratio:
@@ -604,7 +599,7 @@ class Plot:
       return
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
-    canvas = getDefaultCanvas(default_widths['x_width'], default_widths['y_width'], default_widths['y_ratio_width'])
+    canvas = getDefaultCanvas(ratio)
     for modification in canvasModifications: modification(canvas)
 
     canvas.topPad.cd()
@@ -632,8 +627,7 @@ class Plot:
       h.GetXaxis().SetTitle(self.texX)
       h.GetYaxis().SetTitle(self.texY)
 
-      if ratio is None: h.GetYaxis().SetTitleOffset(1.6)
-      else:             h.GetYaxis().SetTitleOffset(2.0)
+      if ratio: h.GetXaxis().SetLabelSize(0)
 
       for modification in histModifications+self.histModifications: modification(h)
 
@@ -665,7 +659,6 @@ class Plot:
       h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
       h_ratio.GetXaxis().SetTitleOffset(3.2)
-      h_ratio.GetYaxis().SetTitleOffset(2.0)
 
       h_ratio.GetXaxis().SetTickLength( 0.03*3 )
       h_ratio.GetYaxis().SetTickLength( 0.03*2 )
