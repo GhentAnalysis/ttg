@@ -187,10 +187,18 @@ def commandForImpactsJSON(dataCard, toys=False, toyR=1):
 # Linearity check
 #
 def doLinearityCheck(dataCard):
-  for r in [i/10. for i in xrange(5, 15)]:
+  gr = ROOT.TGraphAsymmErrors()
+  for i, r in enumerate([x/10. for x in xrange(1, 19)]):
     handleCombine(dataCard, dataCard + '_linCheck', commandForImpactsJSON(dataCard, toys=True, toyR=r))
     signalStrength = extractSignalFromJSON(os.path.join(getCombineRelease(), 'src/CombineHarvester/CombineTools/scripts/impacts.json'))
-    print str(r) + ' --> ' + str(signalStrength)
+    gr.SetPoint(i, r, signalStrength[1])
+    gr.SetPointError(i, 0, 0, signalStrength[1]-signalStrength[0], signalStrength[2]-signalStrength[1])
+  c = ROOT.TCanvas('linearityCheck', 'linearityCheck', 700, 500)
+  gr.Draw('ALPE')
+  gr.GetXaxis().SetTitle("input signal strength");
+  gr.GetYaxis().SetTitle("measured signal strength");
+  c.SaveAs('~/www/ttG/combinePlots/linearityCheck.png')
+
 
 #
 # Run impacts
