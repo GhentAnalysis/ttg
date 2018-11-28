@@ -197,7 +197,7 @@ def doLinearityCheck(dataCard):
   gr.Draw('ALPE')
   gr.GetXaxis().SetTitle("input signal strength");
   gr.GetYaxis().SetTitle("measured signal strength");
-  c.SaveAs('~/www/ttG/combinePlots/linearityCheck.png')
+  c.SaveAs('~/www/ttG/combinePlots/linearityCheck.pdf')
 
 
 #

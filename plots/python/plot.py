@@ -654,13 +654,14 @@ class Plot:
       h_ratio.Divide(den)
 
       if ratio['style']: ratio['style'](h_ratio)
+      h_ratio.GetXaxis().SetLabelSize(20)
 
       h_ratio.GetXaxis().SetTitle(self.texX)
       h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
       h_ratio.GetXaxis().SetTitleOffset(3.2)
 
-      h_ratio.GetXaxis().SetTickLength( 0.03*3 )
+      h_ratio.GetXaxis().SetTickLength( 0.03*2 )
       h_ratio.GetYaxis().SetTickLength( 0.03*2 )
 
       h_ratio.GetYaxis().SetRangeUser(self.yrmin, self.yrmax)
