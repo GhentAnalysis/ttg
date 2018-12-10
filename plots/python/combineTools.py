@@ -218,6 +218,7 @@ def runImpacts(dataCard, perPage=30, toys=False, toyR=1):
   os.system("mkdir -p ~/www/ttG/combinePlots/")
   os.system("cp $CMSSW_BASE/src/ttg/tools/php/index.php ~/www/ttG/combinePlots/")
   os.system("mv " + outName + "*.png ~/www/ttG/combinePlots/")
+  shutil.copy(os.path.join(getCombineRelease(), 'src/CombineHarvester/CombineTools/scripts/impacts.json'), os.path.expandvars('$CMSSW_BASE/src/ttg/plots/combine/' + outName + '.json'))
 
 
 #
