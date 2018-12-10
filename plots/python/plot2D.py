@@ -11,8 +11,14 @@ from ttg.plots.plot import Plot
 # pylint: disable=W0221
 #
 class Plot2D(Plot):
+  defaultStack = None
+
+  @staticmethod
+  def setDefaults(stack = None):
+    Plot2D.defaultStack = stack
+
   def __init__(self, name, texX, varX, binningX, texY, varY, binningY, stack=None):  # pylint: disable=R0913
-    Plot.__init__(self, name, texX, varX, binningX, stack=stack, texY=texY)
+    Plot.__init__(self, name, texX, varX, binningX, stack=(stack if stack else Plot2D.defaultStack), texY=texY, overflowBin=False, normBinWidth=False)
     self.varY        = varY
     self.binningX    = self.binning
 

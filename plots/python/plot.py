@@ -115,9 +115,9 @@ class Plot:
 
   @staticmethod
   def setDefaults(stack = None, texY="Events", overflowBin='upper'):
-      Plot.defaultStack        = stack
-      Plot.defaultTexY         = texY
-      Plot.defaultOverflowBin  = overflowBin
+    Plot.defaultStack       = stack
+    Plot.defaultTexY        = texY
+    Plot.defaultOverflowBin = overflowBin
 
   def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[]):
     self.stack             = stack        if stack else Plot.defaultStack
