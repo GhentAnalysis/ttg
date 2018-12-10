@@ -303,8 +303,8 @@ def doRatioFit(cardName, shapes):
 #doRatioFit('ratioFit_SF', ['sr_SF', 'zg_SF'])
 #doRatioFit('ratioFit_OF', ['sr_OF', 'zg_SF'])
 
-doLinearityCheck('srFit')
-#doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True)
-#doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 32, withSingleTop=True)
-#doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 32, withSingleTop=True)
-#goodnessOfFit('srFit')
+doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True)
+doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 32, withSingleTop=True)
+doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 32, withSingleTop=True)
+goodnessOfFit('srFit')
+#doLinearityCheck('srFit')
