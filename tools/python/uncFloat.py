@@ -20,8 +20,8 @@ class UncFloat():
 
   def __add__(self, other):
     if not type(other)==type(self):
-      if other == 0 or other == None: return self
-      elif self == 0 or self == None: return other
+      if other == 0 or other is None: return self
+      elif self == 0 or self is None: return other
       else: raise ValueError( "Can't add, two objects should be UncFloat but is %r."%(type(other)) )
     val   = self.val+other.val
     sigma = sqrt(self.sigma**2+other.sigma**2)

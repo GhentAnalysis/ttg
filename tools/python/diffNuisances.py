@@ -44,13 +44,13 @@ if options.pullDef!="" and options.pullDef not in CP.allowed_methods(): exit("Me
 
 
 file = ROOT.TFile(args[0])
-if file == None: raise RuntimeError, "Cannot open file %s" % args[0]
+if file is None: raise RuntimeError, "Cannot open file %s" % args[0]
 fit_s  = file.Get("fit_s")
 fit_b  = file.Get("fit_b")
 prefit = file.Get("nuisances_prefit")
-if fit_s == None or fit_s.ClassName()   != "RooFitResult": raise RuntimeError, "File %s does not contain the output of the signal fit 'fit_s'"     % args[0]
-if fit_b == None or fit_b.ClassName()   != "RooFitResult": fit_b = fit_s
-if prefit == None or prefit.ClassName() != "RooArgSet":    raise RuntimeError, "File %s does not contain the prefit nuisances 'nuisances_prefit'"  % args[0]
+if fit_s is None or fit_s.ClassName()   != "RooFitResult": raise RuntimeError, "File %s does not contain the output of the signal fit 'fit_s'"     % args[0]
+if fit_b is None or fit_b.ClassName()   != "RooFitResult": fit_b = fit_s
+if prefit is None or prefit.ClassName() != "RooArgSet":    raise RuntimeError, "File %s does not contain the prefit nuisances 'nuisances_prefit'"  % args[0]
 
 isFlagged = {}
 
@@ -103,7 +103,7 @@ for i in range(fpf_s.getSize()):
     flag = False;
     mean_p, sigma_p, sigma_pu, sigma_pd = 0,0,0,0
 
-    if nuis_p == None:
+    if nuis_p is None:
         # nuisance parameter NOT present in the prefit result
         if not options.absolute_values: continue
         row += [ "[%.2f, %.2f]" % (nuis_s.getMin(), nuis_s.getMax()) ]
@@ -121,7 +121,7 @@ for i in range(fpf_s.getSize()):
 		else: row += [ "%.6f +%.6f %.6f" % (nuis_p.getVal(), nuis_p.getErrorHi(), nuis_p.getErrorLo()) ]
 
     for fit_name, nuis_x in [('b', nuis_b), ('s',nuis_s)]:
-        if nuis_x == None:
+        if nuis_x is None:
             row += [ " n/a " ]
         else:
 	    nuisIsSymm = abs(abs(nuis_x.getErrorLo())-abs(nuis_x.getErrorHi()))<0.01 or nuis_x.getErrorLo() == 0
