@@ -1,31 +1,45 @@
+from collections import namedtuple
+import itertools
 import ROOT, os, pickle
 from ttg.tools.logger import getLogger
 from ttg.tools.helpers import multiply
 log = getLogger()
 
+#class of 2-tuples containing upper and lower binEdges 
+BinEdges = namedtuple("BinEdges", ['low', 'high'])
 
-#binning in pt and eta
-def getPtBins():
-  ptBorders = [30, 50, 70, 100, 140, 200, 300, 600, 1000]
-  ptBins = []
-  for i in range(len(ptBorders)-1):
-    ptBins.append([ptBorders[i], ptBorders[i+1]])
-  ptBins.append([ptBorders[-1], -1])
-  return ptBins
+#monkey-patch generated class to have a 'contains' method (last bin edge is -1)
+def contains( binEdges, entry ):
+  return entry >= binEdges.low and ( entry < binEdges.high or binEdges.high < 0 )
+BinEdges.contains = contains
 
-def getEtaBins():
-  return [[0, 0.8], [0.8, 1.6], [1.6, 2.4]]
+#generator factory constructed from list of bin edges 
+def getBins( binning ):
+  for low, high in zip( binning[:-1], binning[1:] ):
+    yield BinEdges( low, high )
+
+
+def ptBins():
+  ptBorders = [30, 50, 70, 100, 140, 200, 300, 600, 1000, -1]
+  return getBins( ptBorders )
+
+
+def etaBins():
+  etaBorders = [0, 0.8, 1.6, 2.4, -1]
+  return getBins( etaBorders )
+
 
 def toFlavorKey(pdgId):
   if abs(pdgId)==5:   return ROOT.BTagEntry.FLAV_B
   elif abs(pdgId)==4: return ROOT.BTagEntry.FLAV_C
   else:               return ROOT.BTagEntry.FLAV_UDSG
 
+
 class BtagEfficiency:
+  scaleFactorFile    = '$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv'
+  mcEffFileDeepCSV   = '$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl'
   def __init__(self, wp = ROOT.BTagEntry.OP_MEDIUM):
     # Input files
-    self.scaleFactorFile    = '$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv'
-    self.mcEffFileDeepCSV   = '$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl'
 
     self.mcEffDeepCSV = pickle.load(file(os.path.expandvars(self.mcEffFileDeepCSV)))
 
@@ -44,57 +58,58 @@ class BtagEfficiency:
     self.reader.load(self.calib, ROOT.BTagEntry.FLAV_UDSG, "incl")
 
 
-
-
   # Get MC efficiency for a given jet
   def getMCEff(self, tree, index):
     pt     = tree._jetPt[index]
     eta    = abs(tree._jetEta[index])
-    flavor = abs(tree._jetHadronFlavor[index])
-    for ptBin in getPtBins():
-      if pt >= ptBin[0] and (pt < ptBin[1] or ptBin[1] < 0):
-        for etaBin in getEtaBins():
-          if abs(eta) >= etaBin[0] and abs(eta) < etaBin[1]:
-            mcEff = self.mcEffDeepCSV
-            if abs(flavor)==5:   return  mcEff[tuple(ptBin)][tuple(etaBin)]["b"]
-            elif abs(flavor)==4: return  mcEff[tuple(ptBin)][tuple(etaBin)]["c"]
-            else:                return  mcEff[tuple(ptBin)][tuple(etaBin)]["other"]
+    absFlavor = abs(tree._jetHadronFlavor[index])
 
-    log.warning("No MC efficiency for pt %f eta %f pdgId %i", pt, eta, flavor)
-    return 1
+    for ptBin, etaBin in itertools.product( ptBins(), etaBins() ):
+      if ptBin.contains( pt ) and etaBin.contains( eta ):
+        mcEff = self.mcEffDeepCSV
+        
+        effMap = mcEff[tuple(ptBin)][tuple(etaBin)]
+        if absFlavor == 5 : return effMap['b']
+        elif absFlavor == 4 : return effMap['c']
+        else : return effMap['other']
+        
+        log.warning("No MC efficiency for pt %f eta %f pdgId %i", pt, eta, absFlavor)
+        return 1
+
 
   def getJetSF(self, tree, index, sys):
     pt      = tree._jetPt[index]
     eta     = abs(tree._jetEta[index])
-    flavor  = abs(tree._jetHadronFlavor[index])
-    if   sys == 'bUp'   and flavor >= 4: sysType = 'up'
-    elif sys == 'bDown' and flavor >= 4: sysType = 'down'
-    elif sys == 'lUp'   and flavor <= 3: sysType = 'up'
-    elif sys == 'lDown' and flavor <= 3: sysType = 'down'
+    absFlavor  = abs(tree._jetHadronFlavor[index])
+    if   sys == 'bUp'   and absFlavor >= 4: sysType = 'up'
+    elif sys == 'bDown' and absFlavor >= 4: sysType = 'down'
+    elif sys == 'lUp'   and absFlavor <= 3: sysType = 'up'
+    elif sys == 'lDown' and absFlavor <= 3: sysType = 'down'
     elif sys == '':                      sysType = 'central'
     else:                                return 1.
-    return self.reader.eval_auto_bounds(sysType, toFlavorKey(flavor), eta, pt)
+    return self.reader.eval_auto_bounds(sysType, toFlavorKey(absFlavor), eta, pt)
+
  
   def getBtagSF_1a(self, sysType, tree, bjets):
-    mcEff_bJets = [self.getMCEff(tree, j) for j in bjets]
-    mcEff_lJets = [(1-self.getMCEff(tree, j)) for j in tree.jets if j not in bjets]
-    sf_bJets    = [self.getMCEff(tree, j)*self.getJetSF(tree, j, sysType) for j in bjets]
-    sf_lJets    = [(1-self.getMCEff(tree, j)*self.getJetSF(tree, j, sysType)) for j in tree.jets if j not in bjets]
+    mcEff_bJets = ( self.getMCEff(tree, j) for j in bjets )
+    mcEff_lJets = ( (1-self.getMCEff(tree, j)) for j in tree.jets if j not in bjets )
+    sf_bJets    = ( self.getMCEff(tree, j)*self.getJetSF(tree, j, sysType) for j in bjets )
+    sf_lJets    = ( (1-self.getMCEff(tree, j)*self.getJetSF(tree, j, sysType)) for j in tree.jets if j not in bjets )
 
-    ref = multiply(mcEff_bJets + mcEff_lJets)
-    if ref > 0: return multiply(sf_bJets + sf_lJets)/ref
+    ref = multiply( itertools.chain( mcEff_bJets, mcEff_lJets ) )
+    if ref > 0: return multiply( itertools.chain(sf_bJets, sf_lJets) )/ref
     else:     
       log.warning('MC efficiency is zero. Return SF 1')
       return 1
 
 
   def getBtagSF_1c(self, sysType, tree, bjets):
-    btagSF = [self.getJetSF(tree, j, sysType) for j in bjets]
+    btagSF = ( self.getJetSF(tree, j, sysType) for j in bjets )
 
     if   len(btagSF) == 0: return (1.0,         0.0, 0.0)
-    elif len(btagSF) == 1: return (1-btagSF[0], btagSF[0], 0)
+    elif len(btagSF) == 1: return (1 - btagSF[0], btagSF[0], 0)
     else:
-      weight0tag = multiply([1-sf for sf in btagSF])
+      weight0tag = multiply( 1-sf for sf in btagSF )
       weight1tag = 0
       for i in range(len(btagSF)):
         prod = btagSF[i]
