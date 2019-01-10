@@ -233,7 +233,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
-      setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets, isCSV = False))
+      setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets))
 
     trigWeight, trigErr        = triggerEff.getSF(c, l1, l2)
     newVars.triggerWeight      = trigWeight
