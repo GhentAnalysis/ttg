@@ -33,10 +33,10 @@ class LeptonSF:
 
     if abs(flavor)==1:   
       if pt >= 150: pt = 149 # last bin is valid to infinity
-      sf = multiply([self.getPartialSF(effMap, pt, eta) for effMap in self.mu])
+      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu )
     elif abs(flavor)==0:
       if pt >= 200: pt = 199 # last bin is valid to infinity
-      sf = multiply([self.getPartialSF(effMap, pt, eta) for effMap in self.ele])
+      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele )
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)
 
