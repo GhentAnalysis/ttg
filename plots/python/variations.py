@@ -2,6 +2,11 @@ defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
                      'llg-looseLeptonVeto-mll40-signalRegion-photonPt20:SYS',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20:SYS,POST',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20:SYS,POST',
+                     'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt30',
+                     'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt40',
+                     'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt50',
+                     'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt60',
+                     'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt70',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag0-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet1-deepbtag1p-photonPt20',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-photonPt20',
@@ -49,6 +54,7 @@ dilepSelections   = ['ll-looseLeptonVeto-mll40-offZ:SYS',
 #
 def getSelections(tag, channel, sys, post):
   if not tag.count('pho') and tag.count('eleSusyLoose'): selections = dilepSelections
+  elif tag == 'compareWithTT':                           selections = [i for i in dilepSelections if 'photon' not in i]
   elif tag == 'eleSusyLoose-phoCBfull':                  selections = [(s+':SYS,POST') for s in defaultSelections] + diffSelections
   else:                                                  selections = defaultSelections
 
