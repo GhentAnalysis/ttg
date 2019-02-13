@@ -75,7 +75,8 @@ phoCB       = args.tag.count('phoCB')
 phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
 prefire     = args.tag.count('prefireCheck')
-normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay'])
+noWeight    = args.tag.count('noWeight')
+normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay','compareWithTT'])
 
 
 #
@@ -293,6 +294,7 @@ if not args.showSys:
       if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
 
       if sample.isData: eventWeight = 1.
+      elif noWeight:    eventWeight = 1.
       else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale
 
       if prefire and not sample.isData: eventWeight *= c.prefireSF
