@@ -44,6 +44,7 @@ loadedPkls = {}
 def getHistFromPkl(subdirs, plotName, sys, *selectors):
   global loadedPkls
   hist = None
+  if not isinstance(subdirs, tuple): subdirs = (subdirs,)
   resultFile = os.path.join(*((plotDir,)+subdirs+(plotName +'.pkl',)))
 
   if os.path.isdir(os.path.dirname(resultFile)):

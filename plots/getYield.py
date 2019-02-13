@@ -8,7 +8,6 @@ from ttg.plots.plot         import getHistFromPkl
 from ttg.tools.logger       import getLogger
 log = getLogger(args.logLevel)
 
-for sample in ['TTGamma', 'TTJets']:
-  selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20'
-  print sample + ':\t\t\t'           + str(getHistFromPkl('eleSusyLoose-phoCBfull',              'all', selection, 'yield', '', [sample]).Integral())
-  print sample + '(prefireCheck):\t' + str(getHistFromPkl('eleSusyLoose-phoCBfull-prefireCheck', 'all', selection, 'yield', '', [sample]).Integral())
+for sample in ['TTGamma']:
+  selection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'
+  print sample + ':\t\t\t' + str(getHistFromPkl(('eleSusyLoose-phoCBfull-noWeight', 'all', selection), 'yield', '', [sample]).Integral())
