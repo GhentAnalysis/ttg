@@ -11,6 +11,9 @@ systematics = {}
 for i in ('Up', 'Down'):
   systematics['isr'+i]        = []
   systematics['fsr'+i]        = []
+  systematics['ue'+i]         = []
+  systematics['hdamp'+i]      = []
+  systematics['erd'+i]        = []
   systematics['eScale'+i]     = []
   systematics['eRes'+i]       = []
   systematics['phScale'+i]    = []
@@ -86,6 +89,10 @@ def applySysToReduceType(reduceType, sys):
 def getReplacementsForStack(sys):
   if sys and any([i==sys for i in ['fsrUp', 'fsrDown', 'isrUp', 'isrDown']]):
     return {'TTGamma' : 'TTGamma_' + sys.lower(), 'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
+  elif sys and any([i==sys for i in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']]):
+    return {'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
+  elif sys and sys=='erdUp':
+    return {'TTJets_pow' : 'TTJets_pow_erd'}
   else:
     return {}
 
