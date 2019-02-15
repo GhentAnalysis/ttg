@@ -26,6 +26,6 @@ class PhotonSF:
     eta = abs(tree._phEta[index])
 
     if pt >= 499: pt = 499 # last bin is valid to infinity
-    sf = multiply([self.getPartialSF(effMap, pt, eta) for effMap in self.pho])
+    sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.pho )
 
     return (1+sf.sigma*sigma)*sf.val
