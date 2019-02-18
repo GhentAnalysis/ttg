@@ -1,0 +1,8 @@
+-- MC TTGamma
+TTGamma                    t#bar{t}#gamma        lineStyle     kOrange
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
+
+-- MC TTJets
+TTJets_pow                 t#bar{t}              lineStyle     633                      _ttgEventType<3
