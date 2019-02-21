@@ -208,7 +208,7 @@ def writeRootFile(name, systematicVariations, merged=False):
     promptSelectors   = [[t, '(genuine,misIdEle)']]
     fakeSelectors     = [[t, '(hadronicFake)']]
     hadronicSelectors = [[t, '(hadronicPhoton)']]
-    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('sr_ee', 'ee'), ('sr_mm'), ('zg_SF', 'SF')]:
+    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('sr_ee', 'ee'), ('sr_mm', 'mumu'), ('zg_SF', 'SF')]:
       q2Variations = []
       pdfVariations = []
       for sys in [''] + systematicVariations:
