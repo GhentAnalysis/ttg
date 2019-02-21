@@ -189,13 +189,13 @@ doChgIsoFit()
 #
 # ROOT file for a signal regions fit
 #
-def writeRootFile(name, systematicVariations, merged=False, withSingleTop=False):
+def writeRootFile(name, systematicVariations, merged=False):
   f = ROOT.TFile('combine/' + name + '_shapes.root', 'RECREATE')
 
   baseSelection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'
   onZSelection  = 'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20'
   ttSelection   = 'll-looseLeptonVeto-mll40-offZ-signalRegion-nphoton0'
-  tag           = 'eleSusyLoose-phoCBfull-matchNew' if withSingleTop else 'eleSusyLoose-phoCBfull-match'
+  tag           = 'eleSusyLoose-phoCBfull-matchNew'
   tagTT         = 'eleSusyLoose'
   writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl((tag, 'emu', baseSelection), 'signalRegionsSmall', '', ['MuonEG']), mergeBins=merged)
   writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl((tag, 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'], ['DoubleMuon']), mergeBins=merged, removeBins=([1, 2] if merged else []))
@@ -280,7 +280,7 @@ def writeRootFile(name, systematicVariations, merged=False, withSingleTop=False)
 #
 # Signal regions fit
 #
-def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=False, doRatio=False):
+def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, doRatio=False):
   log.info(' --- Signal regions fit (' + cardName + ') --- ')
   extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:]]
   extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:]]
@@ -298,7 +298,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
   else:
     log.info(' --- Signal regions fit (' + cardName + ') --- ')
 
-  writeRootFile(cardName, systematics.keys(), merged, withSingleTop)
+  writeRootFile(cardName, systematics.keys(), merged)
   writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
@@ -309,16 +309,16 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
   runSignificance(cardName, expected=True)
 
 
-doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35, withSingleTop=True)
-doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 35, withSingleTop=True)
-doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 35, withSingleTop=True)
-doSignalRegionFit('srFit_ee', ['sr_ee', 'zg_SF'], 35, withSingleTop=True)
-doSignalRegionFit('srFit_mm', ['sr_mm', 'zg_SF'], 35, withSingleTop=True)
+doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35)
+doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 35)
+doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 35)
+doSignalRegionFit('srFit_ee', ['sr_ee', 'zg_SF'], 35)
+doSignalRegionFit('srFit_mm', ['sr_mm', 'zg_SF'], 35)
 
-doSignalRegionFit('ratioFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
-doSignalRegionFit('ratioFit_SF', ['sr_SF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
-doSignalRegionFit('ratioFit_OF', ['sr_OF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
-doSignalRegionFit('ratioFit_ee', ['sr_ee', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
-doSignalRegionFit('ratioFit_mm', ['sr_mm', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35, doRatio=True)
+doSignalRegionFit('ratioFit_SF', ['sr_SF', 'zg_SF'], 35, doRatio=True)
+doSignalRegionFit('ratioFit_OF', ['sr_OF', 'zg_SF'], 35, doRatio=True)
+doSignalRegionFit('ratioFit_ee', ['sr_ee', 'zg_SF'], 35, doRatio=True)
+doSignalRegionFit('ratioFit_mm', ['sr_mm', 'zg_SF'], 35, doRatio=True)
 #goodnessOfFit('srFit')
 #doLinearityCheck('srFit')
