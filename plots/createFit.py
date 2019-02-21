@@ -199,6 +199,8 @@ def writeRootFile(name, systematicVariations, merged=False, withSingleTop=False)
   tagTT         = 'eleSusyLoose'
   writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl((tag, 'emu', baseSelection), 'signalRegionsSmall', '', ['MuonEG']), mergeBins=merged)
   writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl((tag, 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'], ['DoubleMuon']), mergeBins=merged, removeBins=([1, 2] if merged else []))
+  writeHist(f, 'sr_ee', 'data_obs', getHistFromPkl((tag, 'ee',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG']), mergeBins=merged, removeBins=([1, 2] if merged else []))
+  writeHist(f, 'sr_mm', 'data_obs', getHistFromPkl((tag, 'mumu',  baseSelection), 'signalRegionsSmall', '', ['DoubleMuon']), mergeBins=merged, removeBins=([1, 2] if merged else []))
   writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl((tag, 'SF',  onZSelection),  'signalRegionsSmall', '', ['DoubleEG'], ['DoubleMuon']), mergeBins=True)
   writeHist(f, 'tt',    'data_obs', getHistFromPkl((tagTT, 'all', ttSelection),   'signalRegionsSmall', '', ['DoubleEG'], ['DoubleMuon'], ['MuonEG']), mergeBins=True)
 
@@ -206,7 +208,7 @@ def writeRootFile(name, systematicVariations, merged=False, withSingleTop=False)
     promptSelectors   = [[t, '(genuine,misIdEle)']]
     fakeSelectors     = [[t, '(hadronicFake)']]
     hadronicSelectors = [[t, '(hadronicPhoton)']]
-    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('zg_SF', 'SF')]:
+    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('sr_ee', 'ee'), ('sr_mm'), ('zg_SF', 'SF')]:
       q2Variations = []
       pdfVariations = []
       for sys in [''] + systematicVariations:
@@ -310,9 +312,13 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
 doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35, withSingleTop=True)
 doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 35, withSingleTop=True)
 doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 35, withSingleTop=True)
+doSignalRegionFit('srFit_ee', ['sr_ee', 'zg_SF'], 35, withSingleTop=True)
+doSignalRegionFit('srFit_mm', ['sr_mm', 'zg_SF'], 35, withSingleTop=True)
 
 doSignalRegionFit('ratioFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
 doSignalRegionFit('ratioFit_SF', ['sr_SF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
 doSignalRegionFit('ratioFit_OF', ['sr_OF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit_ee', ['sr_ee', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit_mm', ['sr_mm', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
 #goodnessOfFit('srFit')
 #doLinearityCheck('srFit')
