@@ -296,10 +296,8 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
   else:
     log.info(' --- Signal regions fit (' + cardName + ') --- ')
 
-  showSysListTemp = [i for i in showSysList if not any(i.count(j) for j in ['ue','erd','hdamp'])]
-
   writeRootFile(cardName, systematics.keys(), merged, withSingleTop)
-  writeCard(cardName, shapes, templates, None, extraLines, showSysListTemp + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+  writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True)
@@ -309,12 +307,12 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
   runSignificance(cardName, expected=True)
 
 
-doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF','tt'], 35, withSingleTop=True)
-doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF','tt'], 35, withSingleTop=True)
-doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF','tt'], 35, withSingleTop=True)
+doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35, withSingleTop=True)
+doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 35, withSingleTop=True)
+doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 35, withSingleTop=True)
 
-doSignalRegionFit('ratioFit', ['sr_OF', 'sr_SF', 'zg_SF','tt'], 35, withSingleTop=True, doRatio=True)
-doSignalRegionFit('ratioFit_SF', ['sr_SF', 'zg_SF','tt'], 35, withSingleTop=True, doRatio=True)
-doSignalRegionFit('ratioFit_OF', ['sr_OF', 'zg_SF','tt'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit_SF', ['sr_SF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit_OF', ['sr_OF', 'zg_SF'], 35, withSingleTop=True, doRatio=True)
 #goodnessOfFit('srFit')
 #doLinearityCheck('srFit')
