@@ -194,10 +194,13 @@ def writeRootFile(name, systematicVariations, merged=False, withSingleTop=False)
 
   baseSelection = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20'
   onZSelection  = 'llg-looseLeptonVeto-mll40-llgOnZ-signalRegion-photonPt20'
+  ttSelection   = 'll-looseLeptonVeto-mll40-offZ-signalRegion-nphoton0'
   tag           = 'eleSusyLoose-phoCBfull-matchNew' if withSingleTop else 'eleSusyLoose-phoCBfull-match'
+  tagTT         = 'eleSusyLoose'
   writeHist(f, 'sr_OF', 'data_obs', getHistFromPkl((tag, 'emu', baseSelection), 'signalRegionsSmall', '', ['MuonEG']), mergeBins=merged)
   writeHist(f, 'sr_SF', 'data_obs', getHistFromPkl((tag, 'SF',  baseSelection), 'signalRegionsSmall', '', ['DoubleEG'], ['DoubleMuon']), mergeBins=merged, removeBins=([1, 2] if merged else []))
   writeHist(f, 'zg_SF', 'data_obs', getHistFromPkl((tag, 'SF',  onZSelection),  'signalRegionsSmall', '', ['DoubleEG'], ['DoubleMuon']), mergeBins=True)
+  writeHist(f, 'tt',    'data_obs', getHistFromPkl((tagTT, 'all', ttSelection),   'signalRegionsSmall', '', ['DoubleEG'], ['DoubleMuon'], ['MuonEG']), mergeBins=True)
 
   for t in templates:
     promptSelectors   = [[t, '(genuine,misIdEle)']]
@@ -243,19 +246,60 @@ def writeRootFile(name, systematicVariations, merged=False, withSingleTop=False)
         writeHist(f, shape+'q2Up',   t, up,   mergeBins = ('zg' in shape or merged), removeBins=([1, 2] if (merged and 'sr_SF' in shape) else []))
         writeHist(f, shape+'q2Down', t, down, mergeBins = ('zg' in shape or merged), removeBins=([1, 2] if (merged and 'sr_SF' in shape) else []))
 
+
+    for shape, channel in [('tt', 'all')]:
+      q2Variations = []
+      pdfVariations = []
+      selector = [[t,]]
+      for sys in [''] + systematicVariations:
+        if 'ue' in sys: continue
+        if 'erd' in sys: continue
+        if 'hdamp' in sys: continue
+        total = getHistFromPkl((tagTT, channel, ttSelection), 'signalRegionsSmall', sys, *selector)
+
+        if sys == '':     nominal = total
+        if 'pdf' in sys:  pdfVariations += [total]
+        elif 'q2' in sys: q2Variations += [total]
+        else:             writeHist(f, shape+sys, t, total, mergeBins = True)
+
+      if len(pdfVariations) > 0:
+        up, down = pdfSys(pdfVariations, nominal)
+        writeHist(f, shape+'pdfUp',   t, up,   mergeBins=True)
+        writeHist(f, shape+'pdfDown', t, down, mergeBins=True)
+
+      if len(q2Variations) > 0:
+        up, down = q2Sys(q2Variations)
+        writeHist(f, shape+'q2Up',   t, up,   mergeBins=True)
+        writeHist(f, shape+'q2Down', t, down, mergeBins=True)
+
+
   f.Close()
 
 #
 # Signal regions fit
 #
-def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=False):
+def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=False, doRatio=False):
   log.info(' --- Signal regions fit (' + cardName + ') --- ')
   extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:]]
   extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:]]
   extraLines += ['* autoMCStats 0 1 1']
 
+  if doRatio:
+    log.info(' --- Ratio ttGamma/ttBar fit (' + cardName + ') --- ')
+    from ttg.samples.Sample import createSampleList, getSampleFromList
+    sampleList   = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
+    xsec_ttGamma = sum([getSampleFromList(sampleList, s).xsec for s in ['TTGamma', 'TTGamma_t', 'TTGamma_tbar', 'TTGamma_had']])
+    xsec_tt      = getSampleFromList(sampleList, 'TTJets_pow').xsec
+    extraLines += ['renormTTGamma rateParam * TTGamma* %.7f' % (1./(100*xsec_ttGamma)), 'nuisance edit freeze renormTTGamma ifexists']
+    extraLines += ['renormTTbar rateParam * TTJets* %.7f' % (1./xsec_tt),               'nuisance edit freeze renormTTbar ifexists']
+    extraLines += ['TTbar_norm rateParam * TT* %.7f' % xsec_tt]
+  else:
+    log.info(' --- Signal regions fit (' + cardName + ') --- ')
+
+  showSysListTemp = [i for i in showSysList if not any(i.count(j) for j in ['ue','erd','hdamp'])]
+
   writeRootFile(cardName, systematics.keys(), merged, withSingleTop)
-  writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+  writeCard(cardName, shapes, templates, None, extraLines, showSysListTemp + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True)
@@ -264,47 +308,13 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, withSingleTop=
   runSignificance(cardName)
   runSignificance(cardName, expected=True)
 
-#doSignalRegionFit('srFit'        , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
-#doSignalRegionFit('srFit_SF'     , ['sr_SF', 'zg_SF'], 28)
-#doSignalRegionFit('srFit_OF'     , ['sr_OF', 'zg_SF'], 28)
-#doSignalRegionFit('srFit_noZG'   , ['sr_OF', 'sr_SF'], 32)
-#doSignalRegionFit('srFit_SF_noZG', ['sr_SF'], 28)
-#doSignalRegionFit('srFit_OF_noZG', ['sr_OF'], 28)
 
-#doSignalRegionFit('mergedFit'        , ['sr_OF', 'sr_SF', 'zg_SF'], 32, merged=True)
-#doSignalRegionFit('mergedFit_SF'     , ['sr_SF', 'zg_SF'], 28, merged=True)
-#doSignalRegionFit('mergedFit_OF'     , ['sr_OF', 'zg_SF'], 28, merged=True)
-#doSignalRegionFit('mergedFit_noZG'   , ['sr_OF', 'sr_SF'], 32, merged=True)
-#doSignalRegionFit('mergedFit_SF_noZG', ['sr_SF'], 28, merged=True)
-#doSignalRegionFit('mergedFit_OF_noZG', ['sr_OF'], 28, merged=True)
+doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF','tt'], 35, withSingleTop=True)
+doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF','tt'], 35, withSingleTop=True)
+doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF','tt'], 35, withSingleTop=True)
 
-
-def doRatioFit(cardName, shapes):
-  log.info(' --- Ratio ttGamma/ttBar fit (' + cardName + ') --- ')
-  extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:]]
-  extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:]]
-  extraLines += ['* autoMCStats 0 1 1']
-  from ttg.samples.Sample import createSampleList, getSampleFromList
-  sampleList   = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
-  xsec_ttGamma = sum([getSampleFromList(sampleList, s).xsec for s in ['TTGamma', 'TTGamma_t', 'TTGamma_tbar', 'TTGamma_had']])
-  xsec_tt      = getSampleFromList(sampleList, 'TTJets_pow').xsec
-  extraLines += ['renormTTGamma rateParam * TTGamma* %.7f' % (1./(100*xsec_ttGamma)), 'nuisance edit freeze renormTTGamma ifexists']
-  extraLines += ['renormTTbar rateParam * TTJets* %.7f' % (1./xsec_tt),               'nuisance edit freeze renormTTbar ifexists']
-  extraLines += ['TTbar_norm rateParam * TT* %.7f' % xsec_tt]
-
-  writeRootFile(cardName, systematics.keys())
-  writeCard(cardName, shapes, templates, None, extraLines, systematics.keys() + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
-
-  runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
-  goodnessOfFit('srFit')
-
-
-#doRatioFit('ratioFit'   , ['sr_OF', 'sr_SF', 'zg_SF'], 32)
-#doRatioFit('ratioFit_SF', ['sr_SF', 'zg_SF'])
-#doRatioFit('ratioFit_OF', ['sr_OF', 'zg_SF'])
-
-doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 32, withSingleTop=True)
-doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 32, withSingleTop=True)
-doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 32, withSingleTop=True)
-goodnessOfFit('srFit')
+doSignalRegionFit('ratioFit', ['sr_OF', 'sr_SF', 'zg_SF','tt'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit_SF', ['sr_SF', 'zg_SF','tt'], 35, withSingleTop=True, doRatio=True)
+doSignalRegionFit('ratioFit_OF', ['sr_OF', 'zg_SF','tt'], 35, withSingleTop=True, doRatio=True)
+#goodnessOfFit('srFit')
 #doLinearityCheck('srFit')
