@@ -11,7 +11,7 @@ import os, shutil, ROOT, socket, json
 #
 release        = 'CMSSW_8_1_0'
 arch           = 'slc6_amd64_gcc530'
-version        = 'v7.0.10'
+version        = 'v7.0.9'
 
 
 #
