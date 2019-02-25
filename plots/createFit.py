@@ -254,9 +254,6 @@ def writeRootFile(name, systematicVariations, merged=False):
       pdfVariations = []
       selector = [[t,]]
       for sys in [''] + systematicVariations:
-        if 'ue' in sys: continue
-        if 'erd' in sys: continue
-        if 'hdamp' in sys: continue
         total = getHistFromPkl((tagTT, channel, ttSelection), 'signalRegionsSmall', sys, *selector)
 
         if sys == '':     nominal = total
@@ -290,16 +287,14 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, doRatio=False)
     log.info(' --- Ratio ttGamma/ttBar fit (' + cardName + ') --- ')
     from ttg.samples.Sample import createSampleList, getSampleFromList
     sampleList   = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
-    xsec_ttGamma = sum([getSampleFromList(sampleList, s).xsec for s in ['TTGamma', 'TTGamma_t', 'TTGamma_tbar', 'TTGamma_had']])
-    xsec_tt      = getSampleFromList(sampleList, 'TTJets_pow').xsec
-    extraLines += ['renormTTGamma rateParam * TTGamma* %.7f' % (1./(100*xsec_ttGamma)), 'nuisance edit freeze renormTTGamma ifexists']
-    extraLines += ['renormTTbar rateParam * TTJets* %.7f' % (1./xsec_tt),               'nuisance edit freeze renormTTbar ifexists']
-    extraLines += ['TTbar_norm rateParam * TT* %.7f' % xsec_tt]
+    extraLines += ['renormTTGamma rateParam * TTGamma* 0.338117493', 'nuisance edit freeze renormTTGamma ifexists']
+    extraLines += ['renormTTbar rateParam * TTJets* 1.202269886',    'nuisance edit freeze renormTTbar ifexists']
+    extraLines += ['TTbar_norm rateParam * TT* 0.83176 [0.,2.]']
   else:
     log.info(' --- Signal regions fit (' + cardName + ') --- ')
 
   writeRootFile(cardName, systematics.keys(), merged)
-  writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], linearSystematics, scaleShape={'fsr': 1/sqrt(2)})
+  writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], {}, scaleShape={'fsr': 1/sqrt(2)})
 
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False)
   runFitDiagnostics(cardName, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True)
@@ -309,9 +304,9 @@ def doSignalRegionFit(cardName, shapes, perPage=30, merged=False, doRatio=False)
   runSignificance(cardName, expected=True)
 
 
-doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35)
 doSignalRegionFit('srFit_SF', ['sr_SF', 'zg_SF'], 35)
 doSignalRegionFit('srFit_OF', ['sr_OF', 'zg_SF'], 35)
+doSignalRegionFit('srFit', ['sr_OF', 'sr_SF', 'zg_SF'], 35)
 doSignalRegionFit('srFit_ee', ['sr_ee', 'zg_SF'], 35)
 doSignalRegionFit('srFit_mm', ['sr_mm', 'zg_SF'], 35)
 
