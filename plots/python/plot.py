@@ -648,39 +648,42 @@ class Plot:
     # Make a ratio plot
     if ratio:
       canvas.bottomPad.cd()
-      num = histos[ratio['num']][0]
+
+      if ratio['num'] == -1: nums = [histos[i][0] for i in range(len(histos)) if i != ratio['den']] # if den=-1, simply take everything except the assigned denominator 
+      else:                  nums = [histos[ratio['num']][0]]
       den = histos[ratio['den']][0]
 
-      h_ratio = num.Clone()
-      h_ratio.Divide(den)
+      for i, num in enumerate(nums):
+        h_ratio = num.Clone()
+        h_ratio.Divide(den)
 
-      if ratio['style']: ratio['style'](h_ratio)
-      h_ratio.GetXaxis().SetLabelSize(20)
+        if ratio['style']: ratio['style'](h_ratio)
+        h_ratio.GetXaxis().SetLabelSize(20)
 
-      h_ratio.GetXaxis().SetTitle(self.texX)
-      h_ratio.GetYaxis().SetTitle(ratio['texY'])
+        h_ratio.GetXaxis().SetTitle(self.texX)
+        h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
-      h_ratio.GetXaxis().SetTitleOffset(3.2)
+        h_ratio.GetXaxis().SetTitleOffset(3.2)
 
-      h_ratio.GetXaxis().SetTickLength( 0.03*2 )
-      h_ratio.GetYaxis().SetTickLength( 0.03*2 )
+        h_ratio.GetXaxis().SetTickLength( 0.03*2 )
+        h_ratio.GetYaxis().SetTickLength( 0.03*2 )
 
-      h_ratio.GetYaxis().SetRangeUser(self.yrmin, self.yrmax)
-      h_ratio.GetXaxis().SetRangeUser(self.xmin, self.xmax)
-      h_ratio.GetYaxis().SetNdivisions(505)
+        h_ratio.GetYaxis().SetRangeUser(self.yrmin, self.yrmax)
+        h_ratio.GetXaxis().SetRangeUser(self.xmin, self.xmax)
+        h_ratio.GetYaxis().SetNdivisions(505)
 
-      for modification in ratioModifications: modification(h_ratio)
+        for modification in ratioModifications: modification(h_ratio)
 
-      if num.drawOption == "e1":
-        for bin in range(1, h_ratio.GetNbinsX()+1): h_ratio.SetBinError(bin, 0.0001)     # do not show error bars on hist, those are taken overf by the TGraphAsymmErrors
-        h_ratio.Draw("e0")
-        graph = self.makeRatioGraph(num, den)
-        if den.drawOption == "e1":                                                       # show error bars from denominator
-          graph2 = self.makeRatioGraph(den, den)
-          graph2.Draw("0 same")
-        graph.Draw("P0 same")
-      else:
-        h_ratio.Draw(num.drawOption)
+        if num.drawOption == "e1":
+          for bin in range(1, h_ratio.GetNbinsX()+1): h_ratio.SetBinError(bin, 0.0001)     # do not show error bars on hist, those are taken overf by the TGraphAsymmErrors
+          h_ratio.Draw("e0" + (' same' if i > 0 else ''))
+          graph = self.makeRatioGraph(num, den)
+          if den.drawOption == "e1":                                                       # show error bars from denominator
+            graph2 = self.makeRatioGraph(den, den)
+            graph2.Draw("0 same")
+          graph.Draw("P0 same")
+        else:
+          h_ratio.Draw(num.drawOption + (' same' if i > 0 else ''))
 
       canvas.bottomPad.SetLogx(logX)
       canvas.bottomPad.SetLogy(ratio['logY'])
