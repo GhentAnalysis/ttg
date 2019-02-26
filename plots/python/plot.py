@@ -649,7 +649,7 @@ class Plot:
     if ratio:
       canvas.bottomPad.cd()
 
-      if ratio['num'] == -1: nums = [histos[i][0] for i in range(len(histos)) if i != ratio['den']] # if den=-1, simply take everything except the assigned denominator 
+      if ratio['num'] == -1: nums = [histos[i][0] for i in range(len(histos)) if i != ratio['den']] # if num=-1, simply take everything except the assigned denominator 
       else:                  nums = [histos[ratio['num']][0]]
       den = histos[ratio['den']][0]
 
