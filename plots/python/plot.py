@@ -653,6 +653,7 @@ class Plot:
       else:                  nums = [histos[ratio['num']][0]]
       den = histos[ratio['den']][0]
 
+      ratios = []
       for i, num in enumerate(nums):
         h_ratio = num.Clone()
         h_ratio.Divide(den)
@@ -683,7 +684,8 @@ class Plot:
             graph2.Draw("0 same")
           graph.Draw("P0 same")
         else:
-          h_ratio.Draw(num.drawOption + (' same' if i > 0 else ''))
+          h_ratio.Draw(num.drawOption + (' SAME' if i > 0 else ''))
+        ratios.append(h_ratio)
 
       canvas.bottomPad.SetLogx(logX)
       canvas.bottomPad.SetLogy(ratio['logY'])
