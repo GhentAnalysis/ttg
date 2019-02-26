@@ -76,7 +76,7 @@ phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
 prefire     = args.tag.count('prefireCheck')
 noWeight    = args.tag.count('noWeight')
-normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay','compareWithTT','compareTTSys'])
+normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay','compareWithTT','compareTTSys','compareTTGammaSys'])
 
 
 #
@@ -346,6 +346,9 @@ for plot in plots: # 1D plots
 
     if args.tag.count('compareTTSys'):
       extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}'}
+
+    if args.tag.count('compareTTGammaSys'):
+      extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
     for norm in normalizeToMC:
       if norm: extraArgs['scaling'] = {0:1}

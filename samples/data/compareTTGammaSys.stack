@@ -1,0 +1,14 @@
+-- MC TTGamma
+TTGamma                 t#bar{t}#gamma              lineStyle     kOrange
+
+-- MC TTGamma FSR Up
+TTGamma_fsrup           t#bar{t}#gamma_(FSR_up)     lineStyle     40
+
+-- MC TTGamma FSR Down
+TTGamma_fsrdown         t#bar{t}#gamma_(FSR_down)   lineStyle     41
+
+-- MC TTGamma ISR Down
+TTGamma_isrup           t#bar{t}#gamma_(ISR_up)     lineStyle     42
+
+-- MC TTGamma ISR Down
+TTGamma_isrdown         t#bar{t}#gamma_(ISR_down)   lineStyle     9
