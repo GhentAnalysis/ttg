@@ -9,10 +9,13 @@ from math import sqrt
 import os
 
 
-scaleFactorFile = "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root"
+files = {'16':"$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
+         '17':"$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
+         '18':"$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root"}
 
 class TriggerEfficiency:
-  def __init__(self):
+  def __init__(self, year):
+    scaleFactorFile = files[year]
     self.mumu   = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-mumu")
     self.ee     = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-ee")
     self.mue    = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-mue")

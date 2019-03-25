@@ -7,12 +7,14 @@ from ttg.tools.helpers import getObjFromFile, multiply
 from ttg.tools.uncFloat import UncFloat
 
 dataDir = "$CMSSW_BASE/src/ttg/reduceTuple/data/photonSFData"
-keys    = [("photonSF_CB_tight.root", "EGamma_SF2D")]
+keys    = {'16':[("photonSF_CB_tight.root", "EGamma_SF2D")],
+           '17':[("photonSF_CB_tight.root", "EGamma_SF2D")],
+           '18':[("photonSF_CB_tight.root", "EGamma_SF2D")]}
 
 
 class PhotonSF:
-  def __init__(self):
-    self.pho  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys]
+  def __init__(self, year):
+    self.pho  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys[year]]
     for effMap in self.pho: assert effMap
 
   @staticmethod

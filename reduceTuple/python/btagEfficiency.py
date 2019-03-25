@@ -19,12 +19,12 @@ def getBins( binning ):
     yield BinEdges( low, high )
 
 
-def ptBins():
+def getPtBins():
   ptBorders = [30, 50, 70, 100, 140, 200, 300, 600, 1000, -1]
   return getBins( ptBorders )
 
 
-def etaBins():
+def getEtaBins():
   etaBorders = [0, 0.8, 1.6, 2.4, -1]
   return getBins( etaBorders )
 
@@ -36,16 +36,22 @@ def toFlavorKey(pdgId):
 
 
 class BtagEfficiency:
-  scaleFactorFile    = '$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv'
-  mcEffFileDeepCSV   = '$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl'
-  def __init__(self, wp = ROOT.BTagEntry.OP_MEDIUM):
+  scaleFactorFile    = {'16':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
+                        '17':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
+                        '18':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv'
+                       }
+  mcEffFileDeepCSV   = {'16':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl',
+                        '17':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl',
+                        '18':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl'
+                       }
+  def __init__(self, year, wp = ROOT.BTagEntry.OP_MEDIUM):
     # Input files
 
-    self.mcEffDeepCSV = pickle.load(file(os.path.expandvars(self.mcEffFileDeepCSV)))
+    self.mcEffDeepCSV = pickle.load(file(os.path.expandvars(self.mcEffFileDeepCSV[year])))
 
     ROOT.gSystem.Load('libCondFormatsBTauObjects')
     ROOT.gSystem.Load('libCondToolsBTau')
-    self.calib = ROOT.BTagCalibration("deepCSV", os.path.expandvars(self.scaleFactorFile))
+    self.calib = ROOT.BTagCalibration("deepCSV", os.path.expandvars(self.scaleFactorFile[year]))
 
     # Get readers
     #recommended measurements for different jet flavors given here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X#Data_MC_Scale_Factors
@@ -64,7 +70,7 @@ class BtagEfficiency:
     eta    = abs(tree._jetEta[index])
     absFlavor = abs(tree._jetHadronFlavor[index])
 
-    for ptBin, etaBin in itertools.product( ptBins(), etaBins() ):
+    for ptBin, etaBin in itertools.product( getPtBins(), getEtaBins() ):
       if ptBin.contains( pt ) and etaBin.contains( eta ):
         mcEff = self.mcEffDeepCSV
         
@@ -119,7 +125,9 @@ class BtagEfficiency:
       return (weight0tag, weight1tag, 1-weight0tag-weight1tag)
 
 if __name__ == '__main__':
-  testClass = BtagEfficiency()
-  for ptBin in getPtBins():
-    for etaBin in getEtaBins():
-      print ptBin, etaBin, testClass.mcEffDeepCSV[tuple(ptBin)][tuple(etaBin)]
+  years = ['16', '17', '18']
+  for year in years:
+    testClass = BtagEfficiency(year)
+    for ptBin in getPtBins():
+      for etaBin in getEtaBins():
+        print ptBin, etaBin, testClass.mcEffDeepCSV[tuple(ptBin)][tuple(etaBin)]

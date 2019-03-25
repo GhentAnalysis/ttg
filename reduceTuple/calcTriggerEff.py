@@ -8,7 +8,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse
+import os, argparse, itertools
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--debug',    action='store_true', default=False,  help='Only run over first three files for debugging')
@@ -16,6 +16,7 @@ argParser.add_argument('--corr',     action='store_true', default=False,  help='
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
 argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
 argParser.add_argument('--sample',   action='store',      default=None,   help='Select sample')
+argParser.add_argument('--year',   action='store',      default=None,   help='Select year', choices=['16', '17', '18'])
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')
@@ -26,28 +27,29 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 from ttg.samples.Sample import createSampleList, getSampleFromList
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger.conf'))
+tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['16', '17', '18']] 
+sampleList = itertools.chain.from_iterable([createSampleList(tupleFile) for tupleFile in tupleFiles])
 
 # Submit subjobs
-if not args.isChild and not args.sample:
+if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
-  if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
+  if args.sample and args.year: sampleList = [s for s in sampleList if s.name == args.sample and s.year == args.year]
 
   jobs = []
   for sample in sampleList:
     for select in ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
       for corr in [True, False]:
         for pu in [True, False] if sample.name != 'MET' else [False]:
-          jobs += [(sample.name, select, corr, pu)]
+          jobs += [(sample.name, sample.year, select, corr, pu)]
 
-  submitJobs(__file__, ('sample', 'select', 'corr', 'pu'), jobs, argParser)
+  submitJobs(__file__, ('sample', 'year' 'select', 'corr', 'pu'), jobs, argParser)
   exit(0)
 
 
 if args.select != '':    args.select = '-' + args.select
 
 # Get sample, chain and event loop
-sample    = getSampleFromList(sampleList, args.sample)
+sample    = getSampleFromList(sampleList, args.sample, args.year)
 c         = sample.initTree(shortDebug=args.debug)
 eventLoop = sample.eventLoop(selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None)
 log.info('Sample: ' + sample.name)
@@ -58,7 +60,9 @@ setIDSelection(c, 'eleSusyLoose-phoCB')
 from ttg.tools.style import commonStyle, setDefault
 from ttg.tools.helpers import printCanvas 
 from ttg.reduceTuple.puReweighting import getReweightingFunction
-puReweighting = getReweightingFunction(data="PU_2016_36000_XSecCentral")
+
+reweightingFunctions = {'16':"PU_2016_36000_XSecCentral", '17':"PU_2016_36000_XSecCentral", '18':"PU_2016_36000_XSecCentral"}
+puReweighting = getReweightingFunction(sample.year, data=reweightingFunctions[sample.year])
 
 import ROOT, numpy
 
@@ -165,7 +169,7 @@ else:
         if 'etaBinning' in t: hPass[t][channel].Fill(c._lEta[c.l1], c._lEta[c.l2], puWeight)
         else:                 hPass[t][channel].Fill(c.l1_pt, c.l2_pt, puWeight)
 
-  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '.root'), 'update')
+  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + args.year + '.root'), 'update')
   for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
     for channel in ['ee', 'emu', 'mue', 'mumu']:
       eff = ROOT.TEfficiency(hPass[t][channel], hTotal[t][channel])
@@ -200,7 +204,7 @@ else:
       effDraw.SetMaximum(1.)
       effDraw.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
-      directory = '/user/tomc/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + sample.name + '/' + args.select
+      directory = os.path.expandvars('/user/$USER/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + sample.name + '_' + sample.year + '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       eff.Write(sample.name + '-' + channel + t)

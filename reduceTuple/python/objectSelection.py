@@ -57,20 +57,21 @@ def looseLeptonSelector(tree, index):
   if abs(tree._dz[index]) > 0.1:       return False
   return tree._lPOGVeto[index]
 
-
+# FIXME check source of ElectronPassEmu in heavyneutrino, only correct for 2016?
+# FIXME are the WP the same for _lElectronMvaFall17Iso as for the old one?
 def electronMva(tree, index):
   if not tree._lElectronPassEmu[index]: return False
-  if tree._lEta[index] < 0.8: return tree._lElectronMva[index] > (0.941 if tree.eleMvaTight else 0.837)
-  else:                       return tree._lElectronMva[index] > (0.899 if tree.eleMvaTight else 0.715)
+  if tree._lEta[index] < 0.8: return tree._lElectronMvaFall17Iso[index] > (0.941 if tree.eleMvaTight else 0.837)
+  else:                       return tree._lElectronMvaFall17Iso[index] > (0.899 if tree.eleMvaTight else 0.715)
 
 def electronSusyLoose(tree, index):
   if not tree._lElectronPassEmu[index]: return False
-  if(abs(tree._lEta[index]) < 0.8):     return tree._lElectronMva[index] > slidingCut(tree._lPtCorr[index], -0.48, -0.85)
-  elif(abs(tree._lEta[index]) < 1.479): return tree._lElectronMva[index] > slidingCut(tree._lPtCorr[index], -0.67, -0.91)
-  else:                                 return tree._lElectronMva[index] > slidingCut(tree._lPtCorr[index], -0.49, -0.83)
+  if(abs(tree._lEta[index]) < 0.8):     return tree._lElectronMvaFall17Iso[index] > slidingCut(tree._lPtCorr[index], -0.48, -0.85)
+  elif(abs(tree._lEta[index]) < 1.479): return tree._lElectronMvaFall17Iso[index] > slidingCut(tree._lPtCorr[index], -0.67, -0.91)
+  else:                                 return tree._lElectronMvaFall17Iso[index] > slidingCut(tree._lPtCorr[index], -0.49, -0.83)
 
 def electronSelector(tree, index):
-  for i in xrange(ord(tree._nMu)): # cleaning electrons around muons
+  for i in xrange(tree._nMu): # cleaning electrons around muons
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
   if   tree.eleMva:    return electronMva(tree, index)
@@ -114,7 +115,7 @@ def select2l(t, n):
   n.isEMu           = (t._lFlavor[n.l1]==0 and t._lFlavor[n.l2]==1) or (t._lFlavor[n.l1]==1 and t._lFlavor[n.l2]==0)
   n.isMuMu          = (t._lFlavor[n.l1]==1 and t._lFlavor[n.l2]==1)
   n.isOS            = t._lCharge[n.l1] != t._lCharge[n.l2]
-  n.looseLeptonVeto = len([i for i in xrange(ord(t._nLight)) if looseLeptonSelector(t, i)]) <= 2
+  n.looseLeptonVeto = len([i for i in xrange(t._nLight) if looseLeptonSelector(t, i)]) <= 2
   return leptonPt(t, n.l1) > 25 and n.isOS
 
 
@@ -127,11 +128,11 @@ def select1l(t, n):
   n.l1_pt           = ptAndIndex[0][0]
   n.isE             = (t._lFlavor[n.l1] == 0)
   n.isMu            = (t._lFlavor[n.l1] == 1)
-  n.looseLeptonVeto = len([i for i in xrange(ord(t._nLight)) if looseLeptonSelector(t, i)]) <= 1
+  n.looseLeptonVeto = len([i for i in xrange(t._nLight) if looseLeptonSelector(t, i)]) <= 1
   return True
 
 def selectLeptons(t, n, minLeptons):
-  t.leptons = [i for i in xrange(ord(t._nLight)) if leptonSelector(t, i)]
+  t.leptons = [i for i in xrange(t._nLight) if leptonSelector(t, i)]
   if   minLeptons == 2: return select2l(t, n)
   elif minLeptons == 1: return select1l(t, n)
   elif minLeptons == 0: return True
@@ -173,7 +174,7 @@ def addGenPhotonInfo(t, n, index):
   n.genPhPassParentage = False
   n.genPhPt            = -1
   n.genPhEta           = 99
-  for i in range(ord(t._gen_nPh)):
+  for i in range(t._gen_nPh):
     myDeltaR = deltaR(t._phEta[index], t._gen_phEta[i], t._phPhi[index], t._gen_phPhi[i])
     if myDeltaR < n.genPhDeltaR:
       n.genPhDeltaR        = myDeltaR
@@ -184,7 +185,7 @@ def addGenPhotonInfo(t, n, index):
       n.genPhEta           = t._gen_phEta[i]
 
 def selectPhotons(t, n, minLeptons, isData):
-  t.photons  = [p for p in range(ord(t._nPh)) if photonSelector(t, p, n, minLeptons)]
+  t.photons  = [p for p in range(t._nPh) if photonSelector(t, p, n, minLeptons)]
   n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
   if len(t.photons):
     n.ph    = t.photons[0]
@@ -211,7 +212,7 @@ def makeInvariantMasses(t, n):
 # Jets (filter those within 0.4 from lepton or 0.1 from photon)
 #
 def isGoodJet(tree, index):
-  if not tree._jetId[index]:             return False
+  if not tree._jetIsTight[index]:             return False
   if not abs(tree._jetEta[index]) < 2.4: return False
   for ph in [ph for ph in tree.photons if tree._phCutBasedMedium[ph]]:
     if deltaR(tree._jetEta[index], tree._phEta[ph], tree._jetPhi[index], tree._phPhi[ph]) < 0.1: return False
@@ -219,10 +220,11 @@ def isGoodJet(tree, index):
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True
 
+# Note that all cleared jet variables are smearedJet based, not sure if the should be renamed
 def goodJets(t, n):
-  allGoodJets = [i for i in xrange(ord(t._nJets)) if isGoodJet(t, i)]
+  allGoodJets = [i for i in xrange(t._nJets) if isGoodJet(t, i)]
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
-    setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetPt'+var)[i] > t.jetPtCut])
+    setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var)[i] > t.jetPtCut])
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
     setattr(n, 'j1'+var, getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
     setattr(n, 'j2'+var, getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)

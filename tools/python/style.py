@@ -41,7 +41,7 @@ def ttgGeneralStyle():
   ROOT.gStyle.SetTitleColor(1)
   ROOT.gStyle.SetStatColor(0)
 
-  ROOT.gStyle.SetPaperSize(20,26)
+  ROOT.gStyle.SetPaperSize(20, 26)
   ROOT.gStyle.SetPadTopMargin(0.08)
   ROOT.gStyle.SetPadRightMargin(0.12)
   ROOT.gStyle.SetPadBottomMargin(0.11)
@@ -51,11 +51,11 @@ def ttgGeneralStyle():
 
   ROOT.gStyle.SetTextFont(42) #132
   ROOT.gStyle.SetTextSize(0.09)
-  ROOT.gStyle.SetLabelFont(42,"xyz")
-  ROOT.gStyle.SetTitleFont(42,"xyz")
-  ROOT.gStyle.SetLabelSize(0.055,"xyz") #0.035
-  ROOT.gStyle.SetTitleSize(0.055,"xyz")
-  ROOT.gStyle.SetTitleOffset(1.18,"y")
+  ROOT.gStyle.SetLabelFont(42, "xyz")
+  ROOT.gStyle.SetTitleFont(42, "xyz")
+  ROOT.gStyle.SetLabelSize(0.055, "xyz") #0.035
+  ROOT.gStyle.SetTitleSize(0.055, "xyz")
+  ROOT.gStyle.SetTitleOffset(1.18, "y")
 
   ROOT.gStyle.SetMarkerStyle(8)
   ROOT.gStyle.SetHistLineWidth(2)

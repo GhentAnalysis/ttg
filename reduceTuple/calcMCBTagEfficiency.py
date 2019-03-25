@@ -6,6 +6,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--sample',   action='store',      default='TTJets_pow')
+argParser.add_argument('--year',     action='store',      default=None, choices=['16', '17', '18'])
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -14,10 +15,6 @@ log = getLogger(args.logLevel)
 from ttg.reduceTuple.btagEfficiency import getPtBins, getEtaBins
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, goodJets
 from ttg.samples.Sample import createSampleList, getSampleFromList
-sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples.conf'))
-sample               = getSampleFromList(sampleList, args.sample)
-chain                = sample.initTree()
-setIDSelection(chain, 'eleSusyLoose-phoCB')
 
 def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
   passing = {}
@@ -60,10 +57,18 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
         mceff[tuple(ptBin)][tuple(etaBin)][f] = passing[name]/total[name] if total[name] > 0 else 0
  
   return mceff
+  
+workingPoints = {'16':0.6324, '17':0.6324, '18':0.6324}
+toProcess = {args.year:workingPoints[args.year]} if args.year else workingPoints
+for year in toProcess.keys():
+  sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_'+ args.year +'.conf'))
+  sample               = getSampleFromList(sampleList, args.sample)
+  chain                = sample.initTree()
+  setIDSelection(chain, 'eleSusyLoose-phoCB')
 
-res = getBTagMCTruthEfficiencies(chain, btagWP=0.6324)
+  res = getBTagMCTruthEfficiencies(chain, btagWP= workingPoints[year])
 
-pickle.dump(res, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.sample + '.pkl'), 'w'))
-log.info('Efficiencies deepCSV:')
-log.info(res)
+  pickle.dump(res, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.sample + '_' + args.year + '.pkl'), 'w'))
+  log.info('Efficiencies deepCSV for ' + str(year) +':')
+  log.info(res)
 log.info('Finished')

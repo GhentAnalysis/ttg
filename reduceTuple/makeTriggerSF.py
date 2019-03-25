@@ -29,50 +29,56 @@ ROOT.gStyle.SetPadRightMargin(0.15)
 ROOT.gStyle.SetPadBottomMargin(0.15)
 ROOT.gROOT.ForceStyle()
 
-outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerSF' + args.select + ('_puWeighted' if args.pu else '') + '.root'), 'update')
-inFile  = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '.root'))
-for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
-  for channel in ['ee', 'emu', 'mue', 'mumu']:
-    effData = inFile.Get('MET-'     + channel + t)
-    effMC   = inFile.Get('TTGamma-' + channel + t)
-    effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
-    effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
-    effData.Draw()
-    ROOT.gPad.Update() # Important, otherwise ROOT throws null pointers
-    hist = effData.GetPaintedHistogram()
-    for i in range(1, hist.GetNbinsX()+1):
-      for j in range(1, hist.GetNbinsX()+1):
-        globalBin = effData.GetGlobalBin(i, j)
-        if effMC.GetEfficiency(globalBin) > 0:
-          hist.SetBinContent(i, j, effData.GetEfficiency(globalBin)/effMC.GetEfficiency(globalBin))
-          errUp  = sqrt(effData.GetEfficiencyErrorUp(globalBin)**2+effMC.GetEfficiencyErrorUp(globalBin)**2)
-          errLow = sqrt(effData.GetEfficiencyErrorLow(globalBin)**2+effMC.GetEfficiencyErrorLow(globalBin)**2)
-          hist.SetBinError(i, j, max(errUp, errLow))
+def mkTriggerSF(year):
+  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerSF' + args.select + ('_puWeighted' if args.pu else '') + '_' + year + '.root'), 'update')
+  inFile  = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root'))
+  for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
+    for channel in ['ee', 'emu', 'mue', 'mumu']:
+      effData = inFile.Get('MET-'     + channel + t)
+      effMC   = inFile.Get('TTGamma-' + channel + t)
+      effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
+      effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
+      effData.Draw()
+      ROOT.gPad.Update() # Important, otherwise ROOT throws null pointers
+      hist = effData.GetPaintedHistogram()
+      for i in range(1, hist.GetNbinsX()+1):
+        for j in range(1, hist.GetNbinsX()+1):
+          globalBin = effData.GetGlobalBin(i, j)
+          if effMC.GetEfficiency(globalBin) > 0:
+            hist.SetBinContent(i, j, effData.GetEfficiency(globalBin)/effMC.GetEfficiency(globalBin))
+            errUp  = sqrt(effData.GetEfficiencyErrorUp(globalBin)**2+effMC.GetEfficiencyErrorUp(globalBin)**2)
+            errLow = sqrt(effData.GetEfficiencyErrorLow(globalBin)**2+effMC.GetEfficiencyErrorLow(globalBin)**2)
+            hist.SetBinError(i, j, max(errUp, errLow))
 
-    canvas = ROOT.TCanvas(effData.GetName(), effData.GetName())
-    canvas.cd()
-    ROOT.gStyle.SetPaintTextFormat("2.5f" if 'integral' in t else "2.2f")
-    commonStyle(hist)
-    hist.GetXaxis().SetTitle("leading lepton p_{T} [Gev]")
-    hist.GetYaxis().SetTitle("trailing lepton p_{T} [Gev]")
-    hist.SetTitle("")
-    hist.SetMarkerSize(0.8)
-    hist.Draw("COLZ TEXT")
-    canvas.RedrawAxis()
-    if not ('etaBinning' in t or 'integral' in t):
-      canvas.SetLogy()
-      canvas.SetLogx()
-      hist.GetXaxis().SetMoreLogLabels()
-      hist.GetYaxis().SetMoreLogLabels()
-      hist.GetXaxis().SetNoExponent()
-      hist.GetYaxis().SetNoExponent()
-    hist.SetMinimum(0.8)
-    hist.SetMaximum(1.2)
-    hist.Draw("COLZ TEXTE")
-    canvas.RedrawAxis()
-    directory = '/user/tomc/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF' + '/' + args.select
-    printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
-    outFile.cd()
-    hist.Write('SF-' + channel + t)
+      canvas = ROOT.TCanvas(effData.GetName(), effData.GetName())
+      canvas.cd()
+      ROOT.gStyle.SetPaintTextFormat("2.5f" if 'integral' in t else "2.2f")
+      commonStyle(hist)
+      hist.GetXaxis().SetTitle("leading lepton p_{T} [Gev]")
+      hist.GetYaxis().SetTitle("trailing lepton p_{T} [Gev]")
+      hist.SetTitle("")
+      hist.SetMarkerSize(0.8)
+      hist.Draw("COLZ TEXT")
+      canvas.RedrawAxis()
+      if not ('etaBinning' in t or 'integral' in t):
+        canvas.SetLogy()
+        canvas.SetLogx()
+        hist.GetXaxis().SetMoreLogLabels()
+        hist.GetYaxis().SetMoreLogLabels()
+        hist.GetXaxis().SetNoExponent()
+        hist.GetYaxis().SetNoExponent()
+      hist.SetMinimum(0.8)
+      hist.SetMaximum(1.2)
+      hist.Draw("COLZ TEXTE")
+      canvas.RedrawAxis()
+      
+      directory = os.path.expandvars('/user/$USER/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF_' + year +  '/' + args.select)
+      printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
+      outFile.cd()
+      hist.Write('SF-' + channel + t)
+
+for year in ['16', '17', '18']:
+  mkTriggerSF(year)
+  log.info('making trigger ScaleFactors for 20' + year)
 
 log.info('Finished')

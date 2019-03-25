@@ -24,13 +24,14 @@ import ttg.tools.style as styles
 #
 class Sample:                                                                                # pylint: disable=R0902
 
-  def __init__(self, name, path, productionLabel, splitJobs, xsec):
+  def __init__(self, name, path, productionLabel, splitJobs, xsec, year):
     self.name            = name
     self.path            = path
-    self.isData          = (xsec == 'data')
-    self.xsec            = eval(xsec) if not self.isData else None
     self.productionLabel = productionLabel
     self.splitJobs       = splitJobs
+    self.isData          = (xsec == 'data')
+    self.xsec            = eval(xsec) if not self.isData else None
+    self.year            = year
     self.texName         = None
     self.style           = None 
     self.listOfFiles     = None
@@ -83,8 +84,10 @@ class Sample:                                                                   
         label = self.productionLabel + (subProductionLabel if subProductionLabel else '')
         self.listOfFiles  = glob.glob(os.path.join(self.path, '*Run2016' + splitData + '*' + label, '*', '*', '*.root'))
         self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2017' + splitData + '*' + label, '*', '*', '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2018' + splitData + '*' + label, '*', '*', '*.root'))
         self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2016' + splitData + '*' + label, '*', '*.root'))
         self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2017' + splitData + '*' + label, '*', '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2018' + splitData + '*' + label, '*', '*.root'))
       else:
         self.listOfFiles  = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
         self.listOfFiles += glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
@@ -122,11 +125,11 @@ class Sample:                                                                   
 #
 # Create basic sample (without style options)
 #
-def createSampleList(filename):
+def createSampleList(filename , year=None):
   sampleInfos = [line.split('%')[0].strip() for line in open(filename)]                     # Strip % comments and \n charachters
   sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
   for name, path, productionLabel, splitJobs, xsec in sampleInfos:
-    yield Sample(name, path, productionLabel, int(splitJobs), xsec)
+    yield Sample(name, path, productionLabel, int(splitJobs), xsec, year)
 
 #
 # Create stack from configuration file
@@ -198,8 +201,8 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
 #
 # Get sample from list or stack using its name
 #
-def getSampleFromList(sampleList, name):
-  return next((s for s in sampleList if s.name==name), None)
+def getSampleFromList(sampleList, name, year=None):
+  return next((s for s in sampleList if s.name==name and (s.year==year or not year )), None)
 
 def getSampleFromStack(stack, name):
   return next((s for s in sum(stack, []) if s.name==name), None)

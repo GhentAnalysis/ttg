@@ -8,15 +8,23 @@ import os, math
 from ttg.tools.helpers import getObjFromFile
 
 baseDir  = '$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData/'
-e_file   = baseDir + 'egammaEffi.txt_EGM2D.root'
-e_key    = "EGamma_SF2D"
-m_file   = baseDir + 'Tracking_EfficienciesAndSF_BCDEFGH.root'
-m_key    = "ratio_eff_eta3_dr030e030_corr"
+e_file   = {'16': baseDir + 'egammaEffi.txt_EGM2D.root',
+            '17': baseDir + 'egammaEffi.txt_EGM2D.root',
+            '18': baseDir + 'egammaEffi.txt_EGM2D.root'}
+e_key    = {'16': "EGamma_SF2D",
+            '17': "EGamma_SF2D",
+            '18': "EGamma_SF2D"}
+m_file   = {'16': baseDir + 'Tracking_EfficienciesAndSF_BCDEFGH.root',
+            '17': baseDir + 'Tracking_EfficienciesAndSF_BCDEFGH.root',
+            '18': baseDir + 'Tracking_EfficienciesAndSF_BCDEFGH.root'}
+m_key    = {'16': "ratio_eff_eta3_dr030e030_corr",
+            '17': "ratio_eff_eta3_dr030e030_corr",
+            '18': "ratio_eff_eta3_dr030e030_corr"}
 
 class LeptonTrackingEfficiency:
-  def __init__(self):
-    self.e_sf = getObjFromFile(os.path.expandvars(e_file), e_key)
-    self.m_sf = getObjFromFile(os.path.expandvars(m_file), m_key)
+  def __init__(self, year):
+    self.e_sf = getObjFromFile(os.path.expandvars(e_file[year]), e_key[year])
+    self.m_sf = getObjFromFile(os.path.expandvars(m_file[year]), m_key[year])
     for sf in [self.e_sf, self.m_sf]: assert sf
 
     self.e_ptMax  = self.e_sf.GetYaxis().GetXmax()
