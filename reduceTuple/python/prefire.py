@@ -20,7 +20,7 @@ class Prefire:
   def getSF(self, tree):
     prefireSF = 1.
     for i in xrange(tree._nJets):
-      pt  = tree._jetPt[i]
+      pt  = tree._jetSmearedPt[i]
       eta = abs(tree._jetEta[i])
 
       if eta > 2 and pt > 40:

@@ -66,7 +66,7 @@ class BtagEfficiency:
 
   # Get MC efficiency for a given jet
   def getMCEff(self, tree, index):
-    pt     = tree._jetPt[index]
+    pt     = tree._jetSmearedPt[index]
     eta    = abs(tree._jetEta[index])
     absFlavor = abs(tree._jetHadronFlavor[index])
 
@@ -84,7 +84,7 @@ class BtagEfficiency:
 
 
   def getJetSF(self, tree, index, sys):
-    pt      = tree._jetPt[index]
+    pt      = tree._jetSmearedPt[index]
     eta     = abs(tree._jetEta[index])
     absFlavor  = abs(tree._jetHadronFlavor[index])
     if   sys == 'bUp'   and absFlavor >= 4: sysType = 'up'

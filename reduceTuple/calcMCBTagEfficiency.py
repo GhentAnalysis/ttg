@@ -33,7 +33,7 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
     goodJets(c, c)
  
     for j in c.jets:
-      pt     = c._jetPt[j]
+      pt     = c._jetSmearedPt[j]
       eta    = abs(c._jetEta[j])
       flavor = abs(c._jetHadronFlavor[j])
       for ptBin in getPtBins():
