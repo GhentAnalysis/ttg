@@ -1,27 +1,21 @@
-Repository for tt+gamma analysis in the dilepton channel
+Repository for tt+gamma analysis in the dilepton channel - version for full RunII data
 
 # Analysis to do list
 ## In progress
- * Ratio ttgamma/ttbar fit
- * AN systematic table (some table duplicate of impact parameter plots, so low priority right now)
- * Trying NLO MC sample [failed because of computing time]
+ * Generalize plotting code
 
-## To do
- * Post-fit signal region plot
+## TODO
+ * Find/produce samples,SF, etc for 17 and 18
+ * Produce plotting code to combine histograms from the three separate years
 
 ## Recently finished
- * Separate stat and sys errors
- * Review of trigger strategy
- * Scale FSR to sqrt(2)
- * AN overlap removal discussion
- * SF and OF separate measurements
- * Muon SF systematic uncertainties
- * Make systematic band assymetric (already assymetric for the combine fit, but not in the plots)
+ * Basic generalization of the reduceTuple code
+ * Implement changes to match new heavyneutrino code/ntuples
 
 # Input tuples
 Tuples are produced in the heavyNeutrino framework (https://github.com/GhentAnalysis/heavyNeutrino)
 using option 'dilep' (basic skim of 2 leptons without additional requirements). The branch used is
-currently CMSSW\_8\_0\_X
+currently CMSSW\_10\_2\_X
 
 # Structure of the repository
 
@@ -44,4 +38,4 @@ on the original heavyNeutrino tuples but skimmed for lepton and photon id requir
 The ttgPlots.py script creates plots in .png, .pdf, .root,.C and .pkl formats. The .pkl format is used as an
 input to the fitting script.
 
-
+Histograms will be made per year, and can then be combined for final analysis
