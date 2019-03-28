@@ -106,14 +106,13 @@ for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*"
 outputTree = sample.chain.CloneTree(0)
 for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
 
-
 #
 # Initialize reweighting functions
 #
 
 puData = {('16','central'):"PU_2016_36000_XSecCentral", ('16','up'):"PU_2016_36000_XSecUp", ('16','down'):"PU_2016_36000_XSecDown",
-          ('17','central'):"PU_2016_36000_XSecCentral", ('17','up'):"PU_2016_36000_XSecUp", ('17','down'):"PU_2016_36000_XSecDown",
-          ('18','central'):"PU_2016_36000_XSecCentral", ('18','up'):"PU_2016_36000_XSecUp", ('18','down'):"PU_2016_36000_XSecDown"}
+          ('17','central'):"PU_2017_41500_XSecCentral", ('17','up'):"PU_2017_41500_XSecUp", ('17','down'):"PU_2017_41500_XSecDown",
+          ('18','central'):"PU_2018_60000_XSecCentral", ('18','up'):"PU_2018_60000_XSecUp", ('18','down'):"PU_2018_60000_XSecDown"}
 
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 puReweighting     = getReweightingFunction(sample.year, data=puData[(sample.year,'central')])
@@ -123,13 +122,11 @@ puReweightingDown = getReweightingFunction(sample.year, data=puData[(sample.year
 from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
 from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
-# from ttg.reduceTuple.prefire  import Prefire  as Prefire
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
 leptonSF         = LeptonSF(sample.year)
 photonSF         = PhotonSF(sample.year)
-# prefire          = Prefire(sample.year)
 triggerEff       = TriggerEfficiency(sample.year)
 btagSF           = BtagEfficiency(sample.year)
 
@@ -146,7 +143,6 @@ newBranches += ['isEE/O', 'isMuMu/O', 'isEMu/O']
 if not sample.isData:
   newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeight/F']
   newBranches += ['genPhDeltaR/F', 'genPhPassParentage/O', 'genPhMinDeltaR/F', 'genPhRelPt/F', 'genPhPt/F', 'genPhEta/F']
-  # newBranches += ['prefireSF/F']
   if not forSys:
     for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:
       newBranches += ['njets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I', 'dbj1_' + sys + '/I', 'dbj2_' + sys + '/I']
@@ -215,7 +211,6 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   if not sample.isData:
     newVars.genWeight    = c._weight*lumiWeights[0]
-    # newVars.prefireSF    = prefire.getSF(c)
 
     # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
     # Except when a sample does not have those weights stored (could occur for the minor backgrounds)
