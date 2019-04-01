@@ -55,13 +55,13 @@ eventLoop = sample.eventLoop(selectionString='_lheHTIncoming<100' if sample.name
 log.info('Sample: ' + sample.name)
 
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets
-setIDSelection(c, 'eleSusyLoose-phoCB')
+setIDSelection(c, 'phoCB')
 
 from ttg.tools.style import commonStyle, setDefault
 from ttg.tools.helpers import printCanvas 
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 
-reweightingFunctions = {'16':"PU_2016_36000_XSecCentral", '17':"PU_2016_36000_XSecCentral", '18':"PU_2016_36000_XSecCentral"}
+reweightingFunctions = {'16':"PU_2016_36000_XSecCentral", '17':"PU_2017_41500_XSecCentral", '18':"PU_2018_60000_XSecCentral"}
 puReweighting = getReweightingFunction(sample.year, data=reweightingFunctions[sample.year])
 
 import ROOT, numpy
@@ -93,9 +93,9 @@ def passSelection():
 
 # How to pass our triggers
 def passTrigger():
-  if c.isEE   and (c._passTTG_ee or c._passTTG_e):                 return True
-  if c.isEMu  and (c._passTTG_em or c._passTTG_e or c._passTTG_m): return True
-  if c.isMuMu and (c._passTTG_mm or c._passTTG_m):                 return True
+  if c.isEE   and (c._passTrigger_ee or c._passTrigger_e):                 return True
+  if c.isEMu  and (c._passTrigger_em or c._passTrigger_e or c._passTrigger_m): return True
+  if c.isMuMu and (c._passTrigger_mm or c._passTrigger_m):                 return True
   return False
 
 
@@ -118,9 +118,9 @@ if args.corr:
     puWeight = puReweighting(c._nTrueInt) if args.pu else 1.
 
     countAll[channel] += puWeight
-    if c._passTTG_cross:                   countMET[channel] += puWeight
+    if c._passTrigger_met:                   countMET[channel] += puWeight
     if passTrigger():                      countLep[channel] += puWeight
-    if c._passTTG_cross and passTrigger(): countBoth[channel] += puWeight
+    if c._passTrigger_met and passTrigger(): countBoth[channel] += puWeight
 
   for channel in ['ee', 'emu', 'mumu']:
     log.info('Efficiency  for channel ' + channel + ' is ' + str(countBoth[channel]/countMET[channel]))
@@ -149,7 +149,7 @@ else:
   for i in eventLoop:
     c.GetEntry(i)
 
-    if not c._passTTG_cross: continue
+    if not c._passTrigger_met: continue
     if not passSelection():  continue
 
     if c.isEE:   channel = 'ee'
@@ -204,7 +204,7 @@ else:
       effDraw.SetMaximum(1.)
       effDraw.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
-      directory = os.path.expandvars('/user/$USER/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + sample.name + '_' + sample.year + '/' + args.select)
+      directory = os.path.expandvars('/user/$USER/www/ttG/triggerEfficiency/' + sample.year + ('/puWeighted/' if args.pu else '/') + sample.name + '_' + sample.year + '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       eff.Write(sample.name + '-' + channel + t)

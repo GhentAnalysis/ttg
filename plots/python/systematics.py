@@ -91,7 +91,7 @@ def getReplacementsForStack(sys):
     return {'TTGamma' : 'TTGamma_' + sys.lower(), 'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
   elif sys and any([i==sys for i in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']]):
     return {'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
-  elif sys and sys=='erdUp':
+  elif sys and sys == 'erdUp':
     return {'TTJets_pow' : 'TTJets_pow_erd'}
   else:
     return {}

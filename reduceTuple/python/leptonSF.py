@@ -11,17 +11,28 @@ from ttg.tools.helpers  import getObjFromFile, multiply
 from math import sqrt
 
 dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
-keys_mu  = {'16':[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
-            '17':[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
-            '18':[("scaleFactorsMuons_18.root",     "MuonToTTGamma")]}    # Includes both id and iso
-keys_ele = {'16':[("scaleFactorsElectrons_16.root", "GsfElectronToTTG")],
-            '17':[("scaleFactorsElectrons_17.root", "GsfElectronToTTG")],
-            '18':[("scaleFactorsElectrons_18.root", "GsfElectronToTTG")]} # Includes everything, also emulation and isolation cuts
+
+# FIXME muons: ISO and ID SF are speparately given, and for 16 runs G and H are also separate
+
+# FIXME Muon SF for 2018 are not yet final, leave this comment in the file 
+keys_mu  = {('16','POG'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
+            ('17','POG'):[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
+            ('18','POG'):[("scaleFactorsMuons_18.root",     "MuonToTTGamma")],
+            ('16','elMva'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
+            ('17','elMva'):[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
+            ('18','elMva'):[("scaleFactorsMuons_18.root",     "MuonToTTGamma")]}
+
+keys_ele = {('16','POG'):[("scaleFactorsElectrons_16.root", "GsfElectronToTTG")],
+            ('17','POG'):[("scaleFactorsElectrons_17.root", "GsfElectronToTTG")],
+            ('18','POG'):[("scaleFactorsElectrons_18.root", "GsfElectronToTTG")]
+            ('16','elMva'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
+            ('17','elMva'):[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
+            ('18','elMva'):[("scaleFactorsMuons_18.root",     "MuonToTTGamma")]}
 
 class LeptonSF:
-  def __init__(self, year):
-    self.mu  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu[year]]
-    self.ele = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[year]]
+  def __init__(self, year, elID = 'POG'): 
+    self.mu  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu[(year,elID)]]
+    self.ele = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year,elID)]]
     for effMap in self.mu + self.ele: assert effMap
 
   @staticmethod

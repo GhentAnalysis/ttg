@@ -51,13 +51,13 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
     if resultFile not in loadedPkls:
       with lock(resultFile, 'rb') as f: loadedPkls[resultFile] = pickle.load(f)
     for selector in selectors:
-      filtered = {s:h for s,h in loadedPkls[resultFile][plotName+sys].iteritems() if all(s.count(sel) for sel in selector)}
+      filtered = {s:h for s, h in loadedPkls[resultFile][plotName+sys].iteritems() if all(s.count(sel) for sel in selector)}
       if len(filtered) == 1:   hist = addHist(hist, filtered[filtered.keys()[0]])
       elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
   else:                        log.error('Missing cache file ' + resultFile)
   if 'Scale' in sys and not any('MuonEG' in sel for sel in selectors):
-    data    = getHistFromPkl(subdirs, plotName, '',   ['MuonEG'],['DoubleEG'],['DoubleMuon'])
-    dataSys = getHistFromPkl(subdirs, plotName, sys,  ['MuonEG'],['DoubleEG'],['DoubleMuon'])
+    data    = getHistFromPkl(subdirs, plotName, '',   ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
+    dataSys = getHistFromPkl(subdirs, plotName, sys,  ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
     hist = applySysToOtherHist(data, dataSys, hist)
   if not hist: log.error('Missing ' + str(selectors) + ' for plot ' + plotName + ' in ' + resultFile)
   return hist
@@ -68,8 +68,8 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
 #
 def applySidebandUnc(hist, plot, resultsDir, up):
   selection     = resultsDir.split('/')[-1]
-  ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets','hadronicFake','pass'])
-  ttbarSideband = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets','hadronicFake,0.012'])
+  ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets', 'hadronicFake', 'pass'])
+  ttbarSideband = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets', 'hadronicFake,0.012'])
   normalizeBinWidth(ttbarNominal, 1)
   normalizeBinWidth(ttbarSideband, 1)
   ttbarNominal.Scale(1./ttbarNominal.Integral("width"))
@@ -83,7 +83,7 @@ def applySidebandUnc(hist, plot, resultsDir, up):
 #
 def xAxisLabels(labels):
   def applyLabels(h):
-    for i,l in enumerate(labels):
+    for i, l in enumerate(labels):
       h.GetXaxis().SetBinLabel(i+1, l)
   return [applyLabels]
 
@@ -123,8 +123,8 @@ class Plot:
   def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[]):
     self.stack             = stack        if stack else Plot.defaultStack
     self.texY              = texY         if texY else Plot.defaultTexY
-    self.overflowBin       = overflowBin  if overflowBin!='default'  else Plot.defaultOverflowBin
-    self.normBinWidth      = normBinWidth if normBinWidth!='default' else Plot.defaultNormBinWidth
+    self.overflowBin       = overflowBin  if overflowBin != 'default'  else Plot.defaultOverflowBin
+    self.normBinWidth      = normBinWidth if normBinWidth != 'default' else Plot.defaultNormBinWidth
     self.name              = name
     self.texX              = texX
     self.varX              = varX
@@ -146,12 +146,12 @@ class Plot:
   def addOverFlowBin1D(self, histo, addOverFlowBin = None):
     if addOverFlowBin and not hasattr(histo, 'overflowApplied'):
       if addOverFlowBin.lower() == "upper" or addOverFlowBin.lower() == "both":
-          nbins = histo.GetNbinsX()
-          histo.SetBinContent(nbins, histo.GetBinContent(nbins) + histo.GetBinContent(nbins + 1))
-          histo.SetBinError(nbins, sqrt(histo.GetBinError(nbins)**2 + histo.GetBinError(nbins + 1)**2))
+        nbins = histo.GetNbinsX()
+        histo.SetBinContent(nbins, histo.GetBinContent(nbins) + histo.GetBinContent(nbins + 1))
+        histo.SetBinError(nbins, sqrt(histo.GetBinError(nbins)**2 + histo.GetBinError(nbins + 1)**2))
       if addOverFlowBin.lower() == "lower" or addOverFlowBin.lower() == "both":
-          histo.SetBinContent(1, histo.GetBinContent(0) + histo.GetBinContent(1))
-          histo.SetBinError(1, sqrt(histo.GetBinError(0)**2 + histo.GetBinError(1)**2))
+        histo.SetBinContent(1, histo.GetBinContent(0) + histo.GetBinContent(1))
+        histo.SetBinError(1, sqrt(histo.GetBinError(0)**2 + histo.GetBinError(1)**2))
       histo.overflowApplied = True
 
   def fill(self, sample, weight=1.):
@@ -186,7 +186,7 @@ class Plot:
   # Scaling options, optionally called from the draw function
   #
   def scaleStacks(self, histos, scaling):
-    if scaling=="unity":
+    if scaling == "unity":
       for stack in histos:
         if not stack[0].Integral() > 0: continue
         if self.normBinWidth: factor = 1./stack[0].Integral('width') # actually not fully correct for figures with overflow bin, should check
@@ -248,8 +248,8 @@ class Plot:
   # Get Yields
   #
   def getYields(self, bin=None):
-    if bin: return {s.name : h.GetBinContent(bin) for s,h in self.histos.iteritems()}
-    else:   return {s.name : h.Integral()         for s,h in self.histos.iteritems()}
+    if bin: return {s.name : h.GetBinContent(bin) for s, h in self.histos.iteritems()}
+    else:   return {s.name : h.Integral()         for s, h in self.histos.iteritems()}
 
 
   #
@@ -286,7 +286,7 @@ class Plot:
   # Set self.ymax to avoid overlap
   #
   def getLegendCoordinates(self, histos, canvas, yMax, columns, logY, legend):
-    if legend=="auto":
+    if legend == "auto":
       targetHeight  = 0.045*sum(map(len, histos))
       entriesHeight = sum(ROOT.TLatex(0, 0, h.texName).GetYsize() for h in sum(histos, []))
       entriesWidth  = max(ROOT.TLatex(0, 0, h.texName).GetXsize() for h in sum(histos, []))
@@ -339,7 +339,7 @@ class Plot:
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     if resultsFile not in loadedPkls:                                                                                                  # Speed optimization: check if plots already loaded
       with lock(resultsFile, 'rb') as f: loadedPkls[resultsFile] = pickle.load(f)
-    allPlots = {i : {k : l.Clone() for k,l in j.iteritems()} for i,j in loadedPkls[resultsFile].iteritems()}
+    allPlots = {i : {k : l.Clone() for k, l in j.iteritems()} for i, j in loadedPkls[resultsFile].iteritems()}
 
     if postFitInfo:                                                                                                                    # Apply postfit scaling
       _, sysHistos = self.getSysHistos(stackForSys, resultsDir, systematics)                                                           # Get first the sys histos without post-fit scaling
@@ -403,7 +403,7 @@ class Plot:
   # addMCStat         --> include MC statistics in the uncertainty band
   #
   def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=True):
-    histos_summed,_ = self.getSysHistos(stackForSys, resultsDir, systematics, postFitInfo, addMCStat)                                 # Get the summed sys histograms, to be added in quadrature below
+    histos_summed, _ = self.getSysHistos(stackForSys, resultsDir, systematics, postFitInfo, addMCStat)                                 # Get the summed sys histograms, to be added in quadrature below
     for h in histos_summed.values():                                                                                                  # Normalize for bin width and add overflow bin
       normalizeBinWidth(h, self.normBinWidth)
       self.addOverFlowBin1D(h, self.overflowBin)
@@ -425,8 +425,8 @@ class Plot:
 
       for sampleFilter, unc in linearSystematics.values():
         for i in range(summedErrors.GetNbinsX()+1):
-          if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
-          else:            uncertainty = unc/100*sum([h.GetBinContent(i) for s,h in self.histos.iteritems()])
+          if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
+          else:            uncertainty = unc/100*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
           if postFitInfo:  uncertainty = applyPostFitConstraint(sys, uncertainty, postFitInfo)
           summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
@@ -570,7 +570,7 @@ class Plot:
     for s, h in histDict.iteritems():
       if hasattr(s, 'style'): s.style(h)
       h.texName = s.texName
-      for i,j in legendReplacements.iteritems(): h.texName = h.texName.replace(i, j)
+      for i, j in legendReplacements.iteritems(): h.texName = h.texName.replace(i, j)
       normalizeBinWidth(h, self.normBinWidth)
       self.addOverFlowBin1D(h, self.overflowBin)
 

@@ -3,38 +3,37 @@ log = getLogger()
 
 #
 # Lepton tracking SF class
-#
+# NOTE for muons tracking SF are very close to 1, the recommendation is not to apply any SF see: 
+# https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceSelectionAndCalibrationsRun2
+
 import os, math
 from ttg.tools.helpers import getObjFromFile
 
 baseDir  = '$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData/'
-e_file   = {'16': baseDir + 'egammaEffi.txt_EGM2D.root',
-            '17': baseDir + 'egammaEffi.txt_EGM2D.root',
-            '18': baseDir + 'egammaEffi.txt_EGM2D.root'}
-e_key    = {'16': "EGamma_SF2D",
-            '17': "EGamma_SF2D",
-            '18': "EGamma_SF2D"}
-m_file   = {'16': baseDir + 'Tracking_EfficienciesAndSF_BCDEFGH.root',
-            '17': baseDir + 'Tracking_EfficienciesAndSF_BCDEFGH.root',
-            '18': baseDir + 'Tracking_EfficienciesAndSF_BCDEFGH.root'}
-m_key    = {'16': "ratio_eff_eta3_dr030e030_corr",
-            '17': "ratio_eff_eta3_dr030e030_corr",
-            '18': "ratio_eff_eta3_dr030e030_corr"}
+e_file   = {('16','low'):   baseDir + '2016EGM2D_BtoH_low_RecoSF_Legacy2016.root',
+            ('16','high'):  baseDir + '2016EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root',
+            ('17','low'):   baseDir + '2017egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root',
+            ('17','high'):  baseDir + '2017egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root',
+            ('18','low'):   baseDir + '2018egammaEffi.txt_EGM2D_updatedAll.root'
+            ('18','high'):  baseDir + '2018egammaEffi.txt_EGM2D_updatedAll.root'}
+e_key    = {('16','low'):   "EGamma_SF2D",
+            ('16','high'):  "EGamma_SF2D",
+            ('17','low'):   "EGamma_SF2D",
+            ('17','high'):  "EGamma_SF2D",
+            ('18','low'):   "EGamma_SF2D",
+            ('18','high'):  "EGamma_SF2D"}
 
 class LeptonTrackingEfficiency:
   def __init__(self, year):
-    self.e_sf = getObjFromFile(os.path.expandvars(e_file[year]), e_key[year])
-    self.m_sf = getObjFromFile(os.path.expandvars(m_file[year]), m_key[year])
-    for sf in [self.e_sf, self.m_sf]: assert sf
+    self.eLow_sf = getObjFromFile(os.path.expandvars(e_file[(year, 'low'])), e_key[(year, 'low')])
+    self.eHigh_sf = getObjFromFile(os.path.expandvars(e_file[(year, 'high'])), e_key[(year, 'high')])
+    for sf in [self.eLow_sf, self.eHigh_sf]: assert sf
 
-    self.e_ptMax  = self.e_sf.GetYaxis().GetXmax()
-    self.e_ptMin  = self.e_sf.GetYaxis().GetXmin()
+    self.e_ptMax  = self.eHigh_sf.GetYaxis().GetXmax()
+    self.e_ptMin  = self.eLow_sf.GetYaxis().GetXmin()
 
-    self.e_etaMax = self.e_sf.GetXaxis().GetXmax()
-    self.e_etaMin = self.e_sf.GetXaxis().GetXmin()
-
-    self.m_etaMax = self.m_sf.GetXaxis().GetXmax()
-    self.m_etaMin = self.m_sf.GetXaxis().GetXmin()
+    self.e_etaMax = self.eLow_sf.GetXaxis().GetXmax()
+    self.e_etaMin = self.eLow_sf.GetXaxis().GetXmin()
 
   def getSF(self, tree, index, sigma=0):
     flavor = tree._lFlavor[index]
@@ -51,27 +50,23 @@ class LeptonTrackingEfficiency:
 
       if pt > self.e_ptMax:    pt = self.e_ptMax - 1 
       elif pt <= self.e_ptMin: pt = self.e_ptMin + 1
-
-      val    = self.e_sf.GetBinContent(self.e_sf.FindBin(eta, pt))
-      valErr = self.e_sf.GetBinError(self.e_sf.FindBin(eta, pt))
+      
+      if pt < 20: 
+        val    = self.eLow_sf.GetBinContent(self.eLow_sf.FindBin(eta, pt))
+        valErr = self.eLow_sf.GetBinError(self.eLow_sf.FindBin(eta, pt))
+      else:
+        val    = self.eHigh_sf.GetBinContent(self.eHigh_sf.FindBin(eta, pt))
+        valErr = self.eHigh_sf.GetBinError(self.eHigh_sf.FindBin(eta, pt))
       
       if pt > 80: addUnc = 0.01*val # Additional 1% on ele with pt > 80
       else:       addUnc = 0.
       valErr = math.sqrt(valErr**2 + addUnc**2)
 
     elif abs(flavor) == 1:
-      if not eta <= self.m_etaMax:
-        log.warning("Muon eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.m_etaMin, self.m_etaMax)
-        eta = self.m_etaMax
-      if not eta >= self.m_etaMin:
-        log.warning("Muon eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.m_etaMin, self.m_etaMax)
-        eta = self.m_etaMin
-
-      val    = self.m_sf.Eval( eta )
-      valErr = 0. # Systematic uncertainty not there yet
+      return 1.
 
     else:
       raise ValueError("Lepton flavor %i neither electron or muon" % flavor)
 
-
+# FIXME what is this?
     return (1+valErr*sigma)*val

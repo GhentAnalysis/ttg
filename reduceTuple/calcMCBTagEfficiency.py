@@ -9,6 +9,10 @@ argParser.add_argument('--sample',   action='store',      default='TTJets_pow')
 argParser.add_argument('--year',     action='store',      default=None, choices=['16', '17', '18'])
 args = argParser.parse_args()
 
+if args.sample and not args.year:
+  log.info("If the sample is specified, the year needs to be specified as well, exiting")
+  exit(0)
+
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
@@ -59,16 +63,15 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
   return mceff
   
 workingPoints = {'16':0.6324, '17':0.6324, '18':0.6324}
-toProcess = {args.year:workingPoints[args.year]} if args.year else workingPoints
-for year in toProcess.keys():
-  sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_'+ args.year +'.conf'))
-  sample               = getSampleFromList(sampleList, args.sample)
-  chain                = sample.initTree()
-  setIDSelection(chain, 'eleSusyLoose-phoCB')
 
-  res = getBTagMCTruthEfficiencies(chain, btagWP= workingPoints[year])
+sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_'+ args.year +'.conf'))
+sample               = getSampleFromList(sampleList, args.sample)
+chain                = sample.initTree()
+setIDSelection(chain, 'phoCB')
 
-  pickle.dump(res, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.sample + '_' + args.year + '.pkl'), 'w'))
-  log.info('Efficiencies deepCSV for ' + str(year) +':')
-  log.info(res)
+res = getBTagMCTruthEfficiencies(chain, btagWP= workingPoints[year])
+
+pickle.dump(res, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.sample + '_' + args.year + '.pkl'), 'w'))
+log.info('Efficiencies deepCSV for ' + str(year) +':')
+log.info(res)
 log.info('Finished')

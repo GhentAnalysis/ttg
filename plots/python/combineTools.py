@@ -195,8 +195,8 @@ def doLinearityCheck(dataCard):
     gr.SetPointError(i, 0, 0, signalStrength[1]-signalStrength[0], signalStrength[2]-signalStrength[1])
   c = ROOT.TCanvas('linearityCheck', 'linearityCheck', 700, 500)
   gr.Draw('ALPE')
-  gr.GetXaxis().SetTitle("input signal strength");
-  gr.GetYaxis().SetTitle("measured signal strength");
+  gr.GetXaxis().SetTitle("input signal strength")
+  gr.GetYaxis().SetTitle("measured signal strength")
   c.SaveAs('~/www/ttG/combinePlots/linearityCheck.pdf')
 
 
@@ -265,7 +265,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     elif selectShape    and selectShape    != shape:    return '-'
     elif selectTemplate and selectTemplate != template: return '-'
     elif scaleShape and sys in scaleShape:              return '%.4f' % scaleShape[sys]
-    elif sys=='nonPrompt' and shape=='tt':              return '-' # hacky way, but easiest to currently implement
+    elif sys == 'nonPrompt' and shape == 'tt':              return '-' # hacky way, but easiest to currently implement
     else:                                               return '1'
 
   with open('combine/' + cardName + '.txt', 'w') as f:

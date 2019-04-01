@@ -15,10 +15,6 @@ def setIDSelection(c, reducedTupleType):
   c.photonCutBased      = reducedTupleType.count('phoCB')
   c.photonMva           = reducedTupleType.count('photonMva')
   c.eleMva              = reducedTupleType.count('eleMva')
-  c.cbLoose             = reducedTupleType.count('eleCBLoose')
-  c.cbMedium            = reducedTupleType.count('eleCBMedium')
-  c.cbVeto              = reducedTupleType.count('eleCBVeto')
-  c.susyLoose           = reducedTupleType.count('eleSusyLoose')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
   c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
 
@@ -64,21 +60,11 @@ def electronMva(tree, index):
   if tree._lEta[index] < 0.8: return tree._lElectronMvaFall17Iso[index] > (0.941 if tree.eleMvaTight else 0.837)
   else:                       return tree._lElectronMvaFall17Iso[index] > (0.899 if tree.eleMvaTight else 0.715)
 
-def electronSusyLoose(tree, index):
-  if not tree._lElectronPassEmu[index]: return False
-  if(abs(tree._lEta[index]) < 0.8):     return tree._lElectronMvaFall17Iso[index] > slidingCut(tree._lPtCorr[index], -0.48, -0.85)
-  elif(abs(tree._lEta[index]) < 1.479): return tree._lElectronMvaFall17Iso[index] > slidingCut(tree._lPtCorr[index], -0.67, -0.91)
-  else:                                 return tree._lElectronMvaFall17Iso[index] > slidingCut(tree._lPtCorr[index], -0.49, -0.83)
-
 def electronSelector(tree, index):
   for i in xrange(tree._nMu): # cleaning electrons around muons
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
   if   tree.eleMva:    return electronMva(tree, index)
-  elif tree.cbVeto:    return tree._lPOGVeto[index]
-  elif tree.cbLoose:   return tree._lPOGLoose[index]
-  elif tree.cbMedium:  return tree._lPOGMedium[index]
-  elif tree.susyLoose: return electronSusyLoose(tree, index)
   else:                return tree._lPOGTight[index]
 
 def muonSelector(tree, index):

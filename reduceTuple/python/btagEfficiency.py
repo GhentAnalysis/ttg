@@ -36,6 +36,7 @@ def toFlavorKey(pdgId):
 
 
 class BtagEfficiency:
+#FIXME replace once samples generated, pkl files produced
   scaleFactorFile    = {'16':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
                         '17':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
                         '18':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv'

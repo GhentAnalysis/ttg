@@ -13,7 +13,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',  action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--sample',    action='store',      default=None,                 help='Sample for which to produce reducedTuple, as listed in samples/data/tuples*.conf')
 argParser.add_argument('--year',      action='store',      default=None,                 help='year corresponding to the sample (16,17,18), * in samples/data/tuples_*.conf', choices=['16', '17', '18'])
-argParser.add_argument('--type',      action='store',      default='eleSusyLoose-phoCB', help='Specify type of reducedTuple')
+argParser.add_argument('--type',      action='store',      default='phoCB',              help='Specify type of reducedTuple')
 argParser.add_argument('--subJob',    action='store',      default=None,                 help='The xth subjob for a sample, number of subjobs is defined by split parameter in tuples.conf')
 argParser.add_argument('--splitData', action='store',      default=None,                 help='Splits the data in its separate runs')
 argParser.add_argument('--runLocal',  action='store_true', default=False,                help='use local resources instead of Cream02')
@@ -28,7 +28,7 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 if args.sample and not args.year:
-  log.info("If the sample is specified, the year needs to be specified as well, exiting")
+  log.warning("If the sample is specified, the year needs to be specified as well, exiting")
   exit(0)
 
 #
@@ -106,29 +106,6 @@ for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*"
 outputTree = sample.chain.CloneTree(0)
 for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
 
-#
-# Initialize reweighting functions
-#
-
-puData = {('16','central'):"PU_2016_36000_XSecCentral", ('16','up'):"PU_2016_36000_XSecUp", ('16','down'):"PU_2016_36000_XSecDown",
-          ('17','central'):"PU_2017_41500_XSecCentral", ('17','up'):"PU_2017_41500_XSecUp", ('17','down'):"PU_2017_41500_XSecDown",
-          ('18','central'):"PU_2018_60000_XSecCentral", ('18','up'):"PU_2018_60000_XSecUp", ('18','down'):"PU_2018_60000_XSecDown"}
-
-from ttg.reduceTuple.puReweighting import getReweightingFunction
-puReweighting     = getReweightingFunction(sample.year, data=puData[(sample.year,'central')])
-puReweightingUp   = getReweightingFunction(sample.year, data=puData[(sample.year,'up')])
-puReweightingDown = getReweightingFunction(sample.year, data=puData[(sample.year,'down')])
-
-from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
-from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
-from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
-from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
-from ttg.reduceTuple.btagEfficiency import BtagEfficiency
-leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
-leptonSF         = LeptonSF(sample.year)
-photonSF         = PhotonSF(sample.year)
-triggerEff       = TriggerEfficiency(sample.year)
-btagSF           = BtagEfficiency(sample.year)
 
 
 #
@@ -174,6 +151,35 @@ for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
 setIDSelection(c, args.type)
 
+
+#
+# Initialize reweighting functions
+#
+
+puData = {('16','central'):"PU_2016_36000_XSecCentral", ('16','up'):"PU_2016_36000_XSecUp", ('16','down'):"PU_2016_36000_XSecDown",
+          ('17','central'):"PU_2017_41500_XSecCentral", ('17','up'):"PU_2017_41500_XSecUp", ('17','down'):"PU_2017_41500_XSecDown",
+          ('18','central'):"PU_2018_60000_XSecCentral", ('18','up'):"PU_2018_60000_XSecUp", ('18','down'):"PU_2018_60000_XSecDown"}
+
+from ttg.reduceTuple.puReweighting import getReweightingFunction
+puReweighting     = getReweightingFunction(sample.year, data=puData[(sample.year,'central')])
+puReweightingUp   = getReweightingFunction(sample.year, data=puData[(sample.year,'up')])
+puReweightingDown = getReweightingFunction(sample.year, data=puData[(sample.year,'down')])
+
+from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
+if args.year == '16' and args.splitData in 'GH':
+  log.info("muon SF for 2016 runs GH are currently provided separately, applying those")
+  from ttg.reduceTuple.leptonSF16GH import LeptonSF as LeptonSF
+else:
+  from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
+  
+from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
+from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
+from ttg.reduceTuple.btagEfficiency import BtagEfficiency
+leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
+leptonSF         = LeptonSF(sample.year, 'elMva' if c.eleMva else '')
+photonSF         = PhotonSF(sample.year)
+triggerEff       = TriggerEfficiency(sample.year)
+btagSF           = BtagEfficiency(sample.year)
 
 #
 # Loop over the tree, skim, make new vars and add the weights

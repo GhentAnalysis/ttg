@@ -8,7 +8,7 @@ with open('sysMappingsTemplate.json', 'r') as template:
           for i in range(1, 8):
             mapping.write('  "chgIsoall_' + photonTypeShort + 'Stat' + str(i) + '" : "Stats ' + photonType + ' bin ' + str(i) + '",\n')
         for sample, sampleTex in [('TTGamma', 't#bar{t}#gamma'), ('TTJets', 't#bar{t}'), ('ZG', 'Z#gamma'), ('DY', 'Drell-Yan'), ('other', 'Other')]:
-          for signs in ['SF', 'OF','ee','mm']:
+          for signs in ['SF', 'OF', 'ee', 'mm']:
             for i, mult in [('1', '1j,1b'), ('2', '#geq2j,0b'), ('3', '#geq2j,1b'), ('4', '#geq2j,#geq2b')]:
               mapping.write('  "sr_' + signs + sample + 'Stat' + i + '" : "Stats ' + sampleTex + ' ' + mult + ' (' + signs + ')",\n')
               mapping.write('  "zg_' + signs + sample + 'Stat' + i + '" : "Stats ' + sampleTex + ' ' + mult + ' (Z#gamma ' + signs + ')",\n')

@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-import argparse,json
+import argparse, json
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 args = argParser.parse_args()
