@@ -93,11 +93,9 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
 log.info('Using stackFile ' + stackFile)
 
 
-tupleFiles = {'16':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_16.conf'),
-              '17':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_17.conf'),
-              '18':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_18.conf')}
+tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['16', '17', '18'}
 
-#FIXME maybe check somewhere that all 3 tuples contain the same samples
+#FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
 stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[args.year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '.stack'),
                     channel      = args.channel,
@@ -157,7 +155,7 @@ if args.tag.count('randomConeCheck'):
   plots.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph], (20, 0, 2)))
 else:
   plots.append(Plot('yield',                      'yield',                                 lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
-  plots.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : c._nVertex,                                    (50, 0, 50)))
+  plots.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : c._nVertex,                                         (50, 0, 50)))
   plots.append(Plot('nTrueInt',                   'nTrueInt',                              lambda c : c._nTrueInt,                                        (50, 0, 50)))
   plots.append(Plot('nphoton',                    'number of photons',                     lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
   plots.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (20, 15, 115)))
@@ -226,7 +224,7 @@ else:
   plots.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (5, 0, 5), histModifications=xAxisLabels(['1j,0b', '1j,1b', '#geq2j,0b', '#geq2j,1b', '#geq2j,#geq2b'])))
   plots.append(Plot('signalRegionsSmall',         'signal region',                         lambda c : createSignalRegionsSmall(c),                        (4, 0, 4), histModifications=xAxisLabels(['1j,1b', '#geq2j,0b', '#geq2j,1b', '#geq2j,#geq2b'])))
   plots.append(Plot('signalRegionsLarge',         'signal region',                         lambda c : createSignalRegionsLarge(c),                        (9, 0, 9), histModifications=xAxisLabels(['1j,0b', '1j,1b', '2j,0b', '2j,1b', '2j,2b', '#geq3j,0b', '#geq3j,1b', '#geq3j,2b', '#geq3j,3b'])))
-  plots.append(Plot('eventType',                  'eventType',                             lambda c : c._ttgEventType,                               (9, 0, 9)))
+  plots.append(Plot('eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
   plots.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',               lambda c : c.genPhPt,                                          (10, 10, 110)))
   plots.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                    lambda c : abs(c.genPhEta),                                    (15, 0, 2.5), overflowBin=None))
   plots.append(Plot('genPhoton_minDeltaR',        'min #DeltaR(gen #gamma, other)',        lambda c : c.genPhMinDeltaR,                                   (15, 0, 1.5)))
@@ -239,11 +237,12 @@ if args.filterPlot:
   plots[:] = [p for p in plots if args.filterPlot in p.name]
 
 # FIXME  find correct lumi's
+# this can also be calculated using brilcalc (https://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html) given the good lumi json (assuming all data processed)
 lumiScales = {'16':35.9,
               '17':99.9,
               '18':99.9}
               
-lumiScale = lumisScale = lumiScales[args.year]
+lumiScale = lumiScales[args.year]
 
 #
 # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
@@ -306,10 +305,7 @@ if not args.showSys:
 
       if sample.isData: eventWeight = 1.
       elif noWeight:    eventWeight = 1.
-      else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*lumiScale*prefireWeight
-
-# FIXME what to do with prefire up and down variations
-      # if prefire and not sample.isData: eventWeight *= c.prefireSF
+      else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*c.prefireWeight*lumiScale
 
       fillPlots(plots, c, sample, eventWeight)
 

@@ -42,7 +42,7 @@ if not args.isChild:
         for pu in [True, False] if sample.name != 'MET' else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
 
-  submitJobs(__file__, ('sample', 'year' 'select', 'corr', 'pu'), jobs, argParser)
+  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser)
   exit(0)
 
 
@@ -118,9 +118,9 @@ if args.corr:
     puWeight = puReweighting(c._nTrueInt) if args.pu else 1.
 
     countAll[channel] += puWeight
-    if c._passTrigger_met:                   countMET[channel] += puWeight
-    if passTrigger():                      countLep[channel] += puWeight
-    if c._passTrigger_met and passTrigger(): countBoth[channel] += puWeight
+    if c._passTrigger_ref:                   countMET[channel] += puWeight
+    if passTrigger():                        countLep[channel] += puWeight
+    if c._passTrigger_ref and passTrigger(): countBoth[channel] += puWeight
 
   for channel in ['ee', 'emu', 'mumu']:
     log.info('Efficiency  for channel ' + channel + ' is ' + str(countBoth[channel]/countMET[channel]))

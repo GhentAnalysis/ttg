@@ -19,6 +19,7 @@ for i in ('Up', 'Down'):
   systematics['phScale'+i]    = []
   systematics['phRes'+i]      = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
+  systematics['pf'+i]         = [('prefireWeight', 'prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
   systematics['lSF'+i]        = [('lWeight',       'lWeight'+i)]
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
