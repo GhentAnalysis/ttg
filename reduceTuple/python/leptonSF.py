@@ -12,6 +12,8 @@ from math import sqrt
 
 dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 
+# FIXME electrons: for sure we will not use the susy mva, the POG cut-based or mva's would be a good start, 
+# though Didar really wants to have the leptonMva used once it is developed (even though the dilepton analysis has simply no fakes, so it is questionable if it brings some gain)
 # FIXME muons: ISO and ID SF are speparately given, and for 16 runs G and H are also separate
 
 # FIXME Muon SF for 2018 are not yet final, leave this comment in the file 
@@ -24,7 +26,7 @@ keys_mu  = {('16','POG'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
 
 keys_ele = {('16','POG'):[("scaleFactorsElectrons_16.root", "GsfElectronToTTG")],
             ('17','POG'):[("scaleFactorsElectrons_17.root", "GsfElectronToTTG")],
-            ('18','POG'):[("scaleFactorsElectrons_18.root", "GsfElectronToTTG")]
+            ('18','POG'):[("scaleFactorsElectrons_18.root", "GsfElectronToTTG")],
             ('16','elMva'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
             ('17','elMva'):[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
             ('18','elMva'):[("scaleFactorsMuons_18.root",     "MuonToTTGamma")]}
