@@ -9,12 +9,12 @@ argParser.add_argument('--sample',   action='store',      default='TTJets_pow')
 argParser.add_argument('--year',     action='store',      default=None, choices=['16', '17', '18'])
 args = argParser.parse_args()
 
+from ttg.tools.logger import getLogger
+log = getLogger(args.logLevel)
+
 if args.sample and not args.year:
   log.info("If the sample is specified, the year needs to be specified as well, exiting")
   exit(0)
-
-from ttg.tools.logger import getLogger
-log = getLogger(args.logLevel)
 
 from ttg.reduceTuple.btagEfficiency import getPtBins, getEtaBins
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, goodJets
@@ -69,9 +69,9 @@ sample               = getSampleFromList(sampleList, args.sample)
 chain                = sample.initTree()
 setIDSelection(chain, 'phoCB')
 
-res = getBTagMCTruthEfficiencies(chain, btagWP= workingPoints[year])
+res = getBTagMCTruthEfficiencies(chain, btagWP= workingPoints[args.year])
 
 pickle.dump(res, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.sample + '_' + args.year + '.pkl'), 'w'))
-log.info('Efficiencies deepCSV for ' + str(year) +':')
+log.info('Efficiencies deepCSV for ' + str(args.year) +':')
 log.info(res)
 log.info('Finished')

@@ -471,7 +471,7 @@ class Plot:
   #
   # Remove empty bins from plot
   #
-  def removeEmptyBins(self, histos, yMax, threshold):
+  def removeEmptyBins(self, yMax, threshold):
     filledBins = self.getFilledBins(yMax, threshold)
     self.xmin  = yMax.GetBinLowEdge(filledBins[0])
     self.xmax  = yMax.GetBinLowEdge(filledBins[-1]+1)
@@ -706,3 +706,12 @@ class Plot:
     for extension in extensions:
       ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
       canvas.Print(ofile)
+
+def addPlots(plotA, plotB):
+  log.info('Adding two plots, attributes taken from A, plot B has the following differences:')
+  log.info(plotA.__dict__.items() - plotA.__dict__.items())
+  for sample, hist in plotA.histos:
+    try:
+      hist = addHist(hist, plotB.getSampleFromStack(plotB.stack, sample.name))
+    except: log.warning('mismatch between histograms/samples in the plots')
+  return plotA

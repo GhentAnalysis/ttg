@@ -33,8 +33,8 @@ keys_ele = {('16','POG'):[("scaleFactorsElectrons_16.root", "GsfElectronToTTG")]
 
 class LeptonSF:
   def __init__(self, year, elID = 'POG'): 
-    self.mu  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu[(year,elID)]]
-    self.ele = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year,elID)]]
+    self.mu  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu[(year, elID)]]
+    self.ele = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year, elID)]]
     for effMap in self.mu + self.ele: assert effMap
 
   @staticmethod

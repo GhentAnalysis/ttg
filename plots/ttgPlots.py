@@ -3,7 +3,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse
+import os, argparse, copy
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--year',           action='store',      default=None,                 help='year for which to plot, of not specified run for all 3', choices=['16', '17', '18'])
@@ -19,6 +19,7 @@ argParser.add_argument('--editInfo',       action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
+argParser.add_argument('--overwrite',      action='store_true', default=False, help='do not load a plot/histogram if it already exists')
 args = argParser.parse_args()
 
 
@@ -62,7 +63,7 @@ if not args.isChild:
 # Initializing
 #
 import ROOT
-from ttg.plots.plot           import Plot, xAxisLabels, fillPlots
+from ttg.plots.plot           import Plot, xAxisLabels, fillPlots, addPlots, loadFromCache
 from ttg.plots.plot2D         import Plot2D
 from ttg.plots.cutInterpreter import cutStringAndFunctions
 from ttg.samples.Sample       import createStack
@@ -84,23 +85,33 @@ normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck'
 # Create stack
 #
 import glob
-stackFile = 'default'
+stackFile = 'default_' + args.year
 for f in sorted(glob.glob("../samples/data/*.stack")):
   stackName = os.path.basename(f).split('.')[0]
-  if stackName not in stackFile and args.tag.count(stackName):
-    stackFile = stackName
+  if not stackName[-3:] in ['_16','_17','_18']:
+    log.warning('stack file without year label found (' + stackName + '), please remove or label properly')
+  if stackName not in stackFile and args.tag.count(stackName[:-3]) and stackName[-2:] == args.year:
+    stackFile = stackName[:-3]
 
+years = ['16','17','18'] if args.year == 'all' else [args.year]
+for years in year:
+  if not os.path.isfile(stackFile + '_' + year + '.stack'):
+    log.warning('stackfile ' + stackFile + '_' + year + '.stack is missing, exiting')
+    exit(0)
+
+
+# FIXME zet ergens anders
 log.info('Using stackFile ' + stackFile)
 
 
-tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['16', '17', '18'}
+tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['16', '17', '18']}
 
 #FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
-stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[args.year]),
-                    styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '.stack'),
+# when running over all years, just initialise the plots with the stack for 16
+stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
+                    styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + '16' if args.year == 'all' else args.year + '.stack'),
                     channel      = args.channel,
                     replacements = getReplacementsForStack(args.sys))
-
 
 #
 # Define plots
@@ -236,101 +247,113 @@ else:
 if args.filterPlot:
   plots[:] = [p for p in plots if args.filterPlot in p.name]
 
-# FIXME  find correct lumi's
-# this can also be calculated using brilcalc (https://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html) given the good lumi json (assuming all data processed)
-lumiScales = {'16':35.9,
-              '17':99.9,
-              '18':99.9}
-              
-lumiScale = lumiScales[args.year]
+years = ['16','17','18'] if args.year == 'all' else args.year
+lumiScales = {'16':35.863818448,
+              '17':41.529548819,
+              '18':59.688059536}
 
-#
-# Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
-#
-if not args.showSys:
-  if   args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
-  elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
-  else:                                                                             reduceType = 'eleSusyLoose-phoCB'
-  reduceType = applySysToReduceType(reduceType, args.sys)
 
-  from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
-  for sample in sum(stack, []):
-    cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
-    cutString = applySysToString(sample.name, args.sys, cutString)
-    if args.sys and 'Scale' not in args.sys and sample.isData: continue
-    c = sample.initTree(reducedType = reduceType)
+totalPlots = []
+# FIXME not sure if totalPlots will persist in memeory after the loop
 
-    c.data = sample.isData
-
-    # Filter booleans
-    c.genuine           = sample.texName.count('genuine')
-    c.misIdEle          = sample.texName.count('misidentified') or sample.texName.count('misIdEle')
-    c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons') or sample.texName.count('hadronicPhoton')
-    c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronic fakes') or sample.texName.count('hadronicFake')
-    c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
-    c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail')     or args.tag.count("failSigmaIetaIeta")
-    c.sideSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} sideband') or args.tag.count("sidebandSigmaIetaIeta")
-    c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
-    c.sigmaIetaIeta1    = sample.texName.count('sideband1')
-    c.sigmaIetaIeta2    = sample.texName.count('sideband2')
-    c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
-    c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
-
-    if forward:
-      if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.03001 < #sigma_{i#etai#eta} < 0.032')
-      elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.032 < #sigma_{i#etai#eta}')
-    else:
-      if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01022 < #sigma_{i#etai#eta} < 0.012')
-      elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
-
-    selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
-
-    for i in sample.eventLoop(cutString):
-      c.GetEntry(i)
-      if not sample.isData and args.sys:
-        applySysToTree(sample.name, args.sys, c)
-
-      if not passingFunctions(c): continue
-
-      if selectPhoton:
-        if phoCBfull and not c._phCutBasedMedium[c.ph]:  continue
-        if forward and abs(c._phEta[c.ph]) < 1.566:      continue
-        if not forward and abs(c._phEta[c.ph]) > 1.4442: continue
-
-        if not checkSigmaIetaIeta(c): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
-        if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
-        if not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
-
-      if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
-
-      if sample.isData: eventWeight = 1.
-      elif noWeight:    eventWeight = 1.
-      else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*c.prefireWeight*lumiScale
-
-      fillPlots(plots, c, sample, eventWeight)
-
-# In case of plots: could consider to treat the rateParameters similar as the linearSystematics
-# from ttg.plots.systematics import rateParameters
-# linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
-
-#
-# Drawing the plots
-#
-noWarnings = True
-from ttg.tools.style import drawLumi
-for plot in plots: # 1D plots
-  if isinstance(plot, Plot2D): continue
+for year in years:
+  loadedPlots = []
+  if not args.overWrite:
+    for plot in plots:
+      loadedPlots.append(plot.loadFromCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys))
+    plotsToFill = set(plots).symmetric_difference(set(loadedPlots))
+    loadedPlots = list(set(plots) & set(loadedPlots)
+  
+  lumisScale = lumiScales[year]
+  #
+  # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
+  #
   if not args.showSys:
-    plot.saveToCache(os.path.join(plotDir, args.tag, args.channel, args.selection), args.sys)
-    if plot.name == "yield":
-      log.info("Yields: ")
-      for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+    if   args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
+    elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
+    else:                                                                             reduceType = 'eleSusyLoose-phoCB'
+    reduceType = applySysToReduceType(reduceType, args.sys)
 
+    from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
+    for sample in sum(stack, []):
+      cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
+      cutString = applySysToString(sample.name, args.sys, cutString)
+      if args.sys and 'Scale' not in args.sys and sample.isData: continue
+      c = sample.initTree(reducedType = reduceType)
+
+      c.data = sample.isData
+
+      # Filter booleans
+      c.genuine           = sample.texName.count('genuine')
+      c.misIdEle          = sample.texName.count('misidentified') or sample.texName.count('misIdEle')
+      c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons') or sample.texName.count('hadronicPhoton')
+      c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronic fakes') or sample.texName.count('hadronicFake')
+      c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
+      c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail')     or args.tag.count("failSigmaIetaIeta")
+      c.sideSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} sideband') or args.tag.count("sidebandSigmaIetaIeta")
+      c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
+      c.sigmaIetaIeta1    = sample.texName.count('sideband1')
+      c.sigmaIetaIeta2    = sample.texName.count('sideband2')
+      c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
+      c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
+
+      if forward:
+        if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.03001 < #sigma_{i#etai#eta} < 0.032')
+        elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.032 < #sigma_{i#etai#eta}')
+      else:
+        if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01022 < #sigma_{i#etai#eta} < 0.012')
+        elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
+
+      selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
+
+      for i in sample.eventLoop(cutString):
+        c.GetEntry(i)
+        if not sample.isData and args.sys:
+          applySysToTree(sample.name, args.sys, c)
+
+        if not passingFunctions(c): continue
+
+        if selectPhoton:
+          if phoCBfull and not c._phCutBasedMedium[c.ph]:  continue
+          if forward and abs(c._phEta[c.ph]) < 1.566:      continue
+          if not forward and abs(c._phEta[c.ph]) > 1.4442: continue
+
+          if not checkSigmaIetaIeta(c): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+          if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
+          if not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
+
+        if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
+
+        if sample.isData: eventWeight = 1.
+        elif noWeight:    eventWeight = 1.
+        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*c.prefireWeight*lumiScale
+
+        fillPlots(plotsToFill, c, sample, eventWeight)
+
+  plots = plotsToFill + loadedPlots
+
+# FIXME not completely sure if this ensures plots of same type are added
+
+  if args.year == 'all':
+    if totalPlots:
+      for i, totalPlot in enumerate sorted(totalPlots):
+        totalPlot = addPlots(totalPlot, sorted(plots)[i])
+    else:
+      totalPlots = copy.deepcopy(plots)
+
+  # In case of plots: could consider to treat the rateParameters similar as the linearSystematics
+  # from ttg.plots.systematics import rateParameters
+  # linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
+
+
+  #
+  # set some extra arguments for the plots
+  #
   if not args.sys or args.showSys:
     extraArgs = {}
     normalizeToMC = [False, True] if args.channel != 'noData' else [False]
     if args.tag.count('onlydata'):
-      extraArgs['resultsDir']  = os.path.join(plotDir, args.tag, args.channel, args.selection)
+      extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
       extraArgs['systematics'] = ['sideBandUnc']
     elif args.showSys:
       extraArgs['addMCStat']   = True
@@ -340,7 +363,7 @@ for plot in plots: # 1D plots
         linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
       extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
-      extraArgs['resultsDir']        = os.path.join(plotDir, args.tag, args.channel, args.selection)
+      extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
       extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
 
 
@@ -358,6 +381,73 @@ for plot in plots: # 1D plots
     if args.tag.count('compareTTGammaSys'):
       extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
+  #
+  # Drawing the plots
+  #
+  noWarnings = True
+  from ttg.tools.style import drawLumi
+  for plot in plots: # 1D plots
+    if isinstance(plot, Plot2D): continue
+    if not args.showSys:
+      plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
+      if plot.name == "yield":
+        log.info("Yields: ")
+        for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+
+      for norm in normalizeToMC:
+        if norm: extraArgs['scaling'] = {0:1}
+        for logY in [False, True]:
+          if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.75)
+          else:                                                                                             yRange = None
+          extraTag  = '-log'    if logY else ''
+          extraTag += '-sys'    if args.showSys else ''
+          extraTag += '-normMC' if norm else ''
+          extraTag += '-post'   if args.post else ''
+          err = plot.draw(
+                    plot_directory    = os.path.join(plotDir, year, args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
+                    logX              = False,
+                    logY              = logY,
+                    sorting           = True,
+                    yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
+                    drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
+                    fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
+                    **extraArgs
+          )
+          extraArgs['saveGitInfo'] = False
+          if err: noWarnings = False
+
+  if not args.sys:
+    for plot in plots: # 2D plots
+      if not hasattr(plot, 'varY'): continue
+      for logY in [False, True]:
+        for option in ['SCAT', 'COLZ']:
+          plot.draw(plot_directory = os.path.join(plotDir, year, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
+                    logZ           = False,
+                    drawOption     = option,
+                    drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')))
+  if noWarnings: log.info('Finished')
+  else:          log.info('Could not produce all plots - finished')
+
+
+#
+# Drawing the full RunII plots if requested
+#
+
+if not arg.year == 'all': exit(0)
+# NOTE doing this in a sepatate code block seems like the better option for now 
+
+lumiScale = sum(lumiScales.values())
+
+noWarnings = True
+from ttg.tools.style import drawLumi
+for plot in totalPlots: # 1D plots
+  if isinstance(plot, Plot2D): continue
+  if not args.showSys:
+    plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
+    if plot.name == "yield":
+      log.info("Yields: ")
+      for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+
     for norm in normalizeToMC:
       if norm: extraArgs['scaling'] = {0:1}
       for logY in [False, True]:
@@ -368,7 +458,7 @@ for plot in plots: # 1D plots
         extraTag += '-normMC' if norm else ''
         extraTag += '-post'   if args.post else ''
         err = plot.draw(
-                  plot_directory    = os.path.join(plotDir, args.year, args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
+                  plot_directory    = os.path.join(plotDir, 'all', args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
                   logX              = False,
                   logY              = logY,
                   sorting           = True,
@@ -381,11 +471,11 @@ for plot in plots: # 1D plots
         if err: noWarnings = False
 
 if not args.sys:
-  for plot in plots: # 2D plots
+  for plot in totalPlots: # 2D plots
     if not hasattr(plot, 'varY'): continue
     for logY in [False, True]:
       for option in ['SCAT', 'COLZ']:
-        plot.draw(plot_directory = os.path.join(plotDir, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
+        plot.draw(plot_directory = os.path.join(plotDir, 'all', args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,
                   drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')))
