@@ -124,12 +124,14 @@ class Sample:                                                                   
 
 #
 # Create basic sample (without style options)
+#  - filename: tuples config as found in ttg/samples/data, e.g. "tuples_16.conf"
+#  - year:     run II year, e.g. 2016, 2017 or 2018
 #
-def createSampleList(filename , year=None):
+def createSampleList(filename, year):
   sampleInfos = [line.split('%')[0].strip() for line in open(filename)]                     # Strip % comments and \n charachters
   sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
   for name, path, productionLabel, splitJobs, xsec in sampleInfos:
-    yield Sample(name, path, productionLabel, int(splitJobs), xsec, year)
+    yield Sample(name, path, year + '-' + productionLabel, int(splitJobs), xsec, year)      # The productionLabel in the tuples.conf is prepended with the year, e.g. 2016-v1, 2017-v1, etc...
 
 #
 # Create stack from configuration file
