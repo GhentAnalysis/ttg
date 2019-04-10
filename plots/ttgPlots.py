@@ -64,7 +64,7 @@ if not args.isChild:
 #
 import ROOT
 from ttg.plots.plot           import Plot, xAxisLabels, fillPlots, addPlots, loadFromCache
-from ttg.plots.plot2D         import Plot2D
+from ttg.plots.plot2D         import Plot2D, add2DPlots
 from ttg.plots.cutInterpreter import cutStringAndFunctions
 from ttg.samples.Sample       import createStack
 from ttg.plots.photonCategories import photonCategoryNumber
@@ -88,27 +88,24 @@ import glob
 stackFile = 'default_' + args.year
 for f in sorted(glob.glob("../samples/data/*.stack")):
   stackName = os.path.basename(f).split('.')[0]
-  if not stackName[-3:] in ['_16','_17','_18']:
+  if not stackName[-3:] in ['_16', '_17', '_18']:
     log.warning('stack file without year label found (' + stackName + '), please remove or label properly')
   if stackName not in stackFile and args.tag.count(stackName[:-3]) and stackName[-2:] == args.year:
     stackFile = stackName[:-3]
 
-years = ['16','17','18'] if args.year == 'all' else [args.year]
-for years in year:
+years = ['16', '17', '18'] if args.year == 'all' else [args.year]
+for year in years:
   if not os.path.isfile(stackFile + '_' + year + '.stack'):
     log.warning('stackfile ' + stackFile + '_' + year + '.stack is missing, exiting')
     exit(0)
 
-
-# FIXME zet ergens anders
-log.info('Using stackFile ' + stackFile)
 
 
 tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['16', '17', '18']}
 
 #FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
 # when running over all years, just initialise the plots with the stack for 16
-stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
+stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['16' if args.year == 'all' else args.year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + '16' if args.year == 'all' else args.year + '.stack'),
                     channel      = args.channel,
                     replacements = getReplacementsForStack(args.sys))
@@ -220,16 +217,16 @@ else:
   plots.append(Plot('phLepDeltaR',                '#DeltaR(#gamma, l)',                    lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                    (20, 0, 5)))
   plots.append(Plot('njets',                      'number of jets',                        lambda c : c.njets,                                            (8, -.5, 7.5)))
   plots.append(Plot('nbtag',                      'number of medium b-tags (deepCSV)',     lambda c : c.ndbjets,                                          (4, -.5, 3.5)))
-  plots.append(Plot('j1_pt',                      'p_{T}(j_{1}) (GeV)',                    lambda c : c._jetPt[c.j1],                                     (30, 30, 330)))
+  plots.append(Plot('j1_pt',                      'p_{T}(j_{1}) (GeV)',                    lambda c : c._jetSmearedPt[c.j1],                              (30, 30, 330)))
   plots.append(Plot('j1_eta',                     '|#eta|(j_{1})',                         lambda c : abs(c._jetEta[c.j1]),                               (15, 0, 2.4)))
   plots.append(Plot('j1_phi',                     '#phi(j_{1})',                           lambda c : c._jetPhi[c.j1],                                    (10, -pi, pi)))
   plots.append(Plot('j1_deepCSV',                 'deepCSV(j_{1})',                        lambda c : c._jetDeepCsv_b[c.j1] + c._jetDeepCsv_bb[c.j1],     (20, 0, 1)))
-  plots.append(Plot('j2_pt',                      'p_{T}(j_{2}) (GeV)',                    lambda c : c._jetPt[c.j2],                                     (30, 30, 330)))
+  plots.append(Plot('j2_pt',                      'p_{T}(j_{2}) (GeV)',                    lambda c : c._jetSmearedPt[c.j2],                                     (30, 30, 330)))
   plots.append(Plot('j2_eta',                     '|#eta|(j_{2})',                         lambda c : abs(c._jetEta[c.j2]),                               (15, 0, 2.4)))
   plots.append(Plot('j2_phi',                     '#phi(j_{2})',                           lambda c : c._jetPhi[c.j2],                                    (10, -pi, pi)))
   plots.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                        lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
-  plots.append(Plot('dbj1_pt',                    'p_{T}(bj_{1}) (GeV)',                   lambda c : c._jetPt[c.dbj1],                                   (30, 30, 330)))
-  plots.append(Plot('dbj2_pt',                    'p_{T}(bj_{2}) (GeV)',                   lambda c : c._jetPt[c.dbj2],                                   (30, 30, 330)))
+  plots.append(Plot('dbj1_pt',                    'p_{T}(bj_{1}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj1],                            (30, 30, 330)))
+  plots.append(Plot('dbj2_pt',                    'p_{T}(bj_{2}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj2],                            (30, 30, 330)))
   plots.append(Plot('dbj1_deepCSV',               'deepCSV(dbj_{1})',                      lambda c : c._jetDeepCsv_b[c.dbj1] + c._jetDeepCsv_bb[c.dbj1], (20, 0, 1)))
   plots.append(Plot('dbj2_deepCSV',               'deepCSV(dbj_{2})',                      lambda c : c._jetDeepCsv_b[c.dbj2] + c._jetDeepCsv_bb[c.dbj2], (20, 0, 1)))
   plots.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (5, 0, 5), histModifications=xAxisLabels(['1j,0b', '1j,1b', '#geq2j,0b', '#geq2j,1b', '#geq2j,#geq2b'])))
@@ -247,7 +244,7 @@ else:
 if args.filterPlot:
   plots[:] = [p for p in plots if args.filterPlot in p.name]
 
-years = ['16','17','18'] if args.year == 'all' else args.year
+years = ['16', '17', '18'] if args.year == 'all' else args.year
 lumiScales = {'16':35.863818448,
               '17':41.529548819,
               '18':59.688059536}
@@ -256,15 +253,23 @@ lumiScales = {'16':35.863818448,
 totalPlots = []
 # FIXME not sure if totalPlots will persist in memeory after the loop
 
+from ttg.tools.style import drawLumi
+
 for year in years:
+  stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
+                    styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
+                    channel      = args.channel,
+                    replacements = getReplacementsForStack(args.sys))
+
+  log.info('Using stackFile ' + stackFile)
   loadedPlots = []
   if not args.overWrite:
     for plot in plots:
-      loadedPlots.append(plot.loadFromCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys))
+      loadedPlots.append(loadFromCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys))
     plotsToFill = set(plots).symmetric_difference(set(loadedPlots))
-    loadedPlots = list(set(plots) & set(loadedPlots)
+    loadedPlots = list(set(plots) & set(loadedPlots))
   
-  lumisScale = lumiScales[year]
+  lumiScale = lumiScales[year]
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
@@ -336,8 +341,11 @@ for year in years:
 
   if args.year == 'all':
     if totalPlots:
-      for i, totalPlot in enumerate sorted(totalPlots):
-        totalPlot = addPlots(totalPlot, sorted(plots)[i])
+      for i, totalPlot in enumerate(sorted(totalPlots)):
+        if isinstance(totalPlot, Plot2D):
+          totalPlot = add2DPlots(totalPlot, sorted(plots)[i])
+        else:
+          totalPlot = addPlots(totalPlot, sorted(plots)[i])
     else:
       totalPlots = copy.deepcopy(plots)
 
@@ -385,7 +393,6 @@ for year in years:
   # Drawing the plots
   #
   noWarnings = True
-  from ttg.tools.style import drawLumi
   for plot in plots: # 1D plots
     if isinstance(plot, Plot2D): continue
     if not args.showSys:
@@ -433,13 +440,12 @@ for year in years:
 # Drawing the full RunII plots if requested
 #
 
-if not arg.year == 'all': exit(0)
+if not args.year == 'all': exit(0)
 # NOTE doing this in a sepatate code block seems like the better option for now 
 
 lumiScale = sum(lumiScales.values())
 
 noWarnings = True
-from ttg.tools.style import drawLumi
 for plot in totalPlots: # 1D plots
   if isinstance(plot, Plot2D): continue
   if not args.showSys:

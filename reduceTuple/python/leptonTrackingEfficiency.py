@@ -68,5 +68,4 @@ class LeptonTrackingEfficiency:
     else:
       raise ValueError("Lepton flavor %i neither electron or muon" % flavor)
 
-# FIXME what is this?
     return (1+valErr*sigma)*val

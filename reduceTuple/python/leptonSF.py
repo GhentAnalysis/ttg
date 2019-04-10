@@ -12,30 +12,35 @@ from math import sqrt
 
 dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 
-# FIXME electrons: for sure we will not use the susy mva, the POG cut-based or mva's would be a good start, 
-# though Didar really wants to have the leptonMva used once it is developed (even though the dilepton analysis has simply no fakes, so it is questionable if it brings some gain)
-# FIXME muons: ISO and ID SF are speparately given, and for 16 runs G and H are also separate
+# currently using electron POG tight or electronMVA90, muon pog medium, 
+# current muon SF correspond to a tight isolation cut 
 
 # FIXME Muon SF for 2018 are not yet final, leave this comment in the file 
-keys_mu  = {('16','POG'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
-            ('17','POG'):[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
-            ('18','POG'):[("scaleFactorsMuons_18.root",     "MuonToTTGamma")],
-            ('16','elMva'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
-            ('17','elMva'):[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
-            ('18','elMva'):[("scaleFactorsMuons_18.root",     "MuonToTTGamma")]}
+keys_mu_ISO  = {('16','POG'):[("2016LegRunBCDEF_Mu_SF_ISO.root",      "NUM_TightRelIso_DEN_MediumID_eta_pt")],
+                ('16','POGGH'):[("2016LegRunGH_Mu_SF_ISO.root",       "NUM_TightRelIso_DEN_MediumID_eta_pt")],
+                ('17','POG'):[("2017RunBCDEF_Mu_SF_ISO.root",         "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
+                ('18','POG'):[("2018RunABCD_Mu_SF_ISO.root",          "NUM_TightRelIso_DEN_MediumID_pt_abseta")]}
 
-keys_ele = {('16','POG'):[("scaleFactorsElectrons_16.root", "GsfElectronToTTG")],
-            ('17','POG'):[("scaleFactorsElectrons_17.root", "GsfElectronToTTG")],
-            ('18','POG'):[("scaleFactorsElectrons_18.root", "GsfElectronToTTG")],
-            ('16','elMva'):[("scaleFactorsMuons_16.root",     "MuonToTTGamma")],
-            ('17','elMva'):[("scaleFactorsMuons_17.root",     "MuonToTTGamma")],
-            ('18','elMva'):[("scaleFactorsMuons_18.root",     "MuonToTTGamma")]}
+keys_mu_ID  = {('16','POG'):[("2016LegRunBCDEF_Mu_SF_ID.root",                  "NUM_MediumID_DEN_genTracks_eta_pt")],
+               ('16','POGGH'):[("2016LegRunGH_Mu_SF_ID.root",                   "NUM_MediumID_DEN_genTracks_eta_pt")],
+               ('17','POG'):[("2017RunBCDEF_Mu_SF_ID.root",                     "NUM_MediumID_DEN_genTracks_pt_abseta")],
+               ('18','POG'):[("2018RunABCD_Mu_SF_ID.root",                      "NUM_MediumID_DEN_TrackerMuons_pt_abseta")]}
+
+
+keys_ele = {('16','POG'):[("2016LegacyReReco_ElectronTight_Fall17V2.root",      "EGamma_SF2D")],
+            ('17','POG'):[("2017_ElectronTight.root",                           "EGamma_SF2D")],
+            ('18','POG'):[("2018_ElectronTight.root",                           "EGamma_SF2D")],
+            ('16','elMva'):[("2016LegacyReReco_ElectronMVA90_Fall17V2.root",    "EGamma_SF2D")],
+            ('17','elMva'):[("2017_ElectronMVA90.root",                         "EGamma_SF2D")],
+            ('18','elMva'):[("2018_ElectronMVA90.root",                         "EGamma_SF2D")]}
 
 class LeptonSF:
-  def __init__(self, year, elID = 'POG'): 
-    self.mu  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu[(year, elID)]]
+  def __init__(self, year, Run, elID = 'POG'): 
+    subFile = 'GH' if year == '16' and Run in 'GH' else ''
+    self.mu_ISO  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, elID + subFile)]]
+    self.mu_ID  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, elID + subFile)]]
     self.ele = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year, elID)]]
-    for effMap in self.mu + self.ele: assert effMap
+    for effMap in self.mu_ID + self.mu_ISO + self.ele: assert effMap
 
   @staticmethod
   def getPartialSF(effMap, pt, eta):
@@ -50,7 +55,7 @@ class LeptonSF:
 
     if abs(flavor)==1:   
       if pt >= 150: pt = 149 # last bin is valid to infinity
-      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu)
+      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu_ISO + self.mu_ID)
     elif abs(flavor)==0:
       if pt >= 200: pt = 199 # last bin is valid to infinity
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele)

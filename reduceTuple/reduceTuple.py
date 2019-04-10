@@ -166,17 +166,12 @@ puReweightingUp   = getReweightingFunction(sample.year, data=puData[(sample.year
 puReweightingDown = getReweightingFunction(sample.year, data=puData[(sample.year,'down')])
 
 from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
-if args.year == '16' and args.splitData in 'GH':
-  log.info("muon SF for 2016 runs GH are currently provided separately, applying those")
-  from ttg.reduceTuple.leptonSF16GH import LeptonSF as LeptonSF
-else:
-  from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
-  
+from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
 from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
-leptonSF         = LeptonSF(sample.year, 'elMva' if c.eleMva else '')
+leptonSF         = LeptonSF(sample.year, Run = args.splitData,  elID = 'elMva' if c.eleMva else 'POG')
 photonSF         = PhotonSF(sample.year)
 triggerEff       = TriggerEfficiency(sample.year)
 btagSF           = BtagEfficiency(sample.year)
