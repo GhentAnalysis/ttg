@@ -9,7 +9,7 @@ argParser.add_argument('--logLevel',       action='store',      default='INFO', 
 argParser.add_argument('--year',           action='store',      default=None,                 help='year for which to plot, of not specified run for all 3', choices=['16', '17', '18'])
 argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
-argParser.add_argument('--tag',            action='store',      default='eleSusyLoose-phoCBfull')
+argParser.add_argument('--tag',            action='store',      default='phoCBfull')
 argParser.add_argument('--sys',            action='store',      default=None)
 argParser.add_argument('--filterPlot',     action='store',      default=None)
 argParser.add_argument('--runSys',         action='store_true', default=False)
@@ -274,9 +274,9 @@ for year in years:
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
   if not args.showSys:
-    if   args.tag.count('eleSusyLoose') and not args.tag.count('eleSusyLoose-phoCB'): reduceType = 'eleSusyLoose'
-    elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleSusyLoose-phoCB-noPixelSeedVeto'
-    else:                                                                             reduceType = 'eleSusyLoose-phoCB'
+    if   args.tag.count('eleCBTight') and not args.tag.count('eleCBTight-phoCB'): reduceType = 'eleCBTightTight'
+    elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleCBTight-phoCB-noPixelSeedVeto'
+    else:                                                                             reduceType = 'eleCBTight-phoCB'
     reduceType = applySysToReduceType(reduceType, args.sys)
 
     from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso

@@ -59,9 +59,9 @@ dilepSelections   = ['ll-looseLeptonVeto-mll40-offZ:SYS',
 # When running sys or post-fit plots, reduce the selection
 #
 def getSelections(tag, channel, sys, post):
-  if not tag.count('pho') and tag.count('eleSusyLoose'): selections = dilepSelections
+  if not tag.count('pho') and tag.count('eleCBTight'): selections = dilepSelections
   elif tag == 'compareWithTT':                           selections = [i for i in dilepSelections if 'photon' not in i]
-  elif tag == 'eleSusyLoose-phoCBfull':                  selections = [(s+':SYS,POST') for s in defaultSelections] + diffSelections
+  elif tag == 'eleCBTight-phoCBfull':                  selections = [(s+':SYS,POST') for s in defaultSelections] + diffSelections
   else:                                                  selections = defaultSelections
 
   if channel not in ['SF', 'noData'] or not tag.count('phoCBfull'):
