@@ -127,19 +127,19 @@ class Sample:                                                                   
 #  - filename: tuples config as found in ttg/samples/data, e.g. "tuples_16.conf"
 #  - year:     run II year, e.g. 2016, 2017 or 2018
 #
-def createSampleList(filename, year):
+def createSampleList(filename, year=None):
   sampleInfos = [line.split('%')[0].strip() for line in open(filename)]                     # Strip % comments and \n charachters
   sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
   for name, path, productionLabel, splitJobs, xsec in sampleInfos:
-    yield Sample(name, path, year + '-' + productionLabel, int(splitJobs), xsec, year)      # The productionLabel in the tuples.conf is prepended with the year, e.g. 2016-v1, 2017-v1, etc...
+    yield Sample(name, path, productionLabel, int(splitJobs), xsec, year)      # The productionLabels in tuples.conf contain the the year, e.g. 2016-v1, 2017-v1, etc...
 
 #
 # Create stack from configuration file
 # Refactoring needed
 #
-def createStack(tuplesFile, styleFile, channel, replacements = None):                       # pylint: disable=R0912,R0914,R0915
+def createStack(tuplesFile, styleFile, channel, year = None, replacements = None):                       # pylint: disable=R0912,R0914,R0915
   if not replacements: replacements = {}
-  sampleList  = [s for s in createSampleList(tuplesFile)]
+  sampleList  = [s for s in createSampleList(tuplesFile, year = year)]
   sampleInfos = [line.split('%')[0].strip() for line in open(styleFile)]                    # Strip % comments and \n charachters
   sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
   allStacks   = []

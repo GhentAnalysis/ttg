@@ -81,7 +81,7 @@ if not sample.isData:
 #
 from ttg.tools.helpers import reducedTupleDir, isValidRootFile
 outputId   = (args.splitData if args.splitData in runs[sample.year] else '') + str(args.subJob)
-outputName = os.path.join(reducedTupleDir, sample.year, sample.productionLabel, args.type, sample.name, sample.name + '_' + outputId + '.root')
+outputName = os.path.join(reducedTupleDir, sample.productionLabel, args.type, sample.name, sample.name + '_' + outputId + '.root')
 
 try:    os.makedirs(os.path.dirname(outputName))
 except: pass

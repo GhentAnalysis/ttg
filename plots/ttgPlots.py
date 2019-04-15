@@ -114,7 +114,9 @@ tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' 
 stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['16' if args.year == 'all' else args.year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + ('16' if args.year == 'all' else args.year) + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys))
+                    replacements = getReplacementsForStack(args.sys),
+                    year = '16' if args.year == 'all' else args.year
+                    )
 
 #
 # Define plots
@@ -265,7 +267,9 @@ for year in years:
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys))
+                    replacements = getReplacementsForStack(args.sys),
+                    year = year
+                    )
 
   # link the newly loaded samples to their respective existing histograms in the plots
   for plot in plots:
@@ -303,7 +307,7 @@ for year in years:
       cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
       cutString = applySysToString(sample.name, args.sys, cutString)
       if args.sys and 'Scale' not in args.sys and sample.isData: continue
-      c = sample.initTree(reducedType = reduceType, year=year)
+      c = sample.initTree(reducedType = reduceType)
 
       c.data = sample.isData
 
