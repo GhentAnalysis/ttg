@@ -15,6 +15,12 @@ dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 # currently using electron POG tight or electronMVA90, muon pog medium, 
 # current muon SF correspond to a tight isolation cut 
 
+# last pt bin changed,
+# pt/eta one different axises in different files?
+
+# mu 16 pt y                17, 18 pt x        ele pt y 16, 17, 18 
+
+
 # FIXME Muon SF for 2018 are not yet final, leave this comment in the file 
 keys_mu_ISO  = {('16','POG'):[("2016LegRunBCDEF_Mu_SF_ISO.root",      "NUM_TightRelIso_DEN_MediumID_eta_pt")],
                 ('16','POGGH'):[("2016LegRunGH_Mu_SF_ISO.root",       "NUM_TightRelIso_DEN_MediumID_eta_pt")],
@@ -35,15 +41,23 @@ keys_ele = {('16','POG'):[("2016LegacyReReco_ElectronTight_Fall17V2.root",      
             ('18','elMva'):[("2018_ElectronMVA90.root",                         "EGamma_SF2D")]}
 
 class LeptonSF:
-  def __init__(self, year, Run, elID = 'POG'): 
-    subFile = 'GH' if year == '16' and Run in 'GH' else ''
+  def __init__(self, year, elID = 'POG'): 
+    self.year = year
+    subFile = ''
+    # FIXME subFile = 'GH' if year == '16' and @@ ignoring the different SF for G an H for now, not sure how to implement @@ ''
     self.mu_ISO  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, elID + subFile)]]
     self.mu_ID  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, elID + subFile)]]
     self.ele = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year, elID)]]
+
     for effMap in self.mu_ID + self.mu_ISO + self.ele: assert effMap
 
   @staticmethod
   def getPartialSF(effMap, pt, eta):
+    sf  = effMap.GetBinContent(effMap.GetYaxis().FindBin(abs(eta)), effMap.GetXaxis().FindBin(pt))
+    err = effMap.GetBinError(  effMap.GetYaxis().FindBin(abs(eta)), effMap.GetXaxis().FindBin(pt))
+    return UncFloat(sf, err)
+  @staticmethod
+  def getPartialSFInv(effMap, pt, eta):
     sf  = effMap.GetBinContent(effMap.GetXaxis().FindBin(pt), effMap.GetYaxis().FindBin(abs(eta)))
     err = effMap.GetBinError(  effMap.GetXaxis().FindBin(pt), effMap.GetYaxis().FindBin(abs(eta)))
     return UncFloat(sf, err)
@@ -53,11 +67,14 @@ class LeptonSF:
     pt     = tree._lPt[index] if flavor == 1 else tree._lPtCorr[index]
     eta    = abs(tree._lEta[index])
 
-    if abs(flavor)==1:   
-      if pt >= 150: pt = 149 # last bin is valid to infinity
+    if abs(flavor) == 1 and self.year == '16':   
+      if pt >= 120: pt = 119 # last bin is valid to infinity
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu_ISO + self.mu_ID)
-    elif abs(flavor)==0:
-      if pt >= 200: pt = 199 # last bin is valid to infinity
+    elif abs(flavor) == 1:
+      if pt >= 120: pt = 119 # last bin is valid to infinity
+      sf = multiply( self.getPartialSFInv(effMap, pt, eta) for effMap in self.mu_ISO + self.mu_ID)
+    elif abs(flavor) == 0:
+      if pt >= 500: pt = 499 # last bin is valid to infinity
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele)
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)

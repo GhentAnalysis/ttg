@@ -13,6 +13,7 @@ from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
 from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
 from ttg.plots.systematics import constructQ2Sys, constructPdfSys
+from ttg.samples.Sample import getSampleFromStack
 
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
@@ -242,7 +243,7 @@ class Plot:
         self.histos[s] = allPlots[self.name][s.name+s.texName]
     except:
       log.warning('No resultsfile for ' + self.name + '.pkl')
-      return True
+      return False
 
   #
   # Get Yields
@@ -504,7 +505,9 @@ class Plot:
   #
   def draw(self, \
           yRange = "auto",
-          extensions = ["pdf", "png", "root","C"],
+          # FIXME crash when writing C file?
+          # extensions = ["pdf", "png", "root","C"],
+          extensions = ["pdf", "png", "root"],
           plot_directory = ".",
           logX = False, logY = True,
           ratio = None,
@@ -546,9 +549,11 @@ class Plot:
 
     drawObjects = [i.Clone() for i in drawObjects] # Need to do this otherwise the objects become None after loading the cache, probably some strange garbage collecting bug we don't want
     # If a results directory is given, we can load the histograms from former runs
-    if resultsDir:
-      err = self.loadFromCache(resultsDir)
-      if err: return True
+    
+    # FIXME this has been changed and commented out, loading is now done in the main code. Does it make sense to load it here?
+    # if resultsDir:
+    #   err = self.loadFromCache(resultsDir)
+    #   if not err: return True
 
     # Check if at least one entry is present
     if not sum([h.Integral() for h in self.histos.values()]) > 0:
@@ -611,7 +616,7 @@ class Plot:
     self.yrmin, self.yrmax = ratio['yRange'] if ratio else (None, None)
 
     # Remove empty bins from the edges (or when they are too small to see)
-    self.removeEmptyBins(histos, yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/150.)
+    self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/150.)
 
     # If legend specified, add it to the drawObjects
     if legend:
@@ -705,13 +710,16 @@ class Plot:
     log.info('Creating output files for ' + self.name)
     for extension in extensions:
       ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
+      log.info(ofile)
       canvas.Print(ofile)
 
 def addPlots(plotA, plotB):
-  log.info('Adding two plots, attributes taken from A, plot B has the following differences:')
-  log.info(plotA.__dict__.items() - plotA.__dict__.items())
-  for sample, hist in plotA.histos:
-    try:
-      hist = addHist(hist, plotB.getSampleFromStack(plotB.stack, sample.name))
-    except: log.warning('mismatch between histograms/samples in the plots')
+  # log.info('Adding two plots, attributes taken from A, plot B has the following differences:')
+  # log.info(set(tuple(plotA.__dict__.items())) - set(tuple(plotA.__dict__.items())))
+  for sample, hist in plotA.histos.iteritems():
+    # try:
+    # log.info(hist)
+    # log.inf(getSampleFromStack(plotB.stack, sample.name)
+    hist = addHist(hist, plotB.histos[getSampleFromStack(plotB.stack, sample.name)])
+    # except: log.warning('mismatch between histograms/samples in the plots')
   return plotA

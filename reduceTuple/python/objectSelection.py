@@ -1,6 +1,7 @@
 from ttg.tools.logger  import getLogger
 from ttg.tools.helpers import deltaR
 import ROOT
+from math import exp
 log = getLogger()
 
 #
@@ -54,21 +55,25 @@ def looseLeptonSelector(tree, index):
   return tree._lPOGVeto[index]
 
 # FIXME check source of ElectronPassEmu in heavyneutrino, only correct for 2016?
-# FIXME are the WP the same for _lElectronMvaFall17Iso as for the old one?
+
+
+
 def electronMva(tree, index):
   if not tree._lElectronPassEmu[index]: return False
-  if tree._lEta[index] < 0.8: return tree._lElectronMvaFall17Iso[index] > (0.941 if tree.eleMvaTight else 0.837)
-  else:                       return tree._lElectronMvaFall17Iso[index] > (0.899 if tree.eleMvaTight else 0.715)
+  if abs(tree._lEta[index]) < 0.8:           return tree._lElectronMvaFall17Iso[index] > 6.12931925263 - exp( -tree._lPt[index] / 13.281753835) * 8.711384321
+  elif 0.8 < abs(tree._lEta[index]) < 1.44:  return tree._lElectronMvaFall17Iso[index] > 5.26289004857 - exp( -tree._lPt[index] / 13.2154971491) * 8.0997882835
+  elif 1.57 < abs(tree._lEta[index]) < 2.5:  return tree._lElectronMvaFall17Iso[index] > 4.37338792902 - exp( -tree._lPt[index] / 14.0776094696) * 8.48513324496
 
 def electronSelector(tree, index):
   for i in xrange(tree._nMu): # cleaning electrons around muons
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
+  if 1.44 < abs(tree._lEta[index]) < 1.57: return False
   if   tree.eleMva:    return electronMva(tree, index)
   else:                return tree._lPOGTight[index]
 
 def muonSelector(tree, index):
-  return tree._lPOGMedium[index]
+  return tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15
 
 def leptonSelector(tree, index):
   if leptonPt(tree, index) < 15:       return False
@@ -122,9 +127,6 @@ def selectLeptons(t, n, minLeptons):
   if   minLeptons == 2: return select2l(t, n)
   elif minLeptons == 1: return select1l(t, n)
   elif minLeptons == 0: return True
-
-
-
 
 #
 # Photon selector

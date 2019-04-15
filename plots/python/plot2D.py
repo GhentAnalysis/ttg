@@ -4,6 +4,7 @@ log = getLogger()
 import ROOT, os, numpy
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, addHist
 from ttg.plots.plot import Plot
+from ttg.samples.Sample import getSampleFromStack
 
 #
 # Plot class for 2D
@@ -144,10 +145,10 @@ class Plot2D(Plot):
     del c1
 
 def add2DPlots(plotA, plotB):
-  log.info('Adding two plots, attributes taken from A, plot B has the following differences:')
-  log.info(plotA.__dict__.items() - plotA.__dict__.items())
-  for sample, hist in plotA.histos:
+  # log.info('Adding two plots, attributes taken from A, plot B has the following differences:')
+  # log.info(set(tuple(plotA.__dict__.items())) - set(tuple(plotA.__dict__.items())))
+  for sample, hist in plotA.histos.iteritems():
     try:
-      hist = addHist(hist, plotB.getSampleFromStack(plotB.stack, sample.name))
+      hist = addHist(hist, plotB.histos[getSampleFromStack(plotB.stack, sample.name)])
     except: log.warning('mismatch between histograms/samples in the plots')
   return plotA

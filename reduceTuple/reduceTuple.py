@@ -35,9 +35,9 @@ if args.sample and not args.year:
 # Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
 #
 from ttg.samples.Sample import createSampleList, getSampleFromList
-tupleFiles = {'2016': os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_16.conf'),
-              '2017': os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_17.conf'),
-              '2018': os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_18.conf')}
+tupleFiles = {'2016':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_16.conf'),
+              '2017':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_17.conf'),
+              '2018':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_18.conf')}
 sampleList = itertools.chain.from_iterable([createSampleList(tupleFiles[y], y) for y in tupleFiles.keys()])
 runs = {"16":['B', 'C', 'D', 'E', 'F', 'G', 'H'], "17":['B', 'C', 'D', 'E', 'F'], "18":['A', 'B', 'C', 'D', 'E']}
 #
@@ -171,7 +171,7 @@ from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
-leptonSF         = LeptonSF(sample.year, Run = args.splitData,  elID = 'elMva' if c.eleMva else 'POG')
+leptonSF         = LeptonSF(sample.year,  elID = 'elMva' if c.eleMva else 'POG')
 photonSF         = PhotonSF(sample.year)
 triggerEff       = TriggerEfficiency(sample.year)
 btagSF           = BtagEfficiency(sample.year)
