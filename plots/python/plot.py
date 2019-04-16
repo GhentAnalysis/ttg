@@ -241,6 +241,7 @@ class Plot:
       with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
       for s in self.histos.keys():
         self.histos[s] = allPlots[self.name][s.name+s.texName]
+      return True
     except:
       log.warning('No resultsfile for ' + self.name + '.pkl')
       return False

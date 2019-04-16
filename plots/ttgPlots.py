@@ -282,14 +282,15 @@ for year in years:
   log.info('Using stackFile ' + stackFile)
   loadedPlots = []
   if not args.overwrite:
-    # FIXME fix and reenable
-    # for plot in plots:
-    #   loaded = plot.loadFromCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
-    #   if loaded: loadedPlots.append(plot)
-    plotsToFill = list(set(plots).symmetric_difference(set(loadedPlots)))
-    loadedPlots = list(set(plots) & set(loadedPlots))
-    for loadedPlot in loadedPlots:
-      log.info('Loaded plot from cache: ' + loadedPlot.name)
+    for plot in plots:
+      loaded = plot.loadFromCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection))
+      if loaded: loadedPlots.append(plot)    
+    plotsToFill = [plot for plot in plots if not plot.name in [Lplot.name for Lplot in loadedPlots]]
+    loadedPlots = [Lplot for Lplot in loadedPlots if Lplot.name in [plot.name for plot in plots]]
+    log.info('Plots loaded from cache:')
+    log.info([Lplot.name for Lplot in loadedPlots])
+    log.info('Plots to be filled:')
+    log.info([plot.name for plot in plotsToFill])
 
   lumiScale = lumiScales[year]
   #
