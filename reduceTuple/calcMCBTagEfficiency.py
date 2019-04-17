@@ -12,8 +12,8 @@ args = argParser.parse_args()
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
-if args.sample and not args.year:
-  log.info("If the sample is specified, the year needs to be specified as well, exiting")
+if not args.sample or not args.year:
+  log.info("Specify the sample and the year")
   exit(0)
 
 from ttg.reduceTuple.btagEfficiency import getPtBins, getEtaBins
@@ -62,7 +62,7 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
  
   return mceff
   
-workingPoints = {'16':0.6324, '17':0.6324, '18':0.6324}
+workingPoints = {'16':0.6321, '17':0.4941, '18':0.4184}
 
 sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_'+ args.year +'.conf'))
 sample               = getSampleFromList(sampleList, args.sample)

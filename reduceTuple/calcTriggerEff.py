@@ -16,7 +16,7 @@ argParser.add_argument('--corr',     action='store_true', default=False,  help='
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
 argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
 argParser.add_argument('--sample',   action='store',      default=None,   help='Select sample')
-argParser.add_argument('--year',   action='store',      default=None,   help='Select year', choices=['16', '17', '18'])
+argParser.add_argument('--year',     action='store',      default=None,   help='Select year', choices=['16', '17', '18'])
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')

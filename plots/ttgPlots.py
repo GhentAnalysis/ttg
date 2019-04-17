@@ -417,8 +417,17 @@ for year in years:
   noWarnings = True
   for plot in plots: # 1D plots
     if isinstance(plot, Plot2D): continue
+
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
+
+      if plot.blindRange and not year == 16:
+        for sample, histo in plot.histos.iteritems():
+          if sample.isData:
+            for bin in range(1, histo.GetNbinsX()+1):
+              if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
+                histo.SetBinContent(bin, 0)
+
       if plot.name == "yield":
         log.info("Yields: ")
         for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -432,6 +441,7 @@ for year in years:
           extraTag += '-sys'    if args.showSys else ''
           extraTag += '-normMC' if norm else ''
           extraTag += '-post'   if args.post else ''
+
           err = plot.draw(
                     plot_directory    = os.path.join(plotDir, year, args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
                     logX              = False,
@@ -475,6 +485,14 @@ for plot in totalPlots: # 1D plots
   if isinstance(plot, Plot2D): continue
   if not args.showSys:
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
+
+    if plot.blindRange:
+      for sample, histo in plot.histos.iteritems():
+        if sample.isData:
+          for bin in range(1, histo.GetNbinsX()+1):
+            if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
+              histo.SetBinContent(bin, 0)
+
     if plot.name == "yield":
       log.info("Yields: ")
       for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))

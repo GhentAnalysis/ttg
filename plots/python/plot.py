@@ -121,7 +121,7 @@ class Plot:
     Plot.defaultTexY        = texY
     Plot.defaultOverflowBin = overflowBin
 
-  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[]):
+  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[], blindRange = []):
     self.stack             = stack        if stack else Plot.defaultStack
     self.texY              = texY         if texY else Plot.defaultTexY
     self.overflowBin       = overflowBin  if overflowBin != 'default'  else Plot.defaultOverflowBin
@@ -131,6 +131,7 @@ class Plot:
     self.varX              = varX
     self.histModifications = histModifications
     self.scaleFactor       = None
+    self.blindRange        = blindRange
 
     if type(binning)==type([]):   self.binning = (len(binning)-1, numpy.array(binning))
     elif type(binning)==type(()): self.binning = binning
