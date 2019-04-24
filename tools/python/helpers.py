@@ -6,7 +6,7 @@ from operator import mul
 # Get some fixed paths
 #
 userGroup       = os.path.expandvars('$USER')[0:1]
-plotDir         = os.path.expandvars(('/eos/user/' + userGroup + '/$USER/www/ttG/')       if 'lxp' in socket.gethostname() else '/user/$USER/www/ttG/')
+plotDir         = os.path.expandvars(('/eos/user/' + userGroup + '/$USER/www/ttG/')       if 'lxp' in socket.gethostname() else '/user/$USER/public_html/ttG/')
 reducedTupleDir = os.path.expandvars(('/eos/user/' + userGroup + '/$USER/reducedTuples/') if 'lxp' in socket.gethostname() else '/user/$USER/public/reducedTuples/') 
 
 #

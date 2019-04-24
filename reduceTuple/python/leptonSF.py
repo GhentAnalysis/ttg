@@ -15,11 +15,8 @@ dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 # currently using electron POG tight or electronMVA90, muon pog medium, 
 # current muon SF correspond to a tight isolation cut 
 
-# last pt bin changed,
-# pt/eta one different axises in different files?
-
 # mu 16 pt y                17, 18 pt x        ele pt y 16, 17, 18 
-
+# lumi: B-F: 19.717640795 GH: 16.146177653  total: 35.863818448 -> fractions  0.549792   0.450208
 
 # FIXME Muon SF for 2018 are not yet final, leave this comment in the file 
 keys_mu_ISO = {('2016','POG')   : [("2016LegRunBCDEF_Mu_SF_ISO.root",            "NUM_TightRelIso_DEN_MediumID_eta_pt")],
@@ -40,13 +37,19 @@ keys_ele = {('2016','POG')   : [("2016LegacyReReco_ElectronTight_Fall17V2.root",
             ('2018','elMva') : [("2018_ElectronMVA90.root",                      "EGamma_SF2D")]}
 
 # TODO:
-#   because stupid muon people provide 2016 SF separately for GH need to add those in and weight according to lumi (maybe better construct a weighted histogram at init step)
 #   use syntax of [(filename, key), (filename, key),...] or simplify if we do not use it
 class LeptonSF:
   def __init__(self, year, id = 'POG'): 
     self.mu   = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, id)]]
     self.mu  += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, id)]]
     self.ele  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year, id)]]
+    if year == '2016':
+      self.muGH  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, id + 'GH')]]
+      self.muGH += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, id + 'GH')]]
+      for effMap in self.muGH:
+        assert effMap
+        effMap.ptY = (year == '2016')
+      
 
     for effMap in self.mu:  effMap.ptY = (year == '2016')
     for effMap in self.ele: effMap.ptY = True
@@ -68,6 +71,8 @@ class LeptonSF:
     if abs(flavor) == 1:
       if pt >= 120: pt = 119 # last bin is valid to infinity
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu)
+      if hasattr(self, 'muGH'): # for 2016 self.muGH is defined and needs to be taken into account
+        sf = (0.549792*sf + 0.450208*multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.muGH))
     elif abs(flavor) == 0:
       if pt >= 500: pt = 499 # last bin is valid to infinity
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele)
