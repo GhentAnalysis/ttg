@@ -12,7 +12,7 @@ import os, argparse, itertools
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',  action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--sample',    action='store',      default=None,                 help='Sample for which to produce reducedTuple, as listed in samples/data/tuples*.conf')
-argParser.add_argument('--year',      action='store',      default=None,                 help='year corresponding to the sample (16,17,18), * in samples/data/tuples_*.conf', choices=['16', '17', '18'])
+argParser.add_argument('--year',      action='store',      default=None,                 help='Only run for a specific year', choices=['2016', '2017', '2018'])
 argParser.add_argument('--type',      action='store',      default='phoCB',              help='Specify type of reducedTuple')
 argParser.add_argument('--subJob',    action='store',      default=None,                 help='The xth subjob for a sample, number of subjobs is defined by split parameter in tuples.conf')
 argParser.add_argument('--splitData', action='store',      default=None,                 help='Splits the data in its separate runs')
@@ -35,11 +35,10 @@ if args.sample and not args.year:
 # Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
 #
 from ttg.samples.Sample import createSampleList, getSampleFromList
-tupleFiles = {'2016':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_16.conf'),
-              '2017':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_17.conf'),
-              '2018':os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_18.conf')}
-sampleList = itertools.chain.from_iterable([createSampleList(tupleFiles[y], y) for y in tupleFiles.keys()])
-runs = {"16":['B', 'C', 'D', 'E', 'F', 'G', 'H'], "17":['B', 'C', 'D', 'E', 'F'], "18":['A', 'B', 'C', 'D', 'E']}
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_16.conf'),
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_17.conf'),
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_18.conf'))
+
 #
 # Submit subjobs:
 #   - each sample is splitted by the splitJobs parameter defined in tuples.conf, if a sample runs too slow raise the splitJobs parameter
@@ -48,16 +47,19 @@ runs = {"16":['B', 'C', 'D', 'E', 'F', 'G', 'H'], "17":['B', 'C', 'D', 'E', 'F']
 #
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
-  if args.sample and args.year: sampleList = [s for s in sampleList if s.name == args.sample and s.year == args.year]
+  if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
+  if args.year:   sampleList = [s for s in sampleList if s.year == args.year]
 
   jobs = []
   for sample in sampleList:
     if (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr')): continue
 
     if sample.isData:
-      if args.splitData in runs: splitData = [args.splitData]
-      else:                      splitData = runs[args.year]
-    else:                        splitData = [None]
+      if args.splitData in runs:  splitData = [args.splitData]
+      elif sample.year == '2016': splitData = ['B', 'C', 'D', 'E', 'F', 'G', 'H']
+      elif sample.year == '2017': splitData = ['B', 'C', 'D', 'E', 'F']
+      elif sample.year == '2018': splitData = ['A', 'B', 'C', 'D']
+    else:                         splitData = [None]
     jobs += [(sample.name, sample.year, str(i), j) for i in xrange(sample.splitJobs) for j in splitData]
   submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type)
   exit(0)
@@ -80,7 +82,7 @@ if not sample.isData:
 # Create new reduced tree (except if it already exists and overwrite option is not used)
 #
 from ttg.tools.helpers import reducedTupleDir, isValidRootFile
-outputId   = (args.splitData if args.splitData in runs[sample.year] else '') + str(args.subJob)
+outputId   = (args.splitData if args.splitData else '') + str(args.subJob)
 outputName = os.path.join(reducedTupleDir, sample.productionLabel, args.type, sample.name, sample.name + '_' + outputId + '.root')
 
 try:    os.makedirs(os.path.dirname(outputName))
@@ -155,15 +157,14 @@ setIDSelection(c, args.type)
 #
 # Initialize reweighting functions
 #
-
-puData = {('16','central'):"PU_2016_36000_XSecCentral", ('16','up'):"PU_2016_36000_XSecUp", ('16','down'):"PU_2016_36000_XSecDown",
-          ('17','central'):"PU_2017_41500_XSecCentral", ('17','up'):"PU_2017_41500_XSecUp", ('17','down'):"PU_2017_41500_XSecDown",
-          ('18','central'):"PU_2018_60000_XSecCentral", ('18','up'):"PU_2018_60000_XSecUp", ('18','down'):"PU_2018_60000_XSecDown"}
+if   sample.year == '2016': puData = {'central' : "PU_2016_36000_XSecCentral", 'up' : "PU_2016_36000_XSecUp", 'down' : "PU_2016_36000_XSecDown"}
+elif sample.year == '2017': puData = {'central' : "PU_2017_41500_XSecCentral", 'up' : "PU_2017_41500_XSecUp", 'down' : "PU_2017_41500_XSecDown"}
+elif sample.year == '2017': puData = {'central' : "PU_2018_60000_XSecCentral", 'up' : "PU_2018_60000_XSecUp", 'down' : "PU_2018_60000_XSecDown"}
 
 from ttg.reduceTuple.puReweighting import getReweightingFunction
-puReweighting     = getReweightingFunction(sample.year, data=puData[(sample.year,'central')])
-puReweightingUp   = getReweightingFunction(sample.year, data=puData[(sample.year,'up')])
-puReweightingDown = getReweightingFunction(sample.year, data=puData[(sample.year,'down')])
+puReweighting     = getReweightingFunction(sample.year, data=puData['central'])
+puReweightingUp   = getReweightingFunction(sample.year, data=puData['up'])
+puReweightingDown = getReweightingFunction(sample.year, data=puData['down'])
 
 from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
@@ -171,7 +172,7 @@ from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
-leptonSF         = LeptonSF(sample.year,  elID = 'elMva' if c.eleMva else 'POG')
+leptonSF         = LeptonSF(sample.year, id = 'elMva' if c.eleMva else 'POG')
 photonSF         = PhotonSF(sample.year)
 triggerEff       = TriggerEfficiency(sample.year)
 btagSF           = BtagEfficiency(sample.year)
@@ -187,23 +188,25 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   if not selectLeptons(c, newVars, 2):                continue
   if not selectPhotons(c, newVars, 2, sample.isData): continue
+  if not c._passMETFilters:                           continue
 
   if sample.isData:
-    if not c._passMETFilters:                                                          continue
-    if sample.name.count('DoubleMuon') and not c._passTrigger_mm:                              continue
-    if sample.name.count('DoubleEG')   and not c._passTrigger_ee:                              continue
-    if sample.name.count('MuonEG')     and not c._passTrigger_em:                              continue
+    if sample.name.count('DoubleMuon') and not c._passTrigger_mm:                                      continue
+    if sample.name.count('DoubleEG')   and not c._passTrigger_ee:                                      continue
+    if sample.name.count('MuonEG')     and not c._passTrigger_em:                                      continue
     if sample.name.count('SingleMuon'):
-      if newVars.isMuMu and not (not c._passTrigger_mm and c._passTrigger_m):                      continue
-      if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_m):                      continue
+      if newVars.isMuMu and not (not c._passTrigger_mm and c._passTrigger_m):                          continue
+      if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_m):                          continue
     if sample.name.count('SingleElectron'):
-      if newVars.isEE   and not (not c._passTrigger_ee and c._passTrigger_e):                      continue
+      if newVars.isEE   and not (not c._passTrigger_ee and c._passTrigger_e):                          continue
+      if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_e and not c._passTrigger_m): continue
+    if sample.name.count('EGamma'):
+      if newVars.isEE   and not (c._passTrigger_ee or c._passTrigger_e):                               continue
       if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_e and not c._passTrigger_m): continue
   else:
-    if not c._passMETFilters:                                                            continue
-    if newVars.isEE   and not (c._passTrigger_ee or c._passTrigger_e):                             continue
+    if newVars.isEE   and not (c._passTrigger_ee or c._passTrigger_e):                                 continue
     if newVars.isEMu  and not (c._passTrigger_em or c._passTrigger_e or c._passTrigger_m):             continue
-    if newVars.isMuMu and not (c._passTrigger_mm or c._passTrigger_m):                             continue
+    if newVars.isMuMu and not (c._passTrigger_mm or c._passTrigger_m):                                 continue
 
   goodJets(c, newVars)
   bJets(c, newVars)
@@ -215,6 +218,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
     # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
     # Except when a sample does not have those weights stored (could occur for the minor backgrounds)
+    # TODO: new samples have ISR/FSR systematics also stored in the samples, need to check
     if not forSys:
       for var, i in [('Fu', 1), ('Fd', 2), ('Ru', 3), ('RFu', 4), ('Rd', 6), ('RFd', 8)]:
         try:    setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])

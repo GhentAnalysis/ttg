@@ -10,23 +10,18 @@ import os, math
 from ttg.tools.helpers import getObjFromFile
 
 baseDir  = '$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData/'
-e_file   = {('16','low'):   baseDir + '2016EGM2D_BtoH_low_RecoSF_Legacy2016.root',
-            ('16','high'):  baseDir + '2016EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root',
-            ('17','low'):   baseDir + '2017egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root',
-            ('17','high'):  baseDir + '2017egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root',
-            ('18','low'):   baseDir + '2018egammaEffi.txt_EGM2D_updatedAll.root',
-            ('18','high'):  baseDir + '2018egammaEffi.txt_EGM2D_updatedAll.root'}
-e_key    = {('16','low'):   "EGamma_SF2D",
-            ('16','high'):  "EGamma_SF2D",
-            ('17','low'):   "EGamma_SF2D",
-            ('17','high'):  "EGamma_SF2D",
-            ('18','low'):   "EGamma_SF2D",
-            ('18','high'):  "EGamma_SF2D"}
+e_file   = {('2016','low'):   baseDir + '2016EGM2D_BtoH_low_RecoSF_Legacy2016.root',
+            ('2016','high'):  baseDir + '2016EGM2D_BtoH_GT20GeV_RecoSF_Legacy2016.root',
+            ('2017','low'):   baseDir + '2017egammaEffi.txt_EGM2D_runBCDEF_passingRECO_lowEt.root',
+            ('2017','high'):  baseDir + '2017egammaEffi.txt_EGM2D_runBCDEF_passingRECO.root',
+            ('2018','low'):   baseDir + '2018egammaEffi.txt_EGM2D_updatedAll.root',
+            ('2018','high'):  baseDir + '2018egammaEffi.txt_EGM2D_updatedAll.root'}
+e_key    = "EGamma_SF2D"
 
 class LeptonTrackingEfficiency:
   def __init__(self, year):
-    self.eLow_sf = getObjFromFile(os.path.expandvars(e_file[(year, 'low')]), e_key[(year, 'low')])
-    self.eHigh_sf = getObjFromFile(os.path.expandvars(e_file[(year, 'high')]), e_key[(year, 'high')])
+    self.eLow_sf  = getObjFromFile(os.path.expandvars(e_file[(year, 'low')]),  e_key)
+    self.eHigh_sf = getObjFromFile(os.path.expandvars(e_file[(year, 'high')]), e_key)
     for sf in [self.eLow_sf, self.eHigh_sf]: assert sf
 
     self.e_ptMax  = self.eHigh_sf.GetYaxis().GetXmax()

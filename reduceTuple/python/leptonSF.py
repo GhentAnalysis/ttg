@@ -22,44 +22,42 @@ dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 
 
 # FIXME Muon SF for 2018 are not yet final, leave this comment in the file 
-keys_mu_ISO  = {('16','POG'):[("2016LegRunBCDEF_Mu_SF_ISO.root",      "NUM_TightRelIso_DEN_MediumID_eta_pt")],
-                ('16','POGGH'):[("2016LegRunGH_Mu_SF_ISO.root",       "NUM_TightRelIso_DEN_MediumID_eta_pt")],
-                ('17','POG'):[("2017RunBCDEF_Mu_SF_ISO.root",         "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
-                ('18','POG'):[("2018RunABCD_Mu_SF_ISO.root",          "NUM_TightRelIso_DEN_MediumID_pt_abseta")]}
+keys_mu_ISO = {('2016','POG')   : [("2016LegRunBCDEF_Mu_SF_ISO.root",            "NUM_TightRelIso_DEN_MediumID_eta_pt")],
+               ('2016','POGGH') : [("2016LegRunGH_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_eta_pt")],
+               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
+               ('2018','POG')   : [("2018RunABCD_Mu_SF_ISO.root",                "NUM_TightRelIso_DEN_MediumID_pt_abseta")]}
 
-keys_mu_ID  = {('16','POG'):[("2016LegRunBCDEF_Mu_SF_ID.root",                  "NUM_MediumID_DEN_genTracks_eta_pt")],
-               ('16','POGGH'):[("2016LegRunGH_Mu_SF_ID.root",                   "NUM_MediumID_DEN_genTracks_eta_pt")],
-               ('17','POG'):[("2017RunBCDEF_Mu_SF_ID.root",                     "NUM_MediumID_DEN_genTracks_pt_abseta")],
-               ('18','POG'):[("2018RunABCD_Mu_SF_ID.root",                      "NUM_MediumID_DEN_TrackerMuons_pt_abseta")]}
+keys_mu_ID  = {('2016','POG')   : [("2016LegRunBCDEF_Mu_SF_ID.root",             "NUM_MediumID_DEN_genTracks_eta_pt")],
+               ('2016','POGGH') : [("2016LegRunGH_Mu_SF_ID.root",                "NUM_MediumID_DEN_genTracks_eta_pt")],
+               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ID.root",                "NUM_MediumID_DEN_genTracks_pt_abseta")],
+               ('2018','POG')   : [("2018RunABCD_Mu_SF_ID.root",                 "NUM_MediumID_DEN_TrackerMuons_pt_abseta")]}
 
+keys_ele = {('2016','POG')   : [("2016LegacyReReco_ElectronTight_Fall17V2.root", "EGamma_SF2D")],
+            ('2017','POG')   : [("2017_ElectronTight.root",                      "EGamma_SF2D")],
+            ('2018','POG')   : [("2018_ElectronTight.root",                      "EGamma_SF2D")],
+            ('2016','elMva') : [("2016LegacyReReco_ElectronMVA90_Fall17V2.root", "EGamma_SF2D")],
+            ('2017','elMva') : [("2017_ElectronMVA90.root",                      "EGamma_SF2D")],
+            ('2018','elMva') : [("2018_ElectronMVA90.root",                      "EGamma_SF2D")]}
 
-keys_ele = {('16','POG'):[("2016LegacyReReco_ElectronTight_Fall17V2.root",      "EGamma_SF2D")],
-            ('17','POG'):[("2017_ElectronTight.root",                           "EGamma_SF2D")],
-            ('18','POG'):[("2018_ElectronTight.root",                           "EGamma_SF2D")],
-            ('16','elMva'):[("2016LegacyReReco_ElectronMVA90_Fall17V2.root",    "EGamma_SF2D")],
-            ('17','elMva'):[("2017_ElectronMVA90.root",                         "EGamma_SF2D")],
-            ('18','elMva'):[("2018_ElectronMVA90.root",                         "EGamma_SF2D")]}
-
+# TODO:
+#   because stupid muon people provide 2016 SF separately for GH need to add those in and weight according to lumi (maybe better construct a weighted histogram at init step)
+#   use syntax of [(filename, key), (filename, key),...] or simplify if we do not use it
 class LeptonSF:
-  def __init__(self, year, elID = 'POG'): 
-    self.year = year
-    subFile = ''
-    # FIXME subFile = 'GH' if year == '16' and @@ ignoring the different SF for G an H for now, not sure how to implement @@ ''
-    self.mu_ISO  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, elID + subFile)]]
-    self.mu_ID  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, elID + subFile)]]
-    self.ele = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year, elID)]]
+  def __init__(self, year, id = 'POG'): 
+    self.mu   = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, id)]]
+    self.mu  += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, id)]]
+    self.ele  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year, id)]]
 
-    for effMap in self.mu_ID + self.mu_ISO + self.ele: assert effMap
+    for effMap in self.mu:  effMap.ptY = (year == '2016')
+    for effMap in self.ele: effMap.ptY = True
+
+    for effMap in self.mu + self.ele: assert effMap
 
   @staticmethod
-  def getPartialSF(effMap, pt, eta):
-    sf  = effMap.GetBinContent(effMap.GetYaxis().FindBin(abs(eta)), effMap.GetXaxis().FindBin(pt))
-    err = effMap.GetBinError(  effMap.GetYaxis().FindBin(abs(eta)), effMap.GetXaxis().FindBin(pt))
-    return UncFloat(sf, err)
-  @staticmethod
-  def getPartialSFInv(effMap, pt, eta):
-    sf  = effMap.GetBinContent(effMap.GetXaxis().FindBin(pt), effMap.GetYaxis().FindBin(abs(eta)))
-    err = effMap.GetBinError(  effMap.GetXaxis().FindBin(pt), effMap.GetYaxis().FindBin(abs(eta)))
+  def getPartialSF(effMap, x, y):
+    if effMap.ptY: x, y = y, x
+    sf  = effMap.GetBinContent(effMap.GetXaxis().FindBin(x), effMap.GetYaxis().FindBin(y))
+    err = effMap.GetBinError(  effMap.GetXaxis().FindBin(x), effMap.GetYaxis().FindBin(y))
     return UncFloat(sf, err)
 
   def getSF(self, tree, index, sigma=0):
@@ -67,12 +65,9 @@ class LeptonSF:
     pt     = tree._lPt[index] if flavor == 1 else tree._lPtCorr[index]
     eta    = abs(tree._lEta[index])
 
-    if abs(flavor) == 1 and self.year == '16':   
+    if abs(flavor) == 1:
       if pt >= 120: pt = 119 # last bin is valid to infinity
-      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu_ISO + self.mu_ID)
-    elif abs(flavor) == 1:
-      if pt >= 120: pt = 119 # last bin is valid to infinity
-      sf = multiply( self.getPartialSFInv(effMap, pt, eta) for effMap in self.mu_ISO + self.mu_ID)
+      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu)
     elif abs(flavor) == 0:
       if pt >= 500: pt = 499 # last bin is valid to infinity
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele)

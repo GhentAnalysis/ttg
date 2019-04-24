@@ -37,14 +37,13 @@ def toFlavorKey(pdgId):
 
 class BtagEfficiency:
 #FIXME replace once samples generated, pkl files produced
-  scaleFactorFile    = {'16':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
-                        '17':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
-                        '18':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv'
-                       }
-  mcEffFileDeepCSV   = {'16':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl',
-                        '17':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl',
-                        '18':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl'
-                       }
+  scaleFactorFile    = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
+                        '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv',
+                        '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_Moriond17_B_H.csv'}
+  mcEffFileDeepCSV   = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl',
+                        '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl',
+                        '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_TTGamma.pkl'}
+
   def __init__(self, year, wp = ROOT.BTagEntry.OP_MEDIUM):
     # Input files
 

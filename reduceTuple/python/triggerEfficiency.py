@@ -9,10 +9,11 @@ from math import sqrt
 import os
 
 
-files = {'16':"$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
-         '17':"$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
-         '18':"$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root"}
+files = {'2016' : "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
+         '2017' : "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
+         '2018' : "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root"}
 
+# TODO: studies to be repeated for full Run II data, including assesment of systematics
 class TriggerEfficiency:
   def __init__(self, year):
     scaleFactorFile = files[year]

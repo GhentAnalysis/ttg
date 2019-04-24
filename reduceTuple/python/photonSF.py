@@ -7,9 +7,9 @@ from ttg.tools.helpers import getObjFromFile, multiply
 from ttg.tools.uncFloat import UncFloat
 
 dataDir = "$CMSSW_BASE/src/ttg/reduceTuple/data/photonSFData"
-keys    = {'16':[("Fall17V2_2016_Tight_photons.root", "EGamma_SF2D")],
-           '17':[("2017_PhotonsTight.root", "EGamma_SF2D")],
-           '18':[("2018_PhotonsTight.root", "EGamma_SF2D")]}
+keys    = {'2016':[("Fall17V2_2016_Tight_photons.root", "EGamma_SF2D")],
+           '2017':[("2017_PhotonsTight.root", "EGamma_SF2D")],
+           '2018':[("2018_PhotonsTight.root", "EGamma_SF2D")]}
 
 
 class PhotonSF:
