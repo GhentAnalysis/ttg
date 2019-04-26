@@ -6,7 +6,7 @@ import argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--sample',   action='store',      default='TTJets')
-argParser.add_argument('--year',     action='store',      default='None', choices=['16', '17', '18'])
+argParser.add_argument('--year',     action='store',      default='None', choices=['2016', '2017', '2018'])
 argParser.add_argument('--submit',   action='store_true', default=False,  help='submit the script, need as for some large samples runtime exceeds 5 hours')
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
@@ -71,7 +71,7 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
  
   return mceff
   
-workingPoints = {'16':0.6321, '17':0.4941, '18':0.4184}
+workingPoints = {'2016':0.6321, '2017':0.4941, '2018':0.4184}
 
 sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ args.year +'.conf'))
 sample               = getSampleFromList(sampleList, args.sample)

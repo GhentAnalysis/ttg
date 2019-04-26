@@ -16,7 +16,7 @@ argParser.add_argument('--corr',     action='store_true', default=False,  help='
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
 argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
 argParser.add_argument('--sample',   action='store',      default=None,   help='Select sample')
-argParser.add_argument('--year',     action='store',      default=None,   help='Select year', choices=['16', '17', '18'])
+argParser.add_argument('--year',     action='store',      default=None,   help='Select year', choices=['2016', '2017', '2018'])
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')
@@ -27,7 +27,7 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 from ttg.samples.Sample import createSampleList, getSampleFromList
-tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['16', '17', '18']] 
+tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']] 
 sampleList = createSampleList(tupleFiles)
 
 # Submit subjobs
@@ -59,7 +59,7 @@ from ttg.tools.style import commonStyle, setDefault
 from ttg.tools.helpers import printCanvas 
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 
-reweightingFunctions = {'16':"PU_2016_36000_XSecCentral", '17':"PU_2017_41500_XSecCentral", '18':"PU_2018_60000_XSecCentral"}
+reweightingFunctions = {'2016':"PU_2016_36000_XSecCentral", '2017':"PU_2017_41500_XSecCentral", '2018':"PU_2018_60000_XSecCentral"}
 puReweighting = getReweightingFunction(sample.year, data=reweightingFunctions[sample.year])
 
 import ROOT, numpy

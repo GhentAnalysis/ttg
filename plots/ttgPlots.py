@@ -87,13 +87,13 @@ import glob
 stackFile = 'default_' + args.year
 for f in sorted(glob.glob("../samples/data/*.stack")):
   stackName = os.path.basename(f).split('.')[0]
-  if not stackName[-3:] in ['_16', '_17', '_18']:
+  if not stackName[-5:] in ['_2016', '_2017', '_2018']:
     log.warning('stack file without year label found (' + stackName + '), please remove or label properly')
     exit(0)
-  if stackName not in stackFile and args.tag.count(stackName[:-3]) and stackName[-2:] in ['16', '17', '18']:
-    stackFile = stackName[:-3]
+  if stackName not in stackFile and args.tag.count(stackName[:-5]) and stackName[-4:] in ['2016', '2017', '2018']:
+    stackFile = stackName[:-5]
 
-years = ['16', '17', '18'] if args.year == 'all' else [args.year]
+years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
 
 if args.year == 'all':
   for year in years:
@@ -106,16 +106,16 @@ if args.year == 'all':
 # !!!!!!!!!!!!!! temporarily using 16 tuplesfile for everything 
 # tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['16', '17', '18']}
 
-tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + '16' + '.conf') for y in ['16', '17', '18']}
+tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + '2016' + '.conf') for y in ['2016', '2017', '2018']}
 
 
 #FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
 # when running over all years, just initialise the plots with the stack for 16
-stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['16' if args.year == 'all' else args.year]),
-                    styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + ('16' if args.year == 'all' else args.year) + '.stack'),
+stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.year == 'all' else args.year]),
+                    styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + ('2016' if args.year == 'all' else args.year) + '.stack'),
                     channel      = args.channel,
                     replacements = getReplacementsForStack(args.sys),
-                    year = '16' if args.year == 'all' else args.year
+                    year = '2016' if args.year == 'all' else args.year
                     )
 
 #
@@ -253,10 +253,10 @@ def makePlotList():
     plotList[:] = [p for p in plots if args.filterPlot in p.name]
   return plotList
 
-years = ['16', '17', '18'] if args.year == 'all' else [args.year]
-lumiScales = {'16':35.863818448,
-              '17':41.529548819,
-              '18':59.688059536}
+years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
+lumiScales = {'2016':35.863818448,
+              '2017':41.529548819,
+              '2018':59.688059536}
 
 totalPlots = []
 
@@ -421,7 +421,7 @@ for year in years:
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
 
-      if not plot.blindRange == None and not year == 16:
+      if not plot.blindRange == None and not year == '2016':
         for sample, histo in plot.histos.iteritems():
           if sample.isData:
             for bin in range(1, histo.GetNbinsX()+1):
