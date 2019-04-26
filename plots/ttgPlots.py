@@ -421,7 +421,7 @@ for year in years:
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
 
-      if plot.blindRange and not year == 16:
+      if not plot.blindRange == None and not year == 16:
         for sample, histo in plot.histos.iteritems():
           if sample.isData:
             for bin in range(1, histo.GetNbinsX()+1):
@@ -486,7 +486,7 @@ for plot in totalPlots: # 1D plots
   if not args.showSys:
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
 
-    if plot.blindRange:
+    if not plot.blindRange == None:
       for sample, histo in plot.histos.iteritems():
         if sample.isData:
           for bin in range(1, histo.GetNbinsX()+1):

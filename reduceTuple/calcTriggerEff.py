@@ -28,20 +28,18 @@ log = getLogger(args.logLevel)
 
 from ttg.samples.Sample import createSampleList, getSampleFromList
 tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['16', '17', '18']] 
-sampleList = itertools.chain.from_iterable([createSampleList(tupleFile) for tupleFile in tupleFiles])
+sampleList = createSampleList(tupleFiles)
 
 # Submit subjobs
 if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample and args.year: sampleList = [s for s in sampleList if s.name == args.sample and s.year == args.year]
-
   jobs = []
   for sample in sampleList:
     for select in ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
       for corr in [True, False]:
         for pu in [True, False] if sample.name != 'MET' else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
-
   submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser)
   exit(0)
 
@@ -148,8 +146,8 @@ else:
 
   for i in eventLoop:
     c.GetEntry(i)
-
-    if not c._passTrigger_met: continue
+# FIXME why was this met before, if ref is used for checking correlation?
+    if not c._passTrigger_ref: continue
     if not passSelection():  continue
 
     if c.isEE:   channel = 'ee'
@@ -179,7 +177,7 @@ else:
       effDraw = eff.GetPaintedHistogram()
 
       for i in range(1, effDraw.GetNbinsX()+1):
-        for j in range(1, effDraw.GetNglobalBinsY()+1):
+        for j in range(1, effDraw.GetNbinsY()+1):
           globalBin = eff.GetGlobalBin(i, j)
           effDraw.SetBinError(i, j, max(eff.GetEfficiencyErrorUp(globalBin), eff.GetEfficiencyErrorLow(globalBin)))
 
@@ -204,7 +202,7 @@ else:
       effDraw.SetMaximum(1.)
       effDraw.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
-      directory = os.path.expandvars('/user/$USER/www/ttG/triggerEfficiency/' + sample.year + ('/puWeighted/' if args.pu else '/') + sample.name + '_' + sample.year + '/' + args.select)
+      directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + sample.year + ('/puWeighted/' if args.pu else '/') + sample.name + '_' + sample.year + '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       eff.Write(sample.name + '-' + channel + t)
