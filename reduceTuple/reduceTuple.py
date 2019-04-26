@@ -35,9 +35,9 @@ if args.sample and not args.year:
 # Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
 #
 from ttg.samples.Sample import createSampleList, getSampleFromList
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_16.conf'),
-                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_17.conf'),
-                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_18.conf'))
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_2016.conf'),
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_2017.conf'),
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_2018.conf'))
 
 #
 # Submit subjobs:

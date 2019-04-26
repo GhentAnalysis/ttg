@@ -125,7 +125,7 @@ class BtagEfficiency:
       return (weight0tag, weight1tag, 1-weight0tag-weight1tag)
 
 if __name__ == '__main__':
-  years = ['16', '17', '18']
+  years = ['2016', '2017', '2018']
   for year in years:
     testClass = BtagEfficiency(year)
     for ptBin in getPtBins():

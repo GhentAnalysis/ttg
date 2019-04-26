@@ -16,7 +16,7 @@ argParser.add_argument('--corr',     action='store_true', default=False,  help='
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
 argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
 argParser.add_argument('--sample',   action='store',      default=None,   help='Select sample')
-argParser.add_argument('--year',     action='store',      default=None,   help='Select year', choices=['16', '17', '18'])
+argParser.add_argument('--year',     action='store',      default=None,   help='Select year', choices=['2016', '2017', '2018'])
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')
@@ -27,21 +27,19 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 from ttg.samples.Sample import createSampleList, getSampleFromList
-tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['16', '17', '18']] 
-sampleList = itertools.chain.from_iterable([createSampleList(tupleFile) for tupleFile in tupleFiles])
+tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']] 
+sampleList = createSampleList(*tupleFiles)
 
 # Submit subjobs
 if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample and args.year: sampleList = [s for s in sampleList if s.name == args.sample and s.year == args.year]
-
   jobs = []
   for sample in sampleList:
     for select in ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
       for corr in [True, False]:
         for pu in [True, False] if sample.name != 'MET' else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
-
   submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser)
   exit(0)
 
@@ -61,7 +59,7 @@ from ttg.tools.style import commonStyle, setDefault
 from ttg.tools.helpers import printCanvas 
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 
-reweightingFunctions = {'16':"PU_2016_36000_XSecCentral", '17':"PU_2017_41500_XSecCentral", '18':"PU_2018_60000_XSecCentral"}
+reweightingFunctions = {'2016':"PU_2016_36000_XSecCentral", '2017':"PU_2017_41500_XSecCentral", '2018':"PU_2018_60000_XSecCentral"}
 puReweighting = getReweightingFunction(sample.year, data=reweightingFunctions[sample.year])
 
 import ROOT, numpy
@@ -148,8 +146,7 @@ else:
 
   for i in eventLoop:
     c.GetEntry(i)
-
-    if not c._passTrigger_met: continue
+    if not c._passTrigger_ref: continue
     if not passSelection():  continue
 
     if c.isEE:   channel = 'ee'
@@ -179,7 +176,7 @@ else:
       effDraw = eff.GetPaintedHistogram()
 
       for i in range(1, effDraw.GetNbinsX()+1):
-        for j in range(1, effDraw.GetNglobalBinsY()+1):
+        for j in range(1, effDraw.GetNbinsY()+1):
           globalBin = eff.GetGlobalBin(i, j)
           effDraw.SetBinError(i, j, max(eff.GetEfficiencyErrorUp(globalBin), eff.GetEfficiencyErrorLow(globalBin)))
 
@@ -187,8 +184,12 @@ else:
       canvas.cd()
       ROOT.gStyle.SetPaintTextFormat("2.5f" if 'integral' in t else "2.2f")
       commonStyle(effDraw)
-      effDraw.GetXaxis().SetTitle("leading lepton p_{T} [Gev]")
-      effDraw.GetYaxis().SetTitle("trailing lepton p_{T} [Gev]")
+      if 'etaBinning' in t:
+        effDraw.GetXaxis().SetTitle("leading lepton #eta")
+        effDraw.GetYaxis().SetTitle("trailing lepton #eta")
+      else:
+        effDraw.GetXaxis().SetTitle("leading lepton p_{T} [Gev]")
+        effDraw.GetYaxis().SetTitle("trailing lepton p_{T} [Gev]")
       effDraw.SetTitle("")
       effDraw.SetMarkerSize(0.8)
       effDraw.Draw("COLZ TEXT")
@@ -204,7 +205,7 @@ else:
       effDraw.SetMaximum(1.)
       effDraw.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
-      directory = os.path.expandvars('/user/$USER/www/ttG/triggerEfficiency/' + sample.year + ('/puWeighted/' if args.pu else '/') + sample.name + '_' + sample.year + '/' + args.select)
+      directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + sample.year + ('/puWeighted/' if args.pu else '/') + sample.name + '_' + sample.year + '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       eff.Write(sample.name + '-' + channel + t)
