@@ -28,7 +28,7 @@ log = getLogger(args.logLevel)
 
 from ttg.samples.Sample import createSampleList, getSampleFromList
 tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']] 
-sampleList = createSampleList(tupleFiles)
+sampleList = createSampleList(*tupleFiles)
 
 # Submit subjobs
 if not args.isChild:
@@ -146,7 +146,6 @@ else:
 
   for i in eventLoop:
     c.GetEntry(i)
-# FIXME why was this met before, if ref is used for checking correlation?
     if not c._passTrigger_ref: continue
     if not passSelection():  continue
 
@@ -185,8 +184,12 @@ else:
       canvas.cd()
       ROOT.gStyle.SetPaintTextFormat("2.5f" if 'integral' in t else "2.2f")
       commonStyle(effDraw)
-      effDraw.GetXaxis().SetTitle("leading lepton p_{T} [Gev]")
-      effDraw.GetYaxis().SetTitle("trailing lepton p_{T} [Gev]")
+      if 'etaBinning' in t:
+        effDraw.GetXaxis().SetTitle("leading lepton #eta")
+        effDraw.GetYaxis().SetTitle("trailing lepton #eta")
+      else:
+        effDraw.GetXaxis().SetTitle("leading lepton p_{T} [Gev]")
+        effDraw.GetYaxis().SetTitle("trailing lepton p_{T} [Gev]")
       effDraw.SetTitle("")
       effDraw.SetMarkerSize(0.8)
       effDraw.Draw("COLZ TEXT")

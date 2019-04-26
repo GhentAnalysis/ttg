@@ -18,15 +18,16 @@ dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 # mu 16 pt y                17, 18 pt x        ele pt y 16, 17, 18 
 # lumi: B-F: 19.717640795 GH: 16.146177653  total: 35.863818448 -> fractions  0.549792   0.450208
 
-# FIXME Muon SF for 2018 are not yet final, leave this comment in the file 
+# FIXME Muon SF for 2018 are not yet final, leave this comment in the file (no SF including syst unc available)
+
 keys_mu_ISO = {('2016','POG')   : [("2016LegRunBCDEF_Mu_SF_ISO.root",            "NUM_TightRelIso_DEN_MediumID_eta_pt")],
                ('2016','POGGH') : [("2016LegRunGH_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_eta_pt")],
-               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
+               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ISO_syst.root",          "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
                ('2018','POG')   : [("2018RunABCD_Mu_SF_ISO.root",                "NUM_TightRelIso_DEN_MediumID_pt_abseta")]}
 
 keys_mu_ID  = {('2016','POG')   : [("2016LegRunBCDEF_Mu_SF_ID.root",             "NUM_MediumID_DEN_genTracks_eta_pt")],
                ('2016','POGGH') : [("2016LegRunGH_Mu_SF_ID.root",                "NUM_MediumID_DEN_genTracks_eta_pt")],
-               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ID.root",                "NUM_MediumID_DEN_genTracks_pt_abseta")],
+               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ID_syst.root",           "NUM_MediumID_DEN_genTracks_pt_abseta")],
                ('2018','POG')   : [("2018RunABCD_Mu_SF_ID.root",                 "NUM_MediumID_DEN_TrackerMuons_pt_abseta")]}
 
 keys_ele = {('2016','POG')   : [("2016LegacyReReco_ElectronTight_Fall17V2.root", "EGamma_SF2D")],
