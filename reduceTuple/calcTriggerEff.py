@@ -38,9 +38,9 @@ if not args.isChild:
   for sample in sampleList:
     for select in ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
       for corr in [True, False]:
-        for pu in [True, False] if sample.name != 'MET' else [False]:
+        for pu in [True, False] if sample.name not in ['MET','JetHT'] else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
-  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser)
+  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='60')
   exit(0)
 
 
