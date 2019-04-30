@@ -128,18 +128,18 @@ def selectLeptons(t, n, minLeptons):
   elif minLeptons == 0: return True
 
 #
-# Photon selector
+# Photon selector with reduced cut based ID Fall17V2 (i.e. leaving out chgIso and sigmaIetaIeta cuts)
 #
 def photonCutBasedReduced(c, index):
   pt = c._phPtCorr[index]
   if abs(c._phEtaSC[index]) < 1.479:
-    if c._phHadronicOverEm[index] >  0.0396:                                return False
-    if c._phNeutralHadronIsolation[index] > 2.725+0.0148*pt+0.000017*pt*pt: return False
-    if c._phPhotonIsolation[index] >  2.571+0.0047*pt :                     return False
+    if c._phHadTowOverEm[index] > 0.02197:                                        return False
+    if c._phNeutralHadronIsolation[index] > 1.189 + 0.01512*pt + 2.259e-05*pt*pt: return False
+    if c._phPhotonIsolation[index] > 2.08 + 0.004017*pt:                          return False
   else:
-    if c._phHadronicOverEm[index] > 0.0219:                                   return False
-    if c._phNeutralHadronIsolation[index] >  1.715+0.0163*pt+0.000014*pt*pt : return False
-    if c._phPhotonIsolation[index] >  3.863+0.0034*pt:                        return False
+    if c._phHadTowOverEm[index] > 0.0326:                                      return False
+    if c._phNeutralHadronIsolation[index] > 2.718 + 0.0117*pt + 2.3e-05*pt*pt: return False
+    if c._phPhotonIsolation[index] > 3.867 + 0.0037*pt:                        return False
   return True
 
 
