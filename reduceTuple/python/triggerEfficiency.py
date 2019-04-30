@@ -9,9 +9,7 @@ from math import sqrt
 import os
 
 
-files = {'2016' : "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
-         '2017' : "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root",
-         '2018' : "$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF.root"}
+files = {y : '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerEfficiencies_'+y+'.root' for y in ['2016', '2017', '2018']}
 
 # TODO: studies to be repeated for full Run II data, including assesment of systematics
 class TriggerEfficiency:
