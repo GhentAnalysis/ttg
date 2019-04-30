@@ -8,7 +8,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse, itertools
+import os, argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',  action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--sample',    action='store',      default=None,                 help='Sample for which to produce reducedTuple, as listed in samples/data/tuples*.conf')
@@ -55,7 +55,7 @@ if not args.isChild and not args.subJob:
     if (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr')): continue
 
     if sample.isData:
-      if args.splitData in runs:  splitData = [args.splitData]
+      if args.splitData:          splitData = [args.splitData]
       elif sample.year == '2016': splitData = ['B', 'C', 'D', 'E', 'F', 'G', 'H']
       elif sample.year == '2017': splitData = ['B', 'C', 'D', 'E', 'F']
       elif sample.year == '2018': splitData = ['A', 'B', 'C', 'D']

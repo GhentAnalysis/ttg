@@ -201,14 +201,14 @@ int-import-graph=
 [DESIGN]
 
 # Maximum number of arguments for function / method
-max-args=6
+max-args=7
 
 # Argument names that match this expression will be ignored. Default to name
 # with leading underscore
 ignored-argument-names=_.*
 
 # Maximum number of locals for function / method body
-max-locals=16
+max-locals=20
 
 # Maximum number of return / yield for function / method body
 max-returns=15

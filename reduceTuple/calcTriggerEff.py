@@ -8,7 +8,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse, itertools
+import os, argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--debug',    action='store_true', default=False,  help='Only run over first three files for debugging')
