@@ -6,6 +6,7 @@ Checkout commands:
 ```
 cd $CMSSW_BASE/src;
 git clone https://github.com/GhentAnalysis/ttg;
+cd ttg;
 git checkout RunII
 ```
 
