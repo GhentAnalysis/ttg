@@ -88,6 +88,7 @@ a:hover { text-decoration: underline; color: #D08504; }
       if(realpath('./')!=realpath($path)){
         $user = get_current_user();
         $webPath = str_replace('eos/user/'.$user[0].'/'.$user.'/www', $user, $path).'/?'.$_SERVER['QUERY_STRING'];
+        $webPath = str_replace('storage_mnt/storage/user/'.$user.'/public_html', '~'.$user, $path).'/?'.$_SERVER['QUERY_STRING'];
         print "<span><a class=\"bar\" href=\"$webPath\">$name</a></span>";
       } else {
         print "<span><div class=\"bar\">$name</div></span>";
