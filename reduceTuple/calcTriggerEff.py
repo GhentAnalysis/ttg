@@ -30,6 +30,10 @@ from ttg.samples.Sample import createSampleList, getSampleFromList
 tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']]
 sampleList = createSampleList(*tupleFiles)
 
+nodes     = 5
+cores     = 4
+totalJobs = nodes*cores
+
 # Submit subjobs
 if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
@@ -41,7 +45,7 @@ if not args.isChild:
         for pu in [True, False] if sample.name not in ['MET','JetHT'] else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
   # no splitting so for some samples this has a very long walltime
-  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='168', que='highbw')
+  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='168', queue='highbw', nodes=nodes, cores=cores)
   exit(0)
 
 
@@ -142,7 +146,6 @@ if args.corr:
 # Trigger efficiency in bins
 #
 else:
-  totalJobs = 8
   def multiThreadWrapper(subJob):
     hPass, hTotal = {}, {}
     for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
