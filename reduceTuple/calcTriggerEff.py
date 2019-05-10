@@ -69,6 +69,16 @@ ROOT.gStyle.SetPadRightMargin(0.15)
 ROOT.gStyle.SetPadBottomMargin(0.15)
 ROOT.gROOT.ForceStyle()
 
+#
+# FIXME: temporarily until new trees available
+#
+if not hasattr(c, '_phHadTowOverEm'):
+  def switchBranches(default, variation):
+    return lambda chain: setattr(chain, default, getattr(chain, variation))
+  log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
+  branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
+
+
 # Select for which the trigger efficiencies are measured
 def passSelection():
   if not selectLeptons(c, c, 2): return False
@@ -108,6 +118,7 @@ if args.corr:
 
   for i in eventLoop:
     c.GetEntry(i)
+    for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
     if not passSelection(): continue
 
     if c.isEE:   channel = 'ee'
