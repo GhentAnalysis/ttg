@@ -18,7 +18,7 @@ def checkQueueOnCream02():
     checkQueueOnCream02()
 
 # Cream02 running
-def launchCream02(command, logfile, checkQueue=False, wallTime='15', queue='localgrid@cream02', nodes=1, cores=1):
+def launchCream02(command, logfile, checkQueue=False, wallTime='15', queue='localgrid', nodes=1, cores=1):
   if checkQueue: checkQueueOnCream02()
   log.info('Launching ' + command + ' on ' + queue)
   qsubOptions = ['-v dir=' + os.getcwd() + ',command="' + command + '"',
@@ -48,7 +48,7 @@ def launchLocal(command, logfile):
 #   dropArgs:   if some args need to be ignored
 #   subLog:     subdirectory for the logs
 #
-def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=None, wallTime='15', queue='localgrid@cream02', nodes=1, cores=1):
+def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=None, wallTime='15', queue='localgrid', nodes=1, cores=1):
   args         = argParser.parse_args()
   args.isChild = True
   changedArgs  = [arg for arg in vars(args) if getattr(args, arg) and argParser.get_default(arg) != getattr(args, arg)]
