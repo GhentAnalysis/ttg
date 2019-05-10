@@ -20,7 +20,7 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 from ttg.tools.style import commonStyle, setDefault
-from ttg.tools.helpers import printCanvas
+from ttg.tools.helpers import printCanvas, isValidRootFile
 from math import sqrt
 import ROOT
 
@@ -32,12 +32,20 @@ ROOT.gROOT.ForceStyle()
 def mkTriggerSF(year):
   outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerSF' + args.select + ('_puWeighted' if args.pu else '') + '_' + year + '.root'), 'update')
   inFile  = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root'))
+  inFileUnw = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + '_' + year  + '.root'))
   for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
     for channel in ['ee', 'emu', 'mue', 'mumu']:
-      effData = inFile.Get('MET-'     + channel + t)
+# FIXME could also use JetHT instead of MET
+      effData = inFileUnw.Get('MET-'     + channel + t) # Data is never PU reweighted, not in _puWeighted files
       effMC   = inFile.Get('TTGamma-' + channel + t)
-      effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
-      effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
+      try: effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
+      except: 
+        log.warning('MET-'     + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
+        continue
+      try: effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
+      except: 
+        log.warning('TTGamma-' + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
+        continue
       effData.Draw()
       ROOT.gPad.Update() # Important, otherwise ROOT throws null pointers
       hist = effData.GetPaintedHistogram()
@@ -72,13 +80,13 @@ def mkTriggerSF(year):
       hist.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
       
-      directory = os.path.expandvars('/user/$USER/www/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF_' + year +  '/' + args.select)
+      directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF_' + year +  '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       hist.Write('SF-' + channel + t)
 
-for year in ['16', '17', '18']:
+for year in ['2016', '2017', '2018']:
+  log.info('making trigger ScaleFactors for ' + year)
   mkTriggerSF(year)
-  log.info('making trigger ScaleFactors for 20' + year)
 
 log.info('Finished')

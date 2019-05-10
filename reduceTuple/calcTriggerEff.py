@@ -8,7 +8,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse
+import os, argparse, itertools
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--debug',    action='store_true', default=False,  help='Only run over first three files for debugging')
@@ -40,7 +40,8 @@ if not args.isChild:
       for corr in [True, False]:
         for pu in [True, False] if sample.name not in ['MET','JetHT'] else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
-  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='60')
+  # no splitting so for some samples this has a very long walltime
+  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='168')
   exit(0)
 
 

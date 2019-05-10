@@ -6,7 +6,7 @@
 import os, argparse, copy
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
-argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['16', '17', '18','all'])
+argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018','all'])
 argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='phoCBfull')
@@ -83,8 +83,9 @@ normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck'
 # Create stack
 #
 #
+# FIXME This could use a rewrite
 import glob
-stackFile = 'default_' + args.year
+stackFile = 'default' 
 for f in sorted(glob.glob("../samples/data/*.stack")):
   stackName = os.path.basename(f).split('.')[0]
   if not stackName[-5:] in ['_2016', '_2017', '_2018']:
@@ -94,28 +95,20 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
     stackFile = stackName[:-5]
 
 years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
-
 if args.year == 'all':
   for year in years:
     if not os.path.isfile('../samples/data/' + stackFile + '_' + year + '.stack'):
       log.warning('stackfile ' + stackFile + '_' + year + '.stack is missing, exiting')
       exit(0)
 
-
-# FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME FIXME 
-# !!!!!!!!!!!!!! temporarily using 16 tuplesfile for everything 
-# tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['16', '17', '18']}
-
-tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + '2016' + '.conf') for y in ['2016', '2017', '2018']}
-
+tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['2016', '2017', '2018']}
 
 #FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
 # when running over all years, just initialise the plots with the stack for 16
 stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.year == 'all' else args.year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + ('2016' if args.year == 'all' else args.year) + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys),
-                    year = '2016' if args.year == 'all' else args.year
+                    replacements = getReplacementsForStack(args.sys)
                     )
 
 #
@@ -250,7 +243,7 @@ def makePlotList():
   # pylint: enable=C0301
 
   if args.filterPlot:
-    plotList[:] = [p for p in plots if args.filterPlot in p.name]
+    plotList[:] = [p for p in plotList if args.filterPlot in p.name]
   return plotList
 
 years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
@@ -267,8 +260,7 @@ for year in years:
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys),
-                    year = year
+                    replacements = getReplacementsForStack(args.sys)
                     )
 
   # link the newly loaded samples to their respective existing histograms in the plots
@@ -291,6 +283,8 @@ for year in years:
     log.info([Lplot.name for Lplot in loadedPlots])
     log.info('Plots to be filled:')
     log.info([plot.name for plot in plotsToFill])
+  else: 
+    plotsToFill = plots
 
   lumiScale = lumiScales[year]
   #
@@ -300,7 +294,7 @@ for year in years:
     if   args.tag.count('eleCBTight') and not args.tag.count('eleCBTight-phoCB'): reduceType = 'eleCBTight'
     elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleCBTight-phoCB-noPixelSeedVeto'
     else:                                                                             reduceType = 'eleCBTight-phoCB'
-    if args.tag.count('test'):                                           reduceType = 'phoCB'
+    if args.tag.count('test'):                                           reduceType = 'phoCBtest'
     reduceType = applySysToReduceType(reduceType, args.sys)
 
     from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
@@ -352,10 +346,12 @@ for year in years:
           if not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
 
         if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
+        
+        prefireWeight = 1. if year == '2018' or sample.isData else c._prefireWeight
 
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
-        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*c._prefireWeight*lumiScale
+        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
 
         fillPlots(plotsToFill, c, sample, eventWeight)
 
@@ -376,40 +372,6 @@ for year in years:
   # from ttg.plots.systematics import rateParameters
   # linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
 
-  #
-  # set some extra arguments for the plots
-  #
-  if not args.sys or args.showSys:
-    extraArgs = {}
-    normalizeToMC = [False, True] if args.channel != 'noData' else [False]
-    if args.tag.count('onlydata'):
-      extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
-      extraArgs['systematics'] = ['sideBandUnc']
-    elif args.showSys:
-      extraArgs['addMCStat']   = True
-      if args.sys:
-        extraArgs['addMCStat'] = (args.sys == 'stat')
-        showSysList            = [args.sys] if args.sys != 'stat' else []
-        linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
-      extraArgs['systematics']       = showSysList
-      extraArgs['linearSystematics'] = linearSystematics
-      extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
-      extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
-
-
-    if args.channel != 'noData':
-      extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
-
-    if(normalize or args.tag.count('compareChannels')):
-      extraArgs['scaling'] = 'unity'
-      extraArgs['ratio']   = {'yRange' : (0.1, 1.9), 'texY':'ratio'}
-      normalizeToMC        = [False]
-
-    if args.tag.count('compareTTSys'):
-      extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}'}
-
-    if args.tag.count('compareTTGammaSys'):
-      extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
   #
   # Drawing the plots
@@ -424,13 +386,48 @@ for year in years:
       if not plot.blindRange == None and not year == '2016':
         for sample, histo in plot.histos.iteritems():
           if sample.isData:
-            for bin in range(1, histo.GetNbinsX()+1):
+            for bin in range(1, histo.GetNbinsX()+2):
               if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
                 histo.SetBinContent(bin, 0)
 
       if plot.name == "yield":
         log.info("Yields: ")
         for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+
+  #
+  # set some extra arguments for the plots
+  #
+    if not args.sys or args.showSys:
+      extraArgs = {}
+      normalizeToMC = [False, True] if args.channel != 'noData' else [False]
+      if args.tag.count('onlydata'):
+        extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
+        extraArgs['systematics'] = ['sideBandUnc']
+      elif args.showSys:
+        extraArgs['addMCStat']   = True
+        if args.sys:
+          extraArgs['addMCStat'] = (args.sys == 'stat')
+          showSysList            = [args.sys] if args.sys != 'stat' else []
+          linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
+        extraArgs['systematics']       = showSysList
+        extraArgs['linearSystematics'] = linearSystematics
+        extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
+        extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+
+
+      if args.channel != 'noData':
+        extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
+
+      if(normalize or args.tag.count('compareChannels')):
+        extraArgs['scaling'] = 'unity'
+        extraArgs['ratio']   = {'yRange' : (0.1, 1.9), 'texY':'ratio'}
+        normalizeToMC        = [False]
+
+      if args.tag.count('compareTTSys'):
+        extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}'}
+
+      if args.tag.count('compareTTGammaSys'):
+        extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
@@ -465,10 +462,10 @@ for year in years:
                     drawOption     = option,
                     drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')))
   if noWarnings: 
-    log.info('Plots made for 20' + year)
+    log.info('Plots made for ' + year)
     if not args.year == 'all': log.info('Finished')
   else:          
-    log.info('Could not produce all plots for 20' + year)
+    log.info('Could not produce all plots for ' + year)
 
 
 #
@@ -489,13 +486,47 @@ for plot in totalPlots: # 1D plots
     if not plot.blindRange == None:
       for sample, histo in plot.histos.iteritems():
         if sample.isData:
-          for bin in range(1, histo.GetNbinsX()+1):
+          for bin in range(1, histo.GetNbinsX()+2):
             if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
               histo.SetBinContent(bin, 0)
 
     if plot.name == "yield":
       log.info("Yields: ")
       for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+  #
+  # set some extra arguments for the plots
+  #
+  if not args.sys or args.showSys:
+    extraArgs = {}
+    normalizeToMC = [False, True] if args.channel != 'noData' else [False]
+    if args.tag.count('onlydata'):
+      extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
+      extraArgs['systematics'] = ['sideBandUnc']
+    elif args.showSys:
+      extraArgs['addMCStat']   = True
+      if args.sys:
+        extraArgs['addMCStat'] = (args.sys == 'stat')
+        showSysList            = [args.sys] if args.sys != 'stat' else []
+        linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
+      extraArgs['systematics']       = showSysList
+      extraArgs['linearSystematics'] = linearSystematics
+      extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
+      extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+
+
+    if args.channel != 'noData':
+      extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
+
+    if(normalize or args.tag.count('compareChannels')):
+      extraArgs['scaling'] = 'unity'
+      extraArgs['ratio']   = {'yRange' : (0.1, 1.9), 'texY':'ratio'}
+      normalizeToMC        = [False]
+
+    if args.tag.count('compareTTSys'):
+      extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}'}
+
+    if args.tag.count('compareTTGammaSys'):
+      extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
     for norm in normalizeToMC:
       if norm: extraArgs['scaling'] = {0:1}
