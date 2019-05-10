@@ -50,12 +50,13 @@ class LeptonSF:
       for effMap in self.muGH:
         assert effMap
         effMap.ptY = (year == '2016')
-      
 
     for effMap in self.mu:  effMap.ptY = (year == '2016')
     for effMap in self.ele: effMap.ptY = True
-
     for effMap in self.mu + self.ele: assert effMap
+
+    self.absEtaMu = year in ['2017','2018']
+    self.altEdge = year == '2018'
 
   @staticmethod
   def getPartialSF(effMap, x, y):
@@ -66,16 +67,20 @@ class LeptonSF:
 
   def getSF(self, tree, index, sigma=0):
     flavor = tree._lFlavor[index]
-    pt     = tree._lPt[index] if flavor == 1 else tree._lPtCorr[index]
-    eta    = abs(tree._lEta[index])
+    pt     = tree._lPt[index]   if flavor == 1 else tree._lPtCorr[index]
+    eta    = tree._lEta[index]) if flavor == 1 else tree._lEtaSC[index])
 
     if abs(flavor) == 1:
+      if self.absEtaMu: eta = abs(eta)
       if pt >= 120: pt = 119 # last bin is valid to infinity
+      if self.altEdge and pt <= 15: pt = 16
+      elif pt <= 20: pt = 21
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu)
       if hasattr(self, 'muGH'): # for 2016 self.muGH is defined and needs to be taken into account
         sf = (0.549792*sf + 0.450208*multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.muGH))
     elif abs(flavor) == 0:
       if pt >= 500: pt = 499 # last bin is valid to infinity
+      if pt <= 10: pt = 11 # we don't go this low though
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele)
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)

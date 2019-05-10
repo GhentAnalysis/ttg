@@ -39,9 +39,9 @@ class LeptonTrackingEfficiency:
       if not eta <= self.e_etaMax: 
         log.warning("Supercluster eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.e_etaMin, self.e_etaMax)
         eta = self.e_etaMax
-      if not eta >= self.e_etaMin:
+      if not eta > self.e_etaMin:
         log.warning("Supercluster eta out of bounds: %3.2f (need %3.2f <= eta <=% 3.2f)", eta, self.e_etaMin, self.e_etaMax)
-        eta = self.e_etaMin
+        eta = self.e_etaMin + 0.0001
 
       if pt > self.e_ptMax:    pt = self.e_ptMax - 1 
       elif pt <= self.e_ptMin: pt = self.e_ptMin + 1
@@ -53,9 +53,10 @@ class LeptonTrackingEfficiency:
         val    = self.eHigh_sf.GetBinContent(self.eHigh_sf.FindBin(eta, pt))
         valErr = self.eHigh_sf.GetBinError(self.eHigh_sf.FindBin(eta, pt))
       
-      if pt > 80: addUnc = 0.01*val # Additional 1% on ele with pt > 80
-      else:       addUnc = 0.
-      valErr = math.sqrt(valErr**2 + addUnc**2)
+# TODO  check if this is not needed anymore
+      # if pt > 80: addUnc = 0.01*val # Additional 1% on ele with pt > 80
+      # else:       addUnc = 0.
+      # valErr = math.sqrt(valErr**2 + addUnc**2)
 
     elif abs(flavor) == 1:
       return 1.

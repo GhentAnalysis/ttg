@@ -18,19 +18,20 @@ def checkQueueOnCream02():
     checkQueueOnCream02()
 
 # Cream02 running
-def launchCream02(command, logfile, checkQueue=False, wallTime='15', queue='localgrid'):
+def launchCream02(command, logfile, checkQueue=False, wallTime='15', queue='localgrid@cream02', nodes=1, cores=1):
   if checkQueue: checkQueueOnCream02()
-  log.info('Launching ' + command + ' on cream02')
+  log.info('Launching ' + command + ' on ' + queue)
   qsubOptions = ['-v dir=' + os.getcwd() + ',command="' + command + '"',
                  '-q ' + queue + '@cream02',
                  '-o ' + logfile,
                  '-e ' + logfile,
-                 '-l walltime=' + wallTime + ':00:00']
+                 '-l walltime=' + wallTime + ':00:00',
+                 '-l nodes='+str(nodes)+':ppn=' + str(cores)]
   try:    out = system('qsub ' + ' '.join(qsubOptions) + ' $CMSSW_BASE/src/ttg/tools/scripts/runOnCream02.sh')
   except: out = 'failed'
   if not out.count('.cream02.iihe.ac.be'):
     time.sleep(10)
-    launchCream02(command, logfile, queue=queue)
+    launchCream02(command, logfile, wallTime=wallTime, queue=queue, nodes=nodes, cores=cores)
 
 # Local running: limit to 8 jobs running simultaneously
 def launchLocal(command, logfile):
@@ -47,7 +48,7 @@ def launchLocal(command, logfile):
 #   dropArgs:   if some args need to be ignored
 #   subLog:     subdirectory for the logs
 #
-def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=None, wallTime='15', queue='localgrid'):
+def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=None, wallTime='15', queue='localgrid@cream02', nodes=1, cores=1):
   args         = argParser.parse_args()
   args.isChild = True
   changedArgs  = [arg for arg in vars(args) if getattr(args, arg) and argParser.get_default(arg) != getattr(args, arg)]
@@ -56,7 +57,7 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=
   for i, subJob in enumerate(subJobList):
     for arg, value in zip(subJobArgs, subJob):
       if value: submitArgs[arg] = str(value)
-      else: 
+      else:
         try:    submitArgs.pop(arg)
         except: pass
 
@@ -70,4 +71,4 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=
 
     if args.dryRun:     log.info('Dry-run: ' + command)
     elif args.runLocal: launchLocal(command, logfile)
-    else:               launchCream02(command, logfile, checkQueue=(i%100==0), wallTime=wallTime, queue)
+    else:               launchCream02(command, logfile, checkQueue=(i%100==0), wallTime=wallTime, queue=queue, nodes=nodes, cores=cores)

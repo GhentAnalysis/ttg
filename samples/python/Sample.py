@@ -182,9 +182,8 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
           if channel == 'ee':   texName += ' (2e)'
           if channel == 'mumu': texName += ' (2#mu)'
           if channel == 'emu':  texName += ' (1e, 1#mu)'
-
-        sample = getSampleFromList(stack, alias if alias else name)                         # Check if sample with same name already exists in this stack
-        if not sample: sample = getSampleFromStack(allStacks, alias if alias else name)     # or other stack
+        sample = getSampleFromList(stack, name)                         # Check if sample with same name already exists in this stack
+        if not sample: sample = getSampleFromStack(allStacks, name)     # or other stack
         if sample:                                                                          # if yes, take it from there and make a deepcopy with different name
           sample = copy.deepcopy(sample)
           sample.addSamples = [(sample.name, sample.productionLabel)]
@@ -196,6 +195,8 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
         texName = texName.replace('_{','lower{').replace('_',' ').replace('lower{','_{')
         sample.addStyle(texName, style)
         if alias:
+          sample = copy.deepcopy(sample)
+          sample.addSamples = [(sample.name, sample.productionLabel)]
           sample.name = alias
           alias = None
         stack.append(sample)

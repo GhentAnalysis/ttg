@@ -67,7 +67,7 @@ def electronSelector(tree, index):
   for i in xrange(tree._nMu): # cleaning electrons around muons
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
-  if 1.44 < abs(tree._lEta[index]) < 1.57: return False
+  if 1.4442 < abs(tree._lEtaSC[index]) < 1.566: return False
   if   tree.eleMva:    return electronMva(tree, index)
   else:                return tree._lPOGTight[index]
 
