@@ -92,6 +92,13 @@ def addHist(first, second):
   elif second:         first = second.Clone()
   return first
 
+def addHists(histList):
+  total = None
+  for h in histList:
+    total = addHist(total, h)
+  return total
+
+
 #
 # multiply all elements in list
 #

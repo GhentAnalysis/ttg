@@ -18,11 +18,11 @@ def checkQueueOnCream02():
     checkQueueOnCream02()
 
 # Cream02 running
-def launchCream02(command, logfile, checkQueue=False, wallTime='15'):
+def launchCream02(command, logfile, checkQueue=False, wallTime='15', queue='localgrid'):
   if checkQueue: checkQueueOnCream02()
   log.info('Launching ' + command + ' on cream02')
   qsubOptions = ['-v dir=' + os.getcwd() + ',command="' + command + '"',
-                 '-q localgrid@cream02',
+                 '-q ' + queue + '@cream02',
                  '-o ' + logfile,
                  '-e ' + logfile,
                  '-l walltime=' + wallTime + ':00:00']
@@ -30,7 +30,7 @@ def launchCream02(command, logfile, checkQueue=False, wallTime='15'):
   except: out = 'failed'
   if not out.count('.cream02.iihe.ac.be'):
     time.sleep(10)
-    launchCream02(command, logfile)
+    launchCream02(command, logfile, queue=queue)
 
 # Local running: limit to 8 jobs running simultaneously
 def launchLocal(command, logfile):
@@ -47,7 +47,7 @@ def launchLocal(command, logfile):
 #   dropArgs:   if some args need to be ignored
 #   subLog:     subdirectory for the logs
 #
-def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=None, wallTime='15'):
+def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=None, wallTime='15', queue='localgrid'):
   args         = argParser.parse_args()
   args.isChild = True
   changedArgs  = [arg for arg in vars(args) if getattr(args, arg) and argParser.get_default(arg) != getattr(args, arg)]
@@ -70,4 +70,4 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=
 
     if args.dryRun:     log.info('Dry-run: ' + command)
     elif args.runLocal: launchLocal(command, logfile)
-    else:               launchCream02(command, logfile, checkQueue=(i%100==0), wallTime=wallTime)
+    else:               launchCream02(command, logfile, checkQueue=(i%100==0), wallTime=wallTime, queue)

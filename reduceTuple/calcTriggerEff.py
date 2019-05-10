@@ -8,7 +8,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse, itertools
+import os, argparse, itertools, copy, ROOT, numpy
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--debug',    action='store_true', default=False,  help='Only run over first three files for debugging')
@@ -27,7 +27,7 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 from ttg.samples.Sample import createSampleList, getSampleFromList
-tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']] 
+tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']]
 sampleList = createSampleList(*tupleFiles)
 
 # Submit subjobs
@@ -49,21 +49,15 @@ if args.select != '':    args.select = '-' + args.select
 
 # Get sample, chain and event loop
 sample    = getSampleFromList(sampleList, args.sample, args.year)
-c         = sample.initTree(shortDebug=args.debug)
-eventLoop = sample.eventLoop(selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None)
 log.info('Sample: ' + sample.name)
 
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets
-setIDSelection(c, 'phoCB')
-
 from ttg.tools.style import commonStyle, setDefault
-from ttg.tools.helpers import printCanvas 
+from ttg.tools.helpers import printCanvas, addHists
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 
 reweightingFunctions = {'2016':"PU_2016_36000_XSecCentral", '2017':"PU_2017_41500_XSecCentral", '2018':"PU_2018_60000_XSecCentral"}
 puReweighting = getReweightingFunction(sample.year, data=reweightingFunctions[sample.year])
-
-import ROOT, numpy
 
 setDefault()
 ROOT.gStyle.SetPadRightMargin(0.15)
@@ -71,17 +65,9 @@ ROOT.gStyle.SetPadBottomMargin(0.15)
 ROOT.gROOT.ForceStyle()
 
 #
-# FIXME: temporarily until new trees available
+# Selection for which the trigger efficiencies are measured
 #
-if not hasattr(c, '_phHadTowOverEm'):
-  def switchBranches(default, variation):
-    return lambda chain: setattr(chain, default, getattr(chain, variation))
-  log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
-  branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
-
-
-# Select for which the trigger efficiencies are measured
-def passSelection():
+def passSelection(c):
   if not selectLeptons(c, c, 2): return False
   if args.select.count('ph'):
     c.doPhotonCut = True
@@ -100,15 +86,19 @@ def passSelection():
     if args.select.count('2p') and not c.njets >= 2: return False
   return True
 
+#
 # How to pass our triggers
-def passTrigger():
-  if c.isEE   and (c._passTrigger_ee or c._passTrigger_e):                 return True
+#
+def passTrigger(c):
+  if c.isEE   and (c._passTrigger_ee or c._passTrigger_e):                     return True
   if c.isEMu  and (c._passTrigger_em or c._passTrigger_e or c._passTrigger_m): return True
-  if c.isMuMu and (c._passTrigger_mm or c._passTrigger_m):                 return True
+  if c.isMuMu and (c._passTrigger_mm or c._passTrigger_m):                     return True
   return False
 
 
+#
 # Efficiency and correlation for the whole selection
+#
 if args.corr:
   countAll, countMET, countLep, countBoth = {}, {}, {}, {}
   for channel in ['ee', 'emu', 'mumu']:
@@ -117,10 +107,22 @@ if args.corr:
     countLep[channel]  = 0.
     countBoth[channel] = 0.
 
-  for i in eventLoop:
+  c = sample.initTree(shortDebug=args.debug)
+  setIDSelection(c, 'phoCB')
+  #
+  # FIXME: temporarily until new trees available
+  #
+  if not hasattr(c, '_phHadTowOverEm'):
+    def switchBranches(default, variation):
+      return lambda chain: setattr(chain, default, getattr(chain, variation))
+    log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
+    branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
+
+  # If needed, we can work out a multithreaded option, similar like below
+  for i in sample.eventLoop():
     c.GetEntry(i)
     for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
-    if not passSelection(): continue
+    if not passSelection(c): continue
 
     if c.isEE:   channel = 'ee'
     if c.isEMu:  channel = 'emu'
@@ -129,59 +131,87 @@ if args.corr:
 
     countAll[channel] += puWeight
     if c._passTrigger_ref:                   countMET[channel] += puWeight
-    if passTrigger():                        countLep[channel] += puWeight
+    if passTrigger(c):                       countLep[channel] += puWeight
     if c._passTrigger_ref and passTrigger(): countBoth[channel] += puWeight
 
   for channel in ['ee', 'emu', 'mumu']:
     log.info('Efficiency  for channel ' + channel + ' is ' + str(countBoth[channel]/countMET[channel]))
     log.info('Correlation for channel ' + channel + ' is ' + str((countMET[channel]*countLep[channel])/(countBoth[channel]*countAll[channel])))
 
+#
 # Trigger efficiency in bins
+#
 else:
-  hPass, hTotal = {}, {}
-  for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
-    hPass[t], hTotal[t] = {}, {}
-    for channel in ['ee', 'emu', 'mue', 'mumu']:
-      if 'etaBinning' in t:
-        binningX = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.startswith('e') else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
-        binningY = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.endswith('e')   else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
-      elif 'integral' in t:
-        binningX = numpy.array([25., 9999.])
-        binningY = numpy.array([15., 9999.])
-      else:
-        binningX = numpy.array([25., 35, 50, 100, 150, 250])
-        binningY = numpy.array([15., 20, 25, 35, 50, 100, 150, 250])
-      name    = sample.name + ' ' + channel + ' ' + t
-      hPass[t][channel]  = ROOT.TH2D(name + 'Pass',  name, len(binningX)-1, binningX, len(binningY)-1, binningY)
-      hTotal[t][channel] = ROOT.TH2D(name + 'Total', name, len(binningX)-1, binningX, len(binningY)-1, binningY)
-
-
-  for i in eventLoop:
-    c.GetEntry(i)
-    if not c._passTrigger_ref: continue
-    if not passSelection():  continue
-
-    if c.isEE:   channel = 'ee'
-    if c.isEMu:  channel = 'emu' if c._lFlavor[c.l1] == 0 else 'mue'
-    if c.isMuMu: channel = 'mumu'
-    puWeight = puReweighting(c._nTrueInt) if args.pu else 1.
-
+  totalJobs = 8
+  def multiThreadWrapper(subJob):
+    hPass, hTotal = {}, {}
     for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
-      if 'l1c' in t and abs(c._lEta[c.l1]) > 1.5: continue
-      if 'l1e' in t and abs(c._lEta[c.l1]) < 1.5: continue
-      if 'l2c' in t and abs(c._lEta[c.l2]) > 1.5: continue
-      if 'l2e' in t and abs(c._lEta[c.l2]) < 1.5: continue
+      hPass[t], hTotal[t] = {}, {}
+      for channel in ['ee', 'emu', 'mue', 'mumu']:
+        if 'etaBinning' in t:
+          binningX = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.startswith('e') else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
+          binningY = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.endswith('e')   else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
+        elif 'integral' in t:
+          binningX = numpy.array([25., 9999.])
+          binningY = numpy.array([15., 9999.])
+        else:
+          binningX = numpy.array([25., 35, 50, 100, 150, 250])
+          binningY = numpy.array([15., 20, 25, 35, 50, 100, 150, 250])
+        name    = sample.name + ' ' + channel + ' ' + t
+        hPass[t][channel]  = ROOT.TH2D(name + 'Pass', name, len(binningX)-1, binningX, len(binningY)-1, binningY)
+        hTotal[t][channel] = ROOT.TH2D(name + 'Total', name, len(binningX)-1, binningX, len(binningY)-1, binningY)
 
-      if 'etaBinning' in t: hTotal[t][channel].Fill(c._lEta[c.l1], c._lEta[c.l2], puWeight)
-      else:                 hTotal[t][channel].Fill(c.l1_pt, c.l2_pt, puWeight)
-      if passTrigger():
-        if 'etaBinning' in t: hPass[t][channel].Fill(c._lEta[c.l1], c._lEta[c.l2], puWeight)
-        else:                 hPass[t][channel].Fill(c.l1_pt, c.l2_pt, puWeight)
+    clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
+    c            = clonedSample.initTree(shortDebug=args.debug)
+    setIDSelection(c, 'phoCB')
+    #
+    # FIXME: temporarily until new trees available
+    #
+    if not hasattr(c, '_phHadTowOverEm'):
+      def switchBranches(default, variation):
+        return lambda chain: setattr(chain, default, getattr(chain, variation))
+      log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
+      branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
+
+    for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
+      c.GetEntry(i)
+      if not c._passTrigger_ref: continue
+      for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
+      if not passSelection(c): continue
+
+      if c.isEE:   channel = 'ee'
+      if c.isEMu:  channel = 'emu' if c._lFlavor[c.l1] == 0 else 'mue'
+      if c.isMuMu: channel = 'mumu'
+      puWeight = puReweighting(c._nTrueInt) if args.pu else 1.
+
+      for t in hPass:
+        if 'l1c' in t and abs(c._lEta[c.l1]) > 1.5: continue
+        if 'l1e' in t and abs(c._lEta[c.l1]) < 1.5: continue
+        if 'l2c' in t and abs(c._lEta[c.l2]) > 1.5: continue
+        if 'l2e' in t and abs(c._lEta[c.l2]) < 1.5: continue
+
+        if 'etaBinning' in t: hTotal[t][channel].Fill(c._lEta[c.l1], c._lEta[c.l2], puWeight)
+        else:                 hTotal[t][channel].Fill(c.l1_pt, c.l2_pt, puWeight)
+        if passTrigger(c):
+          if 'etaBinning' in t: hPass[t][channel].Fill(c._lEta[c.l1], c._lEta[c.l2], puWeight)
+          else:                 hPass[t][channel].Fill(c.l1_pt, c.l2_pt, puWeight)
+
+    return hPass, hTotal
+
+  from multiprocessing import Pool
+  pool = Pool(processes=totalJobs)
+  passAndTotalHists = pool.map(multiThreadWrapper, range(totalJobs))
+  pool.close()
+  pool.join()
+
+  passHists, totalHists = [i[0] for i in passAndTotalHists], [i[1] for i in passAndTotalHists]
 
   outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + args.year + '.root'), 'update')
-  for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
-    for channel in ['ee', 'emu', 'mue', 'mumu']:
-      eff = ROOT.TEfficiency(hPass[t][channel], hTotal[t][channel])
+  for t in passHists[0]:
+    for channel in passHists[0][t]:
+      hPass  = addHists(h[t][channel] for h in passHists)
+      hTotal = addHists(h[t][channel] for h in totalHists)
+      eff = ROOT.TEfficiency(hPass, hTotal)
       eff.SetStatisticOption(ROOT.TEfficiency.kFCP)
       eff.Draw()
       ROOT.gPad.Update() # Important, otherwise ROOT throws null pointers
