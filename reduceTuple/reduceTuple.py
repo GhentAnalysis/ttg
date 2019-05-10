@@ -61,7 +61,7 @@ if not args.isChild and not args.subJob:
       elif sample.year == '2018': splitData = ['A', 'B', 'C', 'D']
     else:                         splitData = [None]
     jobs += [(sample.name, sample.year, str(i), j) for i in xrange(sample.splitJobs) for j in splitData]
-  submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type)
+  submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type, que='highbw')
   exit(0)
 
 #

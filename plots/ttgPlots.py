@@ -54,7 +54,7 @@ if not args.isChild:
 
   subJobArgs, subJobList = getVariations(args, sysList)
 
-  submitJobs(__file__, subJobArgs, subJobList, argParser, subLog=args.tag)
+  submitJobs(__file__, subJobArgs, subJobList, argParser, subLog=args.tag, que='highbw')
   exit(0)
 
 #
