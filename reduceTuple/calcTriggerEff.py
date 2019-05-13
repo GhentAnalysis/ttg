@@ -8,7 +8,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse, itertools, copy, ROOT, numpy
+import os, argparse, copy, ROOT, numpy
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--debug',    action='store_true', default=False,  help='Only run over first three files for debugging')
@@ -30,7 +30,7 @@ from ttg.samples.Sample import createSampleList, getSampleFromList
 tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']]
 sampleList = createSampleList(*tupleFiles)
 
-nodes     = 5
+nodes     = 1
 cores     = 4
 totalJobs = nodes*cores
 
@@ -104,43 +104,57 @@ def passTrigger(c):
 # Efficiency and correlation for the whole selection
 #
 if args.corr:
-  countAll, countMET, countLep, countBoth = {}, {}, {}, {}
+  def multiThreadWrapper(subJob):
+    countAll, countMET, countLep, countBoth = {}, {}, {}, {}
+    for channel in ['ee', 'emu', 'mumu']:
+      countAll[channel]  = 0.
+      countMET[channel]  = 0.
+      countLep[channel]  = 0.
+      countBoth[channel] = 0.
+
+    clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
+    c            = clonedSample.initTree(shortDebug=args.debug)
+    setIDSelection(c, 'phoCB')
+    #
+    # FIXME: temporarily until new trees available
+    #
+    if not hasattr(c, '_phHadTowOverEm'):
+      def switchBranches(default, variation):
+        return lambda chain: setattr(chain, default, getattr(chain, variation))
+      log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
+      branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
+
+    # If needed, we can work out a multithreaded option, similar like below
+    for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
+      c.GetEntry(i)
+      for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
+      if not passSelection(c): continue
+
+      if c.isEE:   channel = 'ee'
+      if c.isEMu:  channel = 'emu'
+      if c.isMuMu: channel = 'mumu'
+      puWeight = puReweighting(c._nTrueInt) if args.pu else 1.
+
+      countAll[channel] += puWeight
+      if c._passTrigger_ref:                    countMET[channel] += puWeight
+      if passTrigger(c):                        countLep[channel] += puWeight
+      if c._passTrigger_ref and passTrigger(c): countBoth[channel] += puWeight
+
+    return countAll, countMET, countLep, countBoth
+
+  from multiprocessing import Pool
+  pool = Pool(processes=totalJobs)
+  allCounters = pool.map(multiThreadWrapper, range(totalJobs))
+  pool.close()
+  pool.join()
+
   for channel in ['ee', 'emu', 'mumu']:
-    countAll[channel]  = 0.
-    countMET[channel]  = 0.
-    countLep[channel]  = 0.
-    countBoth[channel] = 0.
-
-  c = sample.initTree(shortDebug=args.debug)
-  setIDSelection(c, 'phoCB')
-  #
-  # FIXME: temporarily until new trees available
-  #
-  if not hasattr(c, '_phHadTowOverEm'):
-    def switchBranches(default, variation):
-      return lambda chain: setattr(chain, default, getattr(chain, variation))
-    log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
-    branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
-
-  # If needed, we can work out a multithreaded option, similar like below
-  for i in sample.eventLoop():
-    c.GetEntry(i)
-    for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
-    if not passSelection(c): continue
-
-    if c.isEE:   channel = 'ee'
-    if c.isEMu:  channel = 'emu'
-    if c.isMuMu: channel = 'mumu'
-    puWeight = puReweighting(c._nTrueInt) if args.pu else 1.
-
-    countAll[channel] += puWeight
-    if c._passTrigger_ref:                   countMET[channel] += puWeight
-    if passTrigger(c):                       countLep[channel] += puWeight
-    if c._passTrigger_ref and passTrigger(): countBoth[channel] += puWeight
-
-  for channel in ['ee', 'emu', 'mumu']:
-    log.info('Efficiency  for channel ' + channel + ' is ' + str(countBoth[channel]/countMET[channel]))
-    log.info('Correlation for channel ' + channel + ' is ' + str((countMET[channel]*countLep[channel])/(countBoth[channel]*countAll[channel])))
+    countAll  = sum([i[0][channel] for i in allCounters])
+    countMET  = sum([i[1][channel] for i in allCounters])
+    countLep  = sum([i[2][channel] for i in allCounters])
+    countBoth = sum([i[3][channel] for i in allCounters])
+    log.info('Efficiency  for channel ' + channel + ' is ' + str(countBoth/countMET))
+    log.info('Correlation for channel ' + channel + ' is ' + str((countMET*countLep)/(countBoth*countAll)))
 
 #
 # Trigger efficiency in bins
