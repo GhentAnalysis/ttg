@@ -27,10 +27,6 @@ args = argParser.parse_args()
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
-if args.sample and not args.year:
-  log.warning("If the sample is specified, the year needs to be specified as well, exiting")
-  exit(0)
-
 #
 # Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
 #
@@ -61,7 +57,7 @@ if not args.isChild and not args.subJob:
       elif sample.year == '2018': splitData = ['A', 'B', 'C', 'D']
     else:                         splitData = [None]
     jobs += [(sample.name, sample.year, str(i), j) for i in xrange(sample.splitJobs) for j in splitData]
-  submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type, que='highbw')
+  submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type)
   exit(0)
 
 #
