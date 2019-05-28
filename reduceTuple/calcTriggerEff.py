@@ -14,7 +14,7 @@ argParser.add_argument('--logLevel', action='store',      default='INFO', help='
 argParser.add_argument('--debug',    action='store_true', default=False,  help='Only run over first three files for debugging')
 argParser.add_argument('--corr',     action='store_true', default=False,  help='Calculate correlation coefficients')
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
-argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
+argParser.add_argument('--select',   action='store',      default=None,   help='Additional selection for systematic studies')
 argParser.add_argument('--sample',   action='store',      default=None,   help='Select sample')
 argParser.add_argument('--year',     action='store',      default=None,   help='Select year', choices=['2016', '2017', '2018'])
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
@@ -30,17 +30,18 @@ from ttg.samples.Sample import createSampleList, getSampleFromList
 tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']]
 sampleList = createSampleList(*tupleFiles)
 
-nodes     = 1
+nodes     = 5
 cores     = 4
 totalJobs = nodes*cores
 
 # Submit subjobs
 if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
-  if args.sample and args.year: sampleList = [s for s in sampleList if s.name == args.sample and s.year == args.year]
+  if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
+  if args.year:   sampleList = [s for s in sampleList if s.year == args.year]
   jobs = []
   for sample in sampleList:
-    for select in ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
+    for select in [args.select] if args.select else ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
       for corr in [True, False]:
         for pu in [True, False] if sample.name not in ['MET','JetHT'] else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
