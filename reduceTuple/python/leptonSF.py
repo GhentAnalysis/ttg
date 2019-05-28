@@ -67,8 +67,8 @@ class LeptonSF:
 
   def getSF(self, tree, index, sigma=0):
     flavor = tree._lFlavor[index]
-    pt     = tree._lPt[index]   if flavor == 1 else tree._lPtCorr[index]
-    eta    = tree._lEta[index]) if flavor == 1 else tree._lEtaSC[index])
+    pt     = tree._lPt[index]  if flavor == 1 else tree._lPtCorr[index]
+    eta    = tree._lEta[index] if flavor == 1 else tree._lEtaSC[index]
 
     if abs(flavor) == 1:
       if self.absEtaMu: eta = abs(eta)
