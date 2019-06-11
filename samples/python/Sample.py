@@ -71,8 +71,20 @@ class Sample:                                                                   
       trueInteractions.SetDirectory(0)
     return trueInteractions
 
+  # returns list of files for production with most recent time-tag
+  def getListOfFiles(self, splitData):
+    if splitData: runDirs = os.path.join(self.path, 'crab_Run' + self.year + splitData + '*' + self.productionLabel)
+    else:         runDirs = os.path.join(self.path, '*' + self.productionLabel)
+    listOfFiles = []
+    for runDir in glob.glob(runDirs):
+      timeTagDirs = glob.glob(os.path.join(runDir, '*'))
+      if len(timeTagDirs) > 1:
+        log.warning('Multiple production time-tags found for ' + runDir + '(' + ','.join(i.split('/')[-1] for i in timeTagDirs) + '), taking the most recent one')
+      listOfFiles += glob.glob(os.path.join(sorted(timeTagDirs)[-1], '*', '*.root'))  # files are typically at **/YYMMDD_HHMMSS/0000/*.root
+    return listOfFiles
+
   # init the chain and return it
-  def initTree(self, shortDebug=False, reducedType=None, splitData=None, subProductionLabel=None):
+  def initTree(self, shortDebug=False, reducedType=None, splitData=None):
     if reducedType:
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
@@ -80,17 +92,7 @@ class Sample:                                                                   
         self.listOfFiles += glob.glob(os.path.join(reducedTupleDir, productionLabel, reducedType, sample, '*.root'))
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
-      if self.isData and splitData:
-        label = self.productionLabel + (subProductionLabel if subProductionLabel else '')
-        self.listOfFiles  = glob.glob(os.path.join(self.path, '*Run2016' + splitData + '*' + label, '*', '*', '*.root'))
-        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2017' + splitData + '*' + label, '*', '*', '*.root'))
-        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2018' + splitData + '*' + label, '*', '*', '*.root'))
-        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2016' + splitData + '*' + label, '*', '*.root'))
-        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2017' + splitData + '*' + label, '*', '*.root'))
-        self.listOfFiles += glob.glob(os.path.join(self.path, '*Run2018' + splitData + '*' + label, '*', '*.root'))
-      else:
-        self.listOfFiles  = glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*', '*', '*.root'))
-        self.listOfFiles += glob.glob(os.path.join(self.path, '*' + self.productionLabel, '*.root'))
+      self.listOfFiles = self.getListOfFiles(splitData)
     if shortDebug: self.listOfFiles = self.listOfFiles[:3]
     if not len(self.listOfFiles): log.error('No tuples to run over for ' + self.name)
     for i in self.listOfFiles:
@@ -212,7 +214,11 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
 # Get sample from list or stack using its name
 #
 def getSampleFromList(sampleList, name, year=None):
-  return next((s for s in sampleList if s.name==name and (s.year==year or not year )), None)
+  sample = next((s for s in sampleList if s.name==name and (s.year==year or not year )), None)
+  if sample: return sample
+  else:      log.warning('No sample ' + name + ' found for year ' + year + '!')
 
 def getSampleFromStack(stack, name):
-  return next((s for s in sum(stack, []) if s.name==name), None)
+  sample = next((s for s in sum(stack, []) if s.name==name), None)
+  if sample: return sample
+  else:      log.warning('No sample ' + name + ' found in stack!')
