@@ -1,0 +1,14 @@
+-- MC (sigmaIetaIeta pass)
+TT_Dil               t#bar{t}_(hadronicPhoton,#sigma_{i#etai#eta}_pass)                       errorStyle     kBlue          _ttgEventType<3
++TT_Sem
++TT_Had
+
+-- MC (sigmaIetaIeta fail)
+TT_Dil               t#bar{t}_(hadronicPhoton,sideband2)                                      errorStyle     kRed           _ttgEventType<3
++TT_Sem
++TT_Had
+
+-- MC (sigmaIetaIeta fail)
+TT_Dil               t#bar{t}_(hadronicPhoton,sideband1)                                      errorStyle     kYellow        _ttgEventType<3
++TT_Sem
++TT_Had

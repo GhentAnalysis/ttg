@@ -46,7 +46,7 @@ if not args.isChild:
         for pu in [True, False] if sample.name not in ['MET','JetHT'] else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
   # no splitting so for some samples this has a very long walltime
-  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='168', queue='highbw', nodes=nodes, cores=cores)
+  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='168', queue='highbw', nodes=nodes, cores=cores, jobLabel = "TE")
   exit(0)
 
 

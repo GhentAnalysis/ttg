@@ -19,7 +19,7 @@ argParser.add_argument('--editInfo',       action='store_true', default=False)
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
-argParser.add_argument('--overwrite',      action='store_true', default=False, help='do not load a plot/histogram if it already exists')
+argParser.add_argument('--noOverwrite',    action='store_true', default=False,       help='load a plot from cache if it already exists')
 args = argParser.parse_args()
 
 
@@ -54,7 +54,7 @@ if not args.isChild:
 
   subJobArgs, subJobList = getVariations(args, sysList)
 
-  submitJobs(__file__, subJobArgs, subJobList, argParser, subLog=args.tag, que='highbw')
+  submitJobs(__file__, subJobArgs, subJobList, argParser, subLog=args.tag,  jobLabel = "PL")
   exit(0)
 
 #
@@ -77,6 +77,8 @@ forward     = args.tag.count('forward')
 prefire     = args.tag.count('prefireCheck')
 noWeight    = args.tag.count('noWeight')
 normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay', 'compareWithTT', 'compareTTSys', 'compareTTGammaSys'])
+
+selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
 
 #
@@ -161,7 +163,7 @@ def makePlotList():
   if args.tag.count('randomConeCheck'):
     plotList.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20, 0, 20)))
     plotList.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80, 0, 20)))
-    plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPt[c.ph], (20, 0, 2)))
+    plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPtCorr[c.ph], (20, 0, 2)))
   else:
     plotList.append(Plot('yield',                      'yield',                                 lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
     plotList.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : c._nVertex,                                         (50, 0, 50)))
@@ -244,6 +246,15 @@ def makePlotList():
 
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
+
+  # if no kind of photon cut was made (also not in skim) (requiring nphotons=0 is allowed) and the plot is not for a photon variable -> can unblind
+  if not any([selectPhoton,
+              args.tag.count('pho'),
+              args.selection.count('pho') and not args.selection.count('nphoton0'),
+            ]):
+    for p in [p for p in plotList if not p.name.lower().count('pho')]:
+      p.blindRange = None
+  
   return plotList
 
 years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
@@ -273,7 +284,7 @@ for year in years:
 
   log.info('Using stackFile ' + stackFile)
   loadedPlots = []
-  if not args.overwrite:
+  if args.noOverwrite:
     for plot in plots:
       loaded = plot.loadFromCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection))
       if loaded: loadedPlots.append(plot)    
@@ -291,10 +302,9 @@ for year in years:
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
   if not args.showSys:
-    if   args.tag.count('eleCBTight') and not args.tag.count('eleCBTight-phoCB'): reduceType = 'eleCBTight'
-    elif args.tag.count('noPixelSeedVeto'):                                           reduceType = 'eleCBTight-phoCB-noPixelSeedVeto'
-    else:                                                                             reduceType = 'eleCBTight-phoCB'
-    if args.tag.count('test'):                                           reduceType = 'phoCBtest'
+    if args.tag.count('noPixelSeedVeto'):                                           reduceType = 'phoCB-noPixelSeedVeto'
+    elif args.tag.count('base'):                                                      reduceType = 'base'
+    else:                                                                             reduceType = 'phoCB'
     reduceType = applySysToReduceType(reduceType, args.sys)
 
     from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
@@ -304,6 +314,7 @@ for year in years:
       if args.sys and 'Scale' not in args.sys and sample.isData: continue
       c = sample.initTree(reducedType = reduceType)
 
+      c.year = year
       c.data = sample.isData
 
       # Filter booleans
@@ -321,13 +332,12 @@ for year in years:
       c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
 
       if forward:
-        if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.03001 < #sigma_{i#etai#eta} < 0.032')
+        if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.0272 < #sigma_{i#etai#eta} < 0.032')
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.032 < #sigma_{i#etai#eta}')
       else:
-        if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01022 < #sigma_{i#etai#eta} < 0.012')
+        if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01015 < #sigma_{i#etai#eta} < 0.012')
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
 
-      selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
@@ -345,7 +355,7 @@ for year in years:
           if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
           if not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
 
-        if not (selectPhoton and c._phPt[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
+        if not (selectPhoton and c._phPtCorr[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
         
         prefireWeight = 1. if year == '2018' or sample.isData else c._prefireWeight
 

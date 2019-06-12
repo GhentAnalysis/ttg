@@ -57,7 +57,7 @@ if not args.isChild and not args.subJob:
       elif sample.year == '2018': splitData = ['A', 'B', 'C', 'D']
     else:                         splitData = [None]
     jobs += [(sample.name, sample.year, str(i), j) for i in xrange(sample.splitJobs) for j in splitData]
-  submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type)
+  submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type, jobLabel = "RT")
   exit(0)
 
 #
@@ -68,7 +68,9 @@ ROOT.gROOT.SetBatch(True)
 
 sample = getSampleFromList(sampleList, args.sample, args.year)
 c      = sample.initTree(shortDebug=args.debug, splitData=args.splitData)
+c.year = sample.year #access to year wherever chain is passed to function, prevents having to pass year every time
 forSys = (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr'))  # Tuple is created for specific sys
+
 
 if not sample.isData:
   lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]

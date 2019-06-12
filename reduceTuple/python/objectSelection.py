@@ -23,9 +23,6 @@ def setIDSelection(c, reducedTupleType):
 #
 # Helper functions
 #
-def slidingCut(pt, low, high):
-  slope = (high - low)/10.
-  return min(low, max(high, low + slope*(pt-15)))
 
 def getLorentzVector(pt, eta, phi, e):
   vector = ROOT.TLorentzVector()
@@ -133,13 +130,13 @@ def selectLeptons(t, n, minLeptons):
 def photonCutBasedReduced(c, index):
   pt = c._phPtCorr[index]
   if abs(c._phEtaSC[index]) < 1.479:
-    if c._phHadTowOverEm[index] > 0.02197:                                        return False
-    if c._phNeutralHadronIsolation[index] > 1.189 + 0.01512*pt + 2.259e-05*pt*pt: return False
-    if c._phPhotonIsolation[index] > 2.08 + 0.004017*pt:                          return False
+    if c._phHadTowOverEm[index] > 0.02197:                                         return False
+    if c._phNeutralHadronIsolation[index] > 1.189 + 0.01512*pt + 0.00002259*pt*pt: return False
+    if c._phPhotonIsolation[index] > 2.08 + 0.004017*pt:                           return False
   else:
-    if c._phHadTowOverEm[index] > 0.0326:                                      return False
-    if c._phNeutralHadronIsolation[index] > 2.718 + 0.0117*pt + 2.3e-05*pt*pt: return False
-    if c._phPhotonIsolation[index] > 3.867 + 0.0037*pt:                        return False
+    if c._phHadTowOverEm[index] > 0.0326:                                          return False
+    if c._phNeutralHadronIsolation[index] > 2.718 + 0.0117*pt + 0.000023*pt*pt:    return False
+    if c._phPhotonIsolation[index] > 3.867 + 0.0037*pt:                            return False
   return True
 
 
@@ -217,8 +214,9 @@ def goodJets(t, n):
     setattr(n, 'j2'+var, getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)
 
 def bJets(t, n):
+  workingPoints = {'2016':0.6321, '2017':0.4941, '2018':0.4184}
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
-    setattr(t, 'dbjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > 0.6324])
+    setattr(t, 'dbjets'+var,  [i for i in getattr(t, 'jets'+var) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > workingPoints[t.year]])
     setattr(n, 'ndbjets'+var, len(getattr(t, 'dbjets'+var)))
     setattr(n, 'dbj1'+var, getattr(t, 'dbjets'+var)[0] if getattr(n, 'ndbjets'+var) > 0 else -1)
     setattr(n, 'dbj2'+var, getattr(t, 'dbjets'+var)[1] if getattr(n, 'ndbjets'+var) > 1 else -1)

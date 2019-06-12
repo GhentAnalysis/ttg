@@ -1,0 +1,68 @@
+-- MC
+TTGamma                    t#bar{t}#gamma        fillStyle     kOrange
++TTGamma_t
++TTGamma_tbar
++TTGamma_had
+
+TT_Dil                 t#bar{t}              fillStyle     633                      _ttgEventType<3
++TT_Sem
+
+ZG                         Z#gamma               fillStyle     598
+
+$DY
+DY_M10to50_NLO              Drell-Yan             fillStyle     427                      _zgEventType<3
++DY_M50_NLO
+
+singleTop_tW_tbar          single-t              fillStyle     797
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
+
+VVTo2L2Nu                  other                 fillStyle     kViolet
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
++TTH
++TTWW
++TTWZ
++TTZZ
++tWll
++tWnunu
++tHq
++tHW
++WG
+
+-- Data
+DoubleMuon                 data:mumu,SF,all      errorStyle    kBlack                   isMuMu
++SingleMuon
+
+$DoubleEG
+DoubleEG                   data:ee,SF,all        errorStyle    kBlack                   isEE
++SingleElectron
+
+MuonEG                     data:emu,all          errorStyle    kBlack                   isEMu
++SingleMuon
++SingleElectron

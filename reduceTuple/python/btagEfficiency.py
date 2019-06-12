@@ -40,9 +40,9 @@ class BtagEfficiency:
   scaleFactorFile    = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_2016LegacySF_V1.csv',
                         '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_94XSF_V4_B_F.csv',
                         '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_102XSF_V1.csv'}
-  mcEffFileDeepCSV   = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTJets_2016.pkl',
-                        '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Had_2017.pkl',
-                        '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTJets_2018.pkl'}
+  mcEffFileDeepCSV   = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTGamma_2016.pkl',
+                        '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTGamma_2017.pkl',
+                        '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTGamma_2018.pkl'}
 
   def __init__(self, year, wp = ROOT.BTagEntry.OP_MEDIUM):
     # Input files
@@ -107,22 +107,6 @@ class BtagEfficiency:
     else:     
       log.warning('MC efficiency is zero. Return SF 1')
       return 1
-
-
-  def getBtagSF_1c(self, sysType, tree, bjets):
-    btagSF = ( self.getJetSF(tree, j, sysType) for j in bjets )
-
-    if   len(btagSF) == 0: return (1.0,         0.0, 0.0)
-    elif len(btagSF) == 1: return (1 - btagSF[0], btagSF[0], 0)
-    else:
-      weight0tag = multiply( 1-sf for sf in btagSF )
-      weight1tag = 0
-      for i in range(len(btagSF)):
-        prod = btagSF[i]
-        for j in range(len((btagSF))):
-          if i != j: prod = (1-btagSF[j])
-        weight1tag += prod
-      return (weight0tag, weight1tag, 1-weight0tag-weight1tag)
 
 if __name__ == '__main__':
   years = ['2016', '2017', '2018']
