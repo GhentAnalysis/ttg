@@ -14,7 +14,7 @@ argParser.add_argument('--logLevel', action='store',      default='INFO', help='
 argParser.add_argument('--debug',    action='store_true', default=False,  help='Only run over first three files for debugging')
 argParser.add_argument('--corr',     action='store_true', default=False,  help='Calculate correlation coefficients')
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
-argParser.add_argument('--select',   action='store',      default=None,   help='Additional selection for systematic studies')
+argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
 argParser.add_argument('--sample',   action='store',      default=None,   help='Select sample')
 argParser.add_argument('--year',     action='store',      default=None,   help='Select year', choices=['2016', '2017', '2018'])
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
@@ -116,19 +116,10 @@ if args.corr:
     clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
     c            = clonedSample.initTree(shortDebug=args.debug)
     setIDSelection(c, 'phoCB')
-    #
-    # FIXME: temporarily until new trees available
-    #
-    if not hasattr(c, '_phHadTowOverEm'):
-      def switchBranches(default, variation):
-        return lambda chain: setattr(chain, default, getattr(chain, variation))
-      log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
-      branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
 
     # If needed, we can work out a multithreaded option, similar like below
     for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
       c.GetEntry(i)
-      for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
       if not passSelection(c): continue
 
       if c.isEE:   channel = 'ee'
@@ -182,19 +173,10 @@ else:
     clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
     c            = clonedSample.initTree(shortDebug=args.debug)
     setIDSelection(c, 'phoCB')
-    #
-    # FIXME: temporarily until new trees available
-    #
-    if not hasattr(c, '_phHadTowOverEm'):
-      def switchBranches(default, variation):
-        return lambda chain: setattr(chain, default, getattr(chain, variation))
-      log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
-      branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
 
     for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
       c.GetEntry(i)
       if not c._passTrigger_ref: continue
-      for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
       if not passSelection(c): continue
 
       if c.isEE:   channel = 'ee'

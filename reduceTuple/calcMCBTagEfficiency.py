@@ -32,15 +32,7 @@ from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selec
 from ttg.samples.Sample import createSampleList, getSampleFromList
 
 def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
-  #
-  # FIXME: temporarily until new trees available
-  #
-  if not hasattr(c, '_phHadTowOverEm'):
-    def switchBranches(default, variation):
-      return lambda chain: setattr(chain, default, getattr(chain, variation))
-    log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
-    branchModifications = [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
-
+    
   passing = {}
   total   = {}
   for ptBin in getPtBins():
@@ -52,7 +44,6 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
 
   for i in sample.eventLoop():
     c.GetEntry(i)
-    for s in branchModifications: s(c) # FIXME: temporarily until _phHadTowOverEm becomes available
     if not selectLeptons(c, c, 2):       continue
     if not selectPhotons(c, c, 2, True): continue
     goodJets(c, c)
