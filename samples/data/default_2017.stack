@@ -1,8 +1,12 @@
 -- MC
-TTGamma                    t#bar{t}#gamma        fillStyle     kOrange
-+TTGamma_t
-+TTGamma_tbar
-%+TTGamma_had
+%TTGamma                    t#bar{t}#gamma        fillStyle     kOrange
+%+TTGamma_t
+%+TTGamma_tbar
+%%+TTGamma_had
+
+TTGamma_Pr_Dil              t#bar{t}#gamma        fillStyle     kOrange
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
 
 TT_Dil                 t#bar{t}              fillStyle     633                      _ttgEventType<3
 +TT_Sem

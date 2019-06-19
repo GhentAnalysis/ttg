@@ -216,7 +216,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
 def getSampleFromList(sampleList, name, year=None):
   sample = next((s for s in sampleList if s.name==name and (s.year==year or not year )), None)
   if sample: return sample
-  else:      log.warning('No sample ' + name + ' found for year ' + year + '!')
+  else:      log.warning('No sample ' + name + (' found for year ' + year + '!') if year else '')
 
 def getSampleFromStack(stack, name):
   sample = next((s for s in sum(stack, []) if s.name==name), None)

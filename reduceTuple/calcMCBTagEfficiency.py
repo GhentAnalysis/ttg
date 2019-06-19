@@ -85,7 +85,7 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
   
 workingPoints = {'2016':0.6321, '2017':0.4941, '2018':0.4184}
 
-sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_'+ args.year +'.conf'))
+sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ args.year +'.conf'))
 sample               = getSampleFromList(sampleList, args.sample)
 chain                = sample.initTree(shortDebug=args.debug)
 setIDSelection(chain, 'phoCB')
