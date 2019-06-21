@@ -6,33 +6,35 @@ from sklearn.preprocessing import StandardScaler
 from sklearn import decomposition
 import numpy
 
-
+import argparse
+argParser = argparse.ArgumentParser(description = "Argument parser")
+argParser.add_argument('--sampleSet',   action='store',      default='allData16')
+args = argParser.parse_args()
 
 # FIXME writing this to use only samples with weights of 1 (so also data)
-# pho = root2array("/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/TTGamma_Pr_Dil/TTGamma_Pr_Dil_*.root", treename="blackJackAndHookersTree", branches = "ph")
-# sigVals = root2array("/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/TTGamma_Pr_Dil/TTGamma_Pr_Dil_*.root", treename="blackJackAndHookersTree", branches = "_phSigmaIetaIeta")
-# CIsVals = root2array("/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/TTGamma_Pr_Dil/TTGamma_Pr_Dil_*.root", treename="blackJackAndHookersTree", branches = "_phChargedIsolation")
+# some sets contain overlap, but that doesn't matter much as long as uncertainties on found values are not needed
 
-# pho = root2array("/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/MuonEG/*.root", treename="blackJackAndHookersTree", branches = "ph", warn_missing_tree = True)
-# sigVals = root2array("/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/MuonEG/*.root", treename="blackJackAndHookersTree", branches = "_phSigmaIetaIeta", warn_missing_tree = True)
-# CIsVals = root2array("/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/MuonEG/*.root", treename="blackJackAndHookersTree", branches = "_phChargedIsolation", warn_missing_tree = True)
+path = '/storage_mnt/storage/user/gmestdac/public/reducedTuples/'
+sets = {
+"allData16" : [ path + "2016-v1/phoCB/MuonEG/*.root", path + "2016-v1/phoCB/DoubleEG/*.root", path + "2016-v1/phoCB/DoubleMuon/*.root", path + "2016-v1/phoCB/SingleMuon/*.root", path + "2016-v1/phoCB/SingleElectron/*.root"],
+"allData17" : [ path + "2017-v1/phoCB/MuonEG/*.root", path + "2017-v1/phoCB/DoubleEG/*.root", path + "2017-v1/phoCB/DoubleMuon/*.root", path + "2017-v1/phoCB/SingleMuon/*.root", path + "2017-v1/phoCB/SingleElectron/*.root"],
+"allData18" : [ path + "2018-v1/phoCB/MuonEG/*.root", path + "2018-v1/phoCB/EGamma/*.root", path + "2018-v1/phoCB/DoubleMuon/*.root", path + "2018-v1/phoCB/SingleMuon/*.root"],
+"DoubleMuon17" : [ path + "2017-v1/phoCB/DoubleMuon/*.root"],
+"DoubleEG17" : [ path + "2017-v1/phoCB/DoubleEG/*.root"],
+"MuonEG17" : [ path + "2017-v1/phoCB/MuonEG/*.root"],
+"TTGamma_Pr_Dil17" : [ path + "2017-v1/phoCB/TTGamma_Pr_Dil/*.root"]
+      }
 
-allData= ["/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/MuonEG/*.root",
-          "/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/DoubleEG/*.root",
-          "/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/DoubleMuon/*.root",
-          "/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/SingleMuon/*.root",
-          "/storage_mnt/storage/user/gmestdac/public/reducedTuples/2017-v1/phoCB/SingleElectron/*.root"]
-pho = root2array(allData, treename="blackJackAndHookersTree", branches = "ph", warn_missing_tree = True)
-sigVals = root2array(allData, treename="blackJackAndHookersTree", branches = "_phSigmaIetaIeta", warn_missing_tree = True)
-CIsVals = root2array(allData, treename="blackJackAndHookersTree", branches = "_phChargedIsolation", warn_missing_tree = True)
+pho = root2array(sets[args.sampleSet], treename="blackJackAndHookersTree", branches = "ph", warn_missing_tree = True)
+sigVals = root2array(sets[args.sampleSet], treename="blackJackAndHookersTree", branches = "_phSigmaIetaIeta", warn_missing_tree = True)
+CIsVals = root2array(sets[args.sampleSet], treename="blackJackAndHookersTree", branches = "_phChargedIsolation", warn_missing_tree = True)
 
-sigVals = sigVals * 1000. 
-
-sigVals = numpy.array([sigVal[index] for index, sigVal in zip(pho,sigVals)])
+# scaling sigmaietaieta values to be of the same order as chIso, prevents tiny/huge values in rotation matrix + performs better 
+sigVals = numpy.array([ 1000. * sigVal[index] for index, sigVal in zip(pho,sigVals)])
 CIsVals = numpy.array([CIsVal[index] for index, CIsVal in zip(pho,CIsVals)])
 
 vals = numpy.array([sigVals,CIsVals]).transpose()
 pca = decomposition.PCA(n_components=2)
 pca.fit_transform(vals)
+print(args.sampleSet)
 print pca.components_
-# print pca
