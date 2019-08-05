@@ -145,13 +145,6 @@ for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
   if args.type.count('ph' + var): branchModifications += [switchBranches('_phPtCorr', '_phPt' + var), switchBranches('_phECorr', '_phE' + var)]
 
 #
-# FIXME: temporarily until new trees available
-#
-if not hasattr(c, '_phHadTowOverEm'):
-  log.warning('_phHadTowOverEm does not exists, taking _phHadronicOverEm for now')
-  branchModifications += [switchBranches('_phHadTowOverEm', '_phHadronicOverEm')]
-
-#
 # Get function calls to object selections and set selections based on the reducedTuple type
 #
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
