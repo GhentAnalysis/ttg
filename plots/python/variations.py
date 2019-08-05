@@ -53,22 +53,84 @@ dilepSelections   = ['ll-looseLeptonVeto-mll40-offZ:SYS',
                      'll-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p-nphoton0'
                      ]
 
+baseSelections   = [
+                     'll-looseLeptonVeto-mll40-OnZ',
+                     'll-looseLeptonVeto-mll40-OnZ-njet1p',
+                     'll-looseLeptonVeto-mll40-OnZ-njet2p',
+                     'll-looseLeptonVeto-mll40-OnZ-njet2p-deepbtag1p'
+                    ]
+
+extraSelections   = [
+                     'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1p-photonPt20',
+                     'llg-looseLeptonVeto-mll40-llgOnZ-njet2p-deepbtag1p-photonPt20',
+                     'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1-photonPt20',
+                     'llg-looseLeptonVeto-mll40-llgOnZ-njet2p-deepbtag1-photonPt20',
+                     'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1p',
+                     'llg-looseLeptonVeto-mll40-llgOnZ',
+                     'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1p-photonPt20',
+                     'llg-looseLeptonVeto-mll40-onZ-njet2p-deepbtag1p-photonPt20',
+                     'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1-photonPt20',
+                     'llg-looseLeptonVeto-mll40-onZ-njet2p-deepbtag1-photonPt20',
+                     'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1p',
+                     'llg-looseLeptonVeto-mll40-onZ',
+                     'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1p-photonPt20',
+                     'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1p-photonPt20',
+                     'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1-photonPt20',
+                     'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1-photonPt20',
+                     'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1p',
+                     'llg-looseLeptonVeto-mll40-orOnZ'
+                    ]
+
+# extraSelections   = [
+#                      'llg-looseLeptonVeto-mll40-offZ-njet1p-deepbtag1p-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1p-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-offZ-njet1p-deepbtag1-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-offZ-njet2p-deepbtag1-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-offZ-njet1p-deepbtag1p',
+#                      'llg-looseLeptonVeto-mll40-offZ-njet1p',
+#                      'llg-looseLeptonVeto-mll40-offZ',
+#                     ]
+
+# extraSelections   = [
+#                      'llg-looseLeptonVeto-mll40-offZ-njet1p-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-offZ-njet1p',
+#                      'llg-looseLeptonVeto-mll40-offZ',
+#                      'llg-looseLeptonVeto-mll40-offZ-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-onZ-njet1p-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-onZ-njet1p',
+#                      'llg-looseLeptonVeto-mll40-onZ',
+#                      'llg-looseLeptonVeto-mll40-onZ-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-llgOnZ-njet1p',
+#                      'llg-looseLeptonVeto-mll40-llgOnZ',
+#                      'llg-looseLeptonVeto-mll40-llgOnZ-photonPt20'
+#                      'llg-looseLeptonVeto-mll40-orOnZ-njet1p-photonPt20',
+#                      'llg-looseLeptonVeto-mll40-orOnZ-njet1p',
+#                      'llg-looseLeptonVeto-mll40-orOnZ',
+#                      'llg-looseLeptonVeto-mll40-orOnZ-photonPt20'
+#                     ]
+
 #
 # Get the selections to consider for a given tag/channel
 # On-Z selection only retained for SF/noData with the default phoCBfull tag
 # When running sys or post-fit plots, reduce the selection
 #
 def getSelections(tag, channel, sys, post):
-  if not tag.count('pho') and tag.count('eleCBTight'): selections = dilepSelections
-  elif tag == 'compareWithTT':                           selections = [i for i in dilepSelections if 'photon' not in i]
-  elif tag == 'eleCBTight-phoCBfull':                  selections = [(s+':SYS,POST') for s in defaultSelections] + diffSelections
-  else:                                                  selections = defaultSelections
+  if not tag.count('pho'):                              selections = dilepSelections
+  elif tag == 'compareWithTT':                          selections = [i for i in dilepSelections if 'photon' not in i]
+  elif tag == 'phoCBfull':                              selections = [(s+':SYS,POST') for s in defaultSelections] + diffSelections
+  elif tag.count('base'):                               selections = dilepSelections + baseSelections
+  else:                                                 selections = defaultSelections
+
+  if tag.count('extra'): selections = extraSelections
 
   if channel not in ['SF', 'noData'] or not tag.count('phoCBfull'):
     selections = [s for s in selections if not s.lower().count('onz')]
 
   if sys:  selections = [s for s in selections if 'SYS'  in s]
   if post: selections = [s for s in selections if 'POST' in s]
+
+
 
   return [s.split(':')[0] for s in selections]
 
@@ -79,6 +141,7 @@ def getVariations(args, sysList):
   if args.channel:                        channels = [args.channel]
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('splitOverlay'):    channels = ['noData']
+  elif args.tag.count('misId'):           channels = ['noData']
   elif args.tag.count('randomConeCheck'): channels = ['ee', 'mumu', 'emu', 'SF', 'all']
   elif args.tag.count('igmaIetaIeta'):    channels = ['ee', 'mumu', 'emu', 'SF', 'all']
   else:                                   channels = ['ee', 'mumu', 'emu', 'SF', 'all', 'noData']

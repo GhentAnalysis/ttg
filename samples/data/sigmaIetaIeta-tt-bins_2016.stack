@@ -1,11 +1,14 @@
 -- MC (sigmaIetaIeta pass)
 TT_Dil               t#bar{t}_(nonprompt,#sigma_{i#etai#eta}_pass)                       errorStyle     kBlue          _ttgEventType<3
 +TT_Sem
++TT_Had
 
 -- MC (sigmaIetaIeta fail)
 TT_Dil               t#bar{t}_(nonprompt,sideband2)                                      errorStyle     kRed           _ttgEventType<3
 +TT_Sem
++TT_Had
 
 -- MC (sigmaIetaIeta fail)
 TT_Dil               t#bar{t}_(nonprompt,sideband1)                                      errorStyle     kYellow        _ttgEventType<3
 +TT_Sem
++TT_Had

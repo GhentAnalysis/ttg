@@ -53,8 +53,7 @@ if not args.isChild:
   else:                            sysList = [None] + (systematics.keys() if args.runSys else [])
 
   subJobArgs, subJobList = getVariations(args, sysList)
-
-  submitJobs(__file__, subJobArgs, subJobList, argParser, subLog= args.tag + '/' + args.year,  jobLabel = "PL", wallTime= '30' if args.tag.count("base") else "15")
+  submitJobs(__file__, subJobArgs, subJobList, argParser, subLog= args.tag + '/' + args.year, jobLabel = "PL", wallTime= '30' if args.tag.count("base") else "15")
   exit(0)
 
 #
@@ -65,7 +64,7 @@ from ttg.plots.plot           import Plot, xAxisLabels, fillPlots, addPlots
 from ttg.plots.plot2D         import Plot2D, add2DPlots
 from ttg.plots.cutInterpreter import cutStringAndFunctions
 from ttg.samples.Sample       import createStack
-from ttg.plots.photonCategories import photonCategoryNumber
+from ttg.plots.photonCategories import photonCategoryNumber, chgIsoCat
 from math import pi
 
 ROOT.gROOT.SetBatch(True)
@@ -123,41 +122,39 @@ def channelNumbering(t):
   return (1 if t.isMuMu else (2 if t.isEMu else 3))
 
 def createSignalRegions(t):
-  if t.njets == 1:
-    if t.ndbjets == 0: return 0
-    else:              return 1
-  elif t.njets >= 2:
-    if t.ndbjets == 0: return 2
-    if t.ndbjets == 1: return 3
-    else:              return 4
+  if t.ndbjets == 0:
+    if t.njets == 0: return 0
+    if t.njets == 1: return 1
+    if t.njets == 2: return 2
+    if t.njets >= 3: return 3
+  elif t.ndbjets == 1:
+    if t.njets == 1: return 4
+    if t.njets == 2: return 5
+    if t.njets >= 3: return 6
+  elif t.ndbjets == 2:
+    if t.njets == 2: return 7
+    if t.njets >= 3: return 8
+  elif t.ndbjets >= 3 and t.njets >= 3: return 9
   return -1
 
-def createSignalRegionsSmall(t):
-  if t.njets == 1:
-    if t.ndbjets > 0:  return 0
-  elif t.njets >= 2:
-    if t.ndbjets == 0: return 1
-    if t.ndbjets == 1: return 2
-    else:              return 3
-  return -1
-
-def createSignalRegionsLarge(t):
-  if t.njets == 1:
-    if t.ndbjets == 0: return 0
-    else:              return 1
-  elif t.njets == 2:
-    if t.ndbjets == 0: return 2
-    if t.ndbjets == 1: return 3
-    else:              return 4
-  elif t.njets >= 3:
-    if t.ndbjets == 0: return 5
-    if t.ndbjets == 1: return 6
-    if t.ndbjets == 2: return 7
-    else:              return 8
+def createSignalRegionsZoom(t):
+  if t.ndbjets == 0:
+    if t.njets == 2: return 0
+    if t.njets >= 3: return 1
+  elif t.ndbjets == 1:
+    if t.njets == 1: return 2
+    if t.njets == 2: return 3
+    if t.njets >= 3: return 4
+  elif t.ndbjets == 2:
+    if t.njets == 2: return 5
+    if t.njets >= 3: return 6
+  elif t.ndbjets >= 3 and t.njets >= 3: return 7
   return -1
 
 # Plot definitions (allow long lines, and switch off unneeded lambda warning, because lambdas are needed)
 # pylint: disable=C0301,W0108
+
+
 def makePlotList():
   plotList = []
   if args.tag.count('randomConeCheck'):
@@ -173,16 +170,18 @@ def makePlotList():
     plotList.append(Plot('photon_eta',                 '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                (15, 0, 2.5)))
     plotList.append(Plot('photon_phi',                 '#phi(#gamma)',                          lambda c : c._phPhi[c.ph],                                     (10, -pi, pi)))
     plotList.append(Plot('photon_mva',                 '#gamma-MVA',                            lambda c : c._phMva[c.ph],                                     (20, -1, 1)))
+    plotList.append(Plot('photon_chargedIso_FP',       'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('photon_chargedIso_FP_new',   'Photon charged-hadron Iso cut (GeV)',   lambda c : chgIsoCat(c),                                       [0, 1 , 2], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), histModifications=xAxisLabels(['fail', 'pass']) ))    
     plotList.append(Plot('photon_chargedIso',          'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     plotList.append(Plot('photon_chargedIso_NO',       'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
-    plotList.append(Plot('photon_chargedIso_bins',     'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441, 1, 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-    plotList.append(Plot('photon_chargedIso_bins_NO',  'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441, 1, 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    plotList.append(Plot('photon_chargedIso_bins',     'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('photon_chargedIso_bins_NO',  'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     plotList.append(Plot('photon_chargedIso_small',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     plotList.append(Plot('photon_chargedIso_small_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
-    plotList.append(Plot('photon_chargedIso_wide',     'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441, 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-    plotList.append(Plot('photon_chargedIso_wide_NO',  'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441, 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
-    plotList.append(Plot('photon_chargedIso_bins2',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441, 1, 2, 3, 5, 10], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-    plotList.append(Plot('photon_chargedIso_bins2_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.441, 1, 2, 3, 5, 10], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    plotList.append(Plot('photon_chargedIso_wide',     'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('photon_chargedIso_wide_NO',  'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    plotList.append(Plot('photon_chargedIso_bins2',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('photon_chargedIso_bins2_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     plotList.append(Plot('photon_chargedIso_bins3',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1, 21), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     plotList.append(Plot('photon_chargedIso_bins3_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1, 21), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phChargedIsolation[c.ph]/c.ph_pt,                (20, 0, 2)))
@@ -225,7 +224,7 @@ def makePlotList():
     plotList.append(Plot('j1_eta',                     '|#eta|(j_{1})',                         lambda c : abs(c._jetEta[c.j1]),                               (15, 0, 2.4)))
     plotList.append(Plot('j1_phi',                     '#phi(j_{1})',                           lambda c : c._jetPhi[c.j1],                                    (10, -pi, pi)))
     plotList.append(Plot('j1_deepCSV',                 'deepCSV(j_{1})',                        lambda c : c._jetDeepCsv_b[c.j1] + c._jetDeepCsv_bb[c.j1],     (20, 0, 1)))
-    plotList.append(Plot('j2_pt',                      'p_{T}(j_{2}) (GeV)',                    lambda c : c._jetSmearedPt[c.j2],                                     (30, 30, 330)))
+    plotList.append(Plot('j2_pt',                      'p_{T}(j_{2}) (GeV)',                    lambda c : c._jetSmearedPt[c.j2],                              (30, 30, 330)))
     plotList.append(Plot('j2_eta',                     '|#eta|(j_{2})',                         lambda c : abs(c._jetEta[c.j2]),                               (15, 0, 2.4)))
     plotList.append(Plot('j2_phi',                     '#phi(j_{2})',                           lambda c : c._jetPhi[c.j2],                                    (10, -pi, pi)))
     plotList.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                        lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
@@ -233,9 +232,8 @@ def makePlotList():
     plotList.append(Plot('dbj2_pt',                    'p_{T}(bj_{2}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj2],                            (30, 30, 330)))
     plotList.append(Plot('dbj1_deepCSV',               'deepCSV(dbj_{1})',                      lambda c : c._jetDeepCsv_b[c.dbj1] + c._jetDeepCsv_bb[c.dbj1], (20, 0, 1)))
     plotList.append(Plot('dbj2_deepCSV',               'deepCSV(dbj_{2})',                      lambda c : c._jetDeepCsv_b[c.dbj2] + c._jetDeepCsv_bb[c.dbj2], (20, 0, 1)))
-    plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (5, 0, 5), histModifications=xAxisLabels(['1j,0b', '1j,1b', '#geq2j,0b', '#geq2j,1b', '#geq2j,#geq2b'])))
-    plotList.append(Plot('signalRegionsSmall',         'signal region',                         lambda c : createSignalRegionsSmall(c),                        (4, 0, 4), histModifications=xAxisLabels(['1j,1b', '#geq2j,0b', '#geq2j,1b', '#geq2j,#geq2b'])))
-    plotList.append(Plot('signalRegionsLarge',         'signal region',                         lambda c : createSignalRegionsLarge(c),                        (9, 0, 9), histModifications=xAxisLabels(['1j,0b', '1j,1b', '2j,0b', '2j,1b', '2j,2b', '#geq3j,0b', '#geq3j,1b', '#geq3j,2b', '#geq3j,3b'])))
+    plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
+    plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
     plotList.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',               lambda c : c.genPhPt,                                          (10, 10, 110)))
     plotList.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                    lambda c : abs(c.genPhEta),                                    (15, 0, 2.5), overflowBin=None))
@@ -248,14 +246,11 @@ def makePlotList():
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
 
-  # if no kind of photon cut was made (also not in skim) (requiring nphotons=0 is allowed) and the plot is not for a photon variable -> can unblind
-  if not any([selectPhoton,
-              args.tag.count('pho'),
-              args.selection.count('pho') and not args.selection.count('nphoton0'),
-            ]):
-    for p in [p for p in plotList if not p.name.lower().count('pho')]:
-      p.blindRange = None
-  
+  # if no kind of photon cut was made (also not in skim) (requiring nphotons=0 is allowed), or no Z-veto is applied -> can unblind
+  phoReq = [selectPhoton, args.tag.count('pho'), args.selection.count('pho') and not args.selection.count('nphoton0')]
+  noZReq = [args.selection.count('offZ'),args.selection.count('llgNoZ')]
+  if not any(phoReq) or not any(noZReq):
+    for p in plotList: p.blindRange = None
   return plotList
 
 years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
@@ -443,7 +438,8 @@ for year in years:
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
         for logY in [False, True]:
-          if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.75)
+          # FIXME this used to be yRange = (0.0001, 0.75), why?
+          if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.35)
           else:                                                                                             yRange = None
           extraTag  = '-log'    if logY else ''
           extraTag += '-sys'    if args.showSys else ''
