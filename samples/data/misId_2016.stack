@@ -10,6 +10,7 @@ TTGamma_Pr_Dil              t#bar{t}#gamma_(misIdEle)        fillStyle     kOran
 
 TT_Dil                 t#bar{t}_(misIdEle)              fillStyle     633                      _ttgEventType<3
 +TT_Sem
++TT_Had
 
 ZG                         Z#gamma_(misIdEle)               fillStyle     598
 
@@ -53,6 +54,7 @@ VVTo2L2Nu                  other_(misIdEle)                 fillStyle     kViole
 +TTWW
 +TTWZ
 +TTZZ
+%+TTTT
 +tWll
 +tWnunu
 +tHq
