@@ -169,7 +169,7 @@ from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
-leptonSF         = LeptonSF(sample.year, id = 'elMva' if c.eleMva else 'POG')
+leptonSF         = LeptonSF(sample.year, id = 'POG')
 photonSF         = PhotonSF(sample.year)
 triggerEff       = TriggerEfficiency(sample.year)
 btagSF           = BtagEfficiency(sample.year)
@@ -180,7 +180,9 @@ btagSF           = BtagEfficiency(sample.year)
 #
 log.info('Starting event loop')
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
-  c.GetEntry(i)
+  if c.GetEntry(i) < 0: 
+    log.warning("problem reading entry, skipping")
+    continue
   for s in branchModifications: s(c)
 
   if not selectLeptons(c, newVars, 2):                continue

@@ -37,14 +37,14 @@ def mkTriggerSF(year):
     for channel in ['ee', 'emu', 'mue', 'mumu']:
 # FIXME could also use JetHT instead of MET
       effData = inFileUnw.Get('MET-'     + channel + t) # Data is never PU reweighted, not in _puWeighted files
-      effMC   = inFile.Get('TTGamma-' + channel + t)
+      effMC   = inFile.Get('TT_Dil-' + channel + t)
       try: effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
       except: 
         log.warning('MET-'     + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
         continue
       try: effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
       except: 
-        log.warning('TTGamma-' + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
+        log.warning('TT_Dil-' + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
         continue
       effData.Draw()
       ROOT.gPad.Update() # Important, otherwise ROOT throws null pointers

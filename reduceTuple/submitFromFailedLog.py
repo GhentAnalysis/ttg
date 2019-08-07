@@ -4,11 +4,13 @@
 # This little script scans the logs and will resubmit failed jobs
 # (i.e. those not containing 'finished' or 'Finished' in their log)
 #
+from datetime import datetime
 import argparse, os
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs')
+argParser.add_argument('--select',   nargs='*', type=str, default=[],   help='resubmit only commands containing all strings given here')
 args = argParser.parse_args()
 
 
@@ -38,9 +40,12 @@ updateGitInfo()
 
 from ttg.tools.jobSubmitter import launchLocal, launchCream02
 for i, (command, logfile) in enumerate(jobsToSubmit):
+  if not all((command.count(sel) for sel in args.select) or not args.select) : continue
   if args.dryRun:
     log.info('Dry-run: ' + command)
   else:
     os.remove(logfile)
     if args.runLocal: launchLocal(command, logfile)
-    else:             launchCream02(command, logfile, checkQueue=(i%100==0))
+    else: 
+      jobName = 'RE' + datetime.now().strftime("%d_%H%M%S.%f")[:12]
+      launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', queue='localgrid', jobName = jobName, nodes=1, cores= 8 if logfile.count("calcTriggerEff") else 1 )

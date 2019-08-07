@@ -93,7 +93,7 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
   if not stackName[-5:] in ['_2016', '_2017', '_2018','_comb']:
     log.warning('stack file without year label found (' + stackName + '), please remove or label properly')
     exit(0)
-  if stackName not in stackFile and args.tag.count(stackName[:-5]) and stackName[-4:] in ['2016', '2017', '2018']:
+  if stackName not in stackFile and args.tag.count(stackName[:-5]) and stackName[-4:] in ['2016', '2017', '2018', 'comb']:
     stackFile = stackName[:-5]
 
 years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]

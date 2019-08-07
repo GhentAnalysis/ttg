@@ -30,8 +30,8 @@ from ttg.samples.Sample import createSampleList, getSampleFromList
 tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']]
 sampleList = createSampleList(*tupleFiles)
 
-nodes     = 5
-cores     = 4
+nodes     = 1
+cores     = 8
 totalJobs = nodes*cores
 
 # Submit subjobs
