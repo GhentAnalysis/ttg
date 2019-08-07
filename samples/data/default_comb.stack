@@ -1,0 +1,14 @@
+-- MC2016
+2016TTGamma_Pr_Dil              t#bar{t}#gamma        errorStyle    kBlack
++2016TTGamma_Pr_Sem
++2016TTGamma_Pr_Had
+
+-- MC2017
+2017TTGamma_Pr_Dil              t#bar{t}#gamma        errorStyle    kBlue
++2017TTGamma_Pr_Sem
++2017TTGamma_Pr_Had
+
+-- MC2018
+2018TTGamma_Pr_Dil              t#bar{t}#gamma        errorStyle    kRed
++2018TTGamma_Pr_Sem
++2018TTGamma_Pr_Had

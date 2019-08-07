@@ -6,7 +6,7 @@
 import os, argparse, copy, pickle
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
-argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018','all'])
+argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018','all','comb'])
 argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='phoCBfull')
@@ -90,7 +90,7 @@ import glob
 stackFile = 'default' 
 for f in sorted(glob.glob("../samples/data/*.stack")):
   stackName = os.path.basename(f).split('.')[0]
-  if not stackName[-5:] in ['_2016', '_2017', '_2018']:
+  if not stackName[-5:] in ['_2016', '_2017', '_2018','_comb']:
     log.warning('stack file without year label found (' + stackName + '), please remove or label properly')
     exit(0)
   if stackName not in stackFile and args.tag.count(stackName[:-5]) and stackName[-4:] in ['2016', '2017', '2018']:
@@ -103,7 +103,7 @@ if args.year == 'all':
       log.warning('stackfile ' + stackFile + '_' + year + '.stack is missing, exiting')
       exit(0)
 
-tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['2016', '2017', '2018']}
+tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['2016', '2017', '2018','comb']}
 
 #FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
 # when running over all years, just initialise the plots with the stack for 16
@@ -256,7 +256,8 @@ def makePlotList():
 years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
 lumiScales = {'2016':35.863818448,
               '2017':41.529548819,
-              '2018':59.688059536}
+              '2018':59.688059536,
+              'comb': 9999 }
 
 totalPlots = []
 
@@ -295,7 +296,6 @@ for year in years:
   else: 
     plotsToFill = plots
 
-  lumiScale = lumiScales[year]
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
@@ -311,8 +311,8 @@ for year in years:
       cutString = applySysToString(sample.name, args.sys, cutString)
       if args.sys and 'Scale' not in args.sys and sample.isData: continue
       c = sample.initTree(reducedType = reduceType)
-
-      c.year = year
+      c.year = sample.name[:4] if year == "comb" else year
+      lumiScale = lumiScales[c.year]
       c.data = sample.isData
 
       # Filter booleans
@@ -355,7 +355,7 @@ for year in years:
 
         if not (selectPhoton and c._phPtCorr[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
         
-        prefireWeight = 1. if year == '2018' or sample.isData else c._prefireWeight
+        prefireWeight = 1. if c.year == '2018' or sample.isData else c._prefireWeight
 
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
@@ -397,6 +397,7 @@ for year in years:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
       if args.dumpArrays: 
         dumpArrays = {variable: array for variable, expression, array in dumpArrays}
+        dumpArrays["info"] = " ".join(s for s in [args.year, args.selection, args.channel, args.tag, args.sys] if s) 
         with open( os.path.join( os.path.join(plotDir, year, args.tag, args.channel, args.selection), 'dumpedArrays' + (args.sys if args.sys else '') + '.pkl') ,'wb') as f:
           pickle.dump(dumpArrays, f)
       if not plot.blindRange == None and not year == '2016':
@@ -462,7 +463,7 @@ for year in years:
                     logY              = logY,
                     sorting           = True,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-                    drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
+                    drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')),
                     fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                     **extraArgs
           )
@@ -477,7 +478,7 @@ for year in years:
           plot.draw(plot_directory = os.path.join(plotDir, year, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                     logZ           = False,
                     drawOption     = option,
-                    drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')))
+                    drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')))
   if noWarnings: 
     log.info('Plots made for ' + year)
     if not args.year == 'all': log.info('Finished')

@@ -89,7 +89,7 @@ class Sample:                                                                   
       self.chain        = ROOT.TChain('blackJackAndHookersTree')
       self.listOfFiles  = []
       for sample, productionLabel in self.addSamples:
-        self.listOfFiles += glob.glob(os.path.join(reducedTupleDir, productionLabel, reducedType, sample, '*.root'))
+        self.listOfFiles += glob.glob(os.path.join(reducedTupleDir, productionLabel, reducedType, sample[4:] if sample[:4] in ['2016', '2017', '2018'] else sample, '*.root'))
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
       self.listOfFiles = self.getListOfFiles(splitData)
