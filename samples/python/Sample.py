@@ -184,8 +184,8 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
           if channel == 'ee':   texName += ' (2e)'
           if channel == 'mumu': texName += ' (2#mu)'
           if channel == 'emu':  texName += ' (1e, 1#mu)'
-        sample = getSampleFromList(stack, name)                         # Check if sample with same name already exists in this stack
-        if not sample: sample = getSampleFromStack(allStacks, name)     # or other stack
+        sample = getSampleFromList(stack, name, verbose=False)                              # Check if sample with same name already exists in this stack
+        if not sample: sample = getSampleFromStack(allStacks, name, verbose=False)          # or other stack
         if sample:                                                                          # if yes, take it from there and make a deepcopy with different name
           sample = copy.deepcopy(sample)
           sample.addSamples = [(sample.name, sample.productionLabel)]
@@ -213,12 +213,12 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
 #
 # Get sample from list or stack using its name
 #
-def getSampleFromList(sampleList, name, year=None):
+def getSampleFromList(sampleList, name, year=None, verbose=True):
   sample = next((s for s in sampleList if s.name==name and (s.year==year or not year )), None)
-  if sample: return sample
-  else:      log.warning('No sample ' + name + ' found for year ' + year + '!')
+  if not sample and verbose: log.warning('No sample ' + name + ' found for year ' + str(year) + '!')
+  return sample
 
-def getSampleFromStack(stack, name):
+def getSampleFromStack(stack, name, verbose=True):
   sample = next((s for s in sum(stack, []) if s.name==name), None)
-  if sample: return sample
-  else:      log.warning('No sample ' + name + ' found in stack!')
+  if not sample and verbose: log.warning('No sample ' + name + ' found in stack!')
+  return sample
