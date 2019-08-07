@@ -92,7 +92,7 @@ def xAxisLabels(labels):
 #
 # Function which fills all plots and removes them when the lamdbda fails (e.g. because var is not defined)
 #
-def fillPlots(plots, c, sample, eventWeight):
+def fillPlots(plots, sample, eventWeight):
   toRemove = None
   for plot in plots:
     try:

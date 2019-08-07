@@ -61,8 +61,7 @@ from ttg.tools.style import commonStyle, setDefault
 from ttg.tools.helpers import printCanvas, addHists
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 
-reweightingFunctions = {'2016':"PU_2016_36000_XSecCentral", '2017':"PU_2017_41500_XSecCentral", '2018':"PU_2018_60000_XSecCentral"}
-puReweighting = getReweightingFunction(sample.year, data=reweightingFunctions[sample.year])
+puReweighting = getReweightingFunction(sample.year, 'central')
 
 setDefault()
 ROOT.gStyle.SetPadRightMargin(0.15)

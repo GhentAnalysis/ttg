@@ -159,16 +159,12 @@ setIDSelection(c, args.type)
 
 
 #
-# Initialize reweighting functions
+# Initialize pile-up reweighting functions
 #
-if   sample.year == '2016': puData = {'central' : "PU_2016_36000_XSecCentral", 'up' : "PU_2016_36000_XSecUp", 'down' : "PU_2016_36000_XSecDown"}
-elif sample.year == '2017': puData = {'central' : "PU_2017_41500_XSecCentral", 'up' : "PU_2017_41500_XSecUp", 'down' : "PU_2017_41500_XSecDown"}
-elif sample.year == '2018': puData = {'central' : "PU_2018_60000_XSecCentral", 'up' : "PU_2018_60000_XSecUp", 'down' : "PU_2018_60000_XSecDown"}
-
 from ttg.reduceTuple.puReweighting import getReweightingFunction
-puReweighting     = getReweightingFunction(sample.year, data=puData['central'])
-puReweightingUp   = getReweightingFunction(sample.year, data=puData['up'])
-puReweightingDown = getReweightingFunction(sample.year, data=puData['down'])
+puReweighting     = getReweightingFunction(sample.year, 'central')
+puReweightingUp   = getReweightingFunction(sample.year, 'up')
+puReweightingDown = getReweightingFunction(sample.year, 'down')
 
 from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF

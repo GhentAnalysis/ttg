@@ -363,7 +363,7 @@ for year in years:
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
 
-        fillPlots(plotsToFill, c, sample, eventWeight)
+        fillPlots(plotsToFill, sample, eventWeight)
 
   plots = plotsToFill + loadedPlots
 
