@@ -15,7 +15,6 @@ def setIDSelection(c, reducedTupleType):
   c.doPhotonCut         = reducedTupleType.count('pho')
   c.photonCutBased      = reducedTupleType.count('phoCB')
   c.photonMva           = reducedTupleType.count('photonMva')
-  c.eleMva              = reducedTupleType.count('eleMva')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
   c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
 
@@ -51,21 +50,11 @@ def looseLeptonSelector(tree, index):
   if abs(tree._dz[index]) > 0.1:       return False
   return tree._lPOGVeto[index]
 
-def electronMva(tree, index):
-  # FIXME no emulation yet for 17 and 18, see what to do
-  # if not tree._lElectronPassEmu[index]: return False
-  # FIXME this implementation is not ok, check
-  unsquashedMva = 0.5 * log((1. + tree._lElectronMvaFall17Iso[index])/(1.0 - tree._lElectronMvaFall17Iso[index]))
-  if abs(tree._lEta[index]) < 0.8:           return unsquashedMva > 6.12931925263 - exp( -tree._lPt[index] / 13.281753835) * 8.711384321
-  elif 0.8 < abs(tree._lEta[index]) < 1.44:  return unsquashedMva > 5.26289004857 - exp( -tree._lPt[index] / 13.2154971491) * 8.0997882835
-  elif 1.57 < abs(tree._lEta[index]) < 2.5:  return unsquashedMva > 4.37338792902 - exp( -tree._lPt[index] / 14.0776094696) * 8.48513324496
-
 def electronSelector(tree, index):
   for i in xrange(tree._nMu): # cleaning electrons around muons
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
   if 1.4442 < abs(tree._lEtaSC[index]) < 1.566: return False
-  if   tree.eleMva:    return electronMva(tree, index)
   else:                return tree._lPOGTight[index]
 
 def muonSelector(tree, index):

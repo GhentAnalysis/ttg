@@ -28,3 +28,7 @@ def checkChgIso(tree):
   if   tree.failChgIso and tree._phChargedIsolation[tree.ph] <= (1.141 if central else 1.051) : return False
   elif tree.passChgIso and tree._phChargedIsolation[tree.ph] >  (1.141 if central else 1.051) : return False
   return True
+
+def chgIsoCat(tree):
+  central = abs(tree._phEtaSC[tree.ph]) < 1.479
+  return 1 * (tree._phChargedIsolation[tree.ph] <= (1.141 if central else 1.051))

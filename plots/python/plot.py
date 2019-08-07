@@ -97,7 +97,8 @@ def fillPlots(plots, sample, eventWeight):
   for plot in plots:
     try:
       plot.fill(sample, eventWeight)
-    except:
+    except Exception as e: 
+      log.debug(e)
       if toRemove: toRemove.append(plot)
       else:        toRemove = [plot]
       log.info('Not considering plot ' + plot.name + ' for this selection')
@@ -507,8 +508,6 @@ class Plot:
   #
   def draw(self, \
           yRange = "auto",
-          # FIXME crash when writing C file?
-          # extensions = ["pdf", "png", "root","C"],
           extensions = ["pdf", "png", "root"],
           plot_directory = ".",
           logX = False, logY = True,

@@ -40,9 +40,9 @@ class BtagEfficiency:
   scaleFactorFile    = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_2016LegacySF_V1.csv',
                         '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_94XSF_V4_B_F.csv',
                         '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_102XSF_V1.csv'}
-  mcEffFileDeepCSV   = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTGamma_2016.pkl',
-                        '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTGamma_2017.pkl',
-                        '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TTGamma_2018.pkl'}
+  mcEffFileDeepCSV   = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil_2016.pkl',
+                        '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil_2017.pkl',
+                        '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil_2018.pkl'}
 
   def __init__(self, year, wp = ROOT.BTagEntry.OP_MEDIUM):
     # Input files
@@ -54,7 +54,7 @@ class BtagEfficiency:
     self.calib = ROOT.BTagCalibration("deepCSV", os.path.expandvars(self.scaleFactorFile[year]))
 
     # Get readers
-    #recommended measurements for different jet flavors given here: https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80X#Data_MC_Scale_Factors
+    #recommended measurements for different jet flavors given here: https://twiki.cern.ch/twiki/bin/view/CMS/BtagRecommendation
     v_sys = getattr(ROOT, 'vector<string>')()
     v_sys.push_back('up')
     v_sys.push_back('down')

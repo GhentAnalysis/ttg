@@ -13,7 +13,7 @@ def replaceShapeForFakes(plot):
     name = sample if isinstance(sample, str) else (sample.name + sample.texName)
     if 'hadronic fakes' in name:
       selection     = 'llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'
-      sideBandShape = getHistFromPkl(('eleCBTight-phoCB-sidebandSigmaIetaIeta', 'all', selection), plot.name, '', ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
+      sideBandShape = getHistFromPkl(('phoCB-sidebandSigmaIetaIeta', 'all', selection), plot.name, '', ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
       plot.histos[sample] = replaceShape(hist, sideBandShape)
       log.info('Replaced the fakes for ' + name + ' by data from the sigmeIetaIeta sideband')
   return {'hadronic fakes' : 'hadronic fakes from #sigma_{i#eta i#eta} sideband'}
