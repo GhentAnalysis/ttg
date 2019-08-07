@@ -3,7 +3,7 @@
 #
 # Argument parser and logging
 #
-import os, argparse, copy
+import os, argparse, copy, pickle
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018','all'])
@@ -20,6 +20,7 @@ argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,       help='do not launch subjobs')
 argParser.add_argument('--noOverwrite',    action='store_true', default=False,       help='load a plot from cache if it already exists')
+argParser.add_argument('--dumpArrays',     action='store_true', default=False)
 args = argParser.parse_args()
 
 
@@ -154,7 +155,6 @@ def createSignalRegionsZoom(t):
 # Plot definitions (allow long lines, and switch off unneeded lambda warning, because lambdas are needed)
 # pylint: disable=C0301,W0108
 
-
 def makePlotList():
   plotList = []
   if args.tag.count('randomConeCheck'):
@@ -263,6 +263,8 @@ totalPlots = []
 from ttg.tools.style import drawLumi
 
 for year in years:
+  dumpArrays = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]) , ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph])]
+  dumpArrays = [(variable, expression, []) for variable, expression in dumpArrays]
   plots = makePlotList()
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
@@ -360,7 +362,12 @@ for year in years:
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
 
         fillPlots(plotsToFill, c, sample, eventWeight)
-
+        if args.dumpArrays:
+          for variable, expression, array in dumpArrays:
+            if sample.isData:
+              array.append((expression(c), 1., eventWeight))
+            else:
+              array.append((expression(c), c.genWeight, eventWeight))
   plots = plotsToFill + loadedPlots
 
   if args.year == 'all':
@@ -388,7 +395,10 @@ for year in years:
 
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
-
+      if args.dumpArrays: 
+        dumpArrays = {variable: array for variable, expression, array in dumpArrays}
+        with open( os.path.join( os.path.join(plotDir, year, args.tag, args.channel, args.selection), 'dumpedArrays' + (args.sys if args.sys else '') + '.pkl') ,'wb') as f:
+          pickle.dump(dumpArrays, f)
       if not plot.blindRange == None and not year == '2016':
         for sample, histo in plot.histos.iteritems():
           if sample.isData:
