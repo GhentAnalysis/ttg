@@ -194,7 +194,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
           sample = getSampleFromList(sampleList, name)
         if not sample: log.error('Could not load sample ' + name + ' from ' + styleFile)
         sample.addSelectionString(selectionString)
-        texName = texName.replace('_{','lower{').replace('_',' ').replace('lower{','_{')
+        texName = texName.replace('_{','lower{').replace('_',' ').replace('lower{','_{').replace('@',' ')
         sample.addStyle(texName, style)
         if alias:
           sample = copy.deepcopy(sample)

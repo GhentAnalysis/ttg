@@ -257,7 +257,8 @@ years = ['2016', '2017', '2018'] if args.year == 'all' else [args.year]
 lumiScales = {'2016':35.863818448,
               '2017':41.529548819,
               '2018':59.688059536,
-              'comb': 9999 }
+              }
+lumiScales['comb'] = lumiScales['2018']
 
 totalPlots = []
 
@@ -360,6 +361,9 @@ for year in years:
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
+        
+        if year == "comb": 
+          eventWeight *= lumiScales['2018'] / lumiScales[c.year]
 
         fillPlots(plotsToFill, sample, eventWeight)
 
@@ -445,6 +449,9 @@ for year in years:
 
       if args.tag.count('compareTTGammaSys'):
         extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
+
+      if args.year == 'comb':
+        extraArgs['ratio']   = {'num': -1, 'den': 0}
 
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
