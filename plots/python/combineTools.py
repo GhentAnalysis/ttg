@@ -291,7 +291,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab([shapeSys(None, None, sys), 'shapeN'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
