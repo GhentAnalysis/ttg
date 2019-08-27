@@ -1,0 +1,11 @@
+-- Data
+DoubleMuon                 data:mumu,SF,all      errorStyle    kBlack                   isMuMu
++SingleMuon
+
+$DoubleEG
+DoubleEG                   data:ee,SF,all        errorStyle    kBlack                   isEE
++SingleElectron
+
+MuonEG                     data:emu,all          errorStyle    kBlack                   isEMu
++SingleMuon
++SingleElectron

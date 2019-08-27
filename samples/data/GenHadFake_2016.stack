@@ -1,8 +1,8 @@
--- MC
-TTGamma_Pr_Dil                    MC_(genuine_photons)         fillStyle     kOrange
+-- FAKE
+TTGamma_Pr_Dil                    MC_(hadronic_fakes)          errorStyle    kGreen
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-%+ZG
++ZG
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar
@@ -15,7 +15,7 @@ TTGamma_Pr_Dil                    MC_(genuine_photons)         fillStyle     kOr
 +ZZTo2Q2Nu
 +ZZTo4L
 +WZTo1L3Nu
-%+WZTo1L1Nu2Q
++WZTo1L1Nu2Q
 +WZTo2L2Q
 +WZTo3LNu
 +WWW
@@ -44,16 +44,17 @@ TTGamma_Pr_Dil                    MC_(genuine_photons)         fillStyle     kOr
 +tHq
 +tHW
 +WG
-TT_Dil                     MC_(genuine_photons)         fillStyle     kOrange                  _ttgEventType<3
+TT_Dil                 MC_(hadronic_fakes)          errorStyle    kGreen                   _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(genuine_photons)         fillStyle     kOrange                  
+DY_M10to50_LO             MC_(hadronic_fakes)          errorStyle    kGreen                   _zgEventType<3
 +DY_M50_LO
 
-TTGamma_Pr_Dil                    MC_(hadronic_photons)        fillStyle     kRed
+-- HAD
+TTGamma_Pr_Dil                    MC_(hadronic_photons)        errorStyle     kRed
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-%+ZG
++ZG
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar
@@ -66,7 +67,7 @@ TTGamma_Pr_Dil                    MC_(hadronic_photons)        fillStyle     kRe
 +ZZTo2Q2Nu
 +ZZTo4L
 +WZTo1L3Nu
-%+WZTo1L1Nu2Q
++WZTo1L1Nu2Q
 +WZTo2L2Q
 +WZTo3LNu
 +WWW
@@ -95,16 +96,17 @@ TTGamma_Pr_Dil                    MC_(hadronic_photons)        fillStyle     kRe
 +tHq
 +tHW
 +WG
-TT_Dil                 MC_(hadronic_photons)        fillStyle     kRed                     _ttgEventType<3
+TT_Dil                 MC_(hadronic_photons)        errorStyle     kRed                     _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(hadronic_photons)        fillStyle     kRed                     
+DY_M10to50_LO             MC_(hadronic_photons)        errorStyle     kRed                     _zgEventType<3
 +DY_M50_LO
 
-TTGamma_Pr_Dil                    MC_(misidentified_electrons) fillStyle     kBlue
+-- OTHER
+TTGamma_Pr_Dil                    MC_(genuine_photons)         errorStyle     kBlue
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-%+ZG
++ZG
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar
@@ -117,7 +119,7 @@ TTGamma_Pr_Dil                    MC_(misidentified_electrons) fillStyle     kBl
 +ZZTo2Q2Nu
 +ZZTo4L
 +WZTo1L3Nu
-%+WZTo1L1Nu2Q
++WZTo1L1Nu2Q
 +WZTo2L2Q
 +WZTo3LNu
 +WWW
@@ -146,16 +148,16 @@ TTGamma_Pr_Dil                    MC_(misidentified_electrons) fillStyle     kBl
 +tHq
 +tHW
 +WG
-TT_Dil                 MC_(misidentified_electrons) fillStyle     kBlue                    _ttgEventType<3
+TT_Dil                     MC_(genuine_photons)         errorStyle     kBlue                  _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(misidentified_electrons) fillStyle     kBlue                    
+DY_M10to50_LO             MC_(genuine_photons)         errorStyle     kBlue                  _zgEventType<3
 +DY_M50_LO
 
-TTGamma_Pr_Dil                    MC_(hadronic_fakes)          fillStyle     kGreen
+TTGamma_Pr_Dil                    MC_(misidentified_electrons) errorStyle     kBlue
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-%+ZG
++ZG
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar
@@ -168,7 +170,7 @@ TTGamma_Pr_Dil                    MC_(hadronic_fakes)          fillStyle     kGr
 +ZZTo2Q2Nu
 +ZZTo4L
 +WZTo1L3Nu
-%+WZTo1L1Nu2Q
++WZTo1L1Nu2Q
 +WZTo2L2Q
 +WZTo3LNu
 +WWW
@@ -197,20 +199,8 @@ TTGamma_Pr_Dil                    MC_(hadronic_fakes)          fillStyle     kGr
 +tHq
 +tHW
 +WG
-TT_Dil                 MC_(hadronic_fakes)          fillStyle     kGreen                   _ttgEventType<3
+TT_Dil                 MC_(misidentified_electrons) errorStyle     kBlue                    _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(hadronic_fakes)          fillStyle     kGreen                   
+DY_M10to50_LO             MC_(misidentified_electrons) errorStyle     kBlue                    _zgEventType<3
 +DY_M50_LO
-
-
--- Data
-DoubleMuon                 data:mumu,SF,all             errorStyle    kBlack                   isMuMu
-+SingleMuon
-
-$DoubleEG
-EGamma                     data:ee,SF,all        errorStyle    kBlack                   isEE
-
-MuonEG                     data:emu,all                 errorStyle    kBlack                   isEMu
-+SingleMuon
-+EGamma

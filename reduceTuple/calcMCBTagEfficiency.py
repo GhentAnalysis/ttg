@@ -72,8 +72,6 @@ for sample in samples:
   chain                = sample.initTree(shortDebug=args.debug)
   setIDSelection(chain, 'phoCB')
   getBTagMCTruthEfficiencies(chain, btagWP = workingPoints[args.year])
-  log.info(passing)
-  log.info(total)
 
 mceff = {}
 for ptBin in getPtBins():

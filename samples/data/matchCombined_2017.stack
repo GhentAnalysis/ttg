@@ -38,7 +38,7 @@ TTGamma_Pr_Dil                    MC_(genuine_photons)         fillStyle     kOr
 +TTWW
 +TTWZ
 +TTZZ
-%+TTTT
++TTTT
 +tWll
 +tWnunu
 +tHq
@@ -89,7 +89,7 @@ TTGamma_Pr_Dil                    MC_(hadronic_photons)        fillStyle     kRe
 +TTWW
 +TTWZ
 +TTZZ
-%+TTTT
++TTTT
 +tWll
 +tWnunu
 +tHq
@@ -140,7 +140,7 @@ TTGamma_Pr_Dil                    MC_(misidentified_electrons) fillStyle     kBl
 +TTWW
 +TTWZ
 +TTZZ
-%+TTTT
++TTTT
 +tWll
 +tWnunu
 +tHq
@@ -191,7 +191,7 @@ TTGamma_Pr_Dil                    MC_(hadronic_fakes)          fillStyle     kGr
 +TTWW
 +TTWZ
 +TTZZ
-%+TTTT
++TTTT
 +tWll
 +tWnunu
 +tHq
