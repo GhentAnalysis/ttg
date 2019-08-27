@@ -5,13 +5,15 @@ from ttg.tools.helpers import plotDir
 from ttg.tools.style import commonStyle, setDefault2D
 import os, shutil, ROOT, socket, json
 
+# Combine documentation:
+# http://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
 
 #
 # Combine settings
 #
-release        = 'CMSSW_8_1_0'
-arch           = 'slc6_amd64_gcc530'
-version        = 'v7.0.9'
+release        = 'CMSSW_10_2_13'
+arch           = 'slc7_amd64_gcc700'
+version        = 'v8.0.1'
 
 
 #
@@ -21,6 +23,7 @@ def getCombineRelease():
   combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE', '..', release)))
   if not os.path.exists(combineRelease):
     log.info('Setting up combine release')
+    log.info('This might not work on T2B, recommended release is now on SLC7, which only available on lxplus')
     setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
     setupCommand += 'export SCRAM_ARCH=' + arch + ';'
     setupCommand += 'source $VO_CMS_SW_DIR/cmsset_default.sh;' if 'lxp' not in socket.gethostname() else ''
@@ -288,7 +291,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab([shapeSys(None, None, sys), 'shapeN'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:
