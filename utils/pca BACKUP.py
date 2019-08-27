@@ -14,8 +14,6 @@ args = argParser.parse_args()
 # FIXME writing this to use only samples with weights of 1 (so also data)
 # some sets contain overlap, but that doesn't matter much as long as uncertainties on found values are not needed
 
-# FIXME   @@@@@@@@@@@@@@         gebruik hier ook selected photons specifiek (met dumpArray sowieso ok)          @@@@@@@@@@@@@@@@@@ 
-
 path = '/storage_mnt/storage/user/gmestdac/public/reducedTuples/'
 sets = {
 "allData16" : [ path + "2016-v1/phoCB/MuonEG/*.root", path + "2016-v1/phoCB/DoubleEG/*.root", path + "2016-v1/phoCB/DoubleMuon/*.root", path + "2016-v1/phoCB/SingleMuon/*.root", path + "2016-v1/phoCB/SingleElectron/*.root"],
