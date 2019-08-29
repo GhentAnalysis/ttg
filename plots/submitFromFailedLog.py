@@ -10,7 +10,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs')
-argParser.add_argument('--select',   nargs='*', type=str, default=None,   help='resubmit only commands containing all strings given here')
+argParser.add_argument('--select',   nargs='*', type=str, default=[],   help='resubmit only commands containing all strings given here')
 args = argParser.parse_args()
 
 

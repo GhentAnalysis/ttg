@@ -12,9 +12,9 @@ TT_Dil                 t#bar{t}              fillStyle     633                  
 +TT_Sem
 +TT_Had
 
-%ZG                         Z#gamma               fillStyle     598
+ZG_lowMLL                         Z#gamma               fillStyle     598
 
-DY_M10to50_LO             Drell-Yan             fillStyle     427                      
+DY_M10to50_LO             Drell-Yan             fillStyle     427                      _zgEventType<3
 +DY_M50_LO
 
 singleTop_tW_tbar          single-t              fillStyle     797
