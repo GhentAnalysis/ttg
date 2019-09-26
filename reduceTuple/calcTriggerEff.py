@@ -20,6 +20,7 @@ argParser.add_argument('--year',     action='store',      default=None,   help='
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')
+argParser.add_argument('--selectID', action='store',      default='phoCB', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB'])
 args = argParser.parse_args()
 
 
@@ -114,7 +115,7 @@ if args.corr:
 
     clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
     c            = clonedSample.initTree(shortDebug=args.debug)
-    setIDSelection(c, 'phoCB')
+    setIDSelection(c, args.selectID)
 
     # If needed, we can work out a multithreaded option, similar like below
     for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
@@ -171,7 +172,7 @@ else:
 
     clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
     c            = clonedSample.initTree(shortDebug=args.debug)
-    setIDSelection(c, 'phoCB')
+    setIDSelection(c, args.selectID)
 
     for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
       c.GetEntry(i)
@@ -205,7 +206,7 @@ else:
 
   passHists, totalHists = [i[0] for i in passAndTotalHists], [i[1] for i in passAndTotalHists]
 
-  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + args.year + '.root'), 'update')
+  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + args.year + '.root'), 'update')
   for t in passHists[0]:
     for channel in passHists[0][t]:
       hPass  = addHists(h[t][channel] for h in passHists)
@@ -246,7 +247,7 @@ else:
       effDraw.SetMaximum(1.)
       effDraw.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
-      directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + sample.year + ('/puWeighted/' if args.pu else '/') + sample.name + '_' + sample.year + '/' + args.select)
+      directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + sample.year + ('/puWeighted/' if args.pu else '/') + args.selectID + '/' + sample.name + '_' + sample.year + '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       eff.Write(sample.name + '-' + channel + t)

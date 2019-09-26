@@ -1,0 +1,17 @@
+-- MC
+TTGamma_Pr_Dil                    t#bar{t}#gamma_(genuine)          fillStyle     800
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+
+%%%%%%%%%%%%%%%%%%%%%%%%% hadronic fakes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+TTGamma_Pr_Dil                    t#bar{t}#gamma_(hadronicFake)          fillStyle     800DARK
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+
+%%%%%%%%%%%%%%%%%%%%%%%%% hadronic photons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+TTGamma_Pr_Dil                    t#bar{t}#gamma_(hadronicPhoton)          fillStyle     800BRIGHT
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+

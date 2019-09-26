@@ -1,0 +1,23 @@
+-- MC
+
+singleTop_tW_tbar                 single-t_(genuine)                fillStyle     797
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
+
+%%%%%%%%%%%%%%%%%%%%%%%%% hadronic fakes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+singleTop_tW_tbar                 single-t_(hadronicFake)                fillStyle     797DARK
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
+
+%%%%%%%%%%%%%%%%%%%%%%%%% hadronic photons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+singleTop_tW_tbar                 single-t_(hadronicPhoton)                fillStyle     797BRIGHT
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s

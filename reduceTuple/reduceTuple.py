@@ -97,7 +97,9 @@ outputFile.cd()
 #
 # Switch off unused branches, avoid copying of branches we want to delete
 #
-unusedBranches = ["HLT", "Flag", "HN", "tau", "Ewk", "lMuon", "miniIso", "leptonMva", "closest", "_pt", "decay"]
+# FIXME NOTE temporarily saving extra vars for MVA input check
+# unusedBranches = ["HLT", "Flag", "HN", "tau", "Ewk", "lMuon", "miniIso", "closest", "_pt", "decay"]
+unusedBranches = ["HLT", "Flag", "HN", "tau", "Ewk", "lMuon", "decay"]
 deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron"]
 if not sample.isData:
   unusedBranches += ["gen_nL", "gen_l", "gen_met"]
@@ -165,6 +167,8 @@ from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
+
+# leptonSF         = LeptonSF(sample.year, id = 'MVA' if args.type.count('leptonMVA') else 'POG')
 leptonSF         = LeptonSF(sample.year, id = 'POG')
 photonSF         = PhotonSF(sample.year)
 triggerEff       = TriggerEfficiency(sample.year)

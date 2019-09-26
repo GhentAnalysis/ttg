@@ -13,6 +13,7 @@ argParser.add_argument('--isChild',  action='store_true', default=False,  help='
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')
 argParser.add_argument('--debug',    action='store_true', default=False,  help='only run over first three files for debugging')
+argParser.add_argument('--selectID', action='store',      default='phoCB', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB'])
 
 args = argParser.parse_args()
 
@@ -70,7 +71,7 @@ samples               = [getSampleFromList(sampleList, sample) for sample in arg
 
 for sample in samples:
   chain                = sample.initTree(shortDebug=args.debug)
-  setIDSelection(chain, 'phoCB')
+  setIDSelection(chain, args.selectID)
   getBTagMCTruthEfficiencies(chain, btagWP = workingPoints[args.year])
 
 mceff = {}
@@ -82,6 +83,6 @@ for ptBin in getPtBins():
       name = str(ptBin) + str(etaBin) + f
       mceff[tuple(ptBin)][tuple(etaBin)][f] = passing[name]/total[name] if total[name] > 0 else 0
 
-pickle.dump(mceff, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.sample + '_' + args.year + ('DEBUG' if args.debug else '') + '.pkl'), 'w'))
+pickle.dump(mceff, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.selectID + '_' + args.sample + '_' + args.year + ('DEBUG' if args.debug else '') + '.pkl'), 'w'))
 log.info('Efficiencies deepCSV for ' + str(args.year) +':')
 log.info('Finished')

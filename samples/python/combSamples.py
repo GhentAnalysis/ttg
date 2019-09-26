@@ -1,3 +1,6 @@
+
+#! /usr/bin/env python
+
 # combines tuple files into tubles_comb.conf putting the sample year in front of each sample name 
 import os
 

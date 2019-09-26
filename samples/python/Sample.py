@@ -167,8 +167,13 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
         selectionString = None
         try:    name, texName, style, color, selectionString = info
         except: name, texName, style, color = info
-
-        try:    color = int(color)                                                          # Create style element for this sample
+        
+        try:    
+          if color.count("DARK"):
+            color =  ROOT.TColor.GetColorDark( int(color.strip("DARK")) )                                                          # Create style element for this sample
+          elif color.count("BRIGHT"):
+            color = ROOT.TColor.GetColorBright( int(color.strip("BRIGHT")) )                                                          # Create style element for this sample
+          else: color = int(color)
         except: color = getattr(ROOT, color)
         if style == 'fillStyle':       style = styles.fillStyle(color)
         elif style == 'errorStyle':    style = styles.errorStyle(color)
@@ -199,7 +204,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
         if alias:
           sample = copy.deepcopy(sample)
           sample.addSamples = [(sample.name, sample.productionLabel)]
-          sample.name = alias
+          sample.name = alias + '_' + texName
           alias = None
         stack.append(sample)
   if len(stack): allStacks.append(stack)

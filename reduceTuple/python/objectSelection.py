@@ -17,6 +17,7 @@ def setIDSelection(c, reducedTupleType):
   c.photonMva           = reducedTupleType.count('photonMva')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
   c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
+  c.leptonMVA           = reducedTupleType.count("leptonMVA")
 
 
 #
@@ -55,9 +56,11 @@ def electronSelector(tree, index):
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
   if 1.4442 < abs(tree._lEtaSC[index]) < 1.566: return False
+  if tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
   else:                return tree._lPOGTight[index]
 
 def muonSelector(tree, index):
+  if tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4 and tree._relIso0p4MuDeltaBeta[index] < 0.15
   return tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15
 
 def leptonSelector(tree, index):
@@ -164,7 +167,7 @@ def selectPhotons(t, n, minLeptons, isData):
     n.ph    = t.photons[0]
     n.ph_pt = t._phPtCorr[n.ph]
     if not isData: addGenPhotonInfo(t, n, n.ph)
-  return (len(t.photons) > 0 or not t.doPhotonCut)
+  return (len(t.photons) == 1 or not t.doPhotonCut)
 
 
 #
@@ -223,3 +226,10 @@ def makeDeltaR(t, n):
     setattr(n, 'l1JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 0 else -1)
     setattr(n, 'l2JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 1 else -1)
     setattr(n, 'jjDeltaR'+var,     min([deltaR(t._jetEta[getattr(n, 'j1'+var)], t._jetEta[getattr(n, 'j2'+var)], t._jetPhi[getattr(n, 'j1'+var)], t._jetPhi[getattr(n, 'j2'+var)])]) if getattr(n, 'njets'+var) > 1 else -1)
+
+def closestRawJet(tree):
+  dist = [deltaR(tree._jetEta[j], tree._phEta[tree.ph], tree._jetPhi[j], tree._phPhi[tree.ph]) for j in range(tree._nJets)]
+  return dist.index(min(dist))
+
+def rawJetDeltaR(tree):
+  return min(deltaR(tree._jetEta[j], tree._phEta[tree.ph], tree._jetPhi[j], tree._phPhi[tree.ph]) for j in range(tree._nJets))

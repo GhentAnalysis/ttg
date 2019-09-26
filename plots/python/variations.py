@@ -1,3 +1,5 @@
+# defaultSelections = ['llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20:SYS,POST']
+
 defaultSelections = ['llg-looseLeptonVeto-mll40-photonPt20',
                      'llg-looseLeptonVeto-mll40-signalRegion-photonPt20:SYS',
                      'llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20:SYS,POST',
@@ -61,24 +63,24 @@ baseSelections   = [
                     ]
 
 extraSelections   = [
-                     'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-llgOnZ-njet2p-deepbtag1p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1-photonPt20',
-                     'llg-looseLeptonVeto-mll40-llgOnZ-njet2p-deepbtag1-photonPt20',
-                     'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1p',
-                     'llg-looseLeptonVeto-mll40-llgOnZ',
-                     'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-onZ-njet2p-deepbtag1p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1-photonPt20',
-                     'llg-looseLeptonVeto-mll40-onZ-njet2p-deepbtag1-photonPt20',
-                     'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1p',
-                     'llg-looseLeptonVeto-mll40-onZ',
-                     'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1p-photonPt20',
-                     'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1-photonPt20',
-                     'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1-photonPt20',
-                     'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1p',
-                     'llg-looseLeptonVeto-mll40-orOnZ'
+                    #  'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1p-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-llgOnZ-njet2p-deepbtag1p-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-llgOnZ-njet2p-deepbtag1-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-llgOnZ-njet1p-deepbtag1p',
+                    #  'llg-looseLeptonVeto-mll40-llgOnZ',
+                    #  'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1p-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-onZ-njet2p-deepbtag1p-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-onZ-njet2p-deepbtag1-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-onZ-njet1p-deepbtag1p',
+                    #  'llg-looseLeptonVeto-mll40-onZ',
+                    #  'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1p-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1p-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-orOnZ-njet2p-deepbtag1-photonPt20',
+                    #  'llg-looseLeptonVeto-mll40-orOnZ-njet1p-deepbtag1p',
+                    #  'llg-looseLeptonVeto-mll40-orOnZ'
                     ]
 
 # extraSelections   = [
@@ -122,9 +124,11 @@ def getSelections(tag, channel, sys, post):
   elif tag.count('base'):                               selections = dilepSelections + baseSelections
   else:                                                 selections = defaultSelections
 
-  if tag.count('extra'): selections = extraSelections
+  # if tag.count('extra'): selections = extraSelections
 
-  if channel not in ['SF', 'noData'] or not tag.count('phoCBfull'):
+# FIXME Why no on-Z plots if not phoCBfull? actual reason these plots would not be ok?
+  # if channel not in ['SF', 'noData'] or not tag.count('phoCBfull'):
+  if channel not in ['SF', 'noData']:
     selections = [s for s in selections if not s.lower().count('onz')]
 
   if sys:  selections = [s for s in selections if 'SYS'  in s]
@@ -142,8 +146,9 @@ def getVariations(args, sysList):
   elif args.tag.count('compareChannels'): channels = ['all']
   elif args.tag.count('splitOverlay'):    channels = ['noData']
   elif args.tag.count('misId'):           channels = ['noData']
+  elif args.tag.count('compos'):          channels = ['noData']
   elif args.tag.count('randomConeCheck'): channels = ['ee', 'mumu', 'emu', 'SF', 'all']
-  elif args.tag.count('igmaIetaIeta'):    channels = ['ee', 'mumu', 'emu', 'SF', 'all']
+  elif args.tag.count('igmaIetaIeta'):    channels = ['ee', 'mumu', 'emu', 'SF', 'all', 'noData']
   else:                                   channels = ['ee', 'mumu', 'emu', 'SF', 'all', 'noData']
 
   variations = []

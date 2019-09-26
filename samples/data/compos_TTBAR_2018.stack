@@ -1,0 +1,17 @@
+-- MC
+
+TT_Dil                     t#bar{t}_(genuine)         fillStyle     633                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+%%%%%%%%%%%%%%%%%%%%%%%%% hadronic fakes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+TT_Dil                     t#bar{t}_(hadronicFake)         fillStyle     633DARK                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+%%%%%%%%%%%%%%%%%%%%%%%%% hadronic photons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+TT_Dil                     t#bar{t}_(hadronicPhoton)         fillStyle     633BRIGHT                      _ttgEventType<3
++TT_Sem
++TT_Had

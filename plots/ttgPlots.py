@@ -61,12 +61,13 @@ if not args.isChild:
 # Initializing
 #
 import ROOT
-from ttg.plots.plot           import Plot, xAxisLabels, fillPlots, addPlots
-from ttg.plots.plot2D         import Plot2D, add2DPlots
-from ttg.plots.cutInterpreter import cutStringAndFunctions
-from ttg.samples.Sample       import createStack
-from ttg.plots.photonCategories import photonCategoryNumber, chgIsoCat
+from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots
+from ttg.plots.plot2D                 import Plot2D, add2DPlots
+from ttg.plots.cutInterpreter         import cutStringAndFunctions
+from ttg.samples.Sample               import createStack
+from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
 from math import pi
+from ttg.reduceTuple.objectSelection  import closestRawJet, rawJetDeltaR
 
 ROOT.gROOT.SetBatch(True)
 
@@ -188,6 +189,7 @@ def makePlotList():
     plotList.append(Plot('photon_neutralIso',          'neutralIso(#gamma) (GeV)',              lambda c : c._phNeutralHadronIsolation[c.ph],                  (25, 0, 5)))
     plotList.append(Plot('photon_photonIso',           'photonIso(#gamma) (GeV)',               lambda c : c._phPhotonIsolation[c.ph],                         (32, 0, 8)))
     plotList.append(Plot('photon_SigmaIetaIeta',       '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (20, 0, 0.04)))
+    plotList.append(Plot('photon_SigmaIetaIeta_small', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
     plotList.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',                lambda c : c._phHadronicOverEm[c.ph],                          (20, 0, .025)))
     plotList.append(Plot('photon_phHadTowOverEm',      'hadronicTowerOverEm(#gamma)',           lambda c : c._phHadTowOverEm[c.ph],                            (20, 0, .025)))
     plotList.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
@@ -241,8 +243,29 @@ def makePlotList():
     plotList.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, #gamma)',           lambda c : c.genPhDeltaR,                                      (15, 0, 0.3)))
     plotList.append(Plot('genPhoton_relPt',            'rel p_{T}',                             lambda c : c.genPhRelPt,                                       (20, -0.2, 0.2)))
     plotList.append(Plot('photonCategory',             'photonCategory',                        lambda c : photonCategoryNumber(c),                            (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
+    plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
+    plotList.append(Plot('phRawJetDeltaR',             'raw #DeltaR(#gamma, j) ',               lambda c : rawJetDeltaR(c),                                    (15, 0, 0.3), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
+    plotList.append(Plot('l1_Mva',                     'leptonMva output l1',                   lambda c : c._leptonMvatZq[c.l1],                              (84, -1.05, 1.05)))
+    plotList.append(Plot('l2_Mva',                     'leptonMva output l2',                   lambda c : c._leptonMvatZq[c.l2],                              (84, -1.05, 1.05)))
+    # NOTE TEMPORARY PLOTS
+    plotList.append(Plot('phJetDeltaRsmall',           '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                     (50, 0, 4.5), overflowBin=None))
+    plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
+  if args.tag.lower().count('extra'):
+    plotList.append(Plot('small_extra_l1_selectedTrackMult',       'l1 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l1],                          (100, 0., 20.)))
+    plotList.append(Plot('small_extra_l2_selectedTrackMult',       'l2 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l2],                          (100, 0., 20.)))
+    plotList.append(Plot('small_extra_l1_miniIsoCharged',          'l1 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l1],                             (100, 0., 5.)))
+    plotList.append(Plot('small_extra_l2_miniIsoCharged',          'l2 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l2],                             (100, 0., 5.)))
+    plotList.append(Plot('small_extra_l1_ptRel',                   'l1 ptRel',                        lambda c : c._ptRel[c.l1],                                      (100, 0., 100.)))
+    plotList.append(Plot('small_extra_l2_ptRel',                   'l2 ptRel',                        lambda c : c._ptRel[c.l2],                                      (100, 0., 100.)))
+    plotList.append(Plot('small_extra_l1_ptRatio',                 'l1 ptRatio',                      lambda c : c._ptRatio[c.l1],                                    (60, 0., 1.5)))
+    plotList.append(Plot('small_extra_l2_ptRatio',                 'l2 ptRatio',                      lambda c : c._ptRatio[c.l2],                                    (60, 0., 1.5)))
+    plotList.append(Plot('small_extra_l1_closestJetDeepCsv',       'l1 closestJetDeepCsv',            lambda c : c._closestJetDeepCsv[c.l1],                          (96, -2.1, 1.1)))
+    plotList.append(Plot('small_extra_l2_closestJetDeepCsv',       'l2 closestJetDeepCsv',            lambda c : c._closestJetDeepCsv[c.l2],                          (96, -2.1, 1.1)))
+    plotList.append(Plot('small_extra_l1_dz',                      'l1 dz',                           lambda c : c._dz[c.l1],                                         (100, -2., 2.)))
+    plotList.append(Plot('small_extra_l2_dz',                      'l2 dz',                           lambda c : c._dz[c.l2],                                         (100, -2., 2.)))
+    plotList.append(Plot('small_extra_l1_dxy',                     'l1 dxy',                          lambda c : c._dxy[c.l1],                                        (100, -0.02, 0.02)))
+    plotList.append(Plot('small_extra_l2_dxy',                     'l2 dxy',                          lambda c : c._dxy[c.l2],                                        (100, -0.02, 0.02)))
   # pylint: enable=C0301
-
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
 
@@ -302,9 +325,19 @@ for year in years:
   #
   if not args.showSys:
     if args.tag.count('noPixelSeedVeto'):                                           reduceType = 'phoCB-noPixelSeedVeto'
-    elif args.tag.count('base'):                                                      reduceType = 'base'
-    else:                                                                             reduceType = 'phoCB'
+    elif args.tag.count('base'):                                                    reduceType = 'base'
+    elif args.tag.count('phoCB'):                                                   reduceType = 'phoCB'
+    else:                                                                           reduceType = 'pho'
+    if args.tag.count('leptonMVA'):                                                 reduceType = 'leptonMVA-' + reduceType
+    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
+    if args.tag.count('phoCBextra') or args.tag.count('phoCBfullextra'):            reduceType = 'phoCBextra' #special skim with extra variables
     reduceType = applySysToReduceType(reduceType, args.sys)
+
+    # NOTE TEMPORARY CODE
+    MVAcut = None
+    if args.tag.count('LMVA'):
+      MVAcut = float(args.tag.split('LMVA')[1][0:4])
+
 
     from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
     for sample in sum(stack, []):
@@ -325,8 +358,8 @@ for year in years:
       c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail')     or args.tag.count("failSigmaIetaIeta")
       c.sideSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} sideband') or args.tag.count("sidebandSigmaIetaIeta")
       c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
-      c.sigmaIetaIeta1    = sample.texName.count('sideband1')
-      c.sigmaIetaIeta2    = sample.texName.count('sideband2')
+      c.sigmaIetaIeta1    = sample.texName.count('sideband1') or args.tag.count("gapSigmaIetaIeta")
+      c.sigmaIetaIeta2    = sample.texName.count('sideband2') 
       c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
       c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
 
@@ -345,6 +378,9 @@ for year in years:
 
         if not passingFunctions(c): continue
 
+        if MVAcut:
+          if not (c._leptonMvatZq[c.l1] > MVAcut and c._leptonMvatZq[c.l2] > MVAcut): continue
+
         if selectPhoton:
           if phoCBfull and not c._phCutBasedMedium[c.ph]:  continue
           if forward and abs(c._phEta[c.ph]) < 1.566:      continue
@@ -360,6 +396,7 @@ for year in years:
 
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
+        elif MVAcut:      eventWeight = c.genWeight*c.puWeight*1.*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
         
         if year == "comb": 
@@ -471,7 +508,7 @@ for year in years:
                     sorting           = True,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                     drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')),
-                    fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
+                    # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                     **extraArgs
           )
           extraArgs['saveGitInfo'] = False
@@ -500,7 +537,7 @@ for year in years:
 if not args.year == 'all': exit(0)
 
 # NOTE doing this in a sepatate code block seems like the better option for now 
-lumiScale = sum(lumiScales.values())
+lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018'] 
 
 noWarnings = True
 for plot in totalPlots: # 1D plots
@@ -569,7 +606,7 @@ for plot in totalPlots: # 1D plots
                   sorting           = True,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
-                  fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
+                  # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                   **extraArgs
         )
         extraArgs['saveGitInfo'] = False
