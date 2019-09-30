@@ -9,12 +9,19 @@ from math import sqrt
 import os
 
 
-files = {y : '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_'+y+'.root' for y in ['2016', '2017', '2018']}
+files = {
+  ('POG', '2016'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2016.root',
+  ('POG', '2017'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2017.root',
+  ('POG', '2018'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2018.root',
+  ('MVA', '2016'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_leptonMVA-phoCB__2016.root',
+  ('MVA', '2017'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_leptonMVA-phoCB__2017.root',
+  ('MVA', '2018'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_leptonMVA-phoCB__2018.root'}
+
 
 # TODO: studies to be repeated for full Run II data, including assesment of systematics
 class TriggerEfficiency:
-  def __init__(self, year):
-    scaleFactorFile = files[year]
+  def __init__(self, year, id ):
+    scaleFactorFile = files[(id, year)]
     self.mumu   = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-mumu")
     self.ee     = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-ee")
     self.mue    = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-mue")

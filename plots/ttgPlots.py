@@ -250,21 +250,25 @@ def makePlotList():
     # NOTE TEMPORARY PLOTS
     plotList.append(Plot('phJetDeltaRsmall',           '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                     (50, 0, 4.5), overflowBin=None))
     plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
-  if args.tag.lower().count('extra'):
-    plotList.append(Plot('small_extra_l1_selectedTrackMult',       'l1 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l1],                          (100, 0., 20.)))
-    plotList.append(Plot('small_extra_l2_selectedTrackMult',       'l2 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l2],                          (100, 0., 20.)))
-    plotList.append(Plot('small_extra_l1_miniIsoCharged',          'l1 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l1],                             (100, 0., 5.)))
-    plotList.append(Plot('small_extra_l2_miniIsoCharged',          'l2 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l2],                             (100, 0., 5.)))
+  if args.tag.lower().count('extra') or args.tag.lower().count('base'):
+    plotList.append(Plot('extra_l1_selectedTrackMult',             'l1 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l1],                          (20, 0., 20.)))
+    plotList.append(Plot('extra_l2_selectedTrackMult',             'l2 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l2],                          (20, 0., 20.)))
+    plotList.append(Plot('small_extra_l1_miniIsoCharged',          'l1 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l1],                             (100, 0., 0.5)))
+    plotList.append(Plot('small_extra_l2_miniIsoCharged',          'l2 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l2],                             (100, 0., 0.5)))
     plotList.append(Plot('small_extra_l1_ptRel',                   'l1 ptRel',                        lambda c : c._ptRel[c.l1],                                      (100, 0., 100.)))
     plotList.append(Plot('small_extra_l2_ptRel',                   'l2 ptRel',                        lambda c : c._ptRel[c.l2],                                      (100, 0., 100.)))
     plotList.append(Plot('small_extra_l1_ptRatio',                 'l1 ptRatio',                      lambda c : c._ptRatio[c.l1],                                    (60, 0., 1.5)))
     plotList.append(Plot('small_extra_l2_ptRatio',                 'l2 ptRatio',                      lambda c : c._ptRatio[c.l2],                                    (60, 0., 1.5)))
     plotList.append(Plot('small_extra_l1_closestJetDeepCsv',       'l1 closestJetDeepCsv',            lambda c : c._closestJetDeepCsv[c.l1],                          (96, -2.1, 1.1)))
     plotList.append(Plot('small_extra_l2_closestJetDeepCsv',       'l2 closestJetDeepCsv',            lambda c : c._closestJetDeepCsv[c.l2],                          (96, -2.1, 1.1)))
-    plotList.append(Plot('small_extra_l1_dz',                      'l1 dz',                           lambda c : c._dz[c.l1],                                         (100, -2., 2.)))
-    plotList.append(Plot('small_extra_l2_dz',                      'l2 dz',                           lambda c : c._dz[c.l2],                                         (100, -2., 2.)))
+    plotList.append(Plot('small_extra_l1_dz',                      'l1 dz',                           lambda c : c._dz[c.l1],                                         (100, -0.05, 0.05)))
+    plotList.append(Plot('small_extra_l2_dz',                      'l2 dz',                           lambda c : c._dz[c.l2],                                         (100, -0.05, 0.05)))
     plotList.append(Plot('small_extra_l1_dxy',                     'l1 dxy',                          lambda c : c._dxy[c.l1],                                        (100, -0.02, 0.02)))
     plotList.append(Plot('small_extra_l2_dxy',                     'l2 dxy',                          lambda c : c._dxy[c.l2],                                        (100, -0.02, 0.02)))
+    plotList.append(Plot('small_extra_l1_leptonMvatZq',            'l1 leptonMvatZq output',          lambda c : c._leptonMvatZq[c.l1],                               (44, -1.1, 1.1)))
+    plotList.append(Plot('small_extra_l2_leptonMvatZq',            'l2 leptonMvatZq output',          lambda c : c._leptonMvatZq[c.l2],                               (44, -1.1, 1.1)))
+    plotList.append(Plot('small_extra_l1_leptonMvaTTH',            'l1 leptonMvaTTH output',          lambda c : c._leptonMvaTTH[c.l1],                               (44, -1.1, 1.1)))
+    plotList.append(Plot('small_extra_l2_leptonMvaTTH',            'l2 leptonMvaTTH output',          lambda c : c._leptonMvaTTH[c.l2],                               (44, -1.1, 1.1)))
   # pylint: enable=C0301
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]

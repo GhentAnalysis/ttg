@@ -163,16 +163,18 @@ puReweightingDown = getReweightingFunction(sample.year, 'down')
 
 from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
+from ttg.reduceTuple.leptonSF_MVA import LeptonSF_MVA as LeptonSF_MVA
 from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
 
-# leptonSF         = LeptonSF(sample.year, id = 'MVA' if args.type.count('leptonMVA') else 'POG')
-leptonSF         = LeptonSF(sample.year, id = 'POG')
+leptonID = 'MVA' if args.type.lower().count('mva') else 'POG'
+
+leptonSF         = LeptonSF_MVA(sample.year) if leptonID=='MVA' else LeptonSF(sample.year)
 photonSF         = PhotonSF(sample.year)
-triggerEff       = TriggerEfficiency(sample.year)
-btagSF           = BtagEfficiency(sample.year)
+triggerEff       = TriggerEfficiency(sample.year, id = leptonID) 
+btagSF           = BtagEfficiency(sample.year, id = leptonID)
 
 #
 # Loop over the tree, skim, make new vars and add the weights

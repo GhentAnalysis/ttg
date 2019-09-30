@@ -13,6 +13,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
 argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
+argParser.add_argument('--selectID', action='store',      default='POG',  help='selects which TE input files to use', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB'])
 args = argParser.parse_args()
 
 
@@ -30,8 +31,8 @@ ROOT.gStyle.SetPadBottomMargin(0.15)
 ROOT.gROOT.ForceStyle()
 
 def mkTriggerSF(year):
-  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerSF' + args.select + ('_puWeighted' if args.pu else '') + '_' + year + '.root'), 'update')
-  inFile  = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root'))
+  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerSF' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year + '.root'), 'update')
+  inFile  = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root'))
   inFileUnw = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + '_' + year  + '.root'))
   for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
     for channel in ['ee', 'emu', 'mue', 'mumu']:
@@ -40,11 +41,11 @@ def mkTriggerSF(year):
       effMC   = inFile.Get('TT_Dil-' + channel + t)
       try: effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
       except: 
-        log.warning('MET-'     + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
+        log.warning('MET-'     + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
         continue
       try: effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
       except: 
-        log.warning('TT_Dil-' + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
+        log.warning('TT_Dil-' + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
         continue
       effData.Draw()
       ROOT.gPad.Update() # Important, otherwise ROOT throws null pointers
@@ -80,7 +81,7 @@ def mkTriggerSF(year):
       hist.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
       
-      directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF_' + year +  '/' + args.select)
+      directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF_' + args.selectID + '_' + year +  '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
       outFile.cd()
       hist.Write('SF-' + channel + t)

@@ -40,14 +40,17 @@ class BtagEfficiency:
   scaleFactorFile    = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_2016LegacySF_V1.csv',
                         '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_94XSF_V4_B_F.csv',
                         '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/DeepCSV_102XSF_V1.csv'}
-  mcEffFileDeepCSV   = {'2016':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2016.pkl',
-                        '2017':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2017.pkl',
-                        '2018':'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2018.pkl'}
+  mcEffFileDeepCSV   = {('POG','2016'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2016.pkl',
+                        ('POG','2017'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2017.pkl',
+                        ('POG','2018'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2018.pkl',
+                        ('MVA','2016'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_leptonMVA-phoCB_TT_Dil+TT_Sem+TT_Had_2016.pkl',
+                        ('MVA','2017'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_leptonMVA-phoCB_TT_Dil+TT_Sem+TT_Had_2017.pkl',
+                        ('MVA','2018'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_leptonMVA-phoCB_TT_Dil+TT_Sem+TT_Had_2018.pkl'}
 
-  def __init__(self, year, wp = ROOT.BTagEntry.OP_MEDIUM):
+  def __init__(self, year, id, wp = ROOT.BTagEntry.OP_MEDIUM):
     # Input files
 
-    self.mcEffDeepCSV = pickle.load(file(os.path.expandvars(self.mcEffFileDeepCSV[year])))
+    self.mcEffDeepCSV = pickle.load(file(os.path.expandvars(self.mcEffFileDeepCSV[(id, year)])))
 
     ROOT.gSystem.Load('libCondFormatsBTauObjects')
     ROOT.gSystem.Load('libCondToolsBTau')

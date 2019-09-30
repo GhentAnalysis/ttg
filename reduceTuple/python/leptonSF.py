@@ -20,33 +20,29 @@ dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 
 # FIXME Muon SF for 2018 are not yet final, leave this comment in the file (no SF including syst unc available)
 
-keys_mu_ISO = {('2016','POG')   : [("2016LegRunBCDEF_Mu_SF_ISO.root",            "NUM_TightRelIso_DEN_MediumID_eta_pt")],
-               ('2016','POGGH') : [("2016LegRunGH_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_eta_pt")],
-               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ISO_syst.root",          "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
-               ('2018','POG')   : [("2018RunABCD_Mu_SF_ISO.root",                "NUM_TightRelIso_DEN_MediumID_pt_abseta")]}
+keys_mu_ISO = {'2016': [("2016LegRunBCDEF_Mu_SF_ISO.root",            "NUM_TightRelIso_DEN_MediumID_eta_pt")],
+               '2017': [("2017RunBCDEF_Mu_SF_ISO_syst.root",          "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
+               '2018': [("2018RunABCD_Mu_SF_ISO.root",                "NUM_TightRelIso_DEN_MediumID_pt_abseta")]}
 
-keys_mu_ID  = {('2016','POG')   : [("2016LegRunBCDEF_Mu_SF_ID.root",             "NUM_MediumID_DEN_genTracks_eta_pt")],
-               ('2016','POGGH') : [("2016LegRunGH_Mu_SF_ID.root",                "NUM_MediumID_DEN_genTracks_eta_pt")],
-               ('2017','POG')   : [("2017RunBCDEF_Mu_SF_ID_syst.root",           "NUM_MediumID_DEN_genTracks_pt_abseta")],
-               ('2018','POG')   : [("2018RunABCD_Mu_SF_ID.root",                 "NUM_MediumID_DEN_TrackerMuons_pt_abseta")]}
+keus_mu_GH  = {'ISO': [("2016LegRunGH_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_eta_pt")],
+               'ID':  [("2016LegRunGH_Mu_SF_ID.root",                "NUM_MediumID_DEN_genTracks_eta_pt")]}
 
-keys_ele = {('2016','POG')   : [("2016LegacyReReco_ElectronTight_Fall17V2.root", "EGamma_SF2D")],
-            ('2017','POG')   : [("2017_ElectronTight.root",                      "EGamma_SF2D")],
-            ('2018','POG')   : [("2018_ElectronTight.root",                      "EGamma_SF2D")],
-            ('2016','elMva') : [("2016LegacyReReco_ElectronMVA90_Fall17V2.root", "EGamma_SF2D")],
-            ('2017','elMva') : [("2017_ElectronMVA90.root",                      "EGamma_SF2D")],
-            ('2018','elMva') : [("2018_ElectronMVA90.root",                      "EGamma_SF2D")]}
+keys_mu_ID  = {'2016': [("2016LegRunBCDEF_Mu_SF_ID.root",             "NUM_MediumID_DEN_genTracks_eta_pt")],
+               '2017': [("2017RunBCDEF_Mu_SF_ID_syst.root",           "NUM_MediumID_DEN_genTracks_pt_abseta")],
+               '2018': [("2018RunABCD_Mu_SF_ID.root",                 "NUM_MediumID_DEN_TrackerMuons_pt_abseta")]}
 
-# TODO:
-#   use syntax of [(filename, key), (filename, key),...] or simplify if we do not use it
+keys_ele = {'2016': [("2016LegacyReReco_ElectronTight_Fall17V2.root", "EGamma_SF2D")],
+            '2017': [("2017_ElectronTight.root",                      "EGamma_SF2D")],
+            '2018': [("2018_ElectronTight.root",                      "EGamma_SF2D")]}
+
 class LeptonSF:
-  def __init__(self, year, id = 'POG'): 
-    self.mu   = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, id)]]
-    self.mu  += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, id)]]
-    self.ele  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[(year, id)]]
+  def __init__(self, year): 
+    self.mu   = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[year]]
+    self.mu  += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[year]]
+    self.ele  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_ele[year]]
     if year == '2016':
-      self.muGH  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ISO[(year, id + 'GH')]]
-      self.muGH += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_ID[(year, id + 'GH')]]
+      self.muGH  = [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_GH['ISO']]
+      self.muGH += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_GH['ID']]
       for effMap in self.muGH:
         assert effMap
         effMap.ptY = (year == '2016')
