@@ -18,10 +18,10 @@ log = getLogger(args.logLevel)
 avs     = [("weightSum",           lambda c : c._weight),                   # sums
           ("phSigmaIetaIetaSum",  lambda c : c._weight * c._phSigmaIetaIeta[c.ph]),
           ("phChargedIsolation",  lambda c : c._weight * c._phChargedIsolation[c.ph])]
-
-rotAvs = [("weightSum",           lambda c : c._weight),                   # sums
-          ("val1Sum",             lambda c : c._weight * (A * 1000. * c._phSigmaIetaIeta[c.ph] + B * c._phChargedIsolation[c.ph]) ),
-          ("val2sum",             lambda c : c._weight * (C * 1000. * c._phSigmaIetaIeta[c.ph] + D * c._phChargedIsolation[c.ph]) )]
+# FIXME: some undefined variables in the lines of code below 
+#rotAvs = [("weightSum",           lambda c : c._weight),                   # sums
+#          ("val1Sum",             lambda c : c._weight * (A * 1000. * c._phSigmaIetaIeta[c.ph] + B * c._phChargedIsolation[c.ph]) ),
+#          ("val2sum",             lambda c : c._weight * (C * 1000. * c._phSigmaIetaIeta[c.ph] + D * c._phChargedIsolation[c.ph]) )]
 
 
 samples = {"TT": "/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-onlyTT/noData/llg-looseLeptonVeto-mll40-offZ-llgNoZ-photonPt20/dumpedArrays.pkl",

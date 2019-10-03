@@ -24,7 +24,7 @@ keys_mu_ISO = {'2016': [("2016LegRunBCDEF_Mu_SF_ISO.root",            "NUM_Tight
                '2017': [("2017RunBCDEF_Mu_SF_ISO_syst.root",          "NUM_TightRelIso_DEN_MediumID_pt_abseta")],
                '2018': [("2018RunABCD_Mu_SF_ISO.root",                "NUM_TightRelIso_DEN_MediumID_pt_abseta")]}
 
-keus_mu_GH  = {'ISO': [("2016LegRunGH_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_eta_pt")],
+keys_mu_GH  = {'ISO': [("2016LegRunGH_Mu_SF_ISO.root",               "NUM_TightRelIso_DEN_MediumID_eta_pt")],
                'ID':  [("2016LegRunGH_Mu_SF_ID.root",                "NUM_MediumID_DEN_genTracks_eta_pt")]}
 
 keys_mu_ID  = {'2016': [("2016LegRunBCDEF_Mu_SF_ID.root",             "NUM_MediumID_DEN_genTracks_eta_pt")],

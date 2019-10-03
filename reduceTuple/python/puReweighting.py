@@ -29,7 +29,7 @@ def getReweightingFunction(year, variation='central', useMC=None):
     elif year == '2018': from SimGeneral.MixingModule.mix_2018_25ns_JuneProjectionFull18_PoissonOOTPU_cfi import mix
       
     sys.stdout = sys.__stdout__
-    for i, value in enumerate(mix.input.nbPileupEvents.probValue): mcProfile.SetBinContent(i+1, value)   # pylint: disable=E1101
+    for i, value in enumerate(mix.input.nbPileupEvents.probValue): mcProfile.SetBinContent(i+1, value)   # pylint: disable=E1103
   else:
     mcProfile = useMC
   mcProfile.Scale(1./mcProfile.Integral())
