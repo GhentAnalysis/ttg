@@ -13,7 +13,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--pu',       action='store_true', default=False,  help='Use pile-up reweighting (no use of CP intervals)')
 argParser.add_argument('--select',   action='store',      default='',     help='Additional selection for systematic studies')
-argParser.add_argument('--selectID', action='store',      default='POG',  help='selects which TE input files to use', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB'])
+argParser.add_argument('--selectID', action='store',      default='POG',  help='Selection of lepton ID, as in the trigger efficiency file names', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB'])
 args = argParser.parse_args()
 
 
@@ -21,7 +21,7 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 from ttg.tools.style import commonStyle, setDefault
-from ttg.tools.helpers import printCanvas, isValidRootFile
+from ttg.tools.helpers import printCanvas, getObjFromFile
 from math import sqrt
 import ROOT
 
@@ -30,23 +30,20 @@ ROOT.gStyle.SetPadRightMargin(0.15)
 ROOT.gStyle.SetPadBottomMargin(0.15)
 ROOT.gROOT.ForceStyle()
 
+
 def mkTriggerSF(year):
-  outFile = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerSF' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year + '.root'), 'update')
-  inFile  = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root'))
-  inFileUnw = ROOT.TFile.Open(os.path.join('data', 'triggerEff', 'triggerEfficiencies' + args.select + '_' + year  + '.root'))
+  mcFile   = os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root')
+  dataFile = os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + '_' + year  + '.root')
+  sfFile   = os.path.join('data', 'triggerEff', 'triggerSF'           + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root')
+  sfFile   = ROOT.TFile(sfFile, 'update')
   for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
     for channel in ['ee', 'emu', 'mue', 'mumu']:
-# FIXME could also use JetHT instead of MET
-      effData = inFileUnw.Get('MET-'     + channel + t) # Data is never PU reweighted, not in _puWeighted files
-      effMC   = inFile.Get('TT_Dil-' + channel + t)
-      try: effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
-      except: 
-        log.warning('MET-'     + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
-        continue
-      try: effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
-      except: 
-        log.warning('TT_Dil-' + channel + t + ' missing in ' + os.path.join('data', 'triggerEff', 'triggerEfficiencies' + '_' + args.selectID + '_' + args.select + ('_puWeighted' if args.pu else '') + '_' + year  + '.root') + ', skipping ') 
-        continue
+      effData = getObjFromFile(dataFile, 'MET-'  + channel + t) # Could also use JETHT
+      effMC   = getObjFromFile(mcFile,   'TT_Dil-' + channel + t)
+      if not effData: log.warning('MET-'    + channel + t + ' missing in ' + dataFile + ', skipping ')
+      if not effMC:   log.warning('TT_Dil-' + channel + t + ' missing in ' + mcFile + ', skipping ')
+      effData.SetStatisticOption(ROOT.TEfficiency.kFCP)
+      effMC.SetStatisticOption(ROOT.TEfficiency.kFCP)
       effData.Draw()
       ROOT.gPad.Update() # Important, otherwise ROOT throws null pointers
       hist = effData.GetPaintedHistogram()
@@ -59,7 +56,7 @@ def mkTriggerSF(year):
             errLow = sqrt(effData.GetEfficiencyErrorLow(globalBin)**2+effMC.GetEfficiencyErrorLow(globalBin)**2)
             hist.SetBinError(i, j, max(errUp, errLow))
 
-      canvas = ROOT.TCanvas(effData.GetName(), effData.GetName())
+      canvas = ROOT.TCanvas(effData.GetName() + year, effData.GetName())
       canvas.cd()
       ROOT.gStyle.SetPaintTextFormat("2.5f" if 'integral' in t else "2.2f")
       commonStyle(hist)
@@ -80,14 +77,14 @@ def mkTriggerSF(year):
       hist.SetMaximum(1.2)
       hist.Draw("COLZ TEXTE")
       canvas.RedrawAxis()
-      
+
       directory = os.path.expandvars('/user/$USER/public_html/ttG/triggerEfficiency/' + ('puWeighted/' if args.pu else '') + 'SF_' + args.selectID + '_' + year +  '/' + args.select)
       printCanvas(canvas, directory, channel + t, ['pdf', 'png'])
-      outFile.cd()
+      sfFile.cd()
       hist.Write('SF-' + channel + t)
 
-for year in ['2016', '2017', '2018']:
-  log.info('making trigger ScaleFactors for ' + year)
-  mkTriggerSF(year)
+for y in ['2016', '2017', '2018']:
+  log.info('making trigger ScaleFactors for ' + y)
+  mkTriggerSF(y)
 
 log.info('Finished')
