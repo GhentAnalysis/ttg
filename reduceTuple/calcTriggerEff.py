@@ -106,6 +106,7 @@ def passTrigger(c):
 #
 if args.corr:
   def multiThreadWrapper(subJob):
+    # pylint: disable=W0621
     countAll, countMET, countLep, countBoth = {}, {}, {}, {}
     for channel in ['ee', 'emu', 'mumu']:
       countAll[channel]  = 0.

@@ -6,7 +6,7 @@ log = getLogger()
 # NOTE for muons tracking SF are very close to 1, the recommendation is not to apply any SF see: 
 # https://twiki.cern.ch/twiki/bin/view/CMS/MuonReferenceSelectionAndCalibrationsRun2
 
-import os, math
+import os
 from ttg.tools.helpers import getObjFromFile
 
 baseDir  = '$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData/'
@@ -53,11 +53,6 @@ class LeptonTrackingEfficiency:
         val    = self.eHigh_sf.GetBinContent(self.eHigh_sf.FindBin(eta, pt))
         valErr = self.eHigh_sf.GetBinError(self.eHigh_sf.FindBin(eta, pt))
       
-# TODO  check if this is not needed anymore
-      # if pt > 80: addUnc = 0.01*val # Additional 1% on ele with pt > 80
-      # else:       addUnc = 0.
-      # valErr = math.sqrt(valErr**2 + addUnc**2)
-
     elif abs(flavor) == 1:
       return 1.
 

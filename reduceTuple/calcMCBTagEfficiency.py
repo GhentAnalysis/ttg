@@ -1,6 +1,5 @@
 #! /usr/bin/env python
 import ROOT, pickle, os
-import itertools
 ROOT.gROOT.SetBatch(True)
 
 import argparse
@@ -44,16 +43,16 @@ def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
       pt     = c._jetSmearedPt[j]
       eta    = abs(c._jetEta[j])
       flavor = abs(c._jetHadronFlavor[j])
-      for ptBin in getPtBins():
-        if pt >= ptBin[0] and (pt < ptBin[1] or ptBin[1] < 0):
-          for etaBin in getEtaBins():
-            if abs(eta) >= etaBin[0] and abs(eta) < etaBin[1]:
-              if abs(flavor) == 5:   f = 'b' 
-              elif abs(flavor) == 4: f = 'c'
-              else:                 f = 'other'
-              name = str(ptBin) + str(etaBin) + f
-              if c._jetDeepCsv_b[j] + c._jetDeepCsv_bb[j] > btagWP: passing[name] += c._weight
-              total[name] += c._weight
+      for myPtBin in getPtBins():
+        if pt >= myPtBin[0] and (pt < myPtBin[1] or myPtBin[1] < 0):
+          for myEtaBin in getEtaBins():
+            if abs(eta) >= myEtaBin[0] and abs(eta) < myEtaBin[1]:
+              if abs(flavor) == 5:   flav = 'b' 
+              elif abs(flavor) == 4: flav = 'c'
+              else:                  flav = 'other'
+              myBin = str(myPtBin) + str(myEtaBin) + flav
+              if c._jetDeepCsv_b[j] + c._jetDeepCsv_bb[j] > btagWP: passing[myBin] += c._weight
+              total[myBin] += c._weight
 
 workingPoints = {'2016':0.6321, '2017':0.4941, '2018':0.4184}
 
@@ -66,11 +65,11 @@ for ptBin in getPtBins():
       passing[name] = 0.
       total[name]   = 0.
 
-sampleList           = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ args.year +'.conf'))
-samples               = [getSampleFromList(sampleList, sample) for sample in args.sample.split("+")]
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ args.year +'.conf'))
+samples    = [getSampleFromList(sampleList, sample) for sample in args.sample.split("+")]
 
 for sample in samples:
-  chain                = sample.initTree(shortDebug=args.debug)
+  chain = sample.initTree(shortDebug=args.debug)
   setIDSelection(chain, args.selectID)
   getBTagMCTruthEfficiencies(chain, btagWP = workingPoints[args.year])
 
@@ -83,6 +82,7 @@ for ptBin in getPtBins():
       name = str(ptBin) + str(etaBin) + f
       mceff[tuple(ptBin)][tuple(etaBin)][f] = passing[name]/total[name] if total[name] > 0 else 0
 
-pickle.dump(mceff, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_' + args.selectID + '_' + args.sample + '_' + args.year + ('DEBUG' if args.debug else '') + '.pkl'), 'w'))
+pklFile = 'deepCSV_' + args.selectID + '_' + args.sample + '_' + args.year + ('DEBUG' if args.debug else '') + '.pkl'
+pickle.dump(mceff, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/' + pklFile), 'w'))
 log.info('Efficiencies deepCSV for ' + str(args.year) +':')
 log.info('Finished')

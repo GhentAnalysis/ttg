@@ -6,7 +6,7 @@
 import os, argparse, copy, pickle
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
-argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018','all','comb'])
+argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018', 'all', 'comb'])
 argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='phoCBfull')
@@ -154,9 +154,8 @@ def createSignalRegionsZoom(t):
   return -1
 
 # Plot definitions (allow long lines, and switch off unneeded lambda warning, because lambdas are needed)
-# pylint: disable=C0301,W0108
-
 def makePlotList():
+  # pylint: disable=C0301,W0108
   plotList = []
   if args.tag.count('randomConeCheck'):
     plotList.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20, 0, 20)))
@@ -275,7 +274,7 @@ def makePlotList():
 
   # if no kind of photon cut was made (also not in skim) (requiring nphotons=0 is allowed), or no Z-veto is applied -> can unblind
   phoReq = [selectPhoton, args.tag.count('pho'), args.selection.count('pho') and not args.selection.count('nphoton0')]
-  noZReq = [args.selection.count('offZ'),args.selection.count('llgNoZ')]
+  noZReq = [args.selection.count('offZ'), args.selection.count('llgNoZ')]
   if not any(phoReq) or not any(noZReq):
     for p in plotList: p.blindRange = None
   return plotList
