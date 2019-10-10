@@ -169,10 +169,10 @@ from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
 
-leptonID = 'MVA' if args.type.lower().count('mva') else 'POG'
+leptonID = 'MVA' if args.type.lower().count('leptonMVA') else 'POG'
 
 leptonSF         = LeptonSF_MVA(sample.year) if leptonID=='MVA' else LeptonSF(sample.year)
-photonSF         = PhotonSF(sample.year)
+photonSF         = PhotonSF(sample.year, "MVA" if args.type.count("photonMVA") else "CB")
 triggerEff       = TriggerEfficiency(sample.year, id = leptonID) 
 btagSF           = BtagEfficiency(sample.year, id = leptonID)
 

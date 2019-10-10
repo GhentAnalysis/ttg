@@ -13,10 +13,11 @@ log = getLogger()
 def setIDSelection(c, reducedTupleType):
   c.doPhotonCut         = reducedTupleType.count('pho')
   c.photonCutBased      = reducedTupleType.count('phoCB')
-  c.photonMva           = reducedTupleType.count('photonMva')
+  c.photonMVA           = reducedTupleType.count('photonMVA')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
   c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
   c.leptonMVA           = reducedTupleType.count("leptonMVA")
+  c.tthMVA              = reducedTupleType.count("tthMVA")
 
 
 #
@@ -59,7 +60,7 @@ def electronSelector(tree, index):
   else:                return tree._lPOGTight[index]
 
 def muonSelector(tree, index):
-  if tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4 and tree._relIso0p4MuDeltaBeta[index] < 0.15
+  if tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
   return tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15
 
 def leptonSelector(tree, index):
@@ -140,7 +141,7 @@ def photonSelector(tree, index, n, minLeptons):
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
-  if tree.photonMva:            return tree._phMva[index] > 0.20
+  if tree.photonMVA:            return tree._phMva[index] > 0.20
   return True
 
 def addGenPhotonInfo(t, n, index):

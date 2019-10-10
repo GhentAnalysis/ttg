@@ -33,7 +33,11 @@ special_cuts = {
 def phLepDeltaR(tree, lower, upper):
   return (lower <= min(tree.phL1DeltaR, tree.phL2DeltaR) < upper)
 
-continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR, 'genPhMinDeltaR' : 'genPhMinDeltaR'}
+# TODO currently this can not deal with combining years due to cuts being different
+def phMVA(tree, lower, upper):
+  return (lower <= tree._phMva[tree.ph] < upper)
+
+continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR, 'genPhMinDeltaR' : 'genPhMinDeltaR', 'phMVA': phMVA}
 discrete_variables  = {'njet': 'njets', 'btag': 'nbjets', 'deepbtag': 'ndbjets', 'nphoton': 'nphotons'}
 
 # Need to disable the too many branches function because CMSSW has some ancient pylint release which does not exclude nested functions

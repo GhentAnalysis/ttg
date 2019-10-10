@@ -163,10 +163,11 @@ def makePlotList():
     plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPtCorr[c.ph], (20, 0, 2)))
   else:
     plotList.append(Plot('yield',                      'yield',                                 lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
-    plotList.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : c._nVertex,                                         (50, 0, 50)))
+    plotList.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : ord(c._nVertex),                                    (50, 0, 50)))
     plotList.append(Plot('nTrueInt',                   'nTrueInt',                              lambda c : c._nTrueInt,                                        (50, 0, 50)))
     plotList.append(Plot('nphoton',                    'number of photons',                     lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
-    plotList.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (20, 15, 115)))
+    plotList.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (24, 15, 135)))
+    plotList.append(Plot('photon_pt_large',            'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (12, 15, 135)))
     plotList.append(Plot('photon_eta',                 '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                (15, 0, 2.5)))
     plotList.append(Plot('photon_phi',                 '#phi(#gamma)',                          lambda c : c._phPhi[c.ph],                                     (10, -pi, pi)))
     plotList.append(Plot('photon_mva',                 '#gamma-MVA',                            lambda c : c._phMva[c.ph],                                     (20, -1, 1)))
@@ -249,6 +250,7 @@ def makePlotList():
     # NOTE TEMPORARY PLOTS
     plotList.append(Plot('phJetDeltaRsmall',           '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                     (50, 0, 4.5), overflowBin=None))
     plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
+    plotList.append(Plot('photon_pt_ATLB',             'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 30., 40., 50., 65., 80., 100., 125., 160., 220., 300.]))
   if args.tag.lower().count('extra') or args.tag.lower().count('base'):
     plotList.append(Plot('extra_l1_selectedTrackMult',             'l1 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l1],                          (20, 0., 20.)))
     plotList.append(Plot('extra_l2_selectedTrackMult',             'l2 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l2],                          (20, 0., 20.)))
@@ -330,11 +332,13 @@ for year in years:
     if args.tag.count('noPixelSeedVeto'):                                           reduceType = 'phoCB-noPixelSeedVeto'
     elif args.tag.count('base'):                                                    reduceType = 'base'
     elif args.tag.count('phoCB'):                                                   reduceType = 'phoCB'
+    elif args.tag.count('photonMVA'):                                               reduceType = 'photonMVA'
     else:                                                                           reduceType = 'pho'
     if args.tag.count('leptonMVA'):                                                 reduceType = 'leptonMVA-' + reduceType
     if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
-    if args.tag.count('phoCBextra') or args.tag.count('phoCBfullextra'):            reduceType = 'phoCBextra' #special skim with extra variables
+    # if args.tag.count('phoCBextra') or args.tag.count('phoCBfullextra'):            reduceType = 'phoCBextra' #special skim with extra variables
     reduceType = applySysToReduceType(reduceType, args.sys)
+    log.info("using reduceType " + reduceType)
 
     # NOTE TEMPORARY CODE
     MVAcut = None
@@ -479,6 +483,9 @@ for year in years:
       if args.channel != 'noData':
         extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
 
+      if any (args.tag.lower().count(sname) for sname in ['failpass','ffp','pfp']):
+        extraArgs['ratio']   = {'yRange' : (1.0, 8.0), 'texY': '#sigma_{i#etai#eta} pass/fail'}
+
       if(normalize or args.tag.count('compareChannels')):
         extraArgs['scaling'] = 'unity'
         extraArgs['ratio']   = {'yRange' : (0.1, 1.9), 'texY':'ratio'}
@@ -581,6 +588,9 @@ for plot in totalPlots: # 1D plots
 
     if args.channel != 'noData':
       extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
+
+    if any (args.tag.lower().count(sname) for sname in ['failpass','ffp','pfp']):
+      extraArgs['ratio']   = {'yRange' : (1.0, 8.0), 'texY': '#sigma_{i#etai#eta} pass/fail'}
 
     if(normalize or args.tag.count('compareChannels')):
       extraArgs['scaling'] = 'unity'
