@@ -7,3 +7,4 @@ plots/fitPlots
 plots/combine
 **/git.txt
 reduceTuple/data/puReweightingData/pileup_latest.txt
+fancyPlots/virenv
