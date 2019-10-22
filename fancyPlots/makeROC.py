@@ -27,9 +27,9 @@ log = getLogger(args.logLevel)
 from ttg.tools.helpers import editInfo, plotDir, updateGitInfo
 plotDir = plotDir.replace('ttG', 'mvaRoc')
 if args.editInfo:
-  try:    os.makedirs(os.path.join(plotDir, args.tag))
+  try:    os.makedirs(os.path.join(plotDir))
   except: pass
-  editInfo(os.path.join(plotDir, args.tag))
+  editInfo(os.path.join(plotDir))
 
 #
 # Directory name
@@ -72,7 +72,7 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   topDir  = '/user/tomc/public_html/mvaRoc/'
   try:    os.makedirs(os.path.join(topDir, plotDir))
   except: pass
-  print('Making roc curves for %s (%s)' % (baseName, plotDir))
+  log.info('Making roc curves for %s (%s)' % (baseName, plotDir))
 
   title = 'ROC curve (2016) for %s' % ('electrons' if flavor=='e' else ('muons' if flavor=='mu' else 'electrons and muons'))
   if ptMin or ptMax:
@@ -130,6 +130,7 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   #
   # Plotting with plotly
   #
+  log.info('Plotting with plotly (%s)' % (plotDir))
   import plotly.offline
   import plotly.graph_objs as go
 
@@ -223,7 +224,9 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   #
   # Plotting with matplotlib
   #
+  log.info('Plotting with matplotlib (%s)' % (plotDir))
   import matplotlib.pyplot as pyplot
+  pyplot.switch_backend('agg') # needed to run on the cluster
 
   def makePyplot(name, logX=False, logY=False, minX=0, minY=0, annotate=False):
     fig, ax = pyplot.subplots()
@@ -251,6 +254,7 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
     ax.set(xlabel='background efficiency', ylabel='signal efficiency', title=title)
     ax.grid()
 
+    log.info('Saving %s.pdf' % name)
     fig.savefig(os.path.join(topDir, plotDir, name + ".pdf"))
     pyplot.close()
 
@@ -261,5 +265,9 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   makePyplot('roc_IlliaStyle3', logX=True, minX=0.00008, minY=None)
   makePyplot('roc_IlliaStyle4', logX=True, minX=0.000008, minY=None)
 
-makeRocCurves(args.tag, '/user/tomc/public/reducedTuples/dilepton_MC_2016_v5/' + args.tag, flavor=args.flavor, ptMin=args.ptMin, ptMax=args.ptMax)
+
+try:
+  makeRocCurves(args.tag, '/user/tomc/public/reducedTuples/dilepton_MC_2016_v5/' + args.tag, flavor=args.flavor, ptMin=args.ptMin, ptMax=args.ptMax)
+except Exception as e:
+  log.error(e) # just to make sure errors are getting logged when they are produced by matplotlib
 log.info('Finished')
