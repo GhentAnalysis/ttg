@@ -18,8 +18,8 @@ fi
 if [ -d "virenv" ]; then
   source virenv/bin/activate
 else
-  python -m virtualenv virenv
+  python -m virtualenv virenv # should move to python3 when CMSSW ROOT is redy
   source virenv/bin/activate
-  pip install -r requirements.txt
+  pip install -r requirements.txt  # shoud move to pip3 when CMSSW ROOT is ready
 fi
 echo "In virtual environment, type 'deactivate' to leave"

@@ -1,9 +1,35 @@
 #!/usr/bin/env python
 
-import glob, ROOT, os
-from ttg.tools.progressBar import progressbar
-import plotly.offline
-import plotly.graph_objs as go
+#
+# Argument parser and logging
+#
+import os, argparse, sys
+argParser = argparse.ArgumentParser(description = "Argument parser")
+argParser.add_argument('--logLevel',       action='store',      default='INFO',         nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
+argParser.add_argument('--tag',            action='store',      default='rocCurve2016', help='Tag to take the flatLeptonTrees from')
+argParser.add_argument('--flavor',         action='store',      default=None,           help='Select electrons, muons or both', choices=[None, 'e', 'mu'])
+argParser.add_argument('--ptMin',          action='store',      default=None,           help='Select minimum lepton pt')
+argParser.add_argument('--ptMax',          action='store',      default=None,           help='Select maximum lepton pt')
+argParser.add_argument('--editInfo',       action='store_true', default=False)
+argParser.add_argument('--isChild',        action='store_true', default=False)
+argParser.add_argument('--runLocal',       action='store_true', default=False)
+argParser.add_argument('--dryRun',         action='store_true', default=False,          help='do not launch subjobs')
+args = argParser.parse_args()
+
+
+from ttg.tools.logger import getLogger
+log = getLogger(args.logLevel)
+
+
+#
+# Check git and edit the info file
+#
+from ttg.tools.helpers import editInfo, plotDir, updateGitInfo
+plotDir = plotDir.replace('ttG', 'mvaRoc')
+if args.editInfo:
+  try:    os.makedirs(os.path.join(plotDir, args.tag))
+  except: pass
+  editInfo(os.path.join(plotDir, args.tag))
 
 #
 # Directory name
@@ -17,6 +43,29 @@ def getPlotDir(baseName, flavor=None, ptMin=None, ptMax=None):
   return baseName + flavorString + ptString
 
 
+#
+# Submit subjobs
+#
+if not args.isChild:
+  updateGitInfo()
+
+  jobs = []
+  for ptRange in [(None, None), (0, 10), (10, 20), (20, 30), (30, 50), (50, None), (0, 25), (25, None)]:
+    for flavor in [None, 'e', 'mu']:
+      jobs.append((args.tag, flavor, ptRange[0], ptRange[1]))
+
+  from ttg.tools.jobSubmitter import submitJobs
+  # Setup the virtual environment before running the job
+  # since 21/10/2019, this script needs to be run with ipython instead of python for unknown reasons
+  submitJobs('source setupVirtEnv.sh; ipython -- ' + __file__, ('tag', 'flavor', 'ptMin', 'ptMax'), jobs, argParser, jobLabel = "ROC", wallTime="5")
+  sys.exit(0)
+
+
+
+
+
+import glob, ROOT, os
+from ttg.tools.progressBar import progressbar
 
 def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   plotDir = getPlotDir(baseName, flavor=flavor, ptMin=ptMin, ptMax=ptMax)
@@ -29,6 +78,9 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   if ptMin or ptMax:
     if ptMax: title += ' (%s < $p_{T}$ < %s GeV)' % (ptMin if ptMin else 0, ptMax)
     else:     title += ' (%s < $p_{T}$)' % (ptMin if ptMin else 0)
+    if ptMin: ptMin = int(ptMin)
+    if ptMax: ptMax = int(ptMax)
+
 
   def analyzeTree(sample, mvas):
     prompt = ('tZq' in sample or 'ttZ' in sample)
@@ -43,7 +95,6 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
     for mva in mvas:
       hists[mva] = ROOT.TH1F(sample+mva, sample+mva, 100000, -1., 1.)
     for i in progressbar(xrange(tree.GetEntries()), sample, 100):
- #   for i in progressbar(xrange(1000000), sample, 100):
       tree.GetEntry(i)
       if prompt!=tree.isPrompt: continue
       if flavor=='e'  and tree.flavor!=0: continue
@@ -75,7 +126,7 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
     for i in roc:
       if i[0] > cut:
         return i[1], i[2]
-  
+
   #
   # Plotting with plotly
   #
@@ -157,7 +208,7 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   with open('index.php') as template:
     with open(os.path.join(topDir, plotDir, 'index.php'), 'w') as f:
       for line in template:
-        if 'DIV' in line:        
+        if 'DIV' in line:
           f.write(getRocPlot() + '\n')
         elif 'SHOWIFEXISTS' in line:
           f.write("  showIfExists('../%s', 'both');"      % getPlotDir(baseName, flavor=None, ptMin=ptMin, ptMax=ptMax))
@@ -210,11 +261,5 @@ def makeRocCurves(baseName, directory, flavor=None, ptMin=None, ptMax=None):
   makePyplot('roc_IlliaStyle3', logX=True, minX=0.00008, minY=None)
   makePyplot('roc_IlliaStyle4', logX=True, minX=0.000008, minY=None)
 
-
-#
-# Looping
-#
-for ptRange in [(None, None), (0, 10), (10, 20), (20, 30), (30, 50), (50, None), (0, 25), (25, None)]:
-#for ptRange in [(10, 20)]:
-  for flavor in [None, 'e', 'mu']:
-    makeRocCurves('rocCurve2016', '/user/tomc/public/reducedTuples/dilepton_MC_2016_v5/rocCurve2016', flavor=flavor, ptMin=ptRange[0], ptMax=ptRange[1])
+makeRocCurves(args.tag, '/user/tomc/public/reducedTuples/dilepton_MC_2016_v5/' + args.tag, flavor=args.flavor, ptMin=args.ptMin, ptMax=args.ptMax)
+log.info('Finished')
