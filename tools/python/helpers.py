@@ -68,6 +68,8 @@ def copyGitInfo(path):
 # Edit the info file in a given path
 #
 def editInfo(path):
+  try:    os.makedirs(path)
+  except: pass
   editor = os.getenv('EDITOR', 'vi')
   subprocess.call('%s %s' % (editor, os.path.join(path, 'info.txt')), shell=True)
 

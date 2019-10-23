@@ -4,19 +4,19 @@
 # This little script scans the logs and will resubmit failed jobs
 # (i.e. those not containing 'finished' or 'Finished' in their log)
 #
-from datetime import datetime
 import argparse, os
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
-argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
-argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs')
-argParser.add_argument('--select',   nargs='*', type=str, default=[],   help='resubmit only commands containing all strings given here')
+argParser.add_argument('--runLocal', action='store_true', default=False,  help='Use local resources instead of Cream02')
+argParser.add_argument('--dryRun',   action='store_true', default=False,  help='Do not launch subjobs')
+argParser.add_argument('--select',   nargs='*', type=str, default=[],     help='Resubmit only commands containing all strings given here')
 args = argParser.parse_args()
-
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
+
+# Get paths to all logs and analyze the files
 def getLogs(logDir):
   for topDir, subDirs, files in os.walk(logDir):
     if not len(files) and not len(subDirs):
@@ -27,25 +27,33 @@ def getLogs(logDir):
 
 jobsToSubmit = []
 for logfile in getLogs('./log'):
-  finished = False
-  command  = None
+  finished  = False
+  rootError = False
+  command   = None
   with open(logfile) as logf:
     for line in logf:
-      if 'Finished' in line or 'finished' in line: finished = True
-      if 'Command:' in line:                       command  = line.split('Command: ')[-1].rstrip()
-  if not finished and command: jobsToSubmit.append((command, logfile))
+      if 'SysError in <TFile::ReadBuffer>' in line: rootError = True
+      if 'Error in <TChain::LoadTree>' in line:     rootError = True
+      if 'Finished' in line or 'finished' in line:  finished  = True
+      if 'Command:' in line:                        command   = line.split('Command: ')[-1].rstrip()
+  if args.select and not all(command.count(sel) for sel in args.select): continue
+  if (not finished or rootError) and command: jobsToSubmit.append((command, logfile))
 
+
+# Update latest git status before resubmitting
 from ttg.tools.helpers import updateGitInfo
 updateGitInfo()
 
+
+# Resubmit the failed jobs
 from ttg.tools.jobSubmitter import launchLocal, launchCream02
+from datetime import datetime
 for i, (command, logfile) in enumerate(jobsToSubmit):
-  if not all((command.count(sel) for sel in args.select) or not args.select) : continue
   if args.dryRun:
     log.info('Dry-run: ' + command)
   else:
     os.remove(logfile)
     if args.runLocal: launchLocal(command, logfile)
-    else: 
+    else:
       jobName = 'RE' + datetime.now().strftime("%d_%H%M%S.%f")[:12]
-      launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', queue='localgrid', jobName = jobName, nodes=1, cores= 8 if logfile.count("calcTriggerEff") else 1 )
+      launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', jobName=jobName, cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript
