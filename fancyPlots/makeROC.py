@@ -27,8 +27,6 @@ log = getLogger(args.logLevel)
 from ttg.tools.helpers import editInfo, plotDir, updateGitInfo
 plotDir = plotDir.replace('ttG', 'mvaRoc')
 if args.editInfo:
-  try:    os.makedirs(os.path.join(plotDir))
-  except: pass
   editInfo(os.path.join(plotDir))
 
 #
