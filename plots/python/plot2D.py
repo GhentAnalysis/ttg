@@ -111,18 +111,7 @@ class Plot2D(Plot):
       histo.GetYaxis().SetTitle(self.texY)
       if zRange is not None:
         histo.GetZaxis().SetRangeUser( *zRange )
-      # precision 3 fonts. see https://root.cern.ch/root/htmldoc//TAttText.html#T5
-      histo.GetXaxis().SetTitleFont(43)
-      histo.GetYaxis().SetTitleFont(43)
-      histo.GetXaxis().SetLabelFont(43)
-      histo.GetYaxis().SetLabelFont(43)
-      histo.GetXaxis().SetTitleSize(24)
-      histo.GetYaxis().SetTitleSize(24)
-      histo.GetXaxis().SetLabelSize(20)
-      histo.GetYaxis().SetLabelSize(20)
-
-      # should probably go into a styler
-
+      style.commonStyle(histo)
       histo.Draw(drawOption+same)
       same = "same"
 

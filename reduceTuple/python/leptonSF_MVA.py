@@ -2,7 +2,8 @@ from ttg.tools.logger import getLogger
 log = getLogger()
 
 #
-# Lepton SF class
+# Lepton SF class for lepton MVA
+# TODO: probably wants to merge with the Lepton SF class into a more general code where the keys and boundaries are defined together in some small snippet
 #
 
 import os
