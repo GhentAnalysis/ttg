@@ -32,8 +32,6 @@ log = getLogger(args.logLevel)
 #
 from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi
 if args.editInfo:
-  try:    os.makedirs(os.path.join(plotDir, args.tag))
-  except: pass
   editInfo(os.path.join(plotDir, args.tag))
 
 #
