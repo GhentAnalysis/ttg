@@ -31,9 +31,8 @@ from ttg.samples.Sample import createSampleList, getSampleFromList
 tupleFiles = [os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuplesTrigger_'+ y +'.conf') for y in ['2016', '2017', '2018']]
 sampleList = createSampleList(*tupleFiles)
 
-nodes     = 1
 cores     = 8
-totalJobs = nodes*cores
+totalJobs = cores
 
 # Submit subjobs
 if not args.isChild:
@@ -47,7 +46,7 @@ if not args.isChild:
         for pu in [True, False] if sample.name not in ['MET','JetHT'] else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
   # no splitting so for some samples this has a very long walltime
-  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='168', queue='highbw', nodes=nodes, cores=cores, jobLabel = "TE")
+  submitJobs(__file__, ('sample', 'year', 'select', 'corr', 'pu'), jobs, argParser, wallTime='168', queue='highbw', cores=cores, jobLabel="TE")
   exit(0)
 
 
@@ -119,7 +118,7 @@ if args.corr:
     setIDSelection(c, args.selectID)
 
     # If needed, we can work out a multithreaded option, similar like below
-    for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
+    for i in clonedSample.eventLoop(totalJobs=cores, subJob=subJob):
       c.GetEntry(i)
       if not passSelection(c): continue
 
@@ -136,8 +135,8 @@ if args.corr:
     return countAll, countMET, countLep, countBoth
 
   from multiprocessing import Pool
-  pool = Pool(processes=totalJobs)
-  allCounters = pool.map(multiThreadWrapper, range(totalJobs))
+  pool = Pool(processes=cores)
+  allCounters = pool.map(multiThreadWrapper, range(cores))
   pool.close()
   pool.join()
 
