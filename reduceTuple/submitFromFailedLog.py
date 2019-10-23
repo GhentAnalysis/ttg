@@ -55,5 +55,4 @@ for i, (command, logfile) in enumerate(jobsToSubmit):
     os.remove(logfile)
     if args.runLocal: launchLocal(command, logfile)
     else:
-      jobName = 'RE' + datetime.now().strftime("%d_%H%M%S.%f")[:12]
-      launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', jobName=jobName, cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript
+      launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', jobLabel='RE', cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript
