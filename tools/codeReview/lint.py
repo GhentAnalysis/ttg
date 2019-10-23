@@ -14,5 +14,7 @@ for root, dirs, files in os.walk(topDir, topdown=True):
   dirs[:]  = [d for d in dirs  if d not in skipDirs]
   pyFiles += [os.path.join(root, f) for f in files if f[-3:] == '.py' and f not in skipFiles]
 
+pyFiles = [f for f in pyFiles if not os.path.islink(f)] # skip symbolic links
+
 pylint.lint.Run(pyFiles + ['--rcfile='+ os.path.join(topDir, 'tools/codeReview/.pylintrc')])
 # possibly extend this with pytest in the future
