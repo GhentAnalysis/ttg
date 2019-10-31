@@ -13,11 +13,13 @@ log = getLogger()
 def setIDSelection(c, reducedTupleType):
   c.doPhotonCut         = reducedTupleType.count('pho')
   c.photonCutBased      = reducedTupleType.count('phoCB')
-  c.photonMVA           = reducedTupleType.count('photonMVA')
+  c.photonMVA           = reducedTupleType.lower().count('photonmva')
+  c.phomvasb            = reducedTupleType.lower().count('phomvasb')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
   c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
-  c.leptonMVA           = reducedTupleType.count("leptonMVA")
-  c.tthMVA              = reducedTupleType.count("tthMVA")
+  c.leptonMVA           = reducedTupleType.lower().count("leptonmva")
+  c.tthMVA              = reducedTupleType.lower().count("tthmva")
+  c.MvaAndCB            = reducedTupleType.lower().count("mvaandcb")
 
 
 #
@@ -56,20 +58,22 @@ def electronSelector(tree, index):
     if not looseLeptonSelector(tree, i): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
   if 1.4442 < abs(tree._lEtaSC[index]) < 1.566: return False
-  if tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
+  if tree.MvaAndCB:      return  (tree._lPOGTight[index] and tree._leptonMvatZq[index] > -0.4)
+  elif tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
   else:                return tree._lPOGTight[index]
 
 def muonSelector(tree, index):
-  if tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
-  return tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15
+  if tree.MvaAndCB:      return  (tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15 and tree._leptonMvatZq[index] > -0.4)
+  elif tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
+  else: return tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15
 
 def leptonSelector(tree, index):
   if leptonPt(tree, index) < 15:       return False
-  if tree._relIso[index] > 0.12:       return False
   if abs(tree._lEta[index]) > 2.4:     return False
   if abs(tree._3dIPSig[index]) > 4:    return False
   if abs(tree._dxy[index]) > 0.05:     return False
   if abs(tree._dz[index]) > 0.1:       return False
+  if tree._relIso[index] > 0.12 and not tree.leptonMVA: return False
   if   tree._lFlavor[index] == 0:      return electronSelector(tree, index)
   elif tree._lFlavor[index] == 1:      return muonSelector(tree, index)
   else:                                return False
@@ -140,6 +144,7 @@ def photonSelector(tree, index, n, minLeptons):
   if not tree._phPassElectronVeto[index]:                                       return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
+  if tree.phomvasb:             return tree._phMva[index] > -0.60
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
   if tree.photonMVA:            return tree._phMva[index] > 0.20
   return True
@@ -187,18 +192,19 @@ def makeInvariantMasses(t, n):
 #
 # Jets (filter those within 0.4 from lepton or 0.1 from photon)
 #
-def isGoodJet(tree, index):
+def isGoodJet(tree, n, index):
   if not tree._jetIsTight[index]:             return False
   if not abs(tree._jetEta[index]) < 2.4: return False
-  for ph in [ph for ph in tree.photons if tree._phCutBasedMedium[ph]]:
-    if deltaR(tree._jetEta[index], tree._phEta[ph], tree._jetPhi[index], tree._phPhi[ph]) < 0.1: return False
+  # NOTE this assumes we're selecting exactly 1 photon. Also this is only for 2016
+  if (tree._phMva[n.ph] > 0.20 and (tree.phomvasb or tree.photonMVA)) or (tree._phCutBasedMedium[n.ph] and tree.photonCutBased):
+    return deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) > 0.1
   for lep in tree.leptons:
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True
 
 # Note that all cleared jet variables are smearedJet based, not sure if the should be renamed
 def goodJets(t, n):
-  allGoodJets = [i for i in xrange(t._nJets) if isGoodJet(t, i)]
+  allGoodJets = [i for i in xrange(t._nJets) if isGoodJet(t, n, i)]
   for var in ['', '_JECUp', '_JECDown', '_JERUp', '_JERDown']:
     setattr(t, 'jets'+var,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var)[i] > t.jetPtCut])
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))

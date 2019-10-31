@@ -10,6 +10,7 @@ special_cuts = {
     'looseLeptonVeto':     'looseLeptonVeto',
 
     'onZ':                 'abs(mll-91.1876)<15&&!isEMu',
+    'onZnar':              'abs(mll-91.1876)<10&&!isEMu',
     'llgOnZ':              'abs(mllg-91.1876)<15&&!isEMu',
     'orOnZ':               '(abs(mll-91.1876)<15||abs(mllg-91.1876)<15)&&!isEMu',
     'offZ':                'abs(mll-91.1876)>15||isEMu',
@@ -75,6 +76,7 @@ def cutStringAndFunctions(cuts, channel): # pylint: disable=R0912
 
   strings, functions = [], []
   for cut in cuts.split('-') + [channel]:
+    cut = cut.replace('NEG','-')
     interpretedCut = translate_cut(cut)
     if callable(interpretedCut):      functions.append(interpretedCut)
     elif interpretedCut.count('||'):  strings.append('(' + interpretedCut + ')') #protect for ||

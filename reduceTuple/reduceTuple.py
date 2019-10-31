@@ -100,10 +100,12 @@ outputFile.cd()
 # FIXME NOTE temporarily saving extra vars for MVA input check
 # unusedBranches = ["HLT", "Flag", "HN", "tau", "Ewk", "lMuon", "miniIso", "closest", "_pt", "decay"]
 unusedBranches = ["HLT", "Flag", "HN", "tau", "Ewk", "lMuon", "decay"]
-deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron"]
+# deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron"]
+deleteBranches = ["Scale", "Res", "pass", "met", "lElectron"]
 if not sample.isData:
-  unusedBranches += ["gen_nL", "gen_l", "gen_met"]
-  deleteBranches += ["heWeight", "gen_ph"]
+  # unusedBranches += ["gen_nL", "gen_l", "gen_met"]
+  # deleteBranches += ["heWeight", "gen_ph"]
+  deleteBranches += ["heWeight"]
 for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
 for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
@@ -169,10 +171,10 @@ from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
 
-leptonID = 'MVA' if args.type.lower().count('leptonMVA') else 'POG'
+leptonID = 'MVA' if args.type.lower().count('leptonmva') else 'POG'
 
 leptonSF         = LeptonSF_MVA(sample.year) if leptonID=='MVA' else LeptonSF(sample.year)
-photonSF         = PhotonSF(sample.year, "MVA" if args.type.count("photonMVA") else "CB")
+photonSF         = PhotonSF(sample.year, "MVA" if (args.type.lower().count("photonmva") or args.type.lower().count("phomvasb")) else "CB")
 triggerEff       = TriggerEfficiency(sample.year, id = leptonID) 
 btagSF           = BtagEfficiency(sample.year, id = leptonID)
 

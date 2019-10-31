@@ -88,6 +88,10 @@ def xAxisLabels(labels):
       h.GetXaxis().SetBinLabel(i+1, l)
   return [applyLabels]
 
+def customLabelSize(size):
+  def setLabelSize(h):
+    h.GetXaxis().SetLabelSize(size)
+  return [setLabelSize]
 
 #
 # Function which fills all plots and removes them when the lamdbda fails (e.g. because var is not defined)
@@ -610,7 +614,6 @@ class Plot:
     for modification in canvasModifications: modification(canvas)
 
     canvas.topPad.cd()
-
     # Range on y axis and remove empty bins
     self.ymin = yRange[0] if (yRange!="auto" and yRange[0]!="auto") else (0.7 if logY else (0 if yMin.GetMinimum() >0 else 1.2*yMin.GetMinimum()))
     self.ymax = yRange[1] if (yRange!="auto" and yRange[1]!="auto") else (None if legend else (1.2*yMax.GetMaximum())) # if auto and legend: yMax wll be set in getLegendCoordinates
@@ -635,8 +638,9 @@ class Plot:
       h.GetYaxis().SetTitle(self.texY)
 
       if ratio: h.GetXaxis().SetLabelSize(0)
-
-      for modification in histModifications+self.histModifications: modification(h)
+      for modification in histModifications+self.histModifications: 
+        if type(modification) == list: modification[0](h)
+        else: modification(h)
 
       h.Draw(drawOption+same)
       same = "same"

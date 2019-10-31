@@ -183,6 +183,7 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
         if texName.count('data'):                                                           # If data, skip if not needed for this channel, fix texName
           if not texName.count(channel):
             skip = True
+            alias = None
             continue
           texName = texName.split(':')[0]
           if channel == 'SF':   texName += ' (SF)'

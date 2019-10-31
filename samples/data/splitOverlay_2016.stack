@@ -1,0 +1,65 @@
+-- 2l,ISR
+TTGamma_Pr_Dil              t#bar{t}#gamma_(2l,ISR)    lineStyle     634                  _ttgEventType==8
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+
+-- 2l,t/b
+TTGamma_Pr_Dil            t#bar{t}#gamma_(2l,t/b)    lineStyle    602                       (_ttgEventType==7||_ttgEventType==3)
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+
+-- 2l,W/l
+TTGamma_Pr_Dil            t#bar{t}#gamma_(2l,W/l)    lineStyle     419                       (_ttgEventType==6||_ttgEventType==5||_ttgEventType==4)
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+
+-- 1l,had
+TTGamma_Pr_Dil             t#bar{t}#gamma_(1l,had)    lineStyle     618
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+
+%-- Other
+%TTJets_pow                 other                      lineStyle     797                      _ttgEventType<3
+%DY_M10to50_NLO             other                      lineStyle     797                      _zgEventType<3
+%+DY_M50_NLO
+%singleTop_tW_tbar          other                      lineStyle     797
+%+singleTop_tW_t
+%+singleTop_t_tbar
+%+singleTop_t_t
+%+singleTop_s
+%+VVTo2L2Nu
+%+WWToLNuQQ
+%+WWTo1L1Nu2Q
+%+ZZTo2L2Q
+%+ZZTo2Q2Nu
+%+ZZTo4L
+%+WZTo1L3Nu
+%+WZTo1L1Nu2Q
+%+WZTo2L2Q
+%+WZTo3LNu
+%+WWW
+%+WWZ
+%+WZZ
+%+ZZZ
+%+GluGluToH_ZZ
+%+GluGluToZZ_2e2m
+%+GluGluToZZ_2e2tau
+%+GluGluToZZ_2mu2tau
+%+GluGluToZZ_4e
+%+GluGluToZZ_4mu
+%+GluGluToZZ_4tau
+%+TTZ
+%+TTZ_M1to10
+%+TTWToLNu
+%+TTWToQQ
+%+tZq
+%+tHq
+%+tHW
+%+TTH
+%+TTWW
+%+TTWZ
+%+TTZZ
+%+tWll
+%+tWnunu
+%+ZG
+%+WG

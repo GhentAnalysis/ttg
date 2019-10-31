@@ -1,0 +1,6 @@
+-- MC
+TTGamma_Pr_Dil              t#bar{t}#gamma_(dileptonic)        fillStyle     800
+
+TTGamma_Pr_Sem              t#bar{t}#gamma_(semileptonic)        fillStyle     800DARK
+
+TTGamma_Pr_Had              t#bar{t}#gamma_(hadronic)        fillStyle     800BRIGHT

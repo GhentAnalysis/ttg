@@ -92,7 +92,7 @@ def getDefaultCanvas(ratio):
     pad.SetFrameFillStyle(0)
     pad.SetFrameBorderMode(0)
     pad.SetTickx(0)
-    pad.SetTicky(0)
+    pad.SetTicky(1)
 
   def getPad(canvas, number):
     pad = canvas.cd(number)
