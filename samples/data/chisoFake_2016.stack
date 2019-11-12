@@ -13,7 +13,7 @@ TT_Dil                All_(hadronicFake,chgIso_fail)             errorStyle    k
 +TT_Had
 
 %$ZG
-%ZG                       All_(hadronicFake,chgIso_fail)               errorStyle    kRed
+%ZG_lowMLL                       All_(hadronicFake,chgIso_fail)               errorStyle    kRed
 
 %DY_M10to50_LO             All_(hadronicFake,chgIso_fail)             errorStyle    kRed                      _zgEventType<3
 %+DY_M50_LO
@@ -77,7 +77,7 @@ TT_Dil                All_(hadronicFake,chgIso_pass)             errorStyle    k
 +TT_Had
 
 %$ZG
-%ZG                       All_(hadronicFake,chgIso_pass)               errorStyle    kBlue
+%ZG_lowMLL                       All_(hadronicFake,chgIso_pass)               errorStyle    kBlue
 
 %DY_M10to50_LO             All_(hadronicFake,chgIso_pass)             errorStyle    kBlue                      _zgEventType<3
 %+DY_M50_LO

@@ -197,7 +197,7 @@ def isGoodJet(tree, n, index):
   if not abs(tree._jetEta[index]) < 2.4: return False
   # NOTE this assumes we're selecting exactly 1 photon. Also this is only for 2016
   if (tree._phMva[n.ph] > 0.20 and (tree.phomvasb or tree.photonMVA)) or (tree._phCutBasedMedium[n.ph] and tree.photonCutBased):
-    return deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) > 0.1
+    if deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) < 0.1: return False
   for lep in tree.leptons:
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True

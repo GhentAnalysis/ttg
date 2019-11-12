@@ -21,7 +21,7 @@ from ttg.samples.Sample import getSampleFromStack
 def applySysToOtherHist(source, sourceVar, destination):
   destinationVar = destination.Clone()
   for i in range(source.GetNbinsX()+1):
-    modificationFactor = 1.+(source.GetBinContent(i)-sourceVar.GetBinContent(i))/source.GetBinContent(i) if source.GetBinContent(i) > 0 else 1.
+    modificationFactor = 1.+(sourceVar.GetBinContent(i) - source.GetBinContent(i))/source.GetBinContent(i) if source.GetBinContent(i) > 0 else 1.
     destinationVar.SetBinContent(i, modificationFactor*destination.GetBinContent(i))
   return destinationVar
 
@@ -556,9 +556,9 @@ class Plot:
     # If a results directory is given, we can load the histograms from former runs
     
     # FIXME this has been changed and commented out, loading is now done in the main code. Does it make sense to load it here?
-    # if resultsDir:
-    #   err = self.loadFromCache(resultsDir)
-    #   if not err: return True
+    if resultsDir:
+      loaded = self.loadFromCache(resultsDir)
+      if not loaded: return True
 
     # Check if at least one entry is present
     if not sum([h.Integral() for h in self.histos.values()]) > 0:

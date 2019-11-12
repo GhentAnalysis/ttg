@@ -12,7 +12,7 @@ TT_Dil                     other                 fillStyle     kBlue            
 +TT_Had
 
 $ZG
-ZG                         other                 fillStyle     kBlue
+ZG_lowMLL                         other                 fillStyle     kBlue
 
 DY_M10to50_LO              other                 fillStyle     kBlue                    _zgEventType<3
 +DY_M50_LO

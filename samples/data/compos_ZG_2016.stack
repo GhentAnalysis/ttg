@@ -1,15 +1,15 @@
 -- MC
 
 $ZG
-ZG                               Z#gamma_(genuine)                 fillStyle     598
+ZG_lowMLL                               Z#gamma_(genuine)                 fillStyle     598
 
 %%%%%%%%%%%%%%%%%%%%%%%%% hadronic fakes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 $ZG
-ZG                               Z#gamma_(hadronicFake)                 fillStyle     598DARK
+ZG_lowMLL                               Z#gamma_(hadronicFake)                 fillStyle     598DARK
 
 %%%%%%%%%%%%%%%%%%%%%%%%% hadronic photons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 $ZG
-ZG                               Z#gamma_(hadronicPhoton)                 fillStyle     598BRIGHT
+ZG_lowMLL                               Z#gamma_(hadronicPhoton)                 fillStyle     598BRIGHT
 

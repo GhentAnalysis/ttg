@@ -7,7 +7,7 @@ TT_Dil                      All           fillStyle     598                     
 +TT_Sem
 +TT_Had
 
-ZG                          All           fillStyle     598
+ZG_lowMLL                          All           fillStyle     598
 
 DY_M10to50_LO              All           fillStyle     598                      _zgEventType<3
 +DY_M50_LO
@@ -63,7 +63,7 @@ TT_Dil                      All_(misIdEle)        fillStyle     633             
 +TT_Sem
 +TT_Had
 
-ZG                          All_(misIdEle)        fillStyle     633
+ZG_lowMLL                          All_(misIdEle)        fillStyle     633
 
 DY_M10to50_LO              All_(misIdEle)        fillStyle     633                      _zgEventType<3
 +DY_M50_LO

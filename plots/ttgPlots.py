@@ -83,7 +83,7 @@ phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
 prefire     = args.tag.count('prefireCheck')
 noWeight    = args.tag.count('noWeight')
-normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay', 'compareWithTT', 'compareTTSys', 'compareTTGammaSys'])
+normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay', 'compareWithTT', 'compareTTSys', 'compareTTGammaSys', 'normalize'])
 
 selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
@@ -218,10 +218,11 @@ def makePlotList():
   if args.tag.count('randomConeCheck'):
     plotList.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20, 0, 20)))
     plotList.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80, 0, 20)))
+    plotList.append(Plot('photon_chargedIso_tiny',     'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (50, 0, 5)))
     plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPtCorr[c.ph], (20, 0, 2)))
   else:
     plotList.append(Plot('yield',                      'yield',                                 lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
-    plotList.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : ord(c._nVertex),                                    (50, 0, 50)))
+    plotList.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : c._nVertex,                                         (50, 0, 50)))
     plotList.append(Plot('nTrueInt',                   'nTrueInt',                              lambda c : c._nTrueInt,                                        (50, 0, 50)))
     plotList.append(Plot('nphoton',                    'number of photons',                     lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
     plotList.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (24, 15, 135)))
@@ -324,29 +325,9 @@ def makePlotList():
     plotList.append(Plot('genLepRawJetNearPhDeltaR',   'raw #DeltaR(gen l, j near #gamma)',      lambda c : genLepRawJetNearPhDeltaR(c),                       (50, 0, 0.5), overflowBin=None))
     # plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
     # plotList.append(Plot('photon_pt_ATLB',             'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 30., 40., 50., 65., 80., 100., 125., 160., 220., 300.]))
-  # if args.tag.lower().count('extra') or args.tag.lower().count('base'):
-  #   plotList.append(Plot('extra_l1_selectedTrackMult',             'l1 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l1],                          (20, 0., 20.)))
-  #   plotList.append(Plot('extra_l2_selectedTrackMult',             'l2 selectedTrackMult',            lambda c : c._selectedTrackMult[c.l2],                          (20, 0., 20.)))
-  #   plotList.append(Plot('small_extra_l1_miniIsoCharged',          'l1 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l1],                             (100, 0., 0.5)))
-  #   plotList.append(Plot('small_extra_l2_miniIsoCharged',          'l2 miniIsoCharged',               lambda c : c._miniIsoCharged[c.l2],                             (100, 0., 0.5)))
-  #   plotList.append(Plot('small_extra_l1_ptRel',                   'l1 ptRel',                        lambda c : c._ptRel[c.l1],                                      (100, 0., 100.)))
-  #   plotList.append(Plot('small_extra_l2_ptRel',                   'l2 ptRel',                        lambda c : c._ptRel[c.l2],                                      (100, 0., 100.)))
-  #   plotList.append(Plot('small_extra_l1_ptRatio',                 'l1 ptRatio',                      lambda c : c._ptRatio[c.l1],                                    (60, 0., 1.5)))
-  #   plotList.append(Plot('small_extra_l2_ptRatio',                 'l2 ptRatio',                      lambda c : c._ptRatio[c.l2],                                    (60, 0., 1.5)))
-  #   plotList.append(Plot('small_extra_l1_closestJetDeepCsv',       'l1 closestJetDeepCsv',            lambda c : c._closestJetDeepCsv[c.l1],                          (96, -2.1, 1.1)))
-  #   plotList.append(Plot('small_extra_l2_closestJetDeepCsv',       'l2 closestJetDeepCsv',            lambda c : c._closestJetDeepCsv[c.l2],                          (96, -2.1, 1.1)))
-  #   plotList.append(Plot('small_extra_l1_dz',                      'l1 dz',                           lambda c : c._dz[c.l1],                                         (100, -0.05, 0.05)))
-  #   plotList.append(Plot('small_extra_l2_dz',                      'l2 dz',                           lambda c : c._dz[c.l2],                                         (100, -0.05, 0.05)))
-  #   plotList.append(Plot('small_extra_l1_dxy',                     'l1 dxy',                          lambda c : c._dxy[c.l1],                                        (100, -0.02, 0.02)))
-  #   plotList.append(Plot('small_extra_l2_dxy',                     'l2 dxy',                          lambda c : c._dxy[c.l2],                                        (100, -0.02, 0.02)))
-  #   plotList.append(Plot('small_extra_l1_leptonMvatZq',            'l1 leptonMvatZq output',          lambda c : c._leptonMvatZq[c.l1],                               (44, -1.1, 1.1)))
-  #   plotList.append(Plot('small_extra_l2_leptonMvatZq',            'l2 leptonMvatZq output',          lambda c : c._leptonMvatZq[c.l2],                               (44, -1.1, 1.1)))
-  #   plotList.append(Plot('small_extra_l1_leptonMvaTTH',            'l1 leptonMvaTTH output',          lambda c : c._leptonMvaTTH[c.l1],                               (44, -1.1, 1.1)))
-  #   plotList.append(Plot('small_extra_l2_leptonMvaTTH',            'l2 leptonMvaTTH output',          lambda c : c._leptonMvaTTH[c.l2],                               (44, -1.1, 1.1)))
   # pylint: enable=C0301
     if args.tag.lower().count('phorigins'):
       plotList.append(Plot('photon_mom',              'photon mom particle',                lambda c : momDictFunc(c),                   (len(momList)+1, 0, len(momList)+1), histModifications=[xAxisLabels(nameList), customLabelSize(14)]))      
-      # plotList.append(Plot('photon_mom',              'photon mom particle',                lambda c : momDict(abs(c._gen_phMomPdg(c.ph))),                   (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))      
 
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
@@ -370,7 +351,8 @@ totalPlots = []
 from ttg.tools.style import drawLumi
 
 for year in years:
-  dumpArrays = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]) , ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph])]
+  # dumpArrays = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]) , ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph])]
+  dumpArrays = [("_runNb", lambda c : c._runNb) , ("_eventNb", lambda c : c._eventNb), ("_lumiBlock", lambda c : c._lumiBlock)]
   dumpArrays = [(variable, expression, []) for variable, expression in dumpArrays]
   plots = makePlotList()
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
@@ -408,11 +390,11 @@ for year in years:
   if not args.showSys:
     if args.tag.count('phoCB'):                                                     reduceType = 'phoCB'
     elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
-    else:                                                                           reduceType = 'pho'
-    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
+    # else:                                                                           reduceType = 'pho'
+    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew2' #for testing new skims
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
-    if args.tag.count('phoCBfull-gen'):                                             reduceType = 'phoCB-gennew'
+    # if args.tag.count('phoCBfull-gen'):                                             reduceType = 'phoCB-gennew'
     if args.tag.count('phomvasb'):                                                  reduceType = 'phomvasb'
     if args.tag.count('phomvasbnew'):                                               reduceType = 'phomvasbnew'
     # if args.tag.count('phoCBextra') or args.tag.count('phoCBfullextra'):            reduceType = 'phoCBextra' #special skim with extra variables
@@ -438,10 +420,10 @@ for year in years:
       c.data = sample.isData
 
       # Filter booleans
-      c.genuine           = sample.texName.count('genuine')
-      c.misIdEle          = sample.texName.count('misidentified') or sample.texName.count('misIdEle') or sample.texName.count('nonprompt')
-      c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons') or sample.texName.count('hadronicPhoton')
-      c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronic fakes') or sample.texName.count('hadronicFake')
+      c.genuine           = sample.texName.count('genuine') or args.tag.count("filterGenuine")
+      c.misIdEle          = sample.texName.count('misidentified') or sample.texName.count('misIdEle') or sample.texName.count('nonprompt') or args.tag.count("filterMisIdEle")
+      c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons') or sample.texName.count('hadronicPhoton') or args.tag.count("filterHadronic")
+      c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronic fakes') or sample.texName.count('hadronicFake') or args.tag.count("filterFake")
       c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
       if args.tag.count('failOrSide'):
         c.failOrSide        = True
@@ -461,6 +443,9 @@ for year in years:
         c.sigmaIetaIeta2    = sample.texName.count('sideband2') 
         c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
         c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
+          # FIXME Temporary for checking strange very low iso fake and had photons
+        c.lowChgIso         = args.tag.count("lowchgIso") or sample.texName.count('lowchgIso')
+        c.highChgIso         = args.tag.count("highchgIso") or sample.texName.count('highchgIso')
 
 
 
@@ -474,6 +459,8 @@ for year in years:
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
+        # c.ISRWeight = 1.
+        # c.FSRWeight = 1.
         if not sample.isData and args.sys:
           applySysToTree(sample.name, args.sys, c)
 
@@ -544,11 +531,6 @@ for year in years:
 
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
-      if args.dumpArrays: 
-        dumpArrays = {variable: array for variable, expression, array in dumpArrays}
-        dumpArrays["info"] = " ".join(s for s in [args.year, args.selection, args.channel, args.tag, args.sys] if s) 
-        with open( os.path.join( os.path.join(plotDir, year, args.tag, args.channel, args.selection), 'dumpedArrays' + (args.sys if args.sys else '') + '.pkl') ,'wb') as f:
-          pickle.dump(dumpArrays, f)
       if not plot.blindRange == None and not year == '2016':
         for sample, histo in plot.histos.iteritems():
           if sample.isData:
@@ -607,6 +589,9 @@ for year in years:
       if args.tag.count('splitOverlay'):
         extraArgs['ratio']   = None
 
+      if args.tag.count('phoReg'):
+        extraArgs['ratio']   = None
+
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
         for logY in [False, True]:
@@ -640,6 +625,13 @@ for year in years:
                     logZ           = False,
                     drawOption     = option,
                     drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')))
+                    
+  if args.dumpArrays: 
+    dumpArrays = {variable: array for variable, expression, array in dumpArrays}
+    dumpArrays["info"] = " ".join(s for s in [args.year, args.selection, args.channel, args.tag, args.sys] if s) 
+    with open( os.path.join( os.path.join(plotDir, year, args.tag, args.channel, args.selection), 'dumpedArrays' + (args.sys if args.sys else '') + '.pkl') ,'wb') as f:
+      pickle.dump(dumpArrays, f)
+
   if noWarnings: 
     log.info('Plots made for ' + year)
     if not args.year == 'all': log.info('Finished')

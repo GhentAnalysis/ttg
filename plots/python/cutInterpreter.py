@@ -38,7 +38,10 @@ def phLepDeltaR(tree, lower, upper):
 def phMVA(tree, lower, upper):
   return (lower <= tree._phMva[tree.ph] < upper)
 
-continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR, 'genPhMinDeltaR' : 'genPhMinDeltaR', 'phMVA': phMVA}
+def chIso(tree, lower, upper):
+  return (lower <= tree._phChargedIsolation[tree.ph] < upper)
+
+continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR, 'genPhMinDeltaR' : 'genPhMinDeltaR', 'phMVA': phMVA, 'chIso':chIso}
 discrete_variables  = {'njet': 'njets', 'btag': 'nbjets', 'deepbtag': 'ndbjets', 'nphoton': 'nphotons'}
 
 # Need to disable the too many branches function because CMSSW has some ancient pylint release which does not exclude nested functions

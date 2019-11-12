@@ -2,7 +2,7 @@
 TTGamma_Pr_Dil                    MC_(genuine_photons)         fillStyle     kOrange
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-+ZG
++ZG_lowMLL
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar
@@ -53,7 +53,7 @@ DY_M10to50_LO             MC_(genuine_photons)         fillStyle     kOrange    
 TTGamma_Pr_Dil                    MC_(hadronic_photons)        fillStyle     kRed
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-+ZG
++ZG_lowMLL
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar
@@ -104,7 +104,7 @@ DY_M10to50_LO             MC_(hadronic_photons)        fillStyle     kRed       
 TTGamma_Pr_Dil                    MC_(misidentified_electrons) fillStyle     kBlue
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-+ZG
++ZG_lowMLL
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar
@@ -155,7 +155,7 @@ DY_M10to50_LO             MC_(misidentified_electrons) fillStyle     kBlue      
 TTGamma_Pr_Dil                    MC_(hadronic_fakes)          fillStyle     kGreen
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
-+ZG
++ZG_lowMLL
 +singleTop_tW_tbar
 +singleTop_tW_t
 +singleTop_t_tbar

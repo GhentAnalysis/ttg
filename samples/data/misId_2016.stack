@@ -12,7 +12,7 @@ TT_Dil                 t#bar{t}_(misIdEle)              fillStyle     633       
 +TT_Sem
 +TT_Had
 
-ZG                         Z#gamma_(misIdEle)               fillStyle     598
+ZG_lowMLL                         Z#gamma_(misIdEle)               fillStyle     598
 
 $DY
 DY_M10to50_NLO              Drell-Yan_(misIdEle)            fillStyle     427                      _zgEventType<3

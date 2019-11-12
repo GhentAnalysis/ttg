@@ -13,7 +13,7 @@
 %+TT_Had
 
 $ZG
-ZG                       All_(hadronicFake)               errorStyle    kBlue
+ZG_lowMLL                       All_(hadronicFake)               errorStyle    kBlue
 
 DY_M10to50_LO             All_(hadronicFake)             errorStyle    kBlue                      _zgEventType<3
 +DY_M50_LO

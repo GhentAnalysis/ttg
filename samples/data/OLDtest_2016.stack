@@ -7,7 +7,7 @@ TTGamma                    t#bar{t}#gamma        fillStyle     kOrange
 TT_Dil                 t#bar{t}              fillStyle     633                      _ttgEventType<3
 +TT_Sem
 
-ZG                         Z#gamma               fillStyle     598
+ZG_lowMLL                         Z#gamma               fillStyle     598
 
 $DY
 DY_M10to50_NLO              Drell-Yan             fillStyle     427                      _zgEventType<3

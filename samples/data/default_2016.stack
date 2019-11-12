@@ -13,7 +13,7 @@ TT_Dil                 t#bar{t}_(genuine)              fillStyle     633        
 +TT_Had
 
 $ZG
-ZG                         Z#gamma_(genuine)               fillStyle     598
+ZG_lowMLL                         Z#gamma_(genuine)               fillStyle     598
 
 DY_M10to50_LO              Drell-Yan_(genuine)             fillStyle     427                      _zgEventType<3
 +DY_M50_LO
@@ -76,7 +76,7 @@ TT_Dil                 nonprompt             fillStyle     814                  
 +TT_Had
 
 $ZG
-ZG                        nonprompt              fillStyle     814
+ZG_lowMLL                        nonprompt              fillStyle     814
 
 DY_M10to50_LO              nonprompt             fillStyle     814                      _zgEventType<3
 +DY_M50_LO

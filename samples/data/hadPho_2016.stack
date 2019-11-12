@@ -4,7 +4,7 @@ TTGamma_Pr_Dil                    t#bar{t}#gamma_(hadronicPhoton)          fillS
 +TTGamma_Pr_Had
 
 $ZG
-ZG                               Z#gamma_(hadronicPhoton)                 fillStyle     598BRIGHT
+ZG_lowMLL                               Z#gamma_(hadronicPhoton)                 fillStyle     598BRIGHT
 
 singleTop_tW_tbar                 single-t_(hadronicPhoton)                fillStyle     797BRIGHT
 +singleTop_tW_t

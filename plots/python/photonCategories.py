@@ -27,6 +27,9 @@ def checkChgIso(tree):
   central = abs(tree._phEtaSC[tree.ph]) < 1.479
   if   tree.failChgIso and tree._phChargedIsolation[tree.ph] <= (1.141 if central else 1.051) : return False
   elif tree.passChgIso and tree._phChargedIsolation[tree.ph] >  (1.141 if central else 1.051) : return False
+  # FIXME Temporary for checking strange very low iso fake and had photons
+  elif tree.lowChgIso and tree._phChargedIsolation[tree.ph] >  (0.10 if central else 0.10) : return False
+  elif tree.highChgIso and tree._phChargedIsolation[tree.ph] <=  (0.10 if central else 0.10) : return False
   return True
 
 def chgIsoCat(tree):
