@@ -67,7 +67,7 @@ if not args.isChild:
 # Initializing
 #
 import ROOT
-from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize
+from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
 from ttg.plots.plot2D                 import Plot2D, add2DPlots
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
@@ -111,7 +111,7 @@ tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' 
 stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.year == 'all' else args.year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + ('2016' if args.year == 'all' else args.year) + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys)
+                    replacements = getReplacementsForStack(args.sys, args.year)
                     )
 
 #
@@ -358,7 +358,7 @@ for year in years:
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys)
+                    replacements = getReplacementsForStack(args.sys, args.year)
                     )
 
   # link the newly loaded samples to their respective existing histograms in the plots
@@ -387,17 +387,17 @@ for year in years:
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
-  if not args.showSys:
+  copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdUp', 'erdDown']
+
+  if not args.showSys and not copySyst:
     if args.tag.count('phoCB'):                                                     reduceType = 'phoCB'
     elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
-    # else:                                                                           reduceType = 'pho'
-    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew2' #for testing new skims
+    else:                                                                           reduceType = 'pho'
+    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
-    # if args.tag.count('phoCBfull-gen'):                                             reduceType = 'phoCB-gennew'
     if args.tag.count('phomvasb'):                                                  reduceType = 'phomvasb'
     if args.tag.count('phomvasbnew'):                                               reduceType = 'phomvasbnew'
-    # if args.tag.count('phoCBextra') or args.tag.count('phoCBfullextra'):            reduceType = 'phoCBextra' #special skim with extra variables
     reduceType = applySysToReduceType(reduceType, args.sys)
     log.info("using reduceType " + reduceType)
 
@@ -459,8 +459,8 @@ for year in years:
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
-        # c.ISRWeight = 1.
-        # c.FSRWeight = 1.
+        c.ISRWeight = 1.
+        c.FSRWeight = 1.
         if not sample.isData and args.sys:
           applySysToTree(sample.name, args.sys, c)
 
@@ -503,6 +503,9 @@ for year in years:
           for variable, expression, array in dumpArrays:
             if sample.isData: array.append((expression(c), 1., eventWeight))
             else:             array.append((expression(c), c.genWeight, eventWeight))
+
+  if not args.showSys and copySyst:
+    copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
 
   plots = plotsToFill + loadedPlots
 

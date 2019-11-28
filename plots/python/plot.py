@@ -8,6 +8,7 @@ log = getLogger()
 import ROOT, os, uuid, numpy, math
 import cPickle as pickle
 from math import sqrt
+from copy import deepcopy
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
@@ -67,6 +68,8 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
 # Get systematic uncertainty on sideband template: based on shape difference of ttbar hadronicFakes in sideband and nominal region
 # (broken - unused)
 #
+
+# TODO check if this is still useable, if so update (nothing updated yet)
 def applySidebandUnc(hist, plot, resultsDir, up):
   selection     = resultsDir.split('/')[-1]
   ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets', 'hadronicFake', 'pass'])
@@ -241,12 +244,12 @@ class Plot:
   #
   # Load from cache
   #
-  def loadFromCache(self, resultsDir):
+  def loadFromCache(self, resultsDir, sys = None):
     resultsFile = os.path.join(resultsDir, self.name + '.pkl')
     try:
       with lock(resultsFile, 'rb') as f: allPlots = pickle.load(f)
       for s in self.histos.keys():
-        self.histos[s] = allPlots[self.name][s.name+s.texName]
+        self.histos[s] = allPlots[self.name+(sys if sys else '')][s.name+s.texName]
       return True
     except:
       log.warning('No resultsfile for ' + self.name + '.pkl')
@@ -719,12 +722,26 @@ class Plot:
       canvas.Print(ofile)
 
 def addPlots(plotA, plotB):
-  # log.info('Adding two plots, attributes taken from A, plot B has the following differences:')
-  # log.info(set(tuple(plotA.__dict__.items())) - set(tuple(plotA.__dict__.items())))
   for sample, hist in plotA.histos.iteritems():
-    # try:
-    # log.info(hist)
-    # log.inf(getSampleFromStack(plotB.stack, sample.name)
     hist = addHist(hist, plotB.histos[getSampleFromStack(plotB.stack, sample.name)])
-    # except: log.warning('mismatch between histograms/samples in the plots')
   return plotA
+
+def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
+  toRemove = None
+  for i, plot in enumerate(plots):
+    try:
+      loaded = plot.loadFromCache(os.path.join(plotDir, year, tag, channel, selection), None)
+      for samp, hist in plot.histos.iteritems():
+        sourceHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, '', [samp.name+samp.texName])
+        sourceVarHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, sys, [samp.name+samp.texName])
+        destVarHist = applySysToOtherHist(sourceHist, sourceVarHist, hist)
+        plots[i].histos[samp] = destVarHist
+      log.info('systematic variation copied for plot ' + plot.name + ' from ' + year)
+    except Exception as e:
+      log.debug(e)
+      if toRemove: toRemove.append(plot)
+      else:        toRemove = [plot]
+      log.info('Input files missing for ' + plot.name)
+  if toRemove:
+    for p in toRemove: plots.remove(p)
+    toRemove = None
