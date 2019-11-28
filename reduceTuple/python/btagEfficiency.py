@@ -94,11 +94,9 @@ class BtagEfficiency:
     elif sys == 'bDown' and absFlavor >= 4: sysType = 'down'
     elif sys == 'lUp'   and absFlavor <= 3: sysType = 'up'
     elif sys == 'lDown' and absFlavor <= 3: sysType = 'down'
-    elif sys == '':                      sysType = 'central'
-    else:                                return 1.
+    else:                                   sysType = 'central'
     return self.reader.eval_auto_bounds(sysType, toFlavorKey(absFlavor), eta, pt)
 
- 
   def getBtagSF_1a(self, sysType, tree, bjets):
     mcEff_bJets = ( self.getMCEff(tree, j) for j in bjets )
     mcEff_lJets = ( (1-self.getMCEff(tree, j)) for j in tree.jets if j not in bjets )
@@ -114,7 +112,7 @@ class BtagEfficiency:
 if __name__ == '__main__':
   years = ['2016', '2017', '2018']
   for year in years:
-    testClass = BtagEfficiency(year)
+    testClass = BtagEfficiency(year, 'POG')
     for ptBin in getPtBins():
       for etaBin in getEtaBins():
         print ptBin, etaBin, testClass.mcEffDeepCSV[tuple(ptBin)][tuple(etaBin)]
