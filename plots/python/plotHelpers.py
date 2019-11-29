@@ -1,0 +1,93 @@
+#! /usr/bin/env python
+
+from ttg.tools.helpers import deltaR
+
+def rawLep1JetDeltaR(tree):
+  return min(deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) for j in range(tree._nJets))
+
+def rawLep2JetDeltaR(tree):
+  return min(deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2]) for j in range(tree._nJets))
+
+def rawLepJetDeltaR(tree):
+  return min([rawLep1JetDeltaR(tree), rawLep2JetDeltaR(tree)])
+
+def closestRawJetLep1(tree):
+  dist = [deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) for j in range(tree._nJets)]
+  return dist.index(min(dist))
+
+def closestRawJetLep2(tree):
+  dist = [deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2]) for j in range(tree._nJets)]
+  return dist.index(min(dist))
+
+def genLep1RawJetDeltaR(tree):
+  j = closestRawJetLep1(tree)
+  if tree._lIsPrompt[tree.l1]: return deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1])
+  else: return -1.
+
+def genLep2RawJetDeltaR(tree):
+  j = closestRawJetLep2(tree)
+  if tree._lIsPrompt[tree.l2]: return deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2])
+  else: return -1.
+
+def genLepRawJetDeltaR(tree):
+  # NOTE this means both leptons are required to be prompt
+  return min([genLep1RawJetDeltaR(tree), genLep2RawJetDeltaR(tree)])
+
+def genLepRawJetNearPhDeltaR(tree):
+  j = closestRawJet(tree) #jet closest to photon
+  distl1 = deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) if tree._lIsPrompt[tree.l1] else -1.
+  distl2 = deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2]) if tree._lIsPrompt[tree.l2] else -1.
+  return min([distl1, distl1])
+
+def channelNumbering(t):
+  return (1 if t.isMuMu else (2 if t.isEMu else 3))
+
+def createSignalRegions(t):
+  if t.ndbjets == 0:
+    if t.njets == 0: return 0
+    if t.njets == 1: return 1
+    if t.njets == 2: return 2
+    if t.njets >= 3: return 3
+  elif t.ndbjets == 1:
+    if t.njets == 1: return 4
+    if t.njets == 2: return 5
+    if t.njets >= 3: return 6
+  elif t.ndbjets == 2:
+    if t.njets == 2: return 7
+    if t.njets >= 3: return 8
+  elif t.ndbjets >= 3 and t.njets >= 3: return 9
+  return -1
+
+def createSignalRegionsZoom(t):
+  if t.ndbjets == 0:
+    if t.njets == 2: return 0
+    if t.njets >= 3: return 1
+  elif t.ndbjets == 1:
+    if t.njets == 1: return 2
+    if t.njets == 2: return 3
+    if t.njets >= 3: return 4
+  elif t.ndbjets == 2:
+    if t.njets == 2: return 5
+    if t.njets >= 3: return 6
+  elif t.ndbjets >= 3 and t.njets >= 3: return 7
+  return -1
+
+# you can remove items from momList, but keep momRef 
+momRef = {1: 'd', 2: 'u', 3: 's', 4: 'c', 5: 'b', 6: 't', 11: 'e', 13: '#mu', 15: '#tau', 21: 'g', 24: 'W', 111: '#pi^{0}', 221: '#pi^{+/-}', 223: '#rho^{+}', 331: '#rho `', 333: '#phi', 413: 'D^{*+}', 423: 'D^{*0}', 433: 'D_{s}^{*+}', 445: '445', 513: 'B^{*0}', 523: 'B^{*+}', 533: 'B_{s}^{*0}', 543: 'B_{c}^{*+}', 2212: 'p', 4312:'4312', 4314: '4314', 4322: '4322', 4324: '4324', 4334: '4334', 5324: '5324', 20443: '20443', 100443: '#psi'}
+# momList = [1, 2, 3, 4, 5, 6, 11, 13, 15, 21, 24, 111, 221, 223, 331, 333, 413, 423, 433, 445, 513, 523, 533, 543, 2212, 4312, 4314, 4322, 4324, 4334, 5324, 20443, 100443]
+momList = [1, 2, 3, 4, 5, 6, 11, 13, 15, 21, 24, 111, 221, 223, 331, 333, 413, 423, 433, 513, 523, 533, 543, 2212, 100443]
+nameList = [momRef[mom] for mom in momList] + ['other']
+momDict = {entry: num for num, entry in enumerate(momList)}
+
+def momDictFunc(t):
+  try: momId = abs(t._gen_phMomPdg[t.ph])
+  except: momId = -1
+  try: return momDict[momId]
+  except: return len(momList)
+
+def closestRawJet(tree):
+  dist = [deltaR(tree._jetEta[j], tree._phEta[tree.ph], tree._jetPhi[j], tree._phPhi[tree.ph]) for j in range(tree._nJets)]
+  return dist.index(min(dist))
+
+def rawJetDeltaR(tree):
+  return min(deltaR(tree._jetEta[j], tree._phEta[tree.ph], tree._jetPhi[j], tree._phPhi[tree.ph]) for j in range(tree._nJets))

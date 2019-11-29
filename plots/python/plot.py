@@ -8,7 +8,6 @@ log = getLogger()
 import ROOT, os, uuid, numpy, math
 import cPickle as pickle
 from math import sqrt
-from copy import deepcopy
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC

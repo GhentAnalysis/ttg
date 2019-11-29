@@ -89,7 +89,7 @@ def applySysToReduceType(reduceType, sys):
 #
 def getReplacementsForStack(sys, year):
   # no syst variation variation samples for 2016 (in miniAODv3 at least)
-  if not year=='2016':
+  if not year == '2016':
     if sys and any([i==sys for i in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']]):
       return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
     elif sys and sys == 'erdUp':
