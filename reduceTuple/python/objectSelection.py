@@ -144,9 +144,9 @@ def photonSelector(tree, index, n, minLeptons):
   if not tree._phPassElectronVeto[index]:                                       return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
-  if tree.phomvasb:             return tree._phMva[index] > -0.60
+  if tree.phomvasb:             return tree._phMvaF17v2[index] > -0.60
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
-  if tree.photonMVA:            return tree._phMva[index] > 0.20
+  if tree.photonMVA:            return tree._phMvaF17v2[index] > 0.20
   return True
 
 def addGenPhotonInfo(t, n, index):
@@ -196,8 +196,9 @@ def isGoodJet(tree, n, index):
   if not tree._jetIsTight[index]:             return False
   if not abs(tree._jetEta[index]) < 2.4: return False
   # NOTE this assumes we're selecting exactly 1 photon. Also this is only for 2016
-  if (tree._phMva[n.ph] > 0.20 and (tree.phomvasb or tree.photonMVA)) or (tree._phCutBasedMedium[n.ph] and tree.photonCutBased):
-    if deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) < 0.1: return False
+  if len(tree.photons) > 0:
+    if (tree._phMvaF17v2[n.ph] > 0.20 and (tree.phomvasb or tree.photonMVA)) or (tree._phCutBasedMedium[n.ph] and tree.photonCutBased):
+      if deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) < 0.1: return False
   for lep in tree.leptons:
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True
@@ -232,10 +233,3 @@ def makeDeltaR(t, n):
     setattr(n, 'l1JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 0 else -1)
     setattr(n, 'l2JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 1 else -1)
     setattr(n, 'jjDeltaR'+var,     min([deltaR(t._jetEta[getattr(n, 'j1'+var)], t._jetEta[getattr(n, 'j2'+var)], t._jetPhi[getattr(n, 'j1'+var)], t._jetPhi[getattr(n, 'j2'+var)])]) if getattr(n, 'njets'+var) > 1 else -1) # pylint: disable=C0301
-
-def closestRawJet(tree):
-  dist = [deltaR(tree._jetEta[j], tree._phEta[tree.ph], tree._jetPhi[j], tree._phPhi[tree.ph]) for j in range(tree._nJets)]
-  return dist.index(min(dist))
-
-def rawJetDeltaR(tree):
-  return min(deltaR(tree._jetEta[j], tree._phEta[tree.ph], tree._jetPhi[j], tree._phPhi[tree.ph]) for j in range(tree._nJets))

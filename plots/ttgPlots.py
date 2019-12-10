@@ -46,7 +46,7 @@ from ttg.plots.systematics import getReplacementsForStack, systematics, linearSy
 import glob
 for f in sorted(glob.glob("../samples/data/*.stack")):
   stackName = os.path.basename(f).split('.')[0]
-  if not stackName[-5:] in ['_2016', '_2017', '_2018','_comb']:
+  if not stackName[-5:] in ['_2016', '_2017', '_2018', '_comb']:
     log.warning('stack file without year label found (' + stackName + '), please remove or label properly')
     exit(0)
 
@@ -67,13 +67,12 @@ if not args.isChild:
 # Initializing
 #
 import ROOT
-from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize
+from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
 from ttg.plots.plot2D                 import Plot2D, add2DPlots
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
 from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
 from math import pi
-from ttg.reduceTuple.objectSelection  import closestRawJet, rawJetDeltaR
 
 ROOT.gROOT.SetBatch(True)
 
@@ -104,14 +103,14 @@ if args.year == 'all':
       log.warning('stackfile ' + stackFile + '_' + year + '.stack is missing, exiting')
       exit(0)
 
-tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['2016', '2017', '2018','comb']}
+tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['2016', '2017', '2018', 'comb']}
 
 #FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
 # when running over all years, just initialise the plots with the stack for 16
 stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.year == 'all' else args.year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + ('2016' if args.year == 'all' else args.year) + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys)
+                    replacements = getReplacementsForStack(args.sys, args.year)
                     )
 
 #
@@ -120,96 +119,7 @@ stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.
 Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'))
 Plot2D.setDefaults(stack=stack)
 
-def rawLep1JetDeltaR(tree):
-  return min(deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) for j in range(tree._nJets))
-
-def rawLep2JetDeltaR(tree):
-  return min(deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2]) for j in range(tree._nJets))
-
-def rawLepJetDeltaR(tree):
-  return min([rawLep1JetDeltaR(tree), rawLep2JetDeltaR(tree)])
-
-def closestRawJetLep1(tree):
-  dist = [deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) for j in range(tree._nJets)]
-  return dist.index(min(dist))
-
-def closestRawJetLep2(tree):
-  dist = [deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2]) for j in range(tree._nJets)]
-  return dist.index(min(dist))
-
-def genLep1RawJetDeltaR(tree):
-  j = closestRawJetLep1(tree)
-  if tree._lIsPrompt[tree.l1]: return deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1])
-  else: return -1.
-
-def genLep2RawJetDeltaR(tree):
-  j = closestRawJetLep2(tree)
-  if tree._lIsPrompt[tree.l2]: return deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2])
-  else: return -1.
-
-def genLepRawJetDeltaR(tree):
-  # NOTE this means both leptons are required to be prompt
-  return min([genLep1RawJetDeltaR(tree), genLep2RawJetDeltaR(tree)])
-
-def genLepRawJetNearPhDeltaR(tree):
-  j = closestRawJet(tree) #jet closest to photon
-  distl1 = deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) if tree._lIsPrompt[tree.l1] else -1.
-  distl2 = deltaR(tree._jetEta[j], tree._lEta[tree.l2], tree._jetPhi[j], tree._lPhi[tree.l2]) if tree._lIsPrompt[tree.l2] else -1.
-  return min([distl1, distl1])
-
-def lepCutCB(tree):
-  if not (tree._relIso[tree.l1] < 0.12 and tree._relIso[tree.l2] < 0.12): return False
-  if tree._lFlavor[tree.l1] == 0 and not tree._lPOGTight[tree.l1]: return False
-  if tree._lFlavor[tree.l1] == 1 and not tree._lPOGMedium[tree.l1]: return False
-  if tree._lFlavor[tree.l2] == 0 and not tree._lPOGTight[tree.l2]: return False
-  if tree._lFlavor[tree.l2] == 1 and not tree._lPOGMedium[tree.l2]: return False
-  else: return True
-
-def channelNumbering(t):
-  return (1 if t.isMuMu else (2 if t.isEMu else 3))
-
-def createSignalRegions(t):
-  if t.ndbjets == 0:
-    if t.njets == 0: return 0
-    if t.njets == 1: return 1
-    if t.njets == 2: return 2
-    if t.njets >= 3: return 3
-  elif t.ndbjets == 1:
-    if t.njets == 1: return 4
-    if t.njets == 2: return 5
-    if t.njets >= 3: return 6
-  elif t.ndbjets == 2:
-    if t.njets == 2: return 7
-    if t.njets >= 3: return 8
-  elif t.ndbjets >= 3 and t.njets >= 3: return 9
-  return -1
-
-def createSignalRegionsZoom(t):
-  if t.ndbjets == 0:
-    if t.njets == 2: return 0
-    if t.njets >= 3: return 1
-  elif t.ndbjets == 1:
-    if t.njets == 1: return 2
-    if t.njets == 2: return 3
-    if t.njets >= 3: return 4
-  elif t.ndbjets == 2:
-    if t.njets == 2: return 5
-    if t.njets >= 3: return 6
-  elif t.ndbjets >= 3 and t.njets >= 3: return 7
-  return -1
-
-# you can remove items from momList, but keep momRef 
-momRef = {1: 'd', 2: 'u', 3: 's', 4: 'c', 5: 'b', 6: 't', 11: 'e', 13: '#mu', 15: '#tau', 21: 'g', 24: 'W', 111: '#pi^{0}', 221: '#pi^{+/-}', 223: '#rho^{+}', 331: '#rho `', 333: '#phi', 413: 'D^{*+}', 423: 'D^{*0}', 433: 'D_{s}^{*+}', 445: '445', 513: 'B^{*0}', 523: 'B^{*+}', 533: 'B_{s}^{*0}', 543: 'B_{c}^{*+}', 2212: 'p', 4312:'4312', 4314: '4314', 4322: '4322', 4324: '4324', 4334: '4334', 5324: '5324', 20443: '20443', 100443: '#psi'}
-# momList = [1, 2, 3, 4, 5, 6, 11, 13, 15, 21, 24, 111, 221, 223, 331, 333, 413, 423, 433, 445, 513, 523, 533, 543, 2212, 4312, 4314, 4322, 4324, 4334, 5324, 20443, 100443]
-momList = [1, 2, 3, 4, 5, 6, 11, 13, 15, 21, 24, 111, 221, 223, 331, 333, 413, 423, 433, 513, 523, 533, 543, 2212, 100443]
-nameList = [momRef[mom] for mom in momList] + ['other']
-momDict = {entry: num for num, entry in enumerate(momList)}
-
-def momDictFunc(t):
-  try: momId = abs(t._gen_phMomPdg[t.ph])
-  except: momId= -1
-  try: return momDict[momId]
-  except: return len(momList)
+from ttg.plots.plotHelpers  import *
 
 # Plot definitions (allow long lines, and switch off unneeded lambda warning, because lambdas are needed)
 def makePlotList():
@@ -268,7 +178,7 @@ def makePlotList():
     plotList.append(Plot('l2_relIso',                  'relIso(l_{2})',                         lambda c : c._relIso[c.l2],                                    (16, 0, 0.16)))
     plotList.append(Plot('l2_jetDeltaR',               '#DeltaR(l_{2}, j)',                     lambda c : c.l2JetDeltaR,                                      (20, 0, 5)))
     plotList.append(Plot('l2_Mva',                     'leptonMva output l2',                   lambda c : c._leptonMvatZq[c.l2],                              (84, -1.05, 1.05)))
-    plotList.append(Plot('l_maxRelIso',                'max relIso(l_{1},l_{2})',               lambda c : max(c._relIso[c.l1],c._relIso[c.l2]),               (16, 0, 0.16)))
+    plotList.append(Plot('l_maxRelIso',                'max relIso(l_{1},l_{2})',               lambda c : max(c._relIso[c.l1], c._relIso[c.l2]),              (16, 0, 0.16)))
     plotList.append(Plot('dl_mass',                    'm(ll) (GeV)',                           lambda c : c.mll,                                              (20, 0, 200)))
     plotList.append(Plot('dl_mass_small',              'm(ll) (GeV)',                           lambda c : c.mll,                                              (40, 0, 200)))
     plotList.append(Plot('ll_deltaPhi',                '#Delta#phi(ll)',                        lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),             (10, 0, pi)))
@@ -306,8 +216,8 @@ def makePlotList():
     plotList.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, #gamma)',           lambda c : c.genPhDeltaR,                                      (15, 0, 0.3)))
     plotList.append(Plot('genPhoton_relPt',            'rel p_{T}',                             lambda c : c.genPhRelPt,                                       (20, -0.2, 0.2)))
     plotList.append(Plot('photonCategory',             'photonCategory',                        lambda c : photonCategoryNumber(c),                            (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
-    plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
-    plotList.append(Plot('phRawJetDeltaR',             'raw #DeltaR(#gamma, j) ',               lambda c : rawJetDeltaR(c),                                    (45, 0, 0.3), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
+    plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
+    plotList.append(Plot('phRawJetDeltaR',             'raw #DeltaR(#gamma, j) ',               lambda c : rawJetDeltaR(c),                                    (45, 0, 0.3), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
     plotList.append(Plot('phL1DeltaR_small',           '#DeltaR(#gamma, l_{1})',                lambda c : c.phL1DeltaR,                                       (50, 0, 5)))
     plotList.append(Plot('phL2DeltaR_small',           '#DeltaR(#gamma, l_{2})',                lambda c : c.phL2DeltaR,                                       (50, 0, 5)))
     plotList.append(Plot('phLepDeltaR_small',          '#DeltaR(#gamma, l)',                    lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                    (50, 0, 5)))
@@ -315,19 +225,18 @@ def makePlotList():
     plotList.append(Plot('phBJetDeltaR_small',         '#DeltaR(#gamma, b)',                    lambda c : c.phBJetDeltaR,                                     (50, 0, 5)))
     plotList.append(Plot('l1_jetDeltaR_small',         '#DeltaR(l_{1}, j)',                     lambda c : c.l1JetDeltaR,                                      (50, 0, 5)))
     plotList.append(Plot('l2_jetDeltaR_small',         '#DeltaR(l_{2}, j)',                     lambda c : c.l2JetDeltaR,                                      (50, 0, 5)))
-    # NOTE TEMPORARY PLOTS
-    plotList.append(Plot('rawLep1JetDeltaR',           'raw #DeltaR(#l1, j)',                    lambda c : rawLep1JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
-    plotList.append(Plot('rawLep2JetDeltaR',           'raw #DeltaR(#l2, j)',                    lambda c : rawLep2JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
-    plotList.append(Plot('rawLepJetDeltaR',            'raw #DeltaR(#l, j)',                     lambda c : rawLepJetDeltaR(c),                                (50, 0, 0.5), overflowBin=None))
-    plotList.append(Plot('genLep1RawJetDeltaR',        'raw #DeltaR(gen l1, j)',                 lambda c : genLep1RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
-    plotList.append(Plot('genLep2RawJetDeltaR',        'raw #DeltaR(gen l2, j)',                 lambda c : genLep2RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
-    plotList.append(Plot('genLepRawJetDeltaR',         'raw #DeltaR(gen l, j)',                  lambda c : genLepRawJetDeltaR(c),                             (50, 0, 0.5), overflowBin=None))
-    plotList.append(Plot('genLepRawJetNearPhDeltaR',   'raw #DeltaR(gen l, j near #gamma)',      lambda c : genLepRawJetNearPhDeltaR(c),                       (50, 0, 0.5), overflowBin=None))
+    # NOTE slow plots used for problem solving below, keep commented out when not needed
+    # plotList.append(Plot('rawLep1JetDeltaR',           'raw #DeltaR(#l1, j)',                    lambda c : rawLep1JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
+    # plotList.append(Plot('rawLep2JetDeltaR',           'raw #DeltaR(#l2, j)',                    lambda c : rawLep2JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
+    # plotList.append(Plot('rawLepJetDeltaR',            'raw #DeltaR(#l, j)',                     lambda c : rawLepJetDeltaR(c),                                (50, 0, 0.5), overflowBin=None))
+    # plotList.append(Plot('genLep1RawJetDeltaR',        'raw #DeltaR(gen l1, j)',                 lambda c : genLep1RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
+    # plotList.append(Plot('genLep2RawJetDeltaR',        'raw #DeltaR(gen l2, j)',                 lambda c : genLep2RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
+    # plotList.append(Plot('genLepRawJetDeltaR',         'raw #DeltaR(gen l, j)',                  lambda c : genLepRawJetDeltaR(c),                             (50, 0, 0.5), overflowBin=None))
+    # plotList.append(Plot('genLepRawJetNearPhDeltaR',   'raw #DeltaR(gen l, j near #gamma)',      lambda c : genLepRawJetNearPhDeltaR(c),                       (50, 0, 0.5), overflowBin=None))
+    # plotList.append(Plot('photon_mom',                 'photon mom particle',                    lambda c : momDictFunc(c),                                    (len(momList)+1, 0, len(momList)+1), histModifications=[xAxisLabels(nameList), customLabelSize(14)]))
     # plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
     # plotList.append(Plot('photon_pt_ATLB',             'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 30., 40., 50., 65., 80., 100., 125., 160., 220., 300.]))
   # pylint: enable=C0301
-    if args.tag.lower().count('phorigins'):
-      plotList.append(Plot('photon_mom',              'photon mom particle',                lambda c : momDictFunc(c),                   (len(momList)+1, 0, len(momList)+1), histModifications=[xAxisLabels(nameList), customLabelSize(14)]))      
 
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
@@ -358,7 +267,7 @@ for year in years:
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
                     channel      = args.channel,
-                    replacements = getReplacementsForStack(args.sys)
+                    replacements = getReplacementsForStack(args.sys, args.year)
                     )
 
   # link the newly loaded samples to their respective existing histograms in the plots
@@ -387,27 +296,19 @@ for year in years:
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
-  if not args.showSys:
+  copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdUp', 'erdDown']
+
+  if not args.showSys and not copySyst:
     if args.tag.count('phoCB'):                                                     reduceType = 'phoCB'
     elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
-    # else:                                                                           reduceType = 'pho'
-    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew2' #for testing new skims
+    else:                                                                           reduceType = 'pho'
+    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
-    # if args.tag.count('phoCBfull-gen'):                                             reduceType = 'phoCB-gennew'
     if args.tag.count('phomvasb'):                                                  reduceType = 'phomvasb'
     if args.tag.count('phomvasbnew'):                                               reduceType = 'phomvasbnew'
-    # if args.tag.count('phoCBextra') or args.tag.count('phoCBfullextra'):            reduceType = 'phoCBextra' #special skim with extra variables
     reduceType = applySysToReduceType(reduceType, args.sys)
     log.info("using reduceType " + reduceType)
-
-    # NOTE TEMPORARY CODE
-    MVAcut = None
-    if args.tag.count('LMVA'):
-      MVAcut = float(args.tag.split('LMVA')[1][0:4])
-    
-    invExtraLepCut = args.tag.lower().count("invextralepcut")
-    extraLepCut = args.tag.lower().count("extralepcut") and not invExtraLepCut
 
     from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
     for sample in sum(stack, []):
@@ -443,11 +344,8 @@ for year in years:
         c.sigmaIetaIeta2    = sample.texName.count('sideband2') 
         c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
         c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
-          # FIXME Temporary for checking strange very low iso fake and had photons
         c.lowChgIso         = args.tag.count("lowchgIso") or sample.texName.count('lowchgIso')
-        c.highChgIso         = args.tag.count("highchgIso") or sample.texName.count('highchgIso')
-
-
+        c.highChgIso        = args.tag.count("highchgIso") or sample.texName.count('highchgIso')
 
       if forward:
         if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.0272 < #sigma_{i#etai#eta} < 0.032')
@@ -459,19 +357,12 @@ for year in years:
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
-        # c.ISRWeight = 1.
-        # c.FSRWeight = 1.
+        c.ISRWeight = 1.
+        c.FSRWeight = 1.
         if not sample.isData and args.sys:
           applySysToTree(sample.name, args.sys, c)
 
         if not passingFunctions(c): continue
-
-        # FIXME unelegant temporary extra cuts 
-        if MVAcut:
-          if not (c._leptonMvatZq[c.l1] > MVAcut and c._leptonMvatZq[c.l2] > MVAcut): continue
-
-        if extraLepCut and not lepCutCB(c): continue
-        if invExtraLepCut and lepCutCB(c): continue
 
         if selectPhoton:
           if phoCBfull and not c._phCutBasedMedium[c.ph]:  continue
@@ -491,8 +382,7 @@ for year in years:
 
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
-        elif MVAcut:      eventWeight = c.genWeight*c.puWeight*1.*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
-        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale
+        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight
         
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]
@@ -503,6 +393,9 @@ for year in years:
           for variable, expression, array in dumpArrays:
             if sample.isData: array.append((expression(c), 1., eventWeight))
             else:             array.append((expression(c), c.genWeight, eventWeight))
+
+  if not args.showSys and copySyst:
+    copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
 
   plots = plotsToFill + loadedPlots
 
@@ -566,10 +459,10 @@ for year in years:
       if args.channel != 'noData':
         extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
 
-      if any (args.tag.count(sname) for sname in ['chisoHad','chisoFake','chisoNP']):
+      if any (args.tag.count(sname) for sname in ['chisoHad', 'chisoFake', 'chisoNP']):
         extraArgs['ratio']   = {'yRange' : (0.0, 1.0), 'texY': 'chargedIso pass/fail'}
 
-      if any (args.tag.lower().count(sname) for sname in ['failpass','ffp','pfp']):
+      if any (args.tag.lower().count(sname) for sname in ['failpass', 'ffp', 'pfp']):
         extraArgs['ratio']   = {'yRange' : (1.0, 8.0), 'texY': '#sigma_{i#etai#eta} pass/fail'}
 
       if(normalize or args.tag.count('compareChannels')):
@@ -688,10 +581,10 @@ for plot in totalPlots: # 1D plots
     if args.channel != 'noData':
       extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
 
-    if any (args.tag.count(sname) for sname in ['chisoHad','chisoFake','chisoNP']):
+    if any (args.tag.count(sname) for sname in ['chisoHad', 'chisoFake', 'chisoNP']):
       extraArgs['ratio']   = {'yRange' : (0.0, 1.0), 'texY': 'chargedIso pass/fail'}
 
-    if any (args.tag.lower().count(sname) for sname in ['failpass','ffp','pfp']):
+    if any (args.tag.lower().count(sname) for sname in ['failpass', 'ffp', 'pfp']):
       extraArgs['ratio']   = {'yRange' : (1.0, 8.0), 'texY': '#sigma_{i#etai#eta} pass/fail'}
 
     if(normalize or args.tag.count('compareChannels')):

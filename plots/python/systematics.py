@@ -9,17 +9,17 @@ varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetSmearedPt', 'dbj1',
 #
 systematics = {}
 for i in ('Up', 'Down'):
-  systematics['isr'+i]        = []
-  systematics['fsr'+i]        = []
-  systematics['ue'+i]         = []
+  systematics['isr'+i]        = [('ISRWeight',    'ISRWeight'+i)]
+  systematics['fsr'+i]        = [('FSRWeight',    'FSRWeight'+i)]
   systematics['hdamp'+i]      = []
+  systematics['ue'+i]         = []
   systematics['erd'+i]        = []
   systematics['eScale'+i]     = []
   systematics['eRes'+i]       = []
   systematics['phScale'+i]    = []
   systematics['phRes'+i]      = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
-  systematics['pf'+i]         = [('prefireWeight', 'prefireWeight'+i)]
+  systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
   systematics['lSF'+i]        = [('lWeight',       'lWeight'+i)]
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
@@ -85,17 +85,16 @@ def applySysToReduceType(reduceType, sys):
   return reduceType
 
 #
-# Special systematic samples for FSR and ISR
+# Special systematic samples for hdamp, ue, and erd
 #
-def getReplacementsForStack(sys):
-  if sys and any([i==sys for i in ['fsrUp', 'fsrDown', 'isrUp', 'isrDown']]):
-    return {'TTGamma' : 'TTGamma_' + sys.lower(), 'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
-  elif sys and any([i==sys for i in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']]):
-    return {'TTJets_pow' : 'TTJets_pow_' + sys.lower()}
-  elif sys and sys == 'erdUp':
-    return {'TTJets_pow' : 'TTJets_pow_erd'}
-  else:
-    return {}
+def getReplacementsForStack(sys, year):
+  # no syst variation variation samples for 2016 (in miniAODv3 at least)
+  if not year == '2016':
+    if sys and any([i==sys for i in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']]):
+      return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
+    elif sys and sys == 'erdUp':
+      return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
+  return {}
 
 
 #

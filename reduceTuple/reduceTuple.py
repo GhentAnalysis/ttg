@@ -130,7 +130,7 @@ if not sample.isData:
       newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-    for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F']
+    for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F']
     for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -221,7 +221,6 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
     # See https://twiki.cern.ch/twiki/bin/view/CMS/TopSystematics#Factorization_and_renormalizatio and https://twiki.cern.ch/twiki/bin/viewauth/CMS/LHEReaderCMSSW for order (index 0->id 1001, etc...)
     # Except when a sample does not have those weights stored (could occur for the minor backgrounds)
-    # TODO: new samples have ISR/FSR systematics also stored in the samples, need to check
     if not forSys:
       for var, i in [('Fu', 1), ('Fd', 2), ('Ru', 3), ('RFu', 4), ('Rd', 6), ('RFd', 8)]:
         try:    setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
@@ -231,9 +230,25 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
         try:    setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+9]*lumiWeights[i+9])
         except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
 
+      try:
+        # corresponds to 2 - 1/2 variations, recommended see talk  
+        # https://indico.cern.ch/event/848486/contributions/3610537/attachments/1948613/3233682/TopSystematics_2019_11_20.pdf
+        newVars.ISRWeightDown = c._psWeight[6]
+        newVars.FSRWeightDown = c._psWeight[7]
+        newVars.ISRWeightUp   = c._psWeight[8]
+        newVars.FSRWeightUp   = c._psWeight[9]
+      except:
+        newVars.ISRWeightDown = 1.
+        newVars.FSRWeightDown = 1.
+        newVars.ISRWeightUp   = 1.
+        newVars.FSRWeightUp   = 1.
+
+
     newVars.puWeight     = puReweighting(c._nTrueInt)
     newVars.puWeightUp   = puReweightingUp(c._nTrueInt)
     newVars.puWeightDown = puReweightingDown(c._nTrueInt)
+
+
 
     l1, l2               = newVars.l1, newVars.l2
     newVars.lWeight      = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
