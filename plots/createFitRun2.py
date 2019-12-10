@@ -72,14 +72,14 @@ def writeRootFile(name, systematicVariations, year):
     tag           = 'phoCBfull_compos_ALL'
 
     # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma CR and ttbar CR
+    dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
     channels = []
     if args.chan == 'll':
         for ch in ['ee', 'mumu', 'emu']:
-            if ch != 'mumu': writeHist(f, 'sr_' + ch, 'data_obs', getHistFromPkl((year, tag, ch, baseSelection), 'signalRegions', '', ['DoubleEG']), mergeBins=False)
-            else: writeHist(f, 'sr_' + ch, 'data_obs', getHistFromPkl((year, tag, ch, baseSelection), 'signalRegions', '', ['DoubleMuon']), mergeBins=False)
+            writeHist(f, 'sr_' + ch, 'data_obs', getHistFromPkl((year, tag, ch, baseSelection), 'signalRegions', '', [dataHistName[ch]]), mergeBins=False)
             channels.append(('sr_' + ch, ch))
     else: 
-        writeHist(f, 'sr_' + args.chan, 'data_obs', getHistFromPkl((year, tag, args.chan, baseSelection), 'signalRegions', '', ['DoubleEG']), mergeBins=False)
+        writeHist(f, 'sr_' + args.chan, 'data_obs', getHistFromPkl((year, tag, args.chan, baseSelection), 'signalRegions', '', [dataHistName[args.chan]]), mergeBins=False)
         channels.append(('sr_' + args.chan, args.chan))            
 
     for t in templates:
