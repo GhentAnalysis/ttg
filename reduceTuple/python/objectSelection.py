@@ -1,11 +1,16 @@
 from ttg.tools.logger  import getLogger
 from ttg.tools.helpers import deltaR
+from math import sqrt, atan, pi, tan
+from math import log as logar
 import ROOT
+import os
 log = getLogger()
 
 #
 # All functions to select objects, as well as some functions which add new variables based on the selected objects to the tree
 #
+
+# NOTE photonmva curretly disabled
 
 #
 # Set ID options on chain using type string
@@ -144,9 +149,9 @@ def photonSelector(tree, index, n, minLeptons):
   if not tree._phPassElectronVeto[index]:                                       return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
-  if tree.phomvasb:             return tree._phMvaF17v2[index] > -0.60
+  # if tree.phomvasb:             return tree._phMvaF17v2[index] > -0.60
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
-  if tree.photonMVA:            return tree._phMvaF17v2[index] > 0.20
+  # if tree.photonMVA:            return tree._phMvaF17v2[index] > 0.20
   return True
 
 def addGenPhotonInfo(t, n, index):
@@ -197,7 +202,8 @@ def isGoodJet(tree, n, index):
   if not abs(tree._jetEta[index]) < 2.4: return False
   # NOTE this assumes we're selecting exactly 1 photon. Also this is only for 2016
   if len(tree.photons) > 0:
-    if (tree._phMvaF17v2[n.ph] > 0.20 and (tree.phomvasb or tree.photonMVA)) or (tree._phCutBasedMedium[n.ph] and tree.photonCutBased):
+    if tree._phCutBasedMedium[n.ph] and tree.photonCutBased:
+    # if (tree._phMvaF17v2[n.ph] > 0.20 and (tree.phomvasb or tree.photonMVA)) or (tree._phCutBasedMedium[n.ph] and tree.photonCutBased):
       if deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) < 0.1: return False
   for lep in tree.leptons:
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
@@ -233,3 +239,90 @@ def makeDeltaR(t, n):
     setattr(n, 'l1JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 0 else -1)
     setattr(n, 'l2JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 1 else -1)
     setattr(n, 'jjDeltaR'+var,     min([deltaR(t._jetEta[getattr(n, 'j1'+var)], t._jetEta[getattr(n, 'j2'+var)], t._jetPhi[getattr(n, 'j1'+var)], t._jetPhi[getattr(n, 'j2'+var)])]) if getattr(n, 'njets'+var) > 1 else -1) # pylint: disable=C0301
+
+def getEta(pt, pz):
+  theta = atan(pt/pz)
+  if( theta < 0 ): theta += pi
+  return -logar(tan(theta/2))
+
+
+def getTopKinFit():
+  from ttg.TopKinFit.kfit import *
+  kf = kfit()
+  kf.Init(TOPTOPLEPLEP)
+  # fitterDir  = "$CMSSW_BASE/src/ttg/TopKinFit/python/test/GenAnalysis/TopTopLepLep/pdf.root"
+  pdfFileName = os.path.expandvars("$CMSSW_BASE/src/ttg/TopKinFit/python/test/GenAnalysis/TopTopLepLep/pdf.root")
+  kf.SetPDF("TopWMass", pdfFileName, "TopWM_Fit")
+  kf.SetPDF("TopMass", pdfFileName, "TopM_Fit")
+  kf.SetPDF("MetPx", pdfFileName, "dMetPx_Gaus")
+  kf.SetPDF("MetPy", pdfFileName, "dMetPy_Gaus")
+  kf.SetPDF("BJetPx", pdfFileName, "dBJetPx_Fit")
+  kf.SetPDF("BJetPy", pdfFileName, "dBJetPy_Fit")
+  kf.SetPDF("BJetPz", pdfFileName, "dBJetPz_Fit")
+  kf.SetPDF("BJetE", pdfFileName, "dBJetE_Fit")
+  kf.SetPDF("ElecPx", pdfFileName, "dElecPx_Fit")
+  kf.SetPDF("ElecPy", pdfFileName, "dElecPy_Fit")
+  kf.SetPDF("ElecPz", pdfFileName, "dElecPz_Fit")
+  kf.SetPDF("ElecE", pdfFileName, "dElecE_Fit")
+  kf.SetPDF("MuonPx", pdfFileName, "dMuonPx_Fit")
+  kf.SetPDF("MuonPy", pdfFileName, "dMuonPy_Fit")
+  kf.SetPDF("MuonPz", pdfFileName, "dMuonPz_Fit")
+  kf.SetPDF("MuonE", pdfFileName, "dMuonE_Fit")
+
+  kf.SetNToy(100)
+  return kf
+
+def reconstTops(kf, t, n):
+  if n.ndbjets > 1: 
+    n.topsReconst = True
+    # prepare lists to enter into fitter
+    nonBJets = [i for i in t.jets if i not in t.dbjets]
+    BJetPt  = [t._jetSmearedPt[j] for j in t.dbjets ]
+    BJetEta = [t._jetEta[j] for j in t.dbjets ]
+    BJetPhi = [t._jetPhi[j] for j in t.dbjets ]
+    BJetE   = [t._jetE[j] for j in t.dbjets ]
+    nonBJetPt  = [t._jetSmearedPt[j] for j in nonBJets ]
+    nonBJetEta = [t._jetEta[j] for j in nonBJets ]
+    nonBJetPhi = [t._jetPhi[j] for j in nonBJets ]
+    nonBJetE   = [t._jetE[j] for j in nonBJets ]
+    ElePt, EleEta, ElePhi, EleE, MuPt, MuEta, MuPhi, MuE = [[] for _ in range(8)]
+    for lept in [n.l1, n.l2]:
+      if t._lFlavor[lept] == 0:
+        ElePt.append(t._lPt[lept])
+        EleEta.append(t._lEta[lept])
+        ElePhi.append(t._lPhi[lept])
+        EleE.append(t._lE[lept])
+      else:
+        MuPt.append(t._lPt[lept])
+        MuEta.append(t._lEta[lept])
+        MuPhi.append(t._lPhi[lept])
+        MuE.append(t._lE[lept])
+    # enter lists into fitter
+    kf.SetBJet(BJetPt, BJetEta, BJetPhi, BJetE)
+    kf.SetNonBJet(nonBJetPt, nonBJetEta, nonBJetPhi, nonBJetE)
+    kf.SetElectron(ElePt, EleEta, ElePhi, EleE)
+    kf.SetMuon(MuPt, MuEta, MuPhi, MuE)
+    # convert met and met phi to px py, independent op E and eta
+    metVect = ROOT.Math.PtEtaPhiEVector(t._met ,0.,t._metPhi, 0.)
+    kf.SetMet(metVect.px(), metVect.px())
+    kf.Run()
+
+    n.top1Pt  = kf.GetTopPt(0,0)
+    n.top1Eta = kf.GetTopEta(0,0)
+    n.top2Pt  = kf.GetTopPt(0,1)
+    n.top2Eta = kf.GetTopEta(0,1)
+    n.nu1Pt   = sqrt(kf.GetNuPx(0,0)*kf.GetNuPx(0,0) + kf.GetNuPy(0,0)*kf.GetNuPy(0,0))
+    n.nu1Eta  = getEta(n.nu1Pt, kf.GetNuPz(0,0)) if not (kf.GetNuPz(0,0) == 0. or n.nu1Pt == 0 ) else 99999.
+    n.nu2Pt   = sqrt(kf.GetNuPx(0,1)*kf.GetNuPx(0,1) + kf.GetNuPy(0,1)*kf.GetNuPy(0,1))
+    n.nu2Eta  = getEta(n.nu2Pt, kf.GetNuPz(0,1)) if not (kf.GetNuPz(0,1) == 0. or n.nu2Pt == 0 ) else 99999.
+
+  else:
+    n.topsReconst = False
+    n.top1Pt  = 9999.
+    n.top1Eta = 9999.
+    n.top2Pt  = 9999.
+    n.top2Eta = 9999.
+    n.nu1Pt   = 9999.
+    n.nu1Eta  = 9999.
+    n.nu2Pt   = 9999.
+    n.nu2Eta  = 9999.
