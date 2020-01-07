@@ -7,6 +7,7 @@ argParser.add_argument('--ratio', action='store_true', help="fit xsec ratio")
 argParser.add_argument('--blind', action='store_true', help="do not use data")
 argParser.add_argument('--run', action='store', default='combine', help="custom run name")
 argParser.add_argument('--chan', action='store', default='ee', help="dilepton channel name", choices=['ee', 'mumu', 'emu', 'll'])
+argParser.add_argument('--year', action='store', default='2016', help="year of data taking", choices=['2016', '2017', '2018', 'All'])
 argParser.add_argument('--tab', action='store_true', help="produce tables")
 args = argParser.parse_args()
 
@@ -17,7 +18,7 @@ from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
 from ttg.plots.combineTools import initCombineTools, writeCard, runFitDiagnostics, runSignificance, runImpacts, runCompatibility, goodnessOfFit, doLinearityCheck, plotNLLScan, plotSys, plotCC
 from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys, rateParameters
 
-import os, ROOT
+import os, sys, subprocess, ROOT
 ROOT.gROOT.SetBatch(True)
 
 from math import sqrt
@@ -64,7 +65,7 @@ templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'other', 'single-t']
 
 def writeRootFile(name, systematicVariations, year):
 
-    fname = args.run + args.chan + '/' + name + '_shapes.root'
+    fname = args.run + args.chan + '/' + name + '_' + year + '_shapes.root'
     print fname
     f = ROOT.TFile(fname, 'RECREATE')
 
@@ -72,7 +73,7 @@ def writeRootFile(name, systematicVariations, year):
     tag           = 'phoCBfull_compos_ALL'
 
     # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma CR and ttbar CR
-    dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
+    dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'DoubleEG'}
     channels = []
     if args.chan == 'll':
         for ch in ['ee', 'mumu', 'emu']:
@@ -173,6 +174,10 @@ def writeRootFile(name, systematicVariations, year):
 # Signal regions fit #
 ######################
 def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', run='combine', blind=False):
+
+    years = [year]
+    if year == 'All': 
+        years = ['2016','2017','2018']
     
     log.info(' --- Signal regions fit (' + cardName + ') --- ')
     extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:]]
@@ -198,34 +203,54 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     # * the up/down variations of FSR were scaled back with 1/sqrt(2) according to TOP recommendations
 
     outDir = run+args.chan
-    
     initCombineTools(year, doCleaning=False, run=outDir)
     
-    shapeSys = []
-    for i in systematics.keys():
-        if 'Up' in i:
-            shapeSys.append(i.replace('Up',''))
-    
+    listSys = {}
+    shapeSys = {}
+    nameSys = {}
+    for y in years:
+        shapeSys[y] = []
+        nameSys[y] = []
+        listSys[y] = showSysList[:]
+        if y == '2018': listSys[y].remove('pf')
+        for i in systematics.keys():
+            if ('pf' in i) and (y == '2018'): continue
+            nameSys[y].append(i)
+            if 'Up' in i:
+                shapeSys[y].append(i.replace('Up',''))            
+
     normSys = [(t+'_norm') for t in templates[1:]]
     
-    allSys = shapeSys + normSys
+    allSys = {}
+    for y in years:
+        allSys[y] = shapeSys[y] + normSys
     
     print colored('##### Prepare ROOT file with histograms', 'red')
-    writeRootFile(cardName, systematics.keys(), year)
+    for y in years:
+        writeRootFile(cardName, nameSys[y], y)
     
     print colored('##### Plot shape systematic variations', 'red')
-    if args.chan == 'll':
-        for ch in ['ee', 'mumu', 'emu']:
-            fileName = args.run + args.chan + '/' + cardName + '_shapes.root'
-            plotSys(fileName, 'sr', ch, templates, systematics.keys(), year, args.run, comb=True)
-    else:
-        fileName = args.run + args.chan + '/' + cardName + '_shapes.root'
-        plotSys(fileName, 'sr', args.chan, templates, systematics.keys(), year, args.run)
+    for y in years:
+        if args.chan == 'll':
+            for ch in ['ee', 'mumu', 'emu']:
+                fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
+                plotSys(fileName, 'sr', ch, templates, nameSys[y], y, args.year, args.run, comb=True)
+        else:
+            fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
+            plotSys(fileName, 'sr', args.chan, templates, nameSys[y], y, args.year, args.run)
     
     print colored('##### Prepare data card', 'red')
-    writeCard(cardName, shapes, templates, None, extraLines, showSysList, {}, {}, run=outDir)
-    ##writeCard(cardName, shapes, templates, None, extraLines, showSysList, {}, scaleShape={'fsr': 1/sqrt(2)})
-    ##writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], {}, scaleShape={'fsr': 1/sqrt(2)})
+    cards = []
+    for y in years:
+        writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y)
+        cards.append(outDir+'/'+cardName+'_'+y+'.txt')
+        ##writeCard(cardName, shapes, templates, None, extraLines, showSysList, {}, scaleShape={'fsr': 1/sqrt(2)})
+        ##writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], {}, scaleShape={'fsr': 1/sqrt(2)})
+    if len(years) == 1:
+        os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')
+    else:
+        for i in range(3): cards[i] = cardName+'_'+y+'.txt'
+        p = subprocess.Popen(['combineCards.py','y2016='+cards[0],'y2017='+cards[1],'y2018='+cards[2]], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
 
     if blind == False:
         print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
@@ -253,7 +278,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     if blind == False:
         print colored('##### Run impacts (obs)', 'red')        
         runImpacts(cardName, year, perPage, poi=poi, doRatio=doRatio, run=outDir)
-        
+
     print colored('##### Run impacts (exp)', 'red')
     runImpacts(cardName, year, perPage, toys=True, poi=poi, doRatio=doRatio, run=outDir)
 
@@ -290,8 +315,8 @@ if args.chan == 'll':
     for ch in ['ee', 'mumu', 'emu']:
         channels.append('sr_'+ch)
 else: channels.append('sr_'+args.chan)
-        
-doSignalRegionFit(fitName, channels, 35, doRatio=doRatio, year='2016', blind=args.blind)
+
+doSignalRegionFit(fitName, channels, 35, doRatio=doRatio, year=args.year, blind=args.blind)
 
 #goodnessOfFit('srFit', run=args.run+args.chan)
 #doLinearityCheck('srFit', run=args.run+args.chan)
