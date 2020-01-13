@@ -3,7 +3,7 @@ log = getLogger()
 
 from ttg.tools.helpers import plotDir, plotCombineDir
 from ttg.tools.style import commonStyle, setDefault2D
-import os, shutil, ROOT, socket, json, math
+import os, sys, subprocess, glob, shutil, ROOT, socket, json, math
 
 import numpy as np
 import root_numpy as rnp
@@ -63,10 +63,12 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = None, run='
     combineRelease = getCombineRelease()
     os.system('rm ' + combineRelease + '/src/*.root &> /dev/null')
     log.debug('Moving to ' + combineRelease + ' to run combine')
-    for f in [dataCard + '.txt', dataCard + '_shapes.root']:
-        log.debug('Input file: ' + currentDir + '/' + run + '/' + f)
-        newPath = os.path.join(combineRelease, 'src', f)
-        shutil.copy(run + '/' + f, newPath)
+    os.system('cp '+run+'/*.txt '+combineRelease+'/src/.')
+    os.system('cp '+run+'/*_shapes.root '+combineRelease+'/src/.')
+#    for f in [dataCard + '.txt', dataCard + '_shapes.root']:
+#        log.debug('Input file: ' + currentDir + '/' + run + '/' + f)
+#        newPath = os.path.join(combineRelease, 'src', f)
+#        shutil.copy(run + '/' + f, newPath)
     shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
     os.system('cp $CMSSW_BASE/src/ttg/plots/data/sysMappings.json ' + combineRelease + '/src/CombineHarvester/CombineTools/scripts/sysMappings.json')
     os.chdir(os.path.join(combineRelease, 'src'))
@@ -75,7 +77,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = None, run='
     os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands) if otherCommands else '')
     os.system('mv *' + dataCard + '* ' + currentDir + '/' + run + '/')
     os.chdir(currentDir)
-
+    
 #
 # Run fit diagnostics
 # Disable pylint "too many branches" until CMSSW has a recent pylint version which takes nested functions into account
@@ -316,8 +318,11 @@ def runImpacts(dataCard, year, perPage=30, toys=False, toyR=1, poi=['r'], doRati
                 log.debug(line.rstrip())
 
         os.system('pdftoppm ' + run + '/' + outName + '.pdf ' + outName + ' -png;mogrify -trim ' + outName + '*.png')
-        os.system('mv ' + outName + '-1.png ' + outName + '.png')
-        os.system('mv ' + outName + '.png ' + os.path.join(plotCombineDir, year, run + '/'))
+        files = glob.glob(outName+'*.png')
+        for i in files:
+            os.system('mv ' + i + ' ' + os.path.join(plotCombineDir, year, run + '/'))
+#        os.system('mv ' + outName + '-1.png ' + outName + '.png')
+#        os.system('mv ' + outName + '.png ' + os.path.join(plotCombineDir, year, run + '/'))
         os.system('mv ' + run + '/' + outName + '.pdf ' + os.path.join(plotCombineDir, year, run + '/'))
         shutil.copy(os.path.join(getCombineRelease(), 'src/CombineHarvester/CombineTools/scripts/impacts.json'), os.path.expandvars('$CMSSW_BASE/src/ttg/plots/' + run + '/' + outName + '.json'))
 
@@ -393,7 +398,7 @@ def goodnessOfFit(dataCard, algo='saturated', run='combine'):
 # Write the card including all systematics and shapes
 # Might need refactoring
 #
-def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine'): # pylint: disable=R0914,R0913,R0912
+def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine', year='2016'): # pylint: disable=R0914,R0913,R0912
   if not templatesNoSys: templatesNoSys = []
 
   def tab(entries, column='12'):
@@ -423,14 +428,14 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     elif sys == 'nonPrompt' and shape == 'tt':          return '-' # hacky way, but easiest to currently implement
     else:                                               return '1'
 
-  cardFile = run + '/' + cardName + '.txt'
+  cardFile = run + '/' + cardName + '_' + year + '.txt'
   print cardFile
   with open(cardFile, 'w') as f:
     f.write('imax ' + str(len(shapes)) + '\n')
     f.write('jmax *\n')
     f.write('kmax *\n')
     f.write('-'*400 + '\n')
-    f.write('shapes * * '+cardName+'_shapes.root $CHANNEL/$PROCESS $CHANNEL$SYSTEMATIC/$PROCESS'+'\n')
+    f.write('shapes * * '+cardName+'_'+year+'_shapes.root $CHANNEL/$PROCESS $CHANNEL$SYSTEMATIC/$PROCESS'+'\n')
     f.write('-'*400 + '\n')
     f.write(tab(['bin']+shapes))
     f.write(tab(['observation']+['-1']*len(shapes)))
@@ -451,7 +456,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     for extraLine in extraLines:
       f.write(tab([x for x in extraLine.split()], column='18'))
 
-def plotSys(fileName, regName, chanName, proc=[''], sys=[''], year='2016', run='combine', comb=False):
+def plotSys(fileName, regName, chanName, proc=[''], sys=[''], year='2016', yeardir = '2016', run='combine', comb=False):
 
     sysShapes = []
 
@@ -542,9 +547,9 @@ def plotSys(fileName, regName, chanName, proc=[''], sys=[''], year='2016', run='
                 irow = 0
 
         if comb == True:
-            figOutput = os.path.join(plotCombineDir, year, run + 'll/') + p + '_fracSys_' + chanName + '.pdf'
+            figOutput = os.path.join(plotCombineDir, yeardir, run + 'll/') + p + '_fracSys_' + chanName + '_' + year + '.pdf'
         else:
-            figOutput = os.path.join(plotCombineDir, year, run + chanName + '/') + p + '_fracSys_' + chanName + '.pdf'
+            figOutput = os.path.join(plotCombineDir, yeardir, run + chanName + '/') + p + '_fracSys_' + chanName + '_' + year + '.pdf'
             
         plt.savefig(figOutput)
         plt.close()
@@ -721,4 +726,26 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
     c1.Print(figOutput)
     
     os.system('convert ' + figOutput + ' ' + figOutput.replace('pdf','png') + ' > /dev/null 2>&1')
-        
+
+#def addCorrelations():
+    
+#    def ScaleTo(syst, val, rename=''):
+#        if 'shape' in syst.type():
+#            syst.set_scale(syst.scale() * val)
+#        elif 'lnN' in syst.type():
+#            syst.set_value_u((syst.value_u() - 1.) * val + 1.)
+#            if syst.asymm():
+#                syst.set_value_d((syst.value_d() - 1.) * val + 1.)
+#        else:
+#            raise RuntimeError('Cannot scale a systematic of type %s' % syst.type())
+#        if rename != '':
+#            syst.set_name(rename)
+
+#    def Decorrelate(cb, name, correlation, postfix_corr, postfix_uncorr):
+#        if correlation <= 0. or correlation >= 1.:
+#            raise RuntimeError('Correlation coeff X must be 0 <= X < 1')
+#        cb_syst = cb.cp().syst_name([name])
+#        print '>> The following systematics will be cloned and adjusted:'
+#        cb_syst.PrintSysts()
+#        ch.CloneSysts(cb_syst, cb, lambda x: ScaleTo(x, math.sqrt(1. - correlation * correlation), name + postfix_uncorr))
+#        cb_syst.ForEachSyst(lambda x: ScaleTo(x, correlation, name+postfix_corr))
