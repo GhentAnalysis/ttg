@@ -4,6 +4,7 @@ from math import sqrt, atan, pi, tan
 from math import log as logar
 import ROOT
 import os
+from ttg.TopKinFit.kfit import *
 log = getLogger()
 
 #
@@ -247,7 +248,6 @@ def getEta(pt, pz):
 
 
 def getTopKinFit():
-  from ttg.TopKinFit.kfit import *
   kf = kfit()
   kf.Init(TOPTOPLEPLEP)
   # fitterDir  = "$CMSSW_BASE/src/ttg/TopKinFit/python/test/GenAnalysis/TopTopLepLep/pdf.root"
@@ -269,7 +269,7 @@ def getTopKinFit():
   kf.SetPDF("MuonPz", pdfFileName, "dMuonPz_Fit")
   kf.SetPDF("MuonE", pdfFileName, "dMuonE_Fit")
 
-  kf.SetNToy(100)
+  kf.SetNToy(50)
   return kf
 
 def reconstTops(kf, t, n):
@@ -285,6 +285,7 @@ def reconstTops(kf, t, n):
     nonBJetEta = [t._jetEta[j] for j in nonBJets ]
     nonBJetPhi = [t._jetPhi[j] for j in nonBJets ]
     nonBJetE   = [t._jetE[j] for j in nonBJets ]
+
     ElePt, EleEta, ElePhi, EleE, MuPt, MuEta, MuPhi, MuE = [[] for _ in range(8)]
     for lept in [n.l1, n.l2]:
       if t._lFlavor[lept] == 0:
@@ -297,6 +298,25 @@ def reconstTops(kf, t, n):
         MuEta.append(t._lEta[lept])
         MuPhi.append(t._lPhi[lept])
         MuE.append(t._lE[lept])
+    # log.info('-------------------------------------')
+    # log.info(nonBJets)
+    # log.info(BJetPt)
+    # log.info(BJetEta)
+    # log.info(BJetPhi)
+    # log.info(BJetE)
+    # log.info(nonBJetPt)
+    # log.info(nonBJetEta)
+    # log.info(nonBJetPhi)
+    # log.info(nonBJetE)
+    # log.info(ElePt)
+    # log.info(EleEta)
+    # log.info(ElePhi)
+    # log.info(EleE)
+    # log.info(MuPt)
+    # log.info(MuEta)
+    # log.info(MuPhi)
+    # log.info(MuE)
+    # log.info('-------------------------------------')
     # enter lists into fitter
     kf.SetBJet(BJetPt, BJetEta, BJetPhi, BJetE)
     kf.SetNonBJet(nonBJetPt, nonBJetEta, nonBJetPhi, nonBJetE)
@@ -304,7 +324,7 @@ def reconstTops(kf, t, n):
     kf.SetMuon(MuPt, MuEta, MuPhi, MuE)
     # convert met and met phi to px py, independent op E and eta
     metVect = ROOT.Math.PtEtaPhiEVector(t._met ,0.,t._metPhi, 0.)
-    kf.SetMet(metVect.px(), metVect.px())
+    kf.SetMet(metVect.px(), metVect.py())
     kf.Run()
 
     n.top1Pt  = kf.GetTopPt(0,0)
@@ -312,17 +332,19 @@ def reconstTops(kf, t, n):
     n.top2Pt  = kf.GetTopPt(0,1)
     n.top2Eta = kf.GetTopEta(0,1)
     n.nu1Pt   = sqrt(kf.GetNuPx(0,0)*kf.GetNuPx(0,0) + kf.GetNuPy(0,0)*kf.GetNuPy(0,0))
-    n.nu1Eta  = getEta(n.nu1Pt, kf.GetNuPz(0,0)) if not (kf.GetNuPz(0,0) == 0. or n.nu1Pt == 0 ) else 99999.
+    n.nu1Eta  = getEta(n.nu1Pt, kf.GetNuPz(0,0)) if not (kf.GetNuPz(0,0) == 0. or n.nu1Pt == 0 ) else -9999.
     n.nu2Pt   = sqrt(kf.GetNuPx(0,1)*kf.GetNuPx(0,1) + kf.GetNuPy(0,1)*kf.GetNuPy(0,1))
-    n.nu2Eta  = getEta(n.nu2Pt, kf.GetNuPz(0,1)) if not (kf.GetNuPz(0,1) == 0. or n.nu2Pt == 0 ) else 99999.
+    n.nu2Eta  = getEta(n.nu2Pt, kf.GetNuPz(0,1)) if not (kf.GetNuPz(0,1) == 0. or n.nu2Pt == 0 ) else -9999.
+    n.liHo    = kf.GetDisc(0)
 
   else:
     n.topsReconst = False
-    n.top1Pt  = 9999.
-    n.top1Eta = 9999.
-    n.top2Pt  = 9999.
-    n.top2Eta = 9999.
-    n.nu1Pt   = 9999.
-    n.nu1Eta  = 9999.
-    n.nu2Pt   = 9999.
-    n.nu2Eta  = 9999.
+    n.top1Pt  = -9999.
+    n.top1Eta = -9999.
+    n.top2Pt  = -9999.
+    n.top2Eta = -9999.
+    n.nu1Pt   = -9999.
+    n.nu1Eta  = -9999.
+    n.nu2Pt   = -9999.
+    n.nu2Eta  = -9999.
+    n.liHo    = -9999.
