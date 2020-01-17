@@ -225,17 +225,16 @@ for promptflav in promptflavs:
         addHist('dz'+type+onz+suff, '|#it{d}_{z}(lep)| [cm]', bins=dxybins)
         addHist('pt'+type+onz+suff, '#pt(lep) [GeV]', nbins=40, minX=0, maxX=100)
         addHist('eta'+type+onz+suff, '|#eta(lep)|', nbins=25, minX=0, maxX=2.5)
-        addHist('photonPt'+type+onz+suff, '#pt(#gamma [GeV]', nbins=25, minX=0, maxX=2.5)
+        addHist('photonPt'+type+onz+suff, '#pt(#gamma [GeV]', nbins=25, minX=0, maxX=100)
         addHist('3dIP'+type+onz+suff, '3dIP(lep)', nbins=20, minX=0, maxX=10)
         addHist('3dIPSig'+type+onz+suff, '3dIPSig(lep)', nbins=20, minX=0, maxX=10)
-        addHist('charge'+type+onz+suff, 'q(lep)', nbins=2, minX=-1, maxX=1)
         addHist('relIso'+type+onz+suff, 'relIso(lep)', nbins=16, minX=0, maxX=0.16)
         if 'displEE' in suff:
           addHist('lmisshits'+type+onz+suff,  'Inner missing hits', nbins=10, minX=0., maxX=10.)
           addHist('hovere'+type+onz+suff,  'H/E', nbins=100, minX=0., maxX=0.1)
           addHist('sigmaIetaIeta'+type+onz+suff,  '#sigma_{i#etai#eta}', nbins=50, minX=0., maxX=.018)
           addHist('ooEmoop'+type+onz+suff,  '1/E-1/P', nbins=50, minX=0., maxX=0.15)
-          addHist('dEtaInSeed'+type+onz+suff,  'dEtaInSeed', nbins=50, minX=-.3, maxX=.3)
+          addHist('dEtaInSeed'+type+onz+suff,  'dEtaInSeed', nbins=50, minX=-.01, maxX=.01)
 
 if args.year=='2016': mllMass=15
 else:                 mllMass=10

@@ -2,22 +2,20 @@
 import ROOT
 import sys, os
 
-ROOT.gROOT.LoadMacro('danystyle.C') 
-ROOT.setTDRStyle()
 
 ROOT.gROOT.SetBatch(True)
+ROOT.gErrorIgnoreLevel = ROOT.kWarning
 
 import os, argparse, sys
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--year',           action='store',      default=None)
 argParser.add_argument('--dyExternal',     action='store_true')
-argParser.add_argument('--dyExternalAll',     action='store_true')
+argParser.add_argument('--dyExternalAll',  action='store_true')
 args = argParser.parse_args()
 
 extra = '_dyExternalAll' if args.dyExternalAll else ('_dyExternal' if args.dyExternal else '_new')
 
-
-from ttg.tools.helpers import getObjFromFile
+from ttg.tools.helpers import getObjFromFile, copyIndexPHP
 import glob
 def getPlot(path, name):
   h = None
@@ -29,17 +27,23 @@ def getPlot(path, name):
     ROOT.TFile(f).ls()
   return h
 
+def getPlotNames():
+  f = ROOT.TFile(glob.glob(args.year + '_new/*/*.root')[0])
+  for k in f.GetListOfKeys():
+    yield k.GetName()
 
-# Output file
-#fout = ROOT.TFile('plots_3l_4l.root', 'recreate')
+ROOT.gROOT.LoadMacro('danystyle.C') 
+ROOT.setTDRStyle()
+
+
 
 # Plot name
-plots = ['zmass',  'dxy', 'lmisshits', 'zmass3',  'dxy3', 'lmisshits3',  'dxy_onz', 'lmisshits_onz',  'dxy3_onz', 'lmisshits3_onz']
-rebin = [      4,      1,           1,        4,       1,            1,          1,               1,           1,                1]
-binmn = [     20,   0.01,           0,       20,    0.01,            0,       0.01,               0,        0.01,                0]
-binmx = [    200,      6,          10,      200,       6,           10,          6,              10,           6,               10]
-log_x = [      0,      1,           0,        0,       1,            0,          1,               0,           1,                0]
-log_y = [      0,      1,           1,        0,       1,            1,          1,               1,           1,                1]
+plots = ['zmass',  'dxy', 'lmisshits', '3dIP', 'charge', 'dEtaInSeed', 'hovere', 'ooEmoop', 'pt', 'relIso3', 'sigmaIetaIeta', 'eta', 'photonPt']
+rebin = [      4,      1,           1,      1,        1,            1,        1,         1,    1,         1,               1,     1,          1]
+binmn = [     20,   0.01,           0,      0,       -1,         -0.3,        0,         0,    0,         0,               0,     0,          0]
+binmx = [    200,      6,          10,     10,        1,          0.3,      0.1,      0.14,  100,      0.16,           0.018,   2.5,        100]
+log_x = [      0,      1,           0,      0,        0,            0,        0,         0,    0,         0,               0,     0,          0]
+log_y = [      0,      1,           1,      1,        0,            0,        0,         1,    1,         1,               1,     0,          0]
 
 nplot = len(plots)
 
@@ -115,8 +119,6 @@ promptflavs = ['_promptEE', '_promptMM']
 displflavs  = ['_displEE' , '_displMM' ]
 
 outdir = '/user/tomc/public_html/hnl/danielePlots/%s' % (args.year + extra)
-try:    os.makedirs(outdir)
-except: pass
 
 
 mcnames = {}
@@ -160,109 +162,100 @@ def drawLumi():
   elif args.year=='2017':      lumi = 41.530
   elif args.year=='2018':      lumi = 59.688
   lines = [
-    (11, (ROOT.gStyle.GetPadLeftMargin(),  1-ROOT.gStyle.GetPadTopMargin()+.03, 'CMS Preliminary')),
-    (31, (1-ROOT.gStyle.GetPadRightMargin(), 1-ROOT.gStyle.GetPadTopMargin()+.03, ('%3.1f fb{}^{-1} (%s, 13 TeV)'% (lumi, args.year))))
+    (11, (ROOT.gStyle.GetPadLeftMargin(),  1-ROOT.gStyle.GetPadTopMargin()+.01, 'CMS Preliminary')),
+    (31, (1-ROOT.gStyle.GetPadRightMargin(), 1-ROOT.gStyle.GetPadTopMargin()+.01, ('%3.1f fb{}^{-1} (%s, 13 TeV)'% (lumi, args.year))))
   ]
   return [drawTex(l, align) for align, l in lines]
 
 
 
 # Get plots
-iplot=0
-leg = ROOT.TLegend(0.75, 0.50, 0.95, 0.90)
-leg.SetBorderSize(0)
-leg.SetLineWidth(0)
-leg.SetLineColor(0)
-leg.SetFillStyle(0)
-leg.SetFillColor(0)
-for promptflav in promptflavs:
-  for displflav in displflavs:
-    suff = promptflav+displflav
-    for plot in plots:
-      if 'lmisshits' in plot and not 'EE' in displflav: continue
-      print plot+suff
-      hstk = ROOT.THStack(plot+suff, '')
-      hbkg = ROOT.TH1D()
-      isfirst = True
-      for label in labels:
-        h = getPlot(args.year + '_new/' +mcnames[label]+'/*.root', plot+suff)
-        h.Rebin(rebin[iplot%nplot])
-        for ibin in range(1, 1+h.GetNbinsX()):
-            if h.GetBinContent(ibin)<0:
-                h.SetBinError(ibin, h.GetBinError(ibin) + abs(h.GetBinContent(ibin)))
-                h.SetBinContent(ibin, 0.)
-        if isfirst:
-            hbkg = h.Clone('total_'+plot+suff)
-            isfirst = False
-        else:
-            hbkg.Add(h)
-        h.SetFillColor(cols[label])
-        hstk.Add(h)
-        if iplot==0:
-            leg.AddEntry(h, label, 'F')
+for plot in getPlotNames():
+  suff='prompt'+plot.split('_prompt')[-1]
+  for i, plotSetting in enumerate(plots):
+    if plotSetting in plot: 
+      iplot=i
+      break
+  else:
+    iplot=-1
 
-      hdata = getPlot(args.year + '_new/' + dataname+'/*.root', plot+suff)
-      hdata.SetMarkerStyle(20)
-      hdata.SetMarkerSize(0.8)
-      #hdata.Sumw2()
-      hdata.Rebin(rebin[iplot%nplot])
+  hstk = ROOT.THStack(plot, '')
+  hbkg = None 
+  leg = ROOT.TLegend(0.75, 0.50, 0.95, 0.90)
+  leg.SetBorderSize(0)
+  leg.SetLineWidth(0)
+  leg.SetLineColor(0)
+  leg.SetFillStyle(0)
+  leg.SetFillColor(0)
 
-      c = ROOT.TCanvas('c_'+plot+suff, 'c_'+plot+suff, 600, 700)
-      p1 = ROOT.TPad('p1', 'p1', 0., 0., 1., 0.25)
-      p2 = ROOT.TPad('p2', 'p2', 0., 0.25, 1., 1.)
-      p1.SetBottomMargin(0.34)
-      p1.SetTopMargin(0.02)
-      p2.SetBottomMargin(0.01)
-      c.Draw()
-      p1.Draw()
-      p1.SetLogx(log_x[iplot%nplot])
-      p2.Draw()
-      p2.cd()
-      p2.SetLogx(log_x[iplot%nplot])
-      p2.SetLogy(log_y[iplot%nplot])
-      hstk.Draw('hist')
-      hbkg.SetFillColor(ROOT.kBlack)
-      hbkg.SetFillStyle(3003)
-      #hbkg.SetMarkerStyle(20)
-      hbkg.Draw('e2same')
-      #hstk.GetXaxis().SetLimits(binmn[iplot%nplot], binmx[iplot%nplot])
-      #hdata.GetXaxis().SetLimits(binmn[iplot%nplot], binmx[iplot%nplot])
-      hdata.Draw('e1same')
-      hstk.GetXaxis().SetLimits(binmn[iplot%nplot], binmx[iplot%nplot])
-      hstk.GetYaxis().SetTitle('Events')
-      hstk.GetYaxis().SetTitleOffset(1.20)
-      drawLumi()
-      leg.Draw()
-      hratio = hdata.Clone('ratio_'+plot+suff)
-      hratio.Divide(hbkg)
-      p1.cd()
-      hratio.Draw('e1')
-      p1.SetGridx()
-      p1.SetGridy()
-      ll = ROOT.TLine(binmn[iplot%nplot], 1., binmx[iplot%nplot], 1.)
-      ll.SetLineWidth(2)
-      ll.SetLineStyle(7)
-      ll.SetLineColor(ROOT.kRed)
-      ll.Draw('same')
-      #hratio.GetXaxis().SetLimits(binmn[iplot%nplot], binmx[iplot%nplot])
-      if 'dxy' in plots[iplot%nplot] and 'displMM' in suff:
-          xaxislabel = hratio.GetXaxis().GetTitle()
-          xaxislabel = xaxislabel.replace('e', '#mu')
-          hratio.GetXaxis().SetTitle(xaxislabel)
-      hratio.GetXaxis().SetRangeUser(binmn[iplot%nplot], binmx[iplot%nplot])
-      #hratio.GetXaxis().SetLimits(binmn[iplot%nplot], binmx[iplot%nplot])
-      hratio.GetXaxis().SetTitleSize(0.15)
-      hratio.GetXaxis().SetLabelSize(0.10)
-      hratio.GetYaxis().SetRangeUser(0.401, 1.599)
-      hratio.GetYaxis().SetTitle('Data/MC')
-      hratio.GetYaxis().SetTitleSize(0.14)
-      hratio.GetYaxis().SetTitleOffset(0.50)
-      hratio.GetYaxis().SetLabelSize(0.10)
-      # for i in range(1, 1+hratio.GetNbinsX()):
-      #     print ' - bin '+str(i)+': '+str(hbkg.GetBinContent(i))+' -> '+str(hratio.GetBinContent(i))
+  for label in labels:
+    h = getPlot(args.year + '_new/' +mcnames[label]+'/*.root', plot)
+    if iplot>=0: h.Rebin(rebin[iplot])
+    for ibin in range(1, 1+h.GetNbinsX()):
+      if h.GetBinContent(ibin)<0:
+        h.SetBinError(ibin, h.GetBinError(ibin) + abs(h.GetBinContent(ibin)))
+        h.SetBinContent(ibin, 0.)
+    if hbkg: hbkg.Add(h)
+    else:    hbkg = h.Clone('total_'+plot)
+    h.SetFillColor(cols[label])
+    hstk.Add(h)
+    leg.AddEntry(h, label, 'F')
 
-      #fout.cd()
-      c.SaveAs(outdir + '/' + plot+suff+'.png')
-      c.SaveAs(outdir + '/' + plot+suff+'.root')
-      iplot += 1
+  hdata = getPlot(args.year + '_new/' + dataname+'/*.root', plot)
+  hdata.SetMarkerStyle(20)
+  hdata.SetMarkerSize(0.8)
+  hdata.Rebin(rebin[iplot])
 
+  c = ROOT.TCanvas('c_'+plot, 'c_'+plot, 600, 700)
+  p1 = ROOT.TPad('p1', 'p1', 0., 0., 1., 0.25)
+  p2 = ROOT.TPad('p2', 'p2', 0., 0.25, 1., 1.)
+  p1.SetBottomMargin(0.34)
+  p1.SetTopMargin(0.02)
+  p2.SetBottomMargin(0.01)
+  c.Draw()
+  p1.Draw()
+  if iplot>=0: p1.SetLogx(log_x[iplot])
+  p2.Draw()
+  p2.cd()
+  if iplot>=0: p2.SetLogx(log_x[iplot])
+  if iplot>=0: p2.SetLogy(log_y[iplot])
+  hstk.Draw('hist')
+  hbkg.SetFillColor(ROOT.kBlack)
+  hbkg.SetFillStyle(3003)
+  hbkg.Draw('e2same')
+  hdata.Draw('e1same')
+  hstk.GetXaxis().SetLimits(binmn[iplot], binmx[iplot])
+  hstk.GetYaxis().SetTitle('Events')
+  hstk.GetYaxis().SetTitleOffset(1.20)
+  drawLumi()
+  leg.Draw()
+  hratio = hdata.Clone('ratio_'+plot+suff)
+  hratio.Divide(hbkg)
+  p1.cd()
+  hratio.Draw('e1')
+  p1.SetGridx()
+  p1.SetGridy()
+  ll = ROOT.TLine(binmn[iplot], 1., binmx[iplot], 1.)
+  ll.SetLineWidth(2)
+  ll.SetLineStyle(7)
+  ll.SetLineColor(ROOT.kRed)
+  ll.Draw('same')
+  if 'dxy' in plot and 'displMM' in suff:
+      xaxislabel = hratio.GetXaxis().GetTitle()
+      xaxislabel = xaxislabel.replace('e', '#mu')
+      hratio.GetXaxis().SetTitle(xaxislabel)
+  hratio.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
+  hratio.GetXaxis().SetTitleSize(0.15)
+  hratio.GetXaxis().SetLabelSize(0.10)
+  hratio.GetYaxis().SetRangeUser(0.401, 1.599)
+  hratio.GetYaxis().SetTitle('Data/MC')
+  hratio.GetYaxis().SetTitleSize(0.14)
+  hratio.GetYaxis().SetTitleOffset(0.50)
+  hratio.GetYaxis().SetLabelSize(0.10)
+
+  zwindow = 'onz' if 'onz' in plot else 'allz'
+  plotDir = os.path.join(outdir, zwindow, suff)
+  copyIndexPHP(plotDir + '/', outdir)
+  c.SaveAs(os.path.join(plotDir, plot+'.png'))
+  c.SaveAs(os.path.join(plotDir, plot+'.pdf'))
+  c.SaveAs(os.path.join(plotDir, plot+'.root'))

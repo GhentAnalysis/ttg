@@ -40,12 +40,12 @@ def getObjFromFile(fname, hname):
 #
 # Copy the index.php file to plotting directory and all mother directories within the plotDir
 #
-def copyIndexPHP(directory):
+def copyIndexPHP(directory, altPlotDir=None):
   if not os.path.exists(directory): os.makedirs(directory)
   subdirs = directory.split('/')
   for i in range(1, len(subdirs)):
     p = '/'.join(subdirs[:-i])
-    if not plotDir in p: continue
+    if not plotDir in p and not altPlotDir in p: continue
     index_php = os.path.join(p, 'index.php')
     if os.path.exists(index_php): continue
     shutil.copyfile(os.path.expandvars('$CMSSW_BASE/src/ttg/tools/php/index.php'), index_php)
