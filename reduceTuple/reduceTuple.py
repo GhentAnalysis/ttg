@@ -21,6 +21,7 @@ argParser.add_argument('--debug',     action='store_true', default=False,       
 argParser.add_argument('--dryRun',    action='store_true', default=False,                help='do not launch subjobs, only show them')
 argParser.add_argument('--isChild',   action='store_true', default=False,                help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--overwrite', action='store_true', default=False,                help='overwrite if valid output file already exists')
+argParser.add_argument('--recTops',   action='store_true', default=False,                help='reconstruct tops, save top and neutrino kinematics')
 args = argParser.parse_args()
 
 
@@ -120,6 +121,9 @@ newBranches += ['njets/I', 'j1/I', 'j2/I', 'ndbjets/I', 'dbj1/I', 'dbj2/I']
 newBranches += ['l1/I', 'l2/I', 'looseLeptonVeto/O', 'l1_pt/F', 'l2_pt/F']
 newBranches += ['mll/F', 'mllg/F', 'ml1g/F', 'ml2g/F', 'phL1DeltaR/F', 'phL2DeltaR/F', 'l1JetDeltaR/F', 'l2JetDeltaR/F', 'jjDeltaR/F']
 newBranches += ['isEE/O', 'isMuMu/O', 'isEMu/O']
+if args.recTops:
+  newBranches = ['top1Pt/F', 'top1Eta/F', 'top2Pt/F', 'top2Eta/F', 'nu1Pt/F', 'nu1Eta/F', 'nu2Pt/F', 'nu2Eta/F', 'topsReconst/O', 'liHo/F']
+
 
 if not sample.isData:
   newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeight/F']
@@ -151,7 +155,7 @@ for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
 #
 # Get function calls to object selections and set selections based on the reducedTuple type
 #
-from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
+from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR, reconstTops, getTopKinFit
 setIDSelection(c, args.type)
 
 
@@ -182,6 +186,9 @@ btagSF           = BtagEfficiency(sample.year, id = leptonID)
 # Loop over the tree, skim, make new vars and add the weights
 # --> for more details about the skims and new variables check the called functions in ttg.reduceTuple.objectSelection
 #
+if args.recTops:
+  kf = getTopKinFit()
+
 log.info('Starting event loop')
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
   if c.GetEntry(i) < 0: 
@@ -268,6 +275,9 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.triggerWeight      = trigWeight
     newVars.triggerWeightUp    = trigWeight+trigErr
     newVars.triggerWeightDown  = trigWeight-trigErr
+
+    if args.recTops:
+      reconstTops(kf, c, newVars)
 
   outputTree.Fill()
 outputTree.AutoSave()

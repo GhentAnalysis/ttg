@@ -52,13 +52,18 @@ class Sample:                                                                   
   def getTotalWeights(self):
     maxVar = None
     for f in self.listOfFiles:
+      fileName = f
       f = ROOT.TFile(f)
-      if not maxVar:
-        maxVar = f.Get('blackJackAndHookers/lheCounter').GetNbinsX()
-        totals = [0 for i in range(maxVar)]
-      for i in range(maxVar):
-        if i == 0: totals[i] += f.Get('blackJackAndHookers/hCounter').GetBinContent(i+1)    # should be no difference, but more precise
-        else:      totals[i] += f.Get('blackJackAndHookers/lheCounter').GetBinContent(i+1)
+      try:
+        if not maxVar:
+          maxVar = f.Get('blackJackAndHookers/lheCounter').GetNbinsX()
+          totals = [0 for i in range(maxVar)]
+        for i in range(maxVar):
+          if i == 0: totals[i] += f.Get('blackJackAndHookers/hCounter').GetBinContent(i+1)    # should be no difference, but more precise
+          else:      totals[i] += f.Get('blackJackAndHookers/lheCounter').GetBinContent(i+1)
+      except:
+        log.warning('problem in getting weights for file, skipping')
+        self.listOfFiles.remove(fileName)
     totals = [(t if t > 0 else totals[0]) for t in totals]
     return totals
 
