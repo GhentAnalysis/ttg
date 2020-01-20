@@ -40,7 +40,7 @@ ROOT.setTDRStyle()
 # Plot name
 plots = ['zmass',  'dxy', 'lmisshits', '3dIP', 'charge', 'dEtaInSeed', 'hovere', 'ooEmoop', 'pt', 'relIso3', 'sigmaIetaIeta', 'eta', 'photonPt']
 rebin = [      4,      1,           1,      1,        1,            1,        1,         1,    1,         1,               1,     1,          1]
-binmn = [     20,   0.01,           0,      0,       -1,         -0.3,        0,         0,    0,         0,               0,     0,          0]
+binmn = [     20,   0.01,           0,      0,       -1,            0,        0,         0,    0,         0,               0,     0,          0]
 binmx = [    200,      6,          10,     10,        1,          0.3,      0.1,      0.14,  100,      0.16,           0.018,   2.5,        100]
 log_x = [      0,      1,           0,      0,        0,            0,        0,         0,    0,         0,               0,     0,          0]
 log_y = [      0,      1,           1,      1,        0,            0,        0,         1,    1,         1,               1,     0,          0]
@@ -177,7 +177,7 @@ for plot in getPlotNames():
       iplot=i
       break
   else:
-    iplot=-1
+    print 'No settings found for plot %s' %s
 
   hstk = ROOT.THStack(plot, '')
   hbkg = None 
@@ -190,7 +190,7 @@ for plot in getPlotNames():
 
   for label in labels:
     h = getPlot(args.year + '_new/' +mcnames[label]+'/*.root', plot)
-    if iplot>=0: h.Rebin(rebin[iplot])
+    h.Rebin(rebin[iplot])
     for ibin in range(1, 1+h.GetNbinsX()):
       if h.GetBinContent(ibin)<0:
         h.SetBinError(ibin, h.GetBinError(ibin) + abs(h.GetBinContent(ibin)))
@@ -214,17 +214,17 @@ for plot in getPlotNames():
   p2.SetBottomMargin(0.01)
   c.Draw()
   p1.Draw()
-  if iplot>=0: p1.SetLogx(log_x[iplot])
+  p1.SetLogx(log_x[iplot])
   p2.Draw()
   p2.cd()
-  if iplot>=0: p2.SetLogx(log_x[iplot])
-  if iplot>=0: p2.SetLogy(log_y[iplot])
+  p2.SetLogx(log_x[iplot])
+  p2.SetLogy(log_y[iplot])
+  hbkg.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
   hstk.Draw('hist')
   hbkg.SetFillColor(ROOT.kBlack)
   hbkg.SetFillStyle(3003)
   hbkg.Draw('e2same')
   hdata.Draw('e1same')
-  hstk.GetXaxis().SetLimits(binmn[iplot], binmx[iplot])
   hstk.GetYaxis().SetTitle('Events')
   hstk.GetYaxis().SetTitleOffset(1.20)
   drawLumi()
