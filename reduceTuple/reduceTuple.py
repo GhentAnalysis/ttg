@@ -122,7 +122,7 @@ newBranches += ['l1/I', 'l2/I', 'looseLeptonVeto/O', 'l1_pt/F', 'l2_pt/F']
 newBranches += ['mll/F', 'mllg/F', 'ml1g/F', 'ml2g/F', 'phL1DeltaR/F', 'phL2DeltaR/F', 'l1JetDeltaR/F', 'l2JetDeltaR/F', 'jjDeltaR/F']
 newBranches += ['isEE/O', 'isMuMu/O', 'isEMu/O']
 if args.recTops:
-  newBranches = ['top1Pt/F', 'top1Eta/F', 'top2Pt/F', 'top2Eta/F', 'nu1Pt/F', 'nu1Eta/F', 'nu2Pt/F', 'nu2Eta/F', 'topsReconst/O', 'liHo/F']
+  newBranches += ['top1Pt/F', 'top1Eta/F', 'top2Pt/F', 'top2Eta/F', 'nu1Pt/F', 'nu1Eta/F', 'nu2Pt/F', 'nu2Eta/F', 'topsReconst/O', 'liHo/F']
 
 
 if not sample.isData:
