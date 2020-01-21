@@ -223,9 +223,9 @@ for promptflav in promptflavs:
       for type in ['3', '']:
         addHist('dxy'+type+onz+suff, '|#it{d}_{xy}(lep)| [cm]', bins=dxybins)
         addHist('dz'+type+onz+suff, '|#it{d}_{z}(lep)| [cm]', bins=dxybins)
-        addHist('pt'+type+onz+suff, '#pt(lep) [GeV]', nbins=40, minX=0, maxX=100)
+        addHist('pt'+type+onz+suff, 'p_{t}(lep) [GeV]', nbins=40, minX=0, maxX=100)
         addHist('eta'+type+onz+suff, '|#eta(lep)|', nbins=25, minX=0, maxX=2.5)
-        addHist('photonPt'+type+onz+suff, '#pt(#gamma [GeV]', nbins=25, minX=0, maxX=100)
+        addHist('photonPt'+type+onz+suff, 'p_{t}(#gamma) [GeV]', nbins=25, minX=0, maxX=100)
         addHist('3dIP'+type+onz+suff, '3dIP(lep)', nbins=20, minX=0, maxX=10)
         addHist('3dIPSig'+type+onz+suff, '3dIPSig(lep)', nbins=20, minX=0, maxX=10)
         addHist('relIso'+type+onz+suff, 'relIso(lep)', nbins=16, minX=0, maxX=0.16)
@@ -353,7 +353,6 @@ for iEvent in progressbar(getEventRange(tree.GetEntries(), getTotalJobs(filename
       hists['dz'+suffixes].Fill(abs(tree._dz[index]), scl)
       hists['3dIP'+suffixes].Fill(abs(tree._3dIP[index]), scl)
       hists['3dIPSig'+suffixes].Fill(abs(tree._3dIPSig[index]), scl)
-      hists['charge'+suffixes].Fill(tree._lCharge[index], scl)
       hists['relIso'+suffixes].Fill(tree._relIso[index], scl)
       if 'displEE' in suffix: 
         hists['lmisshits'+suffixes].Fill(tree._lElectronMissingHits[index], scl)

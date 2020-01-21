@@ -198,10 +198,12 @@ for plot in getPlotNames():
     if hbkg: hbkg.Add(h)
     else:    hbkg = h.Clone('total_'+plot)
     h.SetFillColor(cols[label])
+    h.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
     hstk.Add(h)
     leg.AddEntry(h, label, 'F')
 
   hdata = getPlot(args.year + '_new/' + dataname+'/*.root', plot)
+  hdata.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
   hdata.SetMarkerStyle(20)
   hdata.SetMarkerSize(0.8)
   hdata.Rebin(rebin[iplot])
@@ -220,7 +222,9 @@ for plot in getPlotNames():
   p2.SetLogx(log_x[iplot])
   p2.SetLogy(log_y[iplot])
   hbkg.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
+  hdata.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
   hstk.Draw('hist')
+  hstk.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
   hbkg.SetFillColor(ROOT.kBlack)
   hbkg.SetFillStyle(3003)
   hbkg.Draw('e2same')
@@ -252,6 +256,8 @@ for plot in getPlotNames():
   hratio.GetYaxis().SetTitleSize(0.14)
   hratio.GetYaxis().SetTitleOffset(0.50)
   hratio.GetYaxis().SetLabelSize(0.10)
+  if 'pt' in plot.split('_')[0]: hratio.GetXaxis().SetTitle('p_{t}(lep) [GeV]') # temporary, fixed in next run of analyzeZtoLLLLmass.py
+  if 'Pt' in plot.split('_')[0]: hratio.GetXaxis().SetTitle('p_{t}(#gamma) [GeV]')
 
   zwindow = 'onz' if 'onz' in plot else 'allz'
   plotDir = os.path.join(outdir, zwindow, suff)
