@@ -229,6 +229,7 @@ for promptflav in promptflavs:
         addHist('3dIP'+type+onz+suff, '3dIP(lep)', nbins=20, minX=0, maxX=10)
         addHist('3dIPSig'+type+onz+suff, '3dIPSig(lep)', nbins=20, minX=0, maxX=10)
         addHist('relIso'+type+onz+suff, 'relIso(lep)', nbins=16, minX=0, maxX=0.16)
+        addHist('closestDeltaR'+type+onz+suff, '#DeltaR(lep,other)', nbins=50, minX=0, maxX=5)
         if 'displEE' in suff:
           addHist('lmisshits'+type+onz+suff,  'Inner missing hits', nbins=10, minX=0., maxX=10.)
           addHist('hovere'+type+onz+suff,  'H/E', nbins=100, minX=0., maxX=0.1)
@@ -344,6 +345,8 @@ for iEvent in progressbar(getEventRange(tree.GetEntries(), getTotalJobs(filename
       photonPt = max([getExternalPhotonPt(tree, i) for i in looseIndices + tightIndices])
       if photonPt < (10 if args.year=='2016' else 15): continue
 
+    def closestDeltaR(index):
+      return min([deltaR(tree, index, i) for i in tightIndices])
 
     def fillVariables(suffixes, index):
       hists['photonPt'+suffixes].Fill(getExternalPhotonPt(tree, index), scl)
@@ -354,6 +357,7 @@ for iEvent in progressbar(getEventRange(tree.GetEntries(), getTotalJobs(filename
       hists['3dIP'+suffixes].Fill(abs(tree._3dIP[index]), scl)
       hists['3dIPSig'+suffixes].Fill(abs(tree._3dIPSig[index]), scl)
       hists['relIso'+suffixes].Fill(tree._relIso[index], scl)
+      hists['closestDeltaR'+suffixes].Fill(closestDeltaR(index), scl)
       if 'displEE' in suffix: 
         hists['lmisshits'+suffixes].Fill(tree._lElectronMissingHits[index], scl)
         hists['hovere'+suffixes].Fill(tree._lElehadronicOverEm[index], scl)

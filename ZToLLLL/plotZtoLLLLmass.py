@@ -38,12 +38,12 @@ ROOT.setTDRStyle()
 
 
 # Plot name
-plots = ['zmass',  'dxy', 'lmisshits', '3dIP', 'charge', 'dEtaInSeed', 'hovere', 'ooEmoop', 'pt', 'relIso3', 'sigmaIetaIeta', 'eta', 'photonPt']
-rebin = [      4,      1,           1,      1,        1,            1,        1,         1,    1,         1,               1,     1,          1]
-binmn = [     20,   0.01,           0,      0,       -1,            0,        0,         0,    0,         0,               0,     0,          0]
-binmx = [    200,      6,          10,     10,        1,          0.3,      0.1,      0.14,  100,      0.16,           0.018,   2.5,        100]
-log_x = [      0,      1,           0,      0,        0,            0,        0,         0,    0,         0,               0,     0,          0]
-log_y = [      0,      1,           1,      1,        0,            0,        0,         1,    1,         1,               1,     0,          0]
+plots = ['zmass',  'dxy', 'lmisshits', '3dIP', 'charge', 'dEtaInSeed', 'hovere', 'ooEmoop', 'pt', 'relIso3', 'eta', 'sigmaIetaIeta', 'photonPt', 'deltaR']
+rebin = [      4,      1,           1,      1,        1,            1,        1,         1,    1,         1,     1,               1,          1,        1]
+binmn = [     20,   0.01,           0,      0,       -1,            0,        0,         0,    0,         0,     0,               0,          0,        0]
+binmx = [    200,      6,          10,     10,        1,          0.3,      0.1,      0.14,  100,      0.16,   2.5,           0.018,        100,        5]
+log_x = [      0,      1,           0,      0,        0,            0,        0,         0,    0,         0,     0,               0,          0,        0]
+log_y = [      0,      1,           1,      1,        0,            0,        0,         1,    1,         1,     0,               1,          0,        0]
 
 nplot = len(plots)
 
