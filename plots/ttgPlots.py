@@ -376,13 +376,17 @@ for year in years:
             if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
           if not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
 
-        if not (selectPhoton and c._phPtCorr[c.ph] > 20): c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
+        if not (selectPhoton and c._phPtCorr[c.ph] > 20): 
+          c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
+          c.PVWeight  = 1.
         
         prefireWeight = 1. if c.year == '2018' or sample.isData else c._prefireWeight
 
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight
+        # NOTE TODO switch to weight including PVWeight when new samples arrive (line below)
+        # else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight
         
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]

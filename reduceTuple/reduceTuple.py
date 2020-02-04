@@ -126,7 +126,7 @@ if args.recTops:
 
 
 if not sample.isData:
-  newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeight/F']
+  newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeight/F', 'PVWeight/F']
   newBranches += ['genPhDeltaR/F', 'genPhPassParentage/O', 'genPhMinDeltaR/F', 'genPhRelPt/F', 'genPhPt/F', 'genPhEta/F']
   if not forSys:
     for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:
@@ -134,7 +134,7 @@ if not sample.isData:
       newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-    for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F']
+    for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
     for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -171,6 +171,7 @@ from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
 from ttg.reduceTuple.leptonSF_MVA import LeptonSF_MVA as LeptonSF_MVA
 from ttg.reduceTuple.photonSF import PhotonSF as PhotonSF
+from ttg.reduceTuple.pixelVetoSF import pixelVetoSF as pixelVetoSF
 from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
@@ -179,6 +180,7 @@ leptonID = 'MVA' if args.type.lower().count('leptonmva') else 'POG'
 
 leptonSF         = LeptonSF_MVA(sample.year) if leptonID=='MVA' else LeptonSF(sample.year)
 photonSF         = PhotonSF(sample.year, "MVA" if (args.type.lower().count("photonmva") or args.type.lower().count("phomvasb")) else "CB")
+pixelVetoSF      = pixelVetoSF(sample.year)
 triggerEff       = TriggerEfficiency(sample.year, id = leptonID) 
 btagSF           = BtagEfficiency(sample.year, id = leptonID)
 
@@ -266,6 +268,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.phWeight     = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
     newVars.phWeightUp   = photonSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
     newVars.phWeightDown = photonSF.getSF(c, newVars.ph, sigma=-1) if len(c.photons) > 0 else 1
+
+    newVars.PVWeight     = pixelVetoSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
+    newVars.PVWeightUp   = pixelVetoSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
+    newVars.PVWeightDown = pixelVetoSF.getSF(c, newVars.ph, sigma=-1) if len(c.photons) > 0 else 1
 
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:

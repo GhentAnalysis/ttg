@@ -4,7 +4,7 @@ from math import sqrt, atan, pi, tan
 from math import log as logar
 import ROOT
 import os
-from ttg.TopKinFit.kfit import *
+
 log = getLogger()
 
 #
@@ -248,6 +248,7 @@ def getEta(pt, pz):
 
 
 def getTopKinFit():
+  from ttg.TopKinFit.kfit import *
   kf = kfit()
   kf.Init(TOPTOPLEPLEP)
   # fitterDir  = "$CMSSW_BASE/src/ttg/TopKinFit/python/test/GenAnalysis/TopTopLepLep/pdf.root"
