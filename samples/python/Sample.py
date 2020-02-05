@@ -100,9 +100,7 @@ class Sample:                                                                   
       self.listOfFiles = self.getListOfFiles(splitData)
     if shortDebug: self.listOfFiles = self.listOfFiles[:3]
     if not len(self.listOfFiles): log.error('No tuples to run over for ' + self.name)
-    for i in self.listOfFiles:
-      if i.count('pnfs'): path = 'dcap://maite.iihe.ac.be/' + i                         # Speed up read from pnfs
-      else:               path = i
+    for path in self.listOfFiles:
       log.debug("Adding " + path)
       self.chain.Add(path)
     return self.chain
