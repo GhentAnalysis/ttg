@@ -5,7 +5,7 @@ import os
 #
 # Runs pylint on the whole ttg package, but exclude dirs and files which are from external sources
 #
-skipDirs  = ['documents', 'log', '.git', 'virenv', 'utils']
+skipDirs  = ['documents', 'log', '.git', 'virenv', 'utils','TopKinFit']
 skipFiles = ['__init__.py', 'diffNuisances.py']
 
 pyFiles = []

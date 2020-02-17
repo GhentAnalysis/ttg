@@ -38,7 +38,6 @@ class pixelVetoSF:
       sf  = self.vetoHist.GetBinContent(self.vetoHist.GetXaxis().FindBin(pt), self.vetoHist.GetYaxis().FindBin(eta))
       err  = self.errs.GetBinContent(self.vetoHist.GetXaxis().FindBin(pt), self.vetoHist.GetYaxis().FindBin(eta))
     else: 
-      log.warning('invalid year')
       return 1
     sf = UncFloat(sf, err)
     return (1+sf.sigma*sigma)*sf.val

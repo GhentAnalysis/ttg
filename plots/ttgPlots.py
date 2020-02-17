@@ -254,7 +254,7 @@ def makePlotList():
       plotList.append(Plot('jClPhoPtDiff',                 'p_{T}(j_{1}) (GeV)',                lambda c : abs(c._jetSmearedPt[c.jCl] - c.ph_pt),              (30, 30, 330)))
       plotList.append(Plot('jClPhoPtDiffRel',              'jcl pt - ph pt/ ph pt',             lambda c : abs(c._jetSmearedPt[c.jCl] - c.ph_pt)/c.ph_pt ,     (20, 0., 4.)))
     if args.extraPlots.lower().count('raw'):
-      plotList.append(Plot('phRawJetEDiffRel',             'E photon - closest raw jet/ photon',lambda c : abs(c._phE[c.ph] - c._jetE[closestRawJet(c)])/c._phE[c.ph], (20, 0., 4.)))
+      plotList.append(Plot('phRawJetEDiffRel',             'E photon - closest raw jet/ photon', lambda c : abs(c._phE[c.ph] - c._jetE[closestRawJet(c)])/c._phE[c.ph], (20, 0., 4.)))
       plotList.append(Plot('rawLep1JetDeltaR',           'raw #DeltaR(#l1, j)',                    lambda c : rawLep1JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
       plotList.append(Plot('rawLep2JetDeltaR',           'raw #DeltaR(#l2, j)',                    lambda c : rawLep2JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
       plotList.append(Plot('rawLepJetDeltaR',            'raw #DeltaR(#l, j)',                     lambda c : rawLepJetDeltaR(c),                                (50, 0, 0.5), overflowBin=None))
