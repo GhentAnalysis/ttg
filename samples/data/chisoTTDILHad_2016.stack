@@ -1,0 +1,7 @@
+-- MCfail
+TT_Dil                All_(hadronicPhoton,chgIso_fail)             errorStyle    kRed
++TT_Dil_Alt
+
+-- MCpass
+TT_Dil                All_(hadronicPhoton,chgIso_pass)             errorStyle    kBlue
++TT_Dil_Alt

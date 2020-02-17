@@ -1,0 +1,8 @@
+-- Fake
+TT_Dil                All_(hadronicFake)             lineStyle    kBlue
+-- hadronicFake
+TT_Dil                All_(hadronicPhoton)           lineStyle    kRed
+-- Mag
+TT_Dil                All_(magicPhoton)              lineStyle    kGreen
+-- Genuine
+TT_Dil                All_(genuine)                  lineStyle    kOrange

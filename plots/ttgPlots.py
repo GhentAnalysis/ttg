@@ -8,6 +8,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018', 'all', 'comb'])
 argParser.add_argument('--selection',      action='store',      default=None)
+argParser.add_argument('--extraPlots',      action='store',     default=None)
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='phoCBfull')
 argParser.add_argument('--sys',            action='store',      default=None)
@@ -82,7 +83,7 @@ phoCBfull   = args.tag.count('phoCBfull')
 forward     = args.tag.count('forward')
 prefire     = args.tag.count('prefireCheck')
 noWeight    = args.tag.count('noWeight')
-normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay', 'compareWithTT', 'compareTTSys', 'compareTTGammaSys', 'normalize'])
+normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay', 'compareWithTT', 'compareTTSys', 'compareTTGammaSys', 'normalize', 'IsoRegTTDil', 'IsoFPTTDil'])
 
 selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
@@ -105,7 +106,6 @@ if args.year == 'all':
 
 tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['2016', '2017', '2018', 'comb']}
 
-#FIXME maybe check somewhere that all 3 tuples contain the same samples (or mitigate by separate stack files or some year-specifier within the stack)
 # when running over all years, just initialise the plots with the stack for 16
 stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.year == 'all' else args.year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + ('2016' if args.year == 'all' else args.year) + '.stack'),
@@ -128,7 +128,6 @@ def makePlotList():
   if args.tag.count('randomConeCheck'):
     plotList.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20, 0, 20)))
     plotList.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80, 0, 20)))
-    plotList.append(Plot('photon_chargedIso_tiny',     'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (50, 0, 5)))
     plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPtCorr[c.ph], (20, 0, 2)))
   else:
     plotList.append(Plot('yield',                      'yield',                                 lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
@@ -140,7 +139,7 @@ def makePlotList():
     plotList.append(Plot('photon_eta',                 '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                (15, 0, 2.5)))
     plotList.append(Plot('photon_eta_large',           '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
     plotList.append(Plot('photon_phi',                 '#phi(#gamma)',                          lambda c : c._phPhi[c.ph],                                     (10, -pi, pi)))
-    plotList.append(Plot('photon_mva',                 '#gamma-MVA',                            lambda c : c._phMva[c.ph],                                     (20, -1, 1)))
+    plotList.append(Plot('photon_mva_S16v1',           '#gamma-MVA S16v1',                      lambda c : c._phMvaS16v1[c.ph],                                (20, -1, 1)))
     plotList.append(Plot('photon_chargedIso_FP',       'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     plotList.append(Plot('photon_chargedIso_FP_new',   'Photon charged-hadron Iso cut (GeV)',   lambda c : chgIsoCat(c),                                       [0, 1 , 2], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), histModifications=xAxisLabels(['fail', 'pass']) ))    
     plotList.append(Plot('photon_chargedIso',          'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
@@ -155,13 +154,15 @@ def makePlotList():
     plotList.append(Plot('photon_chargedIso_bins2_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     plotList.append(Plot('photon_chargedIso_bins3',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1, 21), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     plotList.append(Plot('photon_chargedIso_bins3_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 0.1] + range(1, 21), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    plotList.append(Plot('photon_chargedIso_tiny',     'chargedIso(#gamma) (GeV)',              lambda c : c._phChargedIsolation[c.ph],                        (50, 0, 5)))
+    plotList.append(Plot('photon_chargedIso_tiny_NO',  'chargedIso(#gamma) (GeV)',              lambda c : c._phChargedIsolation[c.ph],                        (50, 0, 5), overflowBin = None))
     plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phChargedIsolation[c.ph]/c.ph_pt,                (20, 0, 2)))
     plotList.append(Plot('photon_neutralIso',          'neutralIso(#gamma) (GeV)',              lambda c : c._phNeutralHadronIsolation[c.ph],                  (25, 0, 5)))
     plotList.append(Plot('photon_photonIso',           'photonIso(#gamma) (GeV)',               lambda c : c._phPhotonIsolation[c.ph],                         (32, 0, 8)))
     plotList.append(Plot('photon_SigmaIetaIeta',       '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (20, 0, 0.04)))
     plotList.append(Plot('photon_SigmaIetaIeta_small', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
-    plotList.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',                lambda c : c._phHadronicOverEm[c.ph],                          (20, 0, .025)))
-    plotList.append(Plot('photon_phHadTowOverEm',      'hadronicTowerOverEm(#gamma)',           lambda c : c._phHadTowOverEm[c.ph],                            (20, 0, .025)))
+    plotList.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',                lambda c : c._phHadronicOverEm[c.ph],                          (100, 0, .025)))
+    plotList.append(Plot('photon_phHadTowOverEm',      'hadronicTowerOverEm(#gamma)',           lambda c : c._phHadTowOverEm[c.ph],                            (100, 0, .025)))
     plotList.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
     plotList.append(Plot('phBJetDeltaR',               '#DeltaR(#gamma, b)',                    lambda c : c.phBJetDeltaR,                                     [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
     plotList.append(Plot('l1_pt',                      'p_{T}(l_{1}) (GeV)',                    lambda c : c.l1_pt,                                            (20, 25, 225)))
@@ -213,9 +214,9 @@ def makePlotList():
     plotList.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',               lambda c : c.genPhPt,                                          (10, 10, 110)))
     plotList.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                    lambda c : abs(c.genPhEta),                                    (15, 0, 2.5), overflowBin=None))
     plotList.append(Plot('genPhoton_minDeltaR',        'min #DeltaR(gen #gamma, other)',        lambda c : c.genPhMinDeltaR,                                   (15, 0, 1.5)))
-    plotList.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, #gamma)',           lambda c : c.genPhDeltaR,                                      (15, 0, 0.3)))
+    plotList.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, #gamma)',           lambda c : c.genPhDeltaR,                                      (30, 0, 0.6)))
     plotList.append(Plot('genPhoton_relPt',            'rel p_{T}',                             lambda c : c.genPhRelPt,                                       (20, -0.2, 0.2)))
-    plotList.append(Plot('photonCategory',             'photonCategory',                        lambda c : photonCategoryNumber(c),                            (4, 0.5, 4.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake'])))
+    plotList.append(Plot('photonCategory',             'photonCategory',                        lambda c : photonCategoryNumber(c),                            (7, 0.5, 7.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake', 'magic', 'unmHad', 'unmFake'])))
     plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
     plotList.append(Plot('phRawJetDeltaR',             'raw #DeltaR(#gamma, j) ',               lambda c : rawJetDeltaR(c),                                    (45, 0, 0.3), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
     plotList.append(Plot('phL1DeltaR_small',           '#DeltaR(#gamma, l_{1})',                lambda c : c.phL1DeltaR,                                       (50, 0, 5)))
@@ -225,17 +226,45 @@ def makePlotList():
     plotList.append(Plot('phBJetDeltaR_small',         '#DeltaR(#gamma, b)',                    lambda c : c.phBJetDeltaR,                                     (50, 0, 5)))
     plotList.append(Plot('l1_jetDeltaR_small',         '#DeltaR(l_{1}, j)',                     lambda c : c.l1JetDeltaR,                                      (50, 0, 5)))
     plotList.append(Plot('l2_jetDeltaR_small',         '#DeltaR(l_{2}, j)',                     lambda c : c.l2JetDeltaR,                                      (50, 0, 5)))
-    # NOTE slow plots used for problem solving below, keep commented out when not needed
-    # plotList.append(Plot('rawLep1JetDeltaR',           'raw #DeltaR(#l1, j)',                    lambda c : rawLep1JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
-    # plotList.append(Plot('rawLep2JetDeltaR',           'raw #DeltaR(#l2, j)',                    lambda c : rawLep2JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
-    # plotList.append(Plot('rawLepJetDeltaR',            'raw #DeltaR(#l, j)',                     lambda c : rawLepJetDeltaR(c),                                (50, 0, 0.5), overflowBin=None))
-    # plotList.append(Plot('genLep1RawJetDeltaR',        'raw #DeltaR(gen l1, j)',                 lambda c : genLep1RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
-    # plotList.append(Plot('genLep2RawJetDeltaR',        'raw #DeltaR(gen l2, j)',                 lambda c : genLep2RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
-    # plotList.append(Plot('genLepRawJetDeltaR',         'raw #DeltaR(gen l, j)',                  lambda c : genLepRawJetDeltaR(c),                             (50, 0, 0.5), overflowBin=None))
-    # plotList.append(Plot('genLepRawJetNearPhDeltaR',   'raw #DeltaR(gen l, j near #gamma)',      lambda c : genLepRawJetNearPhDeltaR(c),                       (50, 0, 0.5), overflowBin=None))
-    # plotList.append(Plot('photon_mom',                 'photon mom particle',                    lambda c : momDictFunc(c),                                    (len(momList)+1, 0, len(momList)+1), histModifications=[xAxisLabels(nameList), customLabelSize(14)]))
-    # plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
-    # plotList.append(Plot('photon_pt_ATLB',             'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 30., 40., 50., 65., 80., 100., 125., 160., 220., 300.]))
+    plotList.append(Plot('rhoCorrCharged',             'Photon charged rho correction (GeV)',   lambda c : c._rhoCorrCharged[c.ph],                            (40, 0, 2), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('rhoCorrNeutral',             'Photon neutral rho correction (GeV)',   lambda c : c._rhoCorrNeutral[c.ph],                            (40, 0, 8), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('rhoCorrPhotons',             'Photon photon  rho correction (GeV)',   lambda c : c._rhoCorrPhotons[c.ph],                            (40, 0, 8), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('puChargedHadronIso',         'Photon puChargedHadronIso (GeV)',       lambda c : c._puChargedHadronIso[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('phoWorstChargedIsolation',   'Photon phoWorstChargedIsolation (GeV)', lambda c : c._phoWorstChargedIsolation[c.ph],                  (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('phRawJetDeltaR_WIDE',             'raw #DeltaR(#gamma, j) ',          lambda c : rawJetDeltaR(c),                                    (15, 0, 0.3), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
+    plotList.append(Plot('photon_neutralOverCharged',  'Photon neutral/charged had. iso.',      lambda c : NoverCha(c),                                        (20, -1, 4)))
+    plotList.append(Plot('photon_chargedOverNeutral',  'Photon charged/neutral had. iso.',      lambda c : ChaOverN(c),                                        (20, -1, 4)))
+    plotList.append(Plot('photon_relNeutralIso',       'neutralIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phNeutralHadronIsolation[c.ph]/c.ph_pt,          (20, 0, 0.2)))
+    plotList.append(Plot('photon_relPhotonIso',        'photonIso(#gamma)/p_{T}(#gamma)',       lambda c : c._phPhotonIsolation[c.ph]/c.ph_pt,                 (20, 0, 0.2)))
+    # extra plots only produced when asked
+    if args.extraPlots.lower().count('cj'):
+      plotList.append(Plot('j1jetNeutralHadronFraction',   'j1jetNeutralHadronFraction',        lambda c : jetNeutralHadronFraction(c, c.j1),                  (20, 0., 1.)))
+      plotList.append(Plot('j1jetChargedHadronFraction',   'j1jetChargedHadronFraction',        lambda c : jetChargedHadronFraction(c, c.j1),                  (20, 0., 1.)))
+      plotList.append(Plot('j1jetNeutralEmFraction',       'j1jetNeutralEmFraction',            lambda c : jetNeutralEmFraction(c, c.j1),                      (20, 0., 1.)))
+      plotList.append(Plot('j1jetChargedEmFraction',       'j1jetChargedEmFraction',            lambda c : jetChargedEmFraction(c, c.j1),                      (20, 0., 1.)))
+      plotList.append(Plot('j1jetHFHadronFraction',        'j1jetHFHadronFraction',             lambda c : jetHFHadronFraction(c, c.j1),                       (20, 0., 1.)))
+      plotList.append(Plot('j1jetHFEmFraction',            'j1jetHFEmFraction',                 lambda c : jetHFEmFraction(c, c.j1),                           (20, 0., 1.)))
+      plotList.append(Plot('jCljetNeutralHadronFraction',  'jCljetNeutralHadronFraction',       lambda c : jetNeutralHadronFraction(c, c.jCl),                 (20, 0., 1.)))
+      plotList.append(Plot('jCljetChargedHadronFraction',  'jCljetChargedHadronFraction',       lambda c : jetChargedHadronFraction(c, c.jCl),                 (20, 0., 1.)))
+      plotList.append(Plot('jCljetNeutralEmFraction',      'jCljetNeutralEmFraction',           lambda c : jetNeutralEmFraction(c, c.jCl),                     (20, 0., 1.)))
+      plotList.append(Plot('jCljetChargedEmFraction',      'jCljetChargedEmFraction',           lambda c : jetChargedEmFraction(c, c.jCl),                     (20, 0., 1.)))
+      plotList.append(Plot('jCljetHFHadronFraction',       'jCljetHFHadronFraction',            lambda c : jetHFHadronFraction(c, c.jCl),                      (20, 0., 1.)))
+      plotList.append(Plot('jCljetHFEmFraction',           'jCljetHFEmFraction',                lambda c : jetHFEmFraction(c, c.jCl),                          (20, 0., 1.)))
+      plotList.append(Plot('jClPt',                        'p_{T}(j_{1}) (GeV)',                lambda c : c._jetSmearedPt[c.jCl],                             (30, 30, 330)))
+      plotList.append(Plot('jClPhoPtDiff',                 'p_{T}(j_{1}) (GeV)',                lambda c : abs(c._jetSmearedPt[c.jCl] - c.ph_pt),              (30, 30, 330)))
+      plotList.append(Plot('jClPhoPtDiffRel',              'jcl pt - ph pt/ ph pt',             lambda c : abs(c._jetSmearedPt[c.jCl] - c.ph_pt)/c.ph_pt ,     (20, 0., 4.)))
+    if args.extraPlots.lower().count('raw'):
+      plotList.append(Plot('phRawJetEDiffRel',             'E photon - closest raw jet/ photon',lambda c : abs(c._phE[c.ph] - c._jetE[closestRawJet(c)])/c._phE[c.ph], (20, 0., 4.)))
+      plotList.append(Plot('rawLep1JetDeltaR',           'raw #DeltaR(#l1, j)',                    lambda c : rawLep1JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
+      plotList.append(Plot('rawLep2JetDeltaR',           'raw #DeltaR(#l2, j)',                    lambda c : rawLep2JetDeltaR(c),                               (50, 0, 1.0), overflowBin=None))
+      plotList.append(Plot('rawLepJetDeltaR',            'raw #DeltaR(#l, j)',                     lambda c : rawLepJetDeltaR(c),                                (50, 0, 0.5), overflowBin=None))
+      plotList.append(Plot('genLep1RawJetDeltaR',        'raw #DeltaR(gen l1, j)',                 lambda c : genLep1RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
+      plotList.append(Plot('genLep2RawJetDeltaR',        'raw #DeltaR(gen l2, j)',                 lambda c : genLep2RawJetDeltaR(c),                            (50, 0, 1.0), overflowBin=None))
+      plotList.append(Plot('genLepRawJetDeltaR',         'raw #DeltaR(gen l, j)',                  lambda c : genLepRawJetDeltaR(c),                             (50, 0, 0.5), overflowBin=None))
+      plotList.append(Plot('genLepRawJetNearPhDeltaR',   'raw #DeltaR(gen l, j near #gamma)',      lambda c : genLepRawJetNearPhDeltaR(c),                       (50, 0, 0.5), overflowBin=None))
+      plotList.append(Plot('photon_mom',                 'photon mom particle',                    lambda c : momDictFunc(c),                                    (len(momList)+1, 0, len(momList)+1), histModifications=[xAxisLabels(nameList), customLabelSize(14)]))
+      plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
+      plotList.append(Plot('photon_pt_ATLB',             'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                           [20., 30., 40., 50., 65., 80., 100., 125., 160., 220., 300.]))
   # pylint: enable=C0301
 
   if args.filterPlot:
@@ -260,9 +289,6 @@ totalPlots = []
 from ttg.tools.style import drawLumi
 
 for year in years:
-  # dumpArrays = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]) , ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph])]
-  dumpArrays = [("_runNb", lambda c : c._runNb) , ("_eventNb", lambda c : c._eventNb), ("_lumiBlock", lambda c : c._lumiBlock)]
-  dumpArrays = [(variable, expression, []) for variable, expression in dumpArrays]
   plots = makePlotList()
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
@@ -296,10 +322,13 @@ for year in years:
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
-  copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdUp', 'erdDown']
+  copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdUp', 'erdDown', 'isrUp', 'isrDown', 'fsrUp', 'fsrDown']
 
   if not args.showSys and not copySyst:
-    if args.tag.count('phoCB'):                                                     reduceType = 'phoCB'
+
+
+    if args.tag.lower().count('clallcb'):                                           reduceType = 'phoCB-clallcb'
+    elif args.tag.lower().count('clsel'):                                           reduceType = 'phoCB-clsel'
     elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
     else:                                                                           reduceType = 'pho'
     if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
@@ -311,7 +340,17 @@ for year in years:
     log.info("using reduceType " + reduceType)
 
     from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
+    dumpArrays = {}
     for sample in sum(stack, []):
+      dumpArray = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]),
+                   ("_phNeutralHadronIsolation", lambda c : c._phNeutralHadronIsolation[c.ph]),
+                   ("_phPhotonIsolation", lambda c : c._phPhotonIsolation[c.ph]),
+                   ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph]),
+                   ('puChargedHadronIso', lambda c : c._puChargedHadronIso[c.ph]),
+                   ('phoWorstChargedIsolation', lambda c : c._phoWorstChargedIsolation[c.ph])]
+      # dumpArray = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]) , ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph])]
+      # dumpArray = [("_runNb", lambda c : c._runNb) , ("_eventNb", lambda c : c._eventNb), ("_lumiBlock", lambda c : c._lumiBlock), ("ph_pt", lambda c : c.ph_pt)]
+      dumpArray = [(variable, expression, []) for variable, expression in dumpArray]
       cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
       cutString = applySysToString(sample.name, args.sys, cutString)
       if args.sys and 'Scale' not in args.sys and sample.isData: continue
@@ -325,7 +364,12 @@ for year in years:
       c.misIdEle          = sample.texName.count('misidentified') or sample.texName.count('misIdEle') or sample.texName.count('nonprompt') or args.tag.count("filterMisIdEle")
       c.hadronicPhoton    = sample.texName.count('nonprompt') or sample.texName.count('hadronic photons') or sample.texName.count('hadronicPhoton') or args.tag.count("filterHadronic")
       c.hadronicFake      = sample.texName.count('nonprompt') or sample.texName.count('hadronic fakes') or sample.texName.count('hadronicFake') or args.tag.count("filterFake")
-      c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine])
+      c.magicPhoton       = sample.texName.count('nonprompt') or sample.texName.count('magic photons') or sample.texName.count('magicPhoton') or args.tag.count("filterMagic")
+      c.mHad              = sample.texName.count('nonprompt') or sample.texName.count('mHad')   or sample.texName.count('mhad')   or args.tag.count("filtermHad")
+      c.mFake             = sample.texName.count('nonprompt') or sample.texName.count('mFake')  or sample.texName.count('mfake')  or args.tag.count("filtermFake")
+      c.unmHad            = sample.texName.count('nonprompt') or sample.texName.count('unmHad')   or sample.texName.count('unmhad')   or args.tag.count("filterUnmHad")
+      c.unmFake           = sample.texName.count('nonprompt') or sample.texName.count('unmFake')  or sample.texName.count('unmfake')  or args.tag.count("filterUnmFake")
+      c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine, c.magicPhoton, c.mHad, c.mFake, c.unmHad, c.unmFake])
       if args.tag.count('failOrSide'):
         c.failOrSide        = True
         c.failSigmaIetaIeta = False
@@ -335,6 +379,8 @@ for year in years:
         c.sigmaIetaIeta2    = False
         c.failChgIso        = False
         c.passChgIso        = True
+        c.lowChgIso         = False
+        c.highChgIso        = False
       else:
         c.failOrSide        = False
         c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail')     or args.tag.count("failSigmaIetaIeta")
@@ -363,7 +409,6 @@ for year in years:
           applySysToTree(sample.name, args.sys, c)
 
         if not passingFunctions(c): continue
-
         if selectPhoton:
           if phoCBfull and not c._phCutBasedMedium[c.ph]:  continue
           if forward and abs(c._phEta[c.ph]) < 1.566:      continue
@@ -390,9 +435,10 @@ for year in years:
         fillPlots(plotsToFill, sample, eventWeight)
 
         if args.dumpArrays:
-          for variable, expression, array in dumpArrays:
-            if sample.isData: array.append((expression(c), 1., eventWeight))
-            else:             array.append((expression(c), c.genWeight, eventWeight))
+          for variable, expression, array in dumpArray:
+            if sample.isData: array.append((expression(c), eventWeight))
+            else:             array.append((expression(c), eventWeight))
+      dumpArrays[sample.name] = {variable: array for variable, expression, array in dumpArray}
 
   if not args.showSys and copySyst:
     copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
@@ -485,6 +531,9 @@ for year in years:
       if args.tag.count('phoReg'):
         extraArgs['ratio']   = None
 
+      if args.tag.count('IsoRegTTDil'):
+        extraArgs['ratio']   = None
+
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
         for logY in [False, True]:
@@ -520,7 +569,6 @@ for year in years:
                     drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')))
                     
   if args.dumpArrays: 
-    dumpArrays = {variable: array for variable, expression, array in dumpArrays}
     dumpArrays["info"] = " ".join(s for s in [args.year, args.selection, args.channel, args.tag, args.sys] if s) 
     with open( os.path.join( os.path.join(plotDir, year, args.tag, args.channel, args.selection), 'dumpedArrays' + (args.sys if args.sys else '') + '.pkl') ,'wb') as f:
       pickle.dump(dumpArrays, f)

@@ -1,0 +1,13 @@
+-- Fake
+DY_M50_LO                DY_(hadronicFake)             lineStyle    kBlue
++DY_M10to50_LO
+-- hadronicFake
+DY_M50_LO                DY_(hadronicPhoton)           lineStyle    kRed
++DY_M10to50_LO
+-- Mag
+DY_M50_LO                DY_(magicPhoton)              lineStyle    kGreen
++DY_M10to50_LO
+-- Genuine
+DY_M50_LO                DY_(genuine)                  lineStyle    kOrange
++DY_M10to50_LO
+

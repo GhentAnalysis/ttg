@@ -25,7 +25,6 @@ def setIDSelection(c, reducedTupleType):
 #
 # Helper functions
 #
-
 def getLorentzVector(pt, eta, phi, e):
   vector = ROOT.TLorentzVector()
   vector.SetPtEtaPhiE(pt, eta, phi, e)
@@ -143,7 +142,7 @@ def photonSelector(tree, index, n, minLeptons):
   if tree._phHasPixelSeed[index] and not tree.noPixelSeedVeto:                  return False
   if not tree._phPassElectronVeto[index]:                                       return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
-    if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.1: return False
+    if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.4: return False
   if tree.phomvasb:             return tree._phMvaF17v2[index] > -0.60
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
   if tree.photonMVA:            return tree._phMvaF17v2[index] > 0.20
@@ -172,7 +171,9 @@ def selectPhotons(t, n, minLeptons, isData):
     n.ph    = t.photons[0]
     n.ph_pt = t._phPtCorr[n.ph]
     if not isData: addGenPhotonInfo(t, n, n.ph)
+  # NOTE point of dispute: exact way to require 1 photon
   return (len(t.photons) == 1 or not t.doPhotonCut)
+  # return ((len(t.photons) > 0 and not n.nphotons > 1) or not t.doPhotonCut)
 
 
 #
@@ -193,12 +194,12 @@ def makeInvariantMasses(t, n):
 # Jets (filter those within 0.4 from lepton or 0.1 from photon)
 #
 def isGoodJet(tree, n, index):
-  if not tree._jetIsTight[index]:             return False
+  if not tree._jetIsTight[index]:        return False
   if not abs(tree._jetEta[index]) < 2.4: return False
-  # NOTE this assumes we're selecting exactly 1 photon. Also this is only for 2016
   if len(tree.photons) > 0:
-    if (tree._phMvaF17v2[n.ph] > 0.20 and (tree.phomvasb or tree.photonMVA)) or (tree._phCutBasedMedium[n.ph] and tree.photonCutBased):
+    if tree.photonCutBased: #selected photon is necessarily CB (but not always CBfull)
       if deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) < 0.1: return False
+  
   for lep in tree.leptons:
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False
   return True

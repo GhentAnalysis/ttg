@@ -11,6 +11,7 @@ special_cuts = {
 
     'onZ':                 'abs(mll-91.1876)<15&&!isEMu',
     'onZnar':              'abs(mll-91.1876)<10&&!isEMu',
+    'onZverynar':          'abs(mll-91.1876)<5&&!isEMu',
     'llgOnZ':              'abs(mllg-91.1876)<15&&!isEMu',
     'orOnZ':               '(abs(mll-91.1876)<15||abs(mllg-91.1876)<15)&&!isEMu',
     'offZ':                'abs(mll-91.1876)>15||isEMu',
@@ -41,7 +42,13 @@ def phMVA(tree, lower, upper):
 def chIso(tree, lower, upper):
   return (lower <= tree._phChargedIsolation[tree.ph] < upper)
 
-continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR, 'genPhMinDeltaR' : 'genPhMinDeltaR', 'phMVA': phMVA, 'chIso':chIso}
+def puChargedHadronIso(tree, lower, upper):
+  return (lower <= tree._puChargedHadronIso[tree.ph] < upper)
+
+def phEta(tree, lower, upper):
+  return (lower <= abs(tree._phEta[tree.ph]) < upper)
+
+continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR, 'genPhMinDeltaR' : 'genPhMinDeltaR', 'phMVA': phMVA, 'chIso':chIso, 'puChargedHadronIso' : puChargedHadronIso, 'photonEta': phEta}
 discrete_variables  = {'njet': 'njets', 'btag': 'nbjets', 'deepbtag': 'ndbjets', 'nphoton': 'nphotons'}
 
 # Need to disable the too many branches function because CMSSW has some ancient pylint release which does not exclude nested functions

@@ -1,0 +1,8 @@
+-- passpass
+TT_Dil                t#bar{t}_(hadronicFake,_chgIso_pass,_#sigma_{i#etai#eta}_pass)            lineStyle     kBlue
+-- passside
+TT_Dil                t#bar{t}_(hadronicFake,_chgIso_pass,_#sigma_{i#etai#eta}_sideband)        lineStyle     kGreen
+-- failpass
+TT_Dil                t#bar{t}_(hadronicFake,_chgIso_fail,_#sigma_{i#etai#eta}_pass)            lineStyle     kRed
+-- failside
+TT_Dil                t#bar{t}_(hadronicFake,_chgIso_fail,_#sigma_{i#etai#eta}_sideband)        lineStyle     kOrange

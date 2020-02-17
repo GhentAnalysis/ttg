@@ -1,0 +1,8 @@
+-- hadpass
+TT_Dil                t#bar{t}_(hadronicPhoton,_#sigma_{i#etai#eta}_pass)           lineStyle     633
+-- hadfail
+TT_Dil                t#bar{t}_(hadronicPhoton,_#sigma_{i#etai#eta}_sideband)       lineStyle     632
+-- fakepass
+TT_Dil                t#bar{t}_(hadronicFake,_#sigma_{i#etai#eta}_pass)             lineStyle     602
+-- fakefail
+TT_Dil                t#bar{t}_(hadronicFake,_#sigma_{i#etai#eta}_sideband)         lineStyle     861

@@ -1,0 +1,4 @@
+-- low
+TT_Dil                All_(hadronicPhoton,lowchgIso)                  lineStyle    kGreen
+-- high
+TT_Dil                All_(hadronicPhoton,highchgIso)                 lineStyle    kRed

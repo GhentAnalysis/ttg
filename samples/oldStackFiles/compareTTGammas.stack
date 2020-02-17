@@ -1,8 +1,0 @@
--- MC TTGamma
-TTGamma                    t#bar{t}#gamma_2->7        lineStyle     kOrange
-+TTGamma_t
-+TTGamma_tbar
-+TTGamma_had
-
--- MC TTGJets
-TTGJets                    t#bar{t}#gamma_2->3        lineStyle     kBlue

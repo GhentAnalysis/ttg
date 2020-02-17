@@ -1,0 +1,6 @@
+-- MC
+TT_Dil                TTDil_(hadronicFake)             fillStyle    600
+TT_Dil                TTDil_(hadronicPhoton)           fillStyle    632
+TT_Dil                TTDil_(magicPhoton)              fillStyle    kGreen
+TT_Dil                TTDil_(unmHad)                   fillStyle    632DARK
+TT_Dil                TTDil_(unmFake)                  fillStyle    600DARK

@@ -1,5 +1,0 @@
--- MC (sigmaIetaIeta pass)
-TTJets_pow               t#bar{t}_(#sigma_{i#etai#eta}_pass)             errorStyle     kBlue         _ttgEventType<3
-
--- MC (sigmaIetaIeta fail)
-TTJets_pow               t#bar{t}_(#sigma_{i#etai#eta}_sideband)         errorStyle     kRed          _ttgEventType<3

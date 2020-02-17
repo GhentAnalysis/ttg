@@ -6,4 +6,5 @@ documents/AN*
 plots/fitPlots
 plots/combine
 **/git.txt
+**/*.pdf
 reduceTuple/data/puReweightingData/pileup_latest.txt

@@ -1,0 +1,4 @@
+-- low
+TT_Dil                All_(magicPhoton,lowchgIso)                  lineStyle    kGreen
+-- high
+TT_Dil                All_(magicPhoton,highchgIso)                 lineStyle    kRed

@@ -7,11 +7,16 @@ def photonCategoryNumber(tree):
 def checkMatch(tree):
   if not tree.checkMatch:                                          return True
   if tree.genuine        and tree._phTTGMatchCategory[tree.ph] == 1: return True
-  if tree.hadronicPhoton and tree._phTTGMatchCategory[tree.ph] == 3: return True
   if tree.misIdEle       and tree._phTTGMatchCategory[tree.ph] == 2: return True
-  if tree.hadronicFake   and tree._phTTGMatchCategory[tree.ph] == 4: return True
+  if tree.hadronicPhoton and tree._phTTGMatchCategory[tree.ph] in (3, 6): return True
+  if tree.hadronicFake   and tree._phTTGMatchCategory[tree.ph] in (4, 7): return True
+  if tree.magicPhoton    and tree._phTTGMatchCategory[tree.ph] == 5: return True
+  if tree.mHad           and tree._phTTGMatchCategory[tree.ph] == 3: return True
+  if tree.mFake          and tree._phTTGMatchCategory[tree.ph] == 4: return True
+  if tree.unmHad         and tree._phTTGMatchCategory[tree.ph] == 6: return True
+  if tree.unmFake        and tree._phTTGMatchCategory[tree.ph] == 7: return True
   return False
-
+  
 def checkSigmaIetaIeta(tree):
   # FIXME since cuts changed slightly, sideband cuts might also have to be changed. Is final elif "relaxed" arbitrary?
   central = abs(tree._phEtaSC[tree.ph]) < 1.479

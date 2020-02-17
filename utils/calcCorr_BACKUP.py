@@ -40,6 +40,8 @@ def calcCorr(c, expressions):  # pylint: disable=R0912
     # if not selectLeptons(c, c, 2):       continue
     # if not selectPhotons(c, c, 2, True): continue
     # if not c._phTTGMatchCategory[c.ph] == 4 or c._phTTGMatchCategory[c.ph] == 2: continue
+    # if not c._phTTGMatchCategory[c.ph] == 1: continue
+    # if not c._phTTGMatchCategory[c.ph] == 3: continue
     if not c._phTTGMatchCategory[c.ph] == 4: continue
     # if c._phPtCorr[c.ph] > 60: continue
     valSums = [(val + expression(c), expression) for val, expression in valSums]

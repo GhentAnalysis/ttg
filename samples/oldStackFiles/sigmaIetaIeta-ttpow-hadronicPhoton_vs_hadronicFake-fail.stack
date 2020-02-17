@@ -1,5 +1,0 @@
--- MC (hadronicFake)
-TTJets_pow               t#bar{t}_(hadronicFake,#sigma_{i#etai#eta}_fail)             errorStyle     kBlue          _ttgEventType<3
-
--- MC (hadronicPhoton)
-TTJets_pow               t#bar{t}_(hadronicPhoton,#sigma_{i#etai#eta}_fail)           errorStyle     kRed           _ttgEventType<3

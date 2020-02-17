@@ -735,7 +735,7 @@ def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
         sourceVarHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, sys, [samp.name+samp.texName])
         destVarHist = applySysToOtherHist(sourceHist, sourceVarHist, hist)
         plots[i].histos[samp] = destVarHist
-      log.info('systematic variation copied for plot ' + plot.name + ' from ' + year)
+      log.info('systematic variation copied for plot ' + plot.name + ' from ' + sourceYear)
     except Exception as e:
       log.debug(e)
       if toRemove: toRemove.append(plot)

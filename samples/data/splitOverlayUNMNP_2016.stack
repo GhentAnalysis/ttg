@@ -1,0 +1,8 @@
+-- Fake
+TT_Dil                TTDil_(hadronicFake)             lineStyle    600
+-- hadronicFake
+TT_Dil                TTDil_(hadronicPhoton)           lineStyle    632
+-- unmhad
+TT_Dil                TTDil_(unmHad)                   lineStyle    632DARK
+-- unmfake
+TT_Dil                TTDil_(unmFake)                  lineStyle    600DARK

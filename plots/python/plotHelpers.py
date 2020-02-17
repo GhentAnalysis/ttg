@@ -79,6 +79,7 @@ momList = [1, 2, 3, 4, 5, 6, 11, 13, 15, 21, 24, 111, 221, 223, 331, 333, 413, 4
 nameList = [momRef[mom] for mom in momList] + ['other']
 momDict = {entry: num for num, entry in enumerate(momList)}
 
+# NOTE WARNING this is wrong, t.ph needs to be replaced by id (in gen list of matched photon)
 def momDictFunc(t):
   try: momId = abs(t._gen_phMomPdg[t.ph])
   except: momId = -1
@@ -91,3 +92,39 @@ def closestRawJet(tree):
 
 def rawJetDeltaR(tree):
   return min(deltaR(tree._jetEta[j], tree._phEta[tree.ph], tree._jetPhi[j], tree._phPhi[tree.ph]) for j in range(tree._nJets))
+
+def jetNeutralHadronFraction(c, ind):
+  if ind < 0: return -9999.
+  else: return c._jetNeutralHadronFraction[ind]
+
+def jetChargedHadronFraction(c, ind):
+  if ind < 0: return -9999.
+  else: return c._jetChargedHadronFraction[ind]
+
+def jetNeutralEmFraction(c, ind):
+  if ind < 0: return -9999.
+  else: return c._jetNeutralEmFraction[ind]
+
+def jetChargedEmFraction(c, ind):
+  if ind < 0: return -9999.
+  else: return c._jetChargedEmFraction[ind]
+
+def jetHFHadronFraction(c, ind):
+  if ind < 0: return -9999.
+  else: return c._jetHFHadronFraction[ind]
+
+def jetHFEmFraction(c, ind):
+  if ind < 0: return -9999.
+  else: return c._jetHFEmFraction[ind]
+
+def NoverCha(c):
+  if c._phChargedIsolation[c.ph] > 0:
+    return c._phNeutralHadronIsolation[c.ph]/c._phChargedIsolation[c.ph]
+  else:
+    return -0.9
+
+def ChaOverN(c):
+  if c._phNeutralHadronIsolation[c.ph] > 0:
+    return c._phChargedIsolation[c.ph]/c._phNeutralHadronIsolation[c.ph]
+  else:
+    return -0.9
