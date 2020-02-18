@@ -8,7 +8,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',      nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--year',           action='store',      default=None,        help='year for which to plot, of not specified run for all 3', choices=['2016', '2017', '2018', 'all', 'comb'])
 argParser.add_argument('--selection',      action='store',      default=None)
-argParser.add_argument('--extraPlots',      action='store',     default=None)
+argParser.add_argument('--extraPlots',     action='store',      default='')
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='phoCBfull')
 argParser.add_argument('--sys',            action='store',      default=None)
@@ -236,6 +236,7 @@ def makePlotList():
     plotList.append(Plot('photon_chargedOverNeutral',  'Photon charged/neutral had. iso.',      lambda c : ChaOverN(c),                                        (20, -1, 4)))
     plotList.append(Plot('photon_relNeutralIso',       'neutralIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phNeutralHadronIsolation[c.ph]/c.ph_pt,          (20, 0, 0.2)))
     plotList.append(Plot('photon_relPhotonIso',        'photonIso(#gamma)/p_{T}(#gamma)',       lambda c : c._phPhotonIsolation[c.ph]/c.ph_pt,                 (20, 0, 0.2)))
+    plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 100., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), (20, 0, 0.2)))
     # extra plots only produced when asked
     if args.extraPlots.lower().count('cj'):
       plotList.append(Plot('j1jetNeutralHadronFraction',   'j1jetNeutralHadronFraction',        lambda c : jetNeutralHadronFraction(c, c.j1),                  (20, 0., 1.)))
@@ -327,8 +328,8 @@ for year in years:
   if not args.showSys and not copySyst:
 
 
-    if args.tag.lower().count('clallcb'):                                           reduceType = 'phoCB-clallcb'
-    elif args.tag.lower().count('clsel'):                                           reduceType = 'phoCB-clsel'
+    if args.tag.lower().count('phocb'):                                           reduceType = 'phoCBFeb'
+    # elif args.tag.lower().count('clsel'):                                           reduceType = 'phoCB-clsel'
     elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
     else:                                                                           reduceType = 'pho'
     if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
@@ -427,6 +428,8 @@ for year in years:
         
         prefireWeight = 1. if c.year == '2018' or sample.isData else c._prefireWeight
 
+        # reWeight = npWeight.getWeight(c) if args.reWeight else 1.
+
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight
@@ -470,10 +473,9 @@ for year in years:
   #
   noWarnings = True
   for plot in plots: # 1D plots
-    if isinstance(plot, Plot2D): continue
-
+    plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
     if not args.showSys:
-      plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
+      if isinstance(plot, Plot2D): continue
       if not plot.blindRange == None and not year == '2016':
         for sample, histo in plot.histos.iteritems():
           if sample.isData:
@@ -595,10 +597,9 @@ lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018']
 
 noWarnings = True
 for plot in totalPlots: # 1D plots
-  if isinstance(plot, Plot2D): continue
   if not args.showSys:
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
-
+    if isinstance(plot, Plot2D): continue
     if not plot.blindRange == None:
       for sample, histo in plot.histos.iteritems():
         if sample.isData:

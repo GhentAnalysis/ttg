@@ -2,9 +2,11 @@ from ttg.tools.logger import getLogger
 log = getLogger()
 
 import ROOT, os, numpy
+import cPickle as pickle
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, addHist
 from ttg.plots.plot import Plot
 from ttg.samples.Sample import getSampleFromStack
+from ttg.tools.lock import lock
 
 #
 # Plot class for 2D
@@ -52,6 +54,21 @@ class Plot2D(Plot):
   def getYields(self, binX=None, binY=None):
     if binX and binY: return {s.name : h.GetBinContent(binX, binY) for s, h in self.histos.iteritems()}
     else:             return {s.name : h.Integral()                for s, h in self.histos.iteritems()}
+
+  def saveToCache(self, dir, sys):
+    try:    os.makedirs(os.path.join(dir))
+    except: pass
+
+    resultFile = os.path.join(dir, self.name + '.pkl')
+    histos     = {s.nameNoSys+s.texName: h for s, h in self.histos.iteritems()}
+    plotName   = self.name+(sys if sys else '')
+    try:
+      with lock(resultFile, 'rb', keepLock=True) as f: allPlots = pickle.load(f)
+      allPlots.update({plotName : histos})
+    except:
+      allPlots = {plotName : histos}
+    with lock(resultFile, 'wb', existingLock=True) as f: pickle.dump(allPlots, f)
+    log.info("Plot " + plotName + " saved to cache")
 
 
   #
