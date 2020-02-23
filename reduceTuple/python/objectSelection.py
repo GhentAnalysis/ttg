@@ -173,12 +173,15 @@ def addGenPhotonInfo(t, n, index):
 def selectPhotons(t, n, minLeptons, isData):
   t.photons  = [p for p in range(t._nPh) if photonSelector(t, p, n, minLeptons)]
   n.nphotons = sum([t._phCutBasedMedium[i] for i in t.photons])
+  # NOTE maybe keep saving this value or just stor bot nloose and ntight?
+  # n.nphotons = len(t.photons)
   if len(t.photons):
     n.ph    = t.photons[0]
     n.ph_pt = t._phPtCorr[n.ph]
     if not isData: addGenPhotonInfo(t, n, n.ph)
   # NOTE point of dispute: exact way to require 1 photon
   return (len(t.photons) == 1 or not t.doPhotonCut)
+  # return len(t.photons) > 0
   # return ((len(t.photons) > 0 and not n.nphotons > 1) or not t.doPhotonCut)
 
 
@@ -202,9 +205,8 @@ def makeInvariantMasses(t, n):
 def isGoodJet(tree, n, index):
   if not tree._jetIsTight[index]:        return False
   if not abs(tree._jetEta[index]) < 2.4: return False
-  if len(tree.photons) > 0:
-    if tree.photonCutBased: #selected photon is necessarily CB (but not always CBfull)
-      if deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) < 0.1: return False
+  if len(tree.photons) > 0 and tree.photonCutBased: #selected photon is necessarily CB (but not always CBfull)
+    if deltaR(tree._jetEta[index], tree._phEta[n.ph], tree._jetPhi[index], tree._phPhi[n.ph]) < 0.1: return False
   
   for lep in tree.leptons:
     if deltaR(tree._jetEta[index], tree._lEta[lep], tree._jetPhi[index], tree._lPhi[lep]) < 0.4: return False

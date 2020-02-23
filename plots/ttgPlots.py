@@ -11,7 +11,7 @@ argParser.add_argument('--selection',      action='store',      default=None)
 argParser.add_argument('--extraPlots',     action='store',      default='')
 argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='phoCBfull')
-argParser.add_argument('--sys',            action='store',      default=None)
+argParser.add_argument('--sys',            action='store',      default='')
 argParser.add_argument('--filterPlot',     action='store',      default=None)
 argParser.add_argument('--runSys',         action='store_true', default=False)
 argParser.add_argument('--showSys',        action='store_true', default=False)
@@ -38,7 +38,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSyst
 
 #
 # Submit subjobs
@@ -73,6 +73,7 @@ from ttg.plots.plot2D                 import Plot2D, add2DPlots
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
 from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
+from ttg.plots.npWeight               import npWeight
 from math import pi
 
 ROOT.gROOT.SetBatch(True)
@@ -236,7 +237,9 @@ def makePlotList():
     plotList.append(Plot('photon_chargedOverNeutral',  'Photon charged/neutral had. iso.',      lambda c : ChaOverN(c),                                        (20, -1, 4)))
     plotList.append(Plot('photon_relNeutralIso',       'neutralIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phNeutralHadronIsolation[c.ph]/c.ph_pt,          (20, 0, 0.2)))
     plotList.append(Plot('photon_relPhotonIso',        'photonIso(#gamma)/p_{T}(#gamma)',       lambda c : c._phPhotonIsolation[c.ph]/c.ph_pt,                 (20, 0, 0.2)))
-    plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 100., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), (20, 0, 0.2)))
+    # plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
+    plotList.append(Plot('rawJetDeepCSV',              'deepCSV(closest raw jet)',              lambda c : c._jetDeepCsv_b[closestRawJet(c)] + c._jetDeepCsv_bb[closestRawJet(c)],     (20, 0, 1)))
+    plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 100., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
     # extra plots only produced when asked
     if args.extraPlots.lower().count('cj'):
       plotList.append(Plot('j1jetNeutralHadronFraction',   'j1jetNeutralHadronFraction',        lambda c : jetNeutralHadronFraction(c, c.j1),                  (20, 0., 1.)))
@@ -328,15 +331,13 @@ for year in years:
   if not args.showSys and not copySyst:
 
 
-    if args.tag.lower().count('phocb'):                                           reduceType = 'phoCBFeb'
+    if args.tag.lower().count('phocb'):                                           reduceType = 'phoCBFEB'
     # elif args.tag.lower().count('clsel'):                                           reduceType = 'phoCB-clsel'
     elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
     else:                                                                           reduceType = 'pho'
     if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
-    if args.tag.count('phomvasb'):                                                  reduceType = 'phomvasb'
-    if args.tag.count('phomvasbnew'):                                               reduceType = 'phomvasbnew'
     reduceType = applySysToReduceType(reduceType, args.sys)
     log.info("using reduceType " + reduceType)
 
@@ -371,6 +372,9 @@ for year in years:
       c.unmHad            = sample.texName.count('nonprompt') or sample.texName.count('unmHad')   or sample.texName.count('unmhad')   or args.tag.count("filterUnmHad")
       c.unmFake           = sample.texName.count('nonprompt') or sample.texName.count('unmFake')  or sample.texName.count('unmfake')  or args.tag.count("filterUnmFake")
       c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine, c.magicPhoton, c.mHad, c.mFake, c.unmHad, c.unmFake])
+
+      c.MCreweight        = sample.texName.lower().count('reweight') and args.channel == 'noData'
+      c.nonPrompt         = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.magicPhoton, c.mHad, c.mFake, c.unmHad, c.unmFake])
       if args.tag.count('failOrSide'):
         c.failOrSide        = True
         c.failSigmaIetaIeta = False
@@ -400,7 +404,9 @@ for year in years:
       else:
         if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01015 < #sigma_{i#etai#eta} < 0.012')
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
-
+      
+      npReweight = npWeight(c.year, dataDriven = args.channel != 'noData', sigma = 0.)
+      # npReweight = npWeight(c.year, dataDriven = args.channel != 'noData', sigma = getSigmaSyst(args.sys))
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
@@ -428,13 +434,16 @@ for year in years:
         
         prefireWeight = 1. if c.year == '2018' or sample.isData else c._prefireWeight
 
-        # reWeight = npWeight.getWeight(c) if args.reWeight else 1.
-
+        if args.tag.lower().count('reweight') and c._phCutBasedMedium[c.ph] and selectPhoton:
+          reWeight = npReweight.getWeight(c, i)
+        else:
+          reWeight = 1.
+        
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
-        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight
+        # else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight
         # NOTE TODO switch to weight including PVWeight when new samples arrive (line below)
-        # else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight
+        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*reWeight
         
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]

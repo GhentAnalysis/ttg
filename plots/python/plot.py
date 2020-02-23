@@ -591,7 +591,7 @@ class Plot:
     histos = []
     for stack in self.stack:
       histsToStack = [histDict[s] for s in stack]
-      histos.append(self.stackHists(histsToStack))
+      histos.append(self.stackHists(histsToStack, sorting=sorting))
 
     drawObjects += self.scaleStacks(histos, scaling)
 

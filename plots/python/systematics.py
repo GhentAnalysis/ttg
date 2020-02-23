@@ -28,6 +28,7 @@ for i in ('Up', 'Down'):
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
   systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
+  systematics['NP'+i]         = []
 
 #
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
@@ -78,12 +79,20 @@ def applySysToTree(sample, sys, tree):
     if sysVar.count(':'):
       s, sysVar = sysVar.split(':')
       if sample != s: return
-    setattr(tree, var, getattr(tree, sysVar))
+    try: setattr(tree, var, getattr(tree, sysVar))
+    except: return
 
 def applySysToReduceType(reduceType, sys):
   if sys:
     if (sys.count('Scale') or sys.count('Res')) and reduceType.count('pho'): reduceType += '-' + sys
   return reduceType
+
+def getSigmaSyst(sys):
+  if sys: 
+    if sys == 'NPUp': return 1.
+    elif sys == 'NPDown': return -1.
+    else: return 0.
+
 
 #
 # Special systematic samples for hdamp, ue, and erd
@@ -91,7 +100,7 @@ def applySysToReduceType(reduceType, sys):
 def getReplacementsForStack(sys, year):
   # no syst variation variation samples for 2016 (in miniAODv3 at least)
   if not year == '2016':
-    if sys and any([i==sys for i in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']]):
+    if sys and sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
       return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
     elif sys and sys == 'erdUp':
       return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
