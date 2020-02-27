@@ -91,7 +91,7 @@ def getSigmaSyst(sys):
   if sys: 
     if sys == 'NPUp': return 1.
     elif sys == 'NPDown': return -1.
-    else: return 0.
+  return 0.
 
 
 #

@@ -136,7 +136,7 @@ def makePlotList():
     plotList.append(Plot('nTrueInt',                   'nTrueInt',                              lambda c : c._nTrueInt,                                        (50, 0, 50)))
     plotList.append(Plot('nphoton',                    'number of photons',                     lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
     plotList.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (24, 15, 135)))
-    plotList.append(Plot('photon_pt_large',            'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            [15., 30., 45., 60., 80., 100., 120.]))
+    plotList.append(Plot('photon_pt_large',            'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            [15., 30., 45., 60., 80., 120.]))
     plotList.append(Plot('photon_eta',                 '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                (15, 0, 2.5)))
     plotList.append(Plot('photon_eta_large',           '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
     plotList.append(Plot('photon_phi',                 '#phi(#gamma)',                          lambda c : c._phPhi[c.ph],                                     (10, -pi, pi)))
@@ -239,7 +239,8 @@ def makePlotList():
     plotList.append(Plot('photon_relPhotonIso',        'photonIso(#gamma)/p_{T}(#gamma)',       lambda c : c._phPhotonIsolation[c.ph]/c.ph_pt,                 (20, 0, 0.2)))
     # plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
     plotList.append(Plot('rawJetDeepCSV',              'deepCSV(closest raw jet)',              lambda c : c._jetDeepCsv_b[closestRawJet(c)] + c._jetDeepCsv_bb[closestRawJet(c)],     (20, 0, 1)))
-    plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 100., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
+    plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
+    plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
     # extra plots only produced when asked
     if args.extraPlots.lower().count('cj'):
       plotList.append(Plot('j1jetNeutralHadronFraction',   'j1jetNeutralHadronFraction',        lambda c : jetNeutralHadronFraction(c, c.j1),                  (20, 0., 1.)))
@@ -333,9 +334,9 @@ for year in years:
 
     if args.tag.lower().count('phocb'):                                           reduceType = 'phoCBFEB'
     # elif args.tag.lower().count('clsel'):                                           reduceType = 'phoCB-clsel'
-    elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
+    # elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
     else:                                                                           reduceType = 'pho'
-    if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
+    # if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
     reduceType = applySysToReduceType(reduceType, args.sys)
@@ -405,8 +406,8 @@ for year in years:
         if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01015 < #sigma_{i#etai#eta} < 0.012')
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
       
-      npReweight = npWeight(c.year, dataDriven = args.channel != 'noData', sigma = 0.)
-      # npReweight = npWeight(c.year, dataDriven = args.channel != 'noData', sigma = getSigmaSyst(args.sys))
+      if args.tag.lower().count('reweight'):
+        npReweight = npWeight(c.year, dataDriven = args.channel != 'noData', sigma = getSigmaSyst(args.sys))
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
@@ -433,7 +434,7 @@ for year in years:
           c.PVWeight  = 1.
         
         prefireWeight = 1. if c.year == '2018' or sample.isData else c._prefireWeight
-
+        
         if args.tag.lower().count('reweight') and c._phCutBasedMedium[c.ph] and selectPhoton:
           reWeight = npReweight.getWeight(c, i)
         else:
@@ -441,8 +442,6 @@ for year in years:
         
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
-        # else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight
-        # NOTE TODO switch to weight including PVWeight when new samples arrive (line below)
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*reWeight
         
         if year == "comb": 
@@ -482,19 +481,18 @@ for year in years:
   #
   noWarnings = True
   for plot in plots: # 1D plots
-    plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
     if not args.showSys:
-      if isinstance(plot, Plot2D): continue
-      if not plot.blindRange == None and not year == '2016':
-        for sample, histo in plot.histos.iteritems():
-          if sample.isData:
-            for bin in range(1, histo.GetNbinsX()+2):
-              if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
-                histo.SetBinContent(bin, 0)
-
-      if plot.name == "yield":
-        log.info("Yields: ")
-        for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+      plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
+    if not plot.blindRange == None and not year == '2016':
+      for sample, histo in plot.histos.iteritems():
+        if sample.isData:
+          for bin in range(1, histo.GetNbinsX()+2):
+            if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
+              histo.SetBinContent(bin, 0)
+    if isinstance(plot, Plot2D): continue
+    if plot.name == "yield":
+      log.info("Yields: ")
+      for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
 
   #
   # set some extra arguments for the plots
@@ -519,6 +517,9 @@ for year in years:
 
       if args.channel != 'noData':
         extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'texY': 'data/MC'}
+
+      if args.channel == 'noData' and args.tag.count('compRewAll'):
+        extraArgs['ratio']   = {'yRange' : (0.2, 1.8), 'texY': 'prediction/MC'}
 
       if any (args.tag.count(sname) for sname in ['chisoHad', 'chisoFake', 'chisoNP']):
         extraArgs['ratio']   = {'yRange' : (0.0, 1.0), 'texY': 'chargedIso pass/fail'}
@@ -564,7 +565,7 @@ for year in years:
                     plot_directory    = os.path.join(plotDir, year, args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
                     logX              = False,
                     logY              = logY,
-                    sorting           = True,
+                    sorting           = False,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                     drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')),
                     # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
@@ -598,6 +599,7 @@ for year in years:
 #
 # Drawing the full RunII plots if requested
 #
+# NOTE plotting systematics for 3 years combined is not tested, very likely doesn't work
 
 if not args.year == 'all': exit(0)
 
@@ -608,17 +610,16 @@ noWarnings = True
 for plot in totalPlots: # 1D plots
   if not args.showSys:
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
-    if isinstance(plot, Plot2D): continue
-    if not plot.blindRange == None:
-      for sample, histo in plot.histos.iteritems():
-        if sample.isData:
-          for bin in range(1, histo.GetNbinsX()+2):
-            if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
-              histo.SetBinContent(bin, 0)
-
-    if plot.name == "yield":
-      log.info("Yields: ")
-      for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
+  if not plot.blindRange == None:
+    for sample, histo in plot.histos.iteritems():
+      if sample.isData:
+        for bin in range(1, histo.GetNbinsX()+2):
+          if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
+            histo.SetBinContent(bin, 0)
+  if isinstance(plot, Plot2D): continue
+  if plot.name == "yield":
+    log.info("Yields: ")
+    for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
   #
   # set some extra arguments for the plots
   #
@@ -673,7 +674,7 @@ for plot in totalPlots: # 1D plots
                   plot_directory    = os.path.join(plotDir, 'all', args.tag, args.channel + extraTag, args.selection, (args.sys if args.sys else '')),
                   logX              = False,
                   logY              = logY,
-                  sorting           = True,
+                  sorting           = False,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
                   # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),

@@ -6,15 +6,22 @@ import os
 from ttg.tools.helpers import getObjFromFile, multiply
 from ttg.tools.uncFloat import UncFloat
 import pickle
-
 import time
 
-fileA = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passSigmaIetaIeta-passChgIso/all/llg-mll40-njet1p-photonPt20/photon_pt_eta.pkl'
-fileB = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passSigmaIetaIeta-failChgIso/all/llg-mll40-njet1p-photonPt20/photon_pt_eta.pkl'
-fileC = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-sidebandSigmaIetaIeta-passChgIso/all/llg-mll40-njet1p-photonPt20/photon_pt_eta.pkl'
-fileD = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-sidebandSigmaIetaIeta-failChgIso/all/llg-mll40-njet1p-photonPt20/photon_pt_eta.pkl'
 
-
+sourceHists ={'2016': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passSigmaIetaIeta-passChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passSigmaIetaIeta-failChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-sidebandSigmaIetaIeta-passChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-sidebandSigmaIetaIeta-failChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl'),
+              '2017': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passSigmaIetaIeta-passChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passSigmaIetaIeta-failChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-sidebandSigmaIetaIeta-passChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-sidebandSigmaIetaIeta-failChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl'),
+              '2018': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passSigmaIetaIeta-passChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passSigmaIetaIeta-failChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-sidebandSigmaIetaIeta-passChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-sidebandSigmaIetaIeta-failChgIso-newB/all/llg-mll40-njet1p-photonPt20/photon_pt_etaB.pkl')
+}
   
 #   A/B             ch Iso  BD         ch Iso     BD
 #   C/D                     AC                    AC
@@ -22,9 +29,8 @@ fileD = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-sidebandS
 # def __init__(self, year, selection):
 
 # TODO !!!!!!!!!!!!!!!!!!!!
-# how to deal with empty bins?
-# make year specific
-# split per channel? no ars.channel! us values like t.isMuMu
+# how to deal with empty bins?  
+# split per channel? no args.channel! us values like t.isMuMu
 # make selection specific?  NO
 
 def sumHists(picklePath, plot):
@@ -54,15 +60,7 @@ class npWeight:
     # get Nevents estimate using ABCD in data, turn into weights by dividing by SR MC prediction
     # systematic uncertainty via relative uncertainty between ABCD prediction in MC vs MC in SR
     if dataDriven:
-      A = sumHists(fileA, 'photon_pt_eta')
-      B = sumHists(fileB, 'photon_pt_eta')
-      C = sumHists(fileC, 'photon_pt_eta')
-      D = sumHists(fileD, 'photon_pt_eta')
-      # TODO check if one step doesn't modify a histogram we use later
-
-      # B*(C/D) for data, subtracting genuine in each
-      # self.est = B[0]
-      # return
+      A, B, C, D = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
       B[2].Add(B[1] ,-1.)
       C[2].Add(C[1] ,-1.)
       D[2].Add(D[1], -1.)
@@ -78,15 +76,12 @@ class npWeight:
       # set A data prediction
       for i in range(1, B[0].GetNbinsX()+1):
         for j in range(1, B[0].GetNbinsX()+1):
-          AestData.SetBinError(i, j, abs(A[0].GetBinContent(i, j)))
+          AestData.SetBinError(i, j, abs(B[0].GetBinContent(i, j)))
       self.est = AestData
       assert self.est
     # for ABCD closure checking, purely in MC
     else:
-      A = sumHists(fileA, 'photon_pt_eta')
-      B = sumHists(fileB, 'photon_pt_eta')
-      C = sumHists(fileC, 'photon_pt_eta')
-      D = sumHists(fileD, 'photon_pt_eta')
+      A, B, C, D = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
       # A est MC = B*C/D
       C[0].Divide(D[0])
       B[0].Multiply(C[0])
@@ -121,86 +116,17 @@ class npWeight:
 
 if __name__ == '__main__':
   from ROOT import TCanvas
-  tester = npWeight('2016', False)
+  tester = npWeight('2018', True, 1.)
   c1 = TCanvas('c', 'c', 800, 800)
-  tester.est.Draw('COLZ TEXT')
+  # tester.est.Draw('COLZ TEXT')
+  # time.sleep(20)
   # tester.est.Draw('TEXT SAME')
-  c1.SaveAs('npSFf.png')
+  # c1.SaveAs('npSFi.png')
   # print tester.getTestWeight(25., 0.4)
-  # print tester.getTestWeight(25., 0.4, -1.)
-  # print tester.getTestWeight(25., 0.4, 1.)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# baseFolder = 'CMSSW_BASE/src/ttg/plots/data/nonPrompt/'
-
-# fileA = 'photon_pt_eta_A.pkl'
-# fileB = 'photon_pt_eta_B.pkl'
-# fileC = 'photon_pt_eta_C.pkl'
-# fileD = 'photon_pt_eta_D.pkl'
-
-  # TODO  NO year thingy implemented yet, not selection speficific either
-  
-#   A/B             ch Iso  BD         ch Iso     BD
-#   C/D                     AC                    AC
-#   A= B*(C/D)             sigma               onZ-offZ
-# def __init__(self, year, selection):
-
-# TODO how to deal with empty bins?
-
-# class npWeight:
-#   def __init__(self, year, ):
-#     # A = pickle.load(open(os.path.expandvars(baseFolder + fileA )))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     # B = pickle.load(open(os.path.expandvars(baseFolder + fileB )))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     # C = pickle.load(open(os.path.expandvars(baseFolder + fileC )))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     # D = pickle.load(open(os.path.expandvars(baseFolder + fileD )))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     A = pickle.load(open(os.path.expandvars('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passSigmaIetaIeta-passChgIso-onlyTTDILNPM/noData/llg-njet1p-photonPt20/photon_pt_eta.pkl')))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     B = pickle.load(open(os.path.expandvars('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passSigmaIetaIeta-failChgIso-onlyTTDILNPM/noData/llg-njet1p-photonPt20/photon_pt_eta.pkl')))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     C = pickle.load(open(os.path.expandvars('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-sidebandSigmaIetaIeta-passChgIso-onlyTTDILNPM/noData/llg-njet1p-photonPt20/photon_pt_eta.pkl')))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     D = pickle.load(open(os.path.expandvars('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-sidebandSigmaIetaIeta-failChgIso-onlyTTDILNPM/noData/llg-njet1p-photonPt20/photon_pt_eta.pkl')))['photon_pt_eta']['TT_Dilt#bar{t}']
-#     C.Divide(D)
-#     B.Multiply(C)
-#     B.Draw()
-#     self.est = C
-#     assert self.est
-
-#   def getWeight(self, tree, index, sigma=0):
-#     pt  = tree._phPt[index]
-#     eta = abs(tree._phEta[index])
-#     if pt >= 120: pt = 119 # last bin is valid to infinity
-#     sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-#     err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-#     return (1+err*sigma)*sf
-
-
-#   def getTestWeight(self, pt, eta, sigma=0):
-#     if pt >= 120: pt = 119 # last bin is valid to infinity
-#     sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-#     err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-#     return (1+err*sigma)*sf
-
-
-# if __name__ == '__main__':
-#   from ROOT import TCanvas
-#   tester = npWeight('2016')
-#   c1 = TCanvas('c', 'c', 800, 800)
-#   tester.est.Draw('COLZ TEXT')
-#   # tester.est.Draw('TEXT SAME')
-#   c1.SaveAs('npSF.png')
-#   print tester.getTestWeight(25., 0.4)
-#   print tester.getTestWeight(25., 0.4, -1.)
-#   print tester.getTestWeight(25., 0.4, 1.)
+  # print tester.getTestWeight(25., 0.4)
+  # print tester.getTestWeight(25., 0.4)
+  for i in range(1, 14):
+    for j in range(1, 15):
+      a = tester.getTestWeight(10* i -1., 0.1*j)
+      # if abs(a) < 2: continue
+      print str(i) + '   ' + str(j) + '   ' + str(a)

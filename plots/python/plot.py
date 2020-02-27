@@ -561,6 +561,13 @@ class Plot:
     if resultsDir:
       loaded = self.loadFromCache(resultsDir)
       if not loaded: return True
+      # blinding loaded plots if necessary
+      if not self.blindRange == None and not resultsDir.count('2016'):
+        for sample, histo in self.histos.iteritems():
+          if sample.isData:
+            for bin in range(1, histo.GetNbinsX()+2):
+              if any([self.blindRange[i][0] < histo.GetBinCenter(bin) < self.blindRange[i][1] for i in range(len(self.blindRange))]) or len(self.blindRange) == 0:
+                histo.SetBinContent(bin, 0)
 
     # Check if at least one entry is present
     if not sum([h.Integral() for h in self.histos.values()]) > 0:
