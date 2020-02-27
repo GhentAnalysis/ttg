@@ -709,7 +709,8 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
         errHigh = points.GetErrorXhigh(i)
         errStatLow = pointsStatOnly.GetErrorXlow(i)
         errStatHigh = pointsStatOnly.GetErrorXhigh(i)
-        errSysLow = math.sqrt(errLow*errLow-errStatLow*errStatLow)
+        tempValLow = errLow*errLow-errStatLow*errStatLow
+        errSysLow = (tempValLow/abs(tempValLow)) * math.sqrt(abs(tempValLow))
         errSysHigh = math.sqrt(errHigh*errHigh-errStatHigh*errStatHigh)
 
         v_Str = "%.3f" % v

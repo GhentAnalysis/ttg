@@ -70,101 +70,57 @@ def writeRootFile(name, systematicVariations, year):
     f = ROOT.TFile(fname, 'RECREATE')
 
     baseSelection = 'llg-mll40-signalRegion-offZ-llgNoZ-photonPt20'
+    onZSelection = 'llg-mll40-signalRegion-offZ-llgOnZ-photonPt20'
+    ZNPSelection = 'llg-mll40-signalRegion-onZ-llgNoZ-photonPt20'
     tag           = 'phoCBfull-reweight'
 
-    # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma CR and ttbar CR
+    # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma (separate for ee and mumu)
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
     channels = []
     if args.chan == 'll':
         for ch in ['ee', 'mumu', 'emu']:
             writeHist(f, 'sr_' + ch, 'data_obs', getHistFromPkl((year, tag, ch, baseSelection), 'signalRegions', '', [dataHistName[ch]]), mergeBins=False)
             channels.append(('sr_' + ch, ch))
+        for ch in ['ee', 'mumu']:
+            writeHist(f, 'zg_' + ch, 'data_obs', getHistFromPkl((year, tag, ch, onZSelection), 'signalRegions', '', [dataHistName[ch]]), mergeBins=False)
+            channels.append(('zg_' + ch, ch))
     else: 
         writeHist(f, 'sr_' + args.chan, 'data_obs', getHistFromPkl((year, tag, args.chan, baseSelection), 'signalRegions', '', [dataHistName[args.chan]]), mergeBins=False)
-        channels.append(('sr_' + args.chan, args.chan))            
-
+        channels.append(('sr_' + args.chan, args.chan))
+        if not args.chan == 'emu':
+          writeHist(f, 'zg_' + args.chan, 'data_obs', getHistFromPkl((year, tag, args.chan, onZSelection), 'signalRegions', '', [dataHistName[args.chan]]), mergeBins=False)
+          channels.append(('zg_' + args.chan, args.chan))
     for t in templates:
-        
-        promptSelectors   = [[t, '(genuine)']]
-        nonpromptSelectors     = [[t, 'nonprompt']]
+        promptSelectors     = [[t, '(genuine)']]
+        nonpromptSelectors  = [[t, 'nonprompt']]
       
         for shape, channel in channels:
-####            q2Variations = []
-####            pdfVariations = []
+            q2Variations = []
+            pdfVariations = []
             for sys in [''] + systematicVariations:
-                prompt    = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *promptSelectors)
-                nonprompt = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *nonpromptSelectors)
-                
-                # Write SR and ZGamma CR
-                ##    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('sr_ee', 'ee'), ('sr_mm', 'mumu'), ('zg_SF', 'SF')]:
-                ##      q2Variations = []
-                ##      pdfVariations = []
-                ##      for sys in [''] + systematicVariations:
-                ##        prompt   = getHistFromPkl((tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *promptSelectors)
-                ##        fake     = getHistFromPkl((tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *fakeSelectors)
-                ##        hadronic = getHistFromPkl((tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *hadronicSelectors)
-                
-                # In case of fakes and hadronics, apply their SF (and calculate up and down variations)
-                ##      if sys == '':
-                ##          fakeUp, fakeDown         = applyNonPromptSF(fake, fakeSF, 'Up'),         applyNonPromptSF(fake, fakeSF, 'Down')
-                ##          hadronicUp, hadronicDown = applyNonPromptSF(hadronic, hadronicSF, 'Up'), applyNonPromptSF(hadronic, hadronicSF, 'Down')
-                ##        fake     = applyNonPromptSF(fake, fakeSF)
-                ##        hadronic = applyNonPromptSF(hadronic, hadronicSF)
+              prompt    = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *promptSelectors)
+              nonprompt = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *nonpromptSelectors)
+              
+              # Add up the contributions of genuine and nonprompt
+              total = prompt.Clone()
+              total.Add(nonprompt)
+              if sys == '':     nominal = total                                                   # Save nominal case to be used for q2/pdf calculations
+              writeHist(f, shape+sys, t, total, mergeBins = False)
+              if 'pdf' in sys:  pdfVariations += [total]                                          # Save all pdfVariations in list
+              elif 'q2' in sys: q2Variations += [total]                                           # Save all q2Variations in list
+              else:             writeHist(f, shape+sys, t, total, mergeBins = False)    # Write nominal and other systematics   
 
-                # Add up the contributions of genuine, fake and hadronic photons
-####                if sys == '':
-####                    totalUp   = prompt.Clone()
-####                    totalDown = prompt.Clone()
-                    ##          totalUp.Add(fakeUp)
-                    ##          totalDown.Add(fakeDown)
-                    ##          totalUp.Add(hadronicUp)
-                    ##          totalDown.Add(hadronicDown)
-#                    writeHist(f, shape+'nonPromptUp',   t, totalUp, mergeBins = ('zg' in shape))
-#                    writeHist(f, shape+'nonPromptDown', t, totalDown, mergeBins = ('zg' in shape))
-                total = prompt.Clone()
-                total.Add(nonprompt)
+            # Calculation of up and down envelope pdf variations
+            if len(pdfVariations) > 0:
+              up, down = pdfSys(pdfVariations, nominal)
+              writeHist(f, shape+'pdfUp',   t, up,   mergeBins = False)
+              writeHist(f, shape+'pdfDown', t, down, mergeBins = False)
 
-                if sys == '':     nominal = total                                                   # Save nominal case to be used for q2/pdf calculations
-                writeHist(f, shape+sys, t, total, mergeBins = ('zg' in shape))
-        ##        if 'pdf' in sys:  pdfVariations += [total]                                          # Save all pdfVariations in list
-        ##        elif 'q2' in sys: q2Variations += [total]                                           # Save all q2Variations in list
-        ##        else:             writeHist(f, shape+sys, t, total, mergeBins = ('zg' in shape))    # Write nominal and other systematics   
-
-        # Calculation of up and down envelope pdf variations
-        ##      if len(pdfVariations) > 0:
-        ##        up, down = pdfSys(pdfVariations, nominal)
-        ##        writeHist(f, shape+'pdfUp',   t, up,   mergeBins = ('zg' in shape))
-        ##        writeHist(f, shape+'pdfDown', t, down, mergeBins = ('zg' in shape))
-
-        # Calcualtion of up and down envelope q2 variations
-        ##      if len(q2Variations) > 0:
-        ##        up, down = q2Sys(q2Variations)
-        ##        writeHist(f, shape+'q2Up',   t, up,   mergeBins = ('zg' in shape))
-        ##        writeHist(f, shape+'q2Down', t, down, mergeBins = ('zg' in shape))
-
-        # Similar for tt CR, only here we do not have to sum the photon types
-        ##    for shape, channel in [('tt', 'all')]:
-        ##      q2Variations = []
-        ##      pdfVariations = []
-        ##      selector = [[t,]]
-        ##      for sys in [''] + systematicVariations:
-        ##        total = getHistFromPkl((tagTT, channel, ttSelection), 'signalRegionsSmall', sys, *selector)
-
-        ##        if sys == '':     nominal = total
-        ##        if 'pdf' in sys:  pdfVariations += [total]
-        ##        elif 'q2' in sys: q2Variations += [total]
-        ##        else:             writeHist(f, shape+sys, t, total, mergeBins = True)
-
-        ##      if len(pdfVariations) > 0:
-        ##        up, down = pdfSys(pdfVariations, nominal)
-        ##        writeHist(f, shape+'pdfUp',   t, up,   mergeBins=True)
-        ##        writeHist(f, shape+'pdfDown', t, down, mergeBins=True)
-
-        ##      if len(q2Variations) > 0:
-        ##        up, down = q2Sys(q2Variations)
-        ##        writeHist(f, shape+'q2Up',   t, up,   mergeBins=True)
-        ##        writeHist(f, shape+'q2Down', t, down, mergeBins=True)
-
+            # Calcualtion of up and down envelope q2 variations
+            if len(q2Variations) > 0:
+              up, down = q2Sys(q2Variations)
+              writeHist(f, shape+'q2Up',   t, up,   mergeBins = False)
+              writeHist(f, shape+'q2Down', t, down, mergeBins = False)
     f.Close()
 
 ######################
@@ -308,12 +264,16 @@ fitName = 'srFit'
 if doRatio: fitName = 'ratioFit'
 
 channels = []
-if args.chan == 'll':
-    for ch in ['ee', 'mumu', 'emu']:
-        channels.append('sr_'+ch)
-else: channels.append('sr_'+args.chan)
 
-doSignalRegionFit(fitName, channels, 35, doRatio=doRatio, year=args.year, blind=args.blind)
+if args.chan == 'll':
+  for reg in ('sr_ee', 'zg_ee','sr_mumu', 'zg_mumu', 'sr_emu'):
+    channels.append(reg)
+else: 
+  channels.append('sr_'+args.chan)
+  if not args.chan == 'emu':
+    channels.append('zg_'+args.chan)
+
+doSignalRegionFit(fitName, channels, 35, doRatio=doRatio, year=args.year, blind=args.blind, run=args.run)
 
 #goodnessOfFit('srFit', run=args.run+args.chan)
 #doLinearityCheck('srFit', run=args.run+args.chan)
