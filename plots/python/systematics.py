@@ -14,8 +14,8 @@ for i in ('Up', 'Down'):
   systematics['hdamp'+i]      = []
   systematics['ue'+i]         = []
   systematics['erd'+i]        = []
-  # systematics['eScale'+i]     = []
-  # systematics['eRes'+i]       = []
+  systematics['eScale'+i]     = []
+  systematics['eRes'+i]       = []
   systematics['phScale'+i]    = []
   systematics['phRes'+i]      = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
@@ -91,7 +91,7 @@ def getSigmaSyst(sys):
   if sys: 
     if sys == 'NPUp': return 1.
     elif sys == 'NPDown': return -1.
-    else: return 0.
+  return 0.
 
 
 #

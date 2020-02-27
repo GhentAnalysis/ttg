@@ -10,6 +10,7 @@ argParser.add_argument('--logLevel', action='store',      default='INFO', help='
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='Use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='Do not launch subjobs')
 argParser.add_argument('--select',   nargs='*', type=str, default=[],     help='Resubmit only commands containing all strings given here')
+argParser.add_argument('--tolerant', action='store_true', default=False,  help='don not consider e.g. a missing tuple file a reason for resubmit')
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -37,7 +38,7 @@ for logfile in getLogs('./log'):
       if 'Finished' in line or 'finished' in line:  finished  = True
       if 'Command:' in line:                        command   = line.split('Command: ')[-1].rstrip()
   if args.select and not all(command.count(sel) for sel in args.select): continue
-  if (not finished or rootError) and command: jobsToSubmit.append((command, logfile))
+  if (not finished or (rootError and not args.tolerant)) and command: jobsToSubmit.append((command, logfile))
 
 
 # Update latest git status before resubmitting
