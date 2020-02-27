@@ -14,8 +14,8 @@ for i in ('Up', 'Down'):
   systematics['hdamp'+i]      = []
   systematics['ue'+i]         = []
   systematics['erd'+i]        = []
-  # systematics['eScale'+i]     = []
-  # systematics['eRes'+i]       = []
+  systematics['eScale'+i]     = []
+  systematics['eRes'+i]       = []
   systematics['phScale'+i]    = []
   systematics['phRes'+i]      = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
@@ -33,10 +33,10 @@ for i in ('Up', 'Down'):
 #
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
 #
-for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
-  systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
-for i in range(0, 100):
-  systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
+# for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
+#   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
+# for i in range(0, 100):
+#   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 
 #
 # Compile list to systematic to show
@@ -54,11 +54,11 @@ linearSystematics['lumi'] = (None, 2.5)
 # Define linear systematics implemented as rate parameters
 #
 rateParameters = {}
-rateParameters['TTJets']   = 5.5
+rateParameters['TT_Dil']   = 5.5
 rateParameters['ZG']       = 10
 rateParameters['DY']       = 10
-rateParameters['single-t'] = 10
-rateParameters['other']    = 50
+rateParameters['singleTop'] = 10
+rateParameters['VVTo2L2Nu']    = 50   #other
 
 
 #

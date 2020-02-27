@@ -22,6 +22,8 @@
   "JER"           : "Jet energy resolution",
   "bTagl"         : "b-tagging (light)",
   "bTagb"         : "b-tagging (heavy)",
+  "pvSF"          : "pixel veto sclafactor"
+  "NP"            : "nonprompt background estimation"
   "fake_norm"     : "Hadronic fake normalization",
   "hadronic_norm" : "Hadronic photon normalization",
   "nonPrompt"     : "Non-prompt photon normalization",

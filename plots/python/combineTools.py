@@ -36,7 +36,7 @@ def initCombineTools(year, doCleaning=False, run='combine'):
 
 def getCombineRelease():
   combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE', '..', release)))
-  if not os.path.exists(combineRelease):
+  if not os.path.exists(combineRelease + '/src/HiggsAnalysis'):
     log.info('Setting up combine release')
     log.info('This might not work on T2B, recommended release is now on SLC7, which only available on lxplus')
     setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
@@ -49,8 +49,16 @@ def getCombineRelease():
     setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
     setupCommand += 'git fetch origin;git checkout ' + version + ';'
     setupCommand += 'scramv1 b clean;scramv1 b -j 8;'
-    setupCommand += 'curl -s "https://raw.githubusercontent.com/cms-analysis/CombineHarvester/master/CombineTools/scripts/sparse-checkout-ssh.sh" | bash;'
+    setupCommand += 'pushd $CMSSW_BASE/src;'
+    setupCommand += 'mkdir CombineHarvester; cd CombineHarvester;'
+    setupCommand += 'git init;'
+    setupCommand += 'git remote add origin https://github.com/cms-analysis/CombineHarvester.git;'
+    setupCommand += 'git config core.sparsecheckout true; echo CombineTools/ >> .git/info/sparse-checkout;'
+    setupCommand += 'git pull origin master;'
+    setupCommand += 'popd;'
+    # setupCommand += 'curl -s "https://raw.githubusercontent.com/cms-analysis/CombineHarvester/master/CombineTools/scripts/sparse-checkout-ssh.sh" | bash;'
     setupCommand += 'scramv1 b -j 8;'
+    setupCommand += 'scram b -j 8;'
     os.system(setupCommand)
   return combineRelease
 

@@ -60,8 +60,8 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, 
 
 try: os.makedirs(args.run + args.chan)
 except: pass
-
-templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'other', 'single-t']
+# VVTo2L2Nu = other
+templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop']
 
 def writeRootFile(name, systematicVariations, year):
 
@@ -69,11 +69,11 @@ def writeRootFile(name, systematicVariations, year):
     print fname
     f = ROOT.TFile(fname, 'RECREATE')
 
-    baseSelection = 'llg-mll40-offZ-llgNoZ-signalRegion-photonPt20'
-    tag           = 'phoCBfull_compos_ALL'
+    baseSelection = 'llg-mll40-signalRegion-offZ-llgNoZ-photonPt20'
+    tag           = 'phoCBfull-reweight'
 
     # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma CR and ttbar CR
-    dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'DoubleEG'}
+    dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
     channels = []
     if args.chan == 'll':
         for ch in ['ee', 'mumu', 'emu']:
@@ -86,16 +86,14 @@ def writeRootFile(name, systematicVariations, year):
     for t in templates:
         
         promptSelectors   = [[t, '(genuine)']]
-        fakeSelectors     = [[t, '(hadronicFake)']]
-        hadronicSelectors = [[t, '(hadronicPhoton)']]
+        nonpromptSelectors     = [[t, 'nonprompt']]
       
         for shape, channel in channels:
 ####            q2Variations = []
 ####            pdfVariations = []
             for sys in [''] + systematicVariations:
-                prompt   = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *promptSelectors)
-                fake     = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *fakeSelectors)
-                hadronic = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *hadronicSelectors)
+                prompt    = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *promptSelectors)
+                nonprompt = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *nonpromptSelectors)
                 
                 # Write SR and ZGamma CR
                 ##    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('sr_ee', 'ee'), ('sr_mm', 'mumu'), ('zg_SF', 'SF')]:
@@ -124,8 +122,7 @@ def writeRootFile(name, systematicVariations, year):
 #                    writeHist(f, shape+'nonPromptUp',   t, totalUp, mergeBins = ('zg' in shape))
 #                    writeHist(f, shape+'nonPromptDown', t, totalDown, mergeBins = ('zg' in shape))
                 total = prompt.Clone()
-                total.Add(hadronic)
-                total.Add(fake)
+                total.Add(nonprompt)
 
                 if sys == '':     nominal = total                                                   # Save nominal case to be used for q2/pdf calculations
                 writeHist(f, shape+sys, t, total, mergeBins = ('zg' in shape))
