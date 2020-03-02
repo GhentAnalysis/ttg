@@ -22,13 +22,15 @@
   "JER"           : "Jet energy resolution",
   "bTagl"         : "b-tagging (light)",
   "bTagb"         : "b-tagging (heavy)",
+  "pvSF"          : "pixel veto sclafactor"
+  "NP"            : "nonprompt background estimation"
   "fake_norm"     : "Hadronic fake normalization",
   "hadronic_norm" : "Hadronic photon normalization",
   "nonPrompt"     : "Non-prompt photon normalization",
   "ZG_norm"       : "Z#gamma normalization",
   "DY_norm"       : "Drell-Yan normalization",
-  "other_norm"    : "Other normalization",
-  "single-t_norm" : "Single-top normalization",
+  "VVTo2L2Nu_norm"    : "Other normalization",
+  "singleTop_norm" : "Single-top normalization",
   "TTJets_norm"   : "t#bar{t} normalization",
   "SideBandUnc"   : "Sideband uncertainty"
 }

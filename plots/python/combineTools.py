@@ -36,7 +36,7 @@ def initCombineTools(year, doCleaning=False, run='combine'):
 
 def getCombineRelease():
   combineRelease = os.path.abspath(os.path.expandvars(os.path.join('$CMSSW_BASE', '..', release)))
-  if not os.path.exists(combineRelease):
+  if not os.path.exists(combineRelease + '/src/HiggsAnalysis'):
     log.info('Setting up combine release')
     log.info('This might not work on T2B, recommended release is now on SLC7, which only available on lxplus')
     setupCommand  = 'cd ' + os.path.dirname(combineRelease) + ';'
@@ -49,8 +49,16 @@ def getCombineRelease():
     setupCommand += 'cd HiggsAnalysis/CombinedLimit;'
     setupCommand += 'git fetch origin;git checkout ' + version + ';'
     setupCommand += 'scramv1 b clean;scramv1 b -j 8;'
-    setupCommand += 'curl -s "https://raw.githubusercontent.com/cms-analysis/CombineHarvester/master/CombineTools/scripts/sparse-checkout-ssh.sh" | bash;'
+    setupCommand += 'pushd $CMSSW_BASE/src;'
+    setupCommand += 'mkdir CombineHarvester; cd CombineHarvester;'
+    setupCommand += 'git init;'
+    setupCommand += 'git remote add origin https://github.com/cms-analysis/CombineHarvester.git;'
+    setupCommand += 'git config core.sparsecheckout true; echo CombineTools/ >> .git/info/sparse-checkout;'
+    setupCommand += 'git pull origin master;'
+    setupCommand += 'popd;'
+    # setupCommand += 'curl -s "https://raw.githubusercontent.com/cms-analysis/CombineHarvester/master/CombineTools/scripts/sparse-checkout-ssh.sh" | bash;'
     setupCommand += 'scramv1 b -j 8;'
+    setupCommand += 'scram b -j 8;'
     os.system(setupCommand)
   return combineRelease
 
@@ -701,7 +709,8 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
         errHigh = points.GetErrorXhigh(i)
         errStatLow = pointsStatOnly.GetErrorXlow(i)
         errStatHigh = pointsStatOnly.GetErrorXhigh(i)
-        errSysLow = math.sqrt(errLow*errLow-errStatLow*errStatLow)
+        tempValLow = errLow*errLow-errStatLow*errStatLow
+        errSysLow = (tempValLow/abs(tempValLow)) * math.sqrt(abs(tempValLow))
         errSysHigh = math.sqrt(errHigh*errHigh-errStatHigh*errStatHigh)
 
         v_Str = "%.3f" % v

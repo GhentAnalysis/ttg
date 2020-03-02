@@ -30,6 +30,21 @@ def protectHist(hist):
             if hist.GetBinContent(i) <= 0.00001: hist.SetBinContent(i, 0.00001)
     return hist
 
+# limit the variation in every bin to +-100%, needed for systematics from sample variations with low statistics
+def capVar(nomHist, varHist):    
+    for i in range(1, nomHist.GetNbinsX()+1):
+      varHist.SetBinContent(i, max(min(2.* nomHist.GetBinContent(i), varHist.GetBinContent(i)), 0))
+    return varHist
+
+# return a histogram with any change w.r.t. the nominal inverted
+# NOTE assuming we want up = a * nom, down = 1/a * nom. not nom - a, nom + a. up 
+# var = a * nom -> a = var / nom -> varInverse = nom * (nom / var)
+def invertVar(nomHist, varHist):
+  inverseHist = nomHist.Clone()
+  inverseHist.Multiply(nomHist)
+  inverseHist.Divide(varHist)
+  return inverseHist
+
 def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
   if not nonPromptSF: 
     return histTemp
@@ -60,114 +75,64 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, 
 
 try: os.makedirs(args.run + args.chan)
 except: pass
+# VVTo2L2Nu = other
+templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop']
 
-templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'other', 'single-t']
-
-def writeRootFile(name, systematicVariations, year):
+def writeRootFile(name, shapes, systematicVariations, year):
 
     fname = args.run + args.chan + '/' + name + '_' + year + '_shapes.root'
     print fname
     f = ROOT.TFile(fname, 'RECREATE')
 
-    baseSelection = 'llg-mll40-offZ-llgNoZ-signalRegion-photonPt20'
-    tag           = 'phoCBfull_compos_ALL'
+    baseSelection = 'llg-mll40-signalRegion-offZ-llgNoZ-photonPt20'
+    onZSelection = 'llg-mll40-signalRegion-offZ-llgOnZ-photonPt20'
+    DYNPSelection = 'llg-mll40-signalRegion-onZ-llgNoZ-photonPt20'
+    tag           = 'phoCBfull-reweight'
+    dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
+    channelMap = {'sr': baseSelection,'zg': onZSelection,'np': DYNPSelection}
 
-    # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma CR and ttbar CR
-    dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'DoubleEG'}
-    channels = []
-    if args.chan == 'll':
-        for ch in ['ee', 'mumu', 'emu']:
-            writeHist(f, 'sr_' + ch, 'data_obs', getHistFromPkl((year, tag, ch, baseSelection), 'signalRegions', '', [dataHistName[ch]]), mergeBins=False)
-            channels.append(('sr_' + ch, ch))
-    else: 
-        writeHist(f, 'sr_' + args.chan, 'data_obs', getHistFromPkl((year, tag, args.chan, baseSelection), 'signalRegions', '', [dataHistName[args.chan]]), mergeBins=False)
-        channels.append(('sr_' + args.chan, args.chan))            
-
-    for t in templates:
-        
-        promptSelectors   = [[t, '(genuine)']]
-        fakeSelectors     = [[t, '(hadronicFake)']]
-        hadronicSelectors = [[t, '(hadronicPhoton)']]
+    for shape in shapes:
+      # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma (separate for ee and mumu)
+      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', '', [dataHistName[shape[3:]]]), mergeBins=False)
+      # write the MC histograms to the shapes file
+      for t in templates:
+        promptSelectors     = [[t, '(genuine)']]
+        nonpromptSelectors  = [[t, 'nonprompt']]
       
-        for shape, channel in channels:
-####            q2Variations = []
-####            pdfVariations = []
-            for sys in [''] + systematicVariations:
-                prompt   = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *promptSelectors)
-                fake     = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *fakeSelectors)
-                hadronic = getHistFromPkl((year, tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegions', sys, *hadronicSelectors)
-                
-                # Write SR and ZGamma CR
-                ##    for shape, channel in [('sr_OF', 'emu'), ('sr_SF', 'SF'), ('sr_ee', 'ee'), ('sr_mm', 'mumu'), ('zg_SF', 'SF')]:
-                ##      q2Variations = []
-                ##      pdfVariations = []
-                ##      for sys in [''] + systematicVariations:
-                ##        prompt   = getHistFromPkl((tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *promptSelectors)
-                ##        fake     = getHistFromPkl((tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *fakeSelectors)
-                ##        hadronic = getHistFromPkl((tag, channel, baseSelection if not 'zg' in shape else onZSelection), 'signalRegionsSmall', sys, *hadronicSelectors)
-                
-                # In case of fakes and hadronics, apply their SF (and calculate up and down variations)
-                ##      if sys == '':
-                ##          fakeUp, fakeDown         = applyNonPromptSF(fake, fakeSF, 'Up'),         applyNonPromptSF(fake, fakeSF, 'Down')
-                ##          hadronicUp, hadronicDown = applyNonPromptSF(hadronic, hadronicSF, 'Up'), applyNonPromptSF(hadronic, hadronicSF, 'Down')
-                ##        fake     = applyNonPromptSF(fake, fakeSF)
-                ##        hadronic = applyNonPromptSF(hadronic, hadronicSF)
-
-                # Add up the contributions of genuine, fake and hadronic photons
-####                if sys == '':
-####                    totalUp   = prompt.Clone()
-####                    totalDown = prompt.Clone()
-                    ##          totalUp.Add(fakeUp)
-                    ##          totalDown.Add(fakeDown)
-                    ##          totalUp.Add(hadronicUp)
-                    ##          totalDown.Add(hadronicDown)
-#                    writeHist(f, shape+'nonPromptUp',   t, totalUp, mergeBins = ('zg' in shape))
-#                    writeHist(f, shape+'nonPromptDown', t, totalDown, mergeBins = ('zg' in shape))
-                total = prompt.Clone()
-                total.Add(hadronic)
-                total.Add(fake)
-
-                if sys == '':     nominal = total                                                   # Save nominal case to be used for q2/pdf calculations
-                writeHist(f, shape+sys, t, total, mergeBins = ('zg' in shape))
-        ##        if 'pdf' in sys:  pdfVariations += [total]                                          # Save all pdfVariations in list
-        ##        elif 'q2' in sys: q2Variations += [total]                                           # Save all q2Variations in list
-        ##        else:             writeHist(f, shape+sys, t, total, mergeBins = ('zg' in shape))    # Write nominal and other systematics   
+        q2Variations = []
+        pdfVariations = []
+        for sys in [''] + systematicVariations:
+          prompt    = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', sys, *promptSelectors)
+          nonprompt = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', sys, *nonpromptSelectors)
+          
+          # Add up the contributions of genuine and nonprompt
+          total = prompt.Clone()
+          total.Add(nonprompt)
+          if sys == '':     nominal = total                                                   # Save nominal case to be used for q2/pdf calculations
+          writeHist(f, shape+sys, t, total, mergeBins = False)
+          if 'pdf' in sys:  pdfVariations += [total]                                          # Save all pdfVariations in list
+          elif 'q2' in sys: q2Variations += [total]                                           # Save all q2Variations in list
+          else:
+            # NOTE if we start using nonprompt an prompt separately this needs changing, only summed nominal is currenly saved
+            if 'erdDown' in sys:
+              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', 'erdUp', *promptSelectors)
+              ErdUpnonprompt = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', 'erdUp', *nonpromptSelectors)
+              ErdUpprompt.Add(nonprompt)
+              total = invertVar(nominal, ErdUpprompt)
+            
+            total = capVar(nominal, total)
+            writeHist(f, shape+sys, t, total, mergeBins = False)    # Write nominal and other systematics   
 
         # Calculation of up and down envelope pdf variations
-        ##      if len(pdfVariations) > 0:
-        ##        up, down = pdfSys(pdfVariations, nominal)
-        ##        writeHist(f, shape+'pdfUp',   t, up,   mergeBins = ('zg' in shape))
-        ##        writeHist(f, shape+'pdfDown', t, down, mergeBins = ('zg' in shape))
-
+        if len(pdfVariations) > 0:
+          up, down = pdfSys(pdfVariations, nominal)
+          writeHist(f, shape+'pdfUp',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdfDown', t, down, mergeBins = False)
         # Calcualtion of up and down envelope q2 variations
-        ##      if len(q2Variations) > 0:
-        ##        up, down = q2Sys(q2Variations)
-        ##        writeHist(f, shape+'q2Up',   t, up,   mergeBins = ('zg' in shape))
-        ##        writeHist(f, shape+'q2Down', t, down, mergeBins = ('zg' in shape))
-
-        # Similar for tt CR, only here we do not have to sum the photon types
-        ##    for shape, channel in [('tt', 'all')]:
-        ##      q2Variations = []
-        ##      pdfVariations = []
-        ##      selector = [[t,]]
-        ##      for sys in [''] + systematicVariations:
-        ##        total = getHistFromPkl((tagTT, channel, ttSelection), 'signalRegionsSmall', sys, *selector)
-
-        ##        if sys == '':     nominal = total
-        ##        if 'pdf' in sys:  pdfVariations += [total]
-        ##        elif 'q2' in sys: q2Variations += [total]
-        ##        else:             writeHist(f, shape+sys, t, total, mergeBins = True)
-
-        ##      if len(pdfVariations) > 0:
-        ##        up, down = pdfSys(pdfVariations, nominal)
-        ##        writeHist(f, shape+'pdfUp',   t, up,   mergeBins=True)
-        ##        writeHist(f, shape+'pdfDown', t, down, mergeBins=True)
-
-        ##      if len(q2Variations) > 0:
-        ##        up, down = q2Sys(q2Variations)
-        ##        writeHist(f, shape+'q2Up',   t, up,   mergeBins=True)
-        ##        writeHist(f, shape+'q2Down', t, down, mergeBins=True)
-
+        if len(q2Variations) > 0:
+          up, down = q2Sys(q2Variations)
+          writeHist(f, shape+'q2Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2Down', t, down, mergeBins = False)
     f.Close()
 
 ######################
@@ -185,12 +150,12 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     extraLines += ['* autoMCStats 0 1 1']
     
     if doRatio == True: # Special case in order to fit the ratio of ttGamma to ttbar [hardcoded numbers as discussed with 1l group]
-        log.info(' --- Ratio ttGamma/ttBar fit --- ')
-        extraLines += ['renormTTGamma rateParam * TTGamma* 0.338117493', 'nuisance edit freeze renormTTGamma ifexists']
-        extraLines += ['renormTTbar rateParam * TT_Dil* 1.202269886',    'nuisance edit freeze renormTTbar ifexists']
-        #extraLines += ['TT_Dil_norm rateParam * TT* 0.83176 [0.,2.]'] # fit ttbar xsec (TT_Dil_norm) and the ttg/ttbar ratio (r)
-        extraLines += ['TT_Dil_norm rateParam * TT* 0.83176 [0.,2.]']
-        #extraLines += ['TT_Dil_norm rateParam * TT_Dil* 0.83176 [0.,2.]'] # fit to ttg (r) and ttbar (TT_Dil_norm) xsecs
+      log.info(' --- Ratio ttGamma/ttBar fit --- ')
+      extraLines += ['renormTTGamma rateParam * TTGamma* 0.338117493', 'nuisance edit freeze renormTTGamma ifexists']
+      extraLines += ['renormTTbar rateParam * TT_Dil* 1.202269886',    'nuisance edit freeze renormTTbar ifexists']
+      #extraLines += ['TT_Dil_norm rateParam * TT* 0.83176 [0.,2.]'] # fit ttbar xsec (TT_Dil_norm) and the ttg/ttbar ratio (r)
+      extraLines += ['TT_Dil_norm rateParam * TT* 0.83176 [0.,2.]']
+      #extraLines += ['TT_Dil_norm rateParam * TT_Dil* 0.83176 [0.,2.]'] # fit to ttg (r) and ttbar (TT_Dil_norm) xsecs
 
     # Write shapes file and combine card using
     # * systematic.keys() --> all the up/down, pdf and q2 variations histograms as imported from ttg.plots.systematics, being used to write the shape file
@@ -209,54 +174,50 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     shapeSys = {}
     nameSys = {}
     for y in years:
-        shapeSys[y] = []
-        nameSys[y] = []
-        listSys[y] = showSysList[:]
-        if y == '2018': listSys[y].remove('pf')
-        for i in systematics.keys():
-            if ('pf' in i) and (y == '2018'): continue
-            nameSys[y].append(i)
-            if 'Up' in i:
-                shapeSys[y].append(i.replace('Up',''))            
+      shapeSys[y] = []
+      nameSys[y] = []
+      listSys[y] = showSysList[:]
+      if y == '2018': listSys[y].remove('pf')
+      for i in systematics.keys():
+        if ('pf' in i) and (y == '2018'): continue
+        nameSys[y].append(i)
+        if 'Up' in i:
+          shapeSys[y].append(i.replace('Up',''))            
 
     normSys = [(t+'_norm') for t in templates[1:]]
     
     allSys = {}
     for y in years:
-        allSys[y] = shapeSys[y] + normSys
+      allSys[y] = shapeSys[y] + normSys
     
     print colored('##### Prepare ROOT file with histograms', 'red')
     for y in years:
-        writeRootFile(cardName, nameSys[y], y)
+      writeRootFile(cardName, shapes, nameSys[y], y)
     
     print colored('##### Plot shape systematic variations', 'red')
     for y in years:
-        if args.chan == 'll':
-            for ch in ['ee', 'mumu', 'emu']:
-                fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
-                plotSys(fileName, 'sr', ch, templates, nameSys[y], y, args.year, args.run, comb=True)
-        else:
-            fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
-            plotSys(fileName, 'sr', args.chan, templates, nameSys[y], y, args.year, args.run)
-    
+      for shape in shapes:
+        fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
+        plotSys(fileName, shape[:2], shape[3:], templates, nameSys[y], y, args.year, args.run, comb=args.chan=='ll')
+
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
-        writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y)
-        cards.append(outDir+'/'+cardName+'_'+y+'.txt')
-        ##writeCard(cardName, shapes, templates, None, extraLines, showSysList, {}, scaleShape={'fsr': 1/sqrt(2)})
-        ##writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], {}, scaleShape={'fsr': 1/sqrt(2)})
+      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y)
+      cards.append(outDir+'/'+cardName+'_'+y+'.txt')
+      ##writeCard(cardName, shapes, templates, None, extraLines, showSysList, {}, scaleShape={'fsr': 1/sqrt(2)})
+      ##writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], {}, scaleShape={'fsr': 1/sqrt(2)})
     if len(years) == 1:
-        os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')
+      os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')
     else:
-        for i in range(3): cards[i] = cardName+'_'+y+'.txt'
-        p = subprocess.Popen(['combineCards.py','y2016='+cards[0],'y2017='+cards[1],'y2018='+cards[2]], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+      for i in range(3): cards[i] = cardName+'_'+y+'.txt'
+      p = subprocess.Popen(['combineCards.py','y2016='+cards[0],'y2017='+cards[1],'y2018='+cards[2]], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
 
     if blind == False:
-        print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
-        runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
-        print colored('##### Run fit diagnostics for obs (stat)', 'red')
-        runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
+      print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
+      print colored('##### Run fit diagnostics for obs (stat)', 'red')
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
         
     print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
     runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
@@ -269,54 +230,58 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     plotNLLScan(cardName, year, 'exp', trackParameters = [(t+'_norm') for t in templates[1:]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
     
     if blind == False:
-        if doRatio == True:
-            rMin = 0.5
-            rMax = 1.5
-        plotNLLScan(cardName, year, 'obs', trackParameters = [(t+'_norm') for t in templates[1:]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
+      if doRatio == True:
+        rMin = 0.5
+        rMax = 1.5
+      plotNLLScan(cardName, year, 'obs', trackParameters = [(t+'_norm') for t in templates[1:]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
         
     poi = ['r']
     if blind == False:
-        print colored('##### Run impacts (obs)', 'red')        
-        runImpacts(cardName, year, perPage, poi=poi, doRatio=doRatio, run=outDir)
+      print colored('##### Run impacts (obs)', 'red')        
+      runImpacts(cardName, year, perPage, poi=poi, doRatio=doRatio, run=outDir)
 
     print colored('##### Run impacts (exp)', 'red')
     runImpacts(cardName, year, perPage, toys=True, poi=poi, doRatio=doRatio, run=outDir)
 
     if blind == False:
-        print colored('##### Run channel compatibility (obs)', 'red')
-        runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir)
-        plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='obs', addNominal=True)
+      print colored('##### Run channel compatibility (obs)', 'red')
+      runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir)
+      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='obs', addNominal=True)
         
     print colored('##### Run channel compatibility (exp)', 'red')
     runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir)
     plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='exp', addNominal=True)
     
     if doRatio == False:
-        
-        if blind == False:
-            print colored('##### Calculate the significance (obs)', 'red')
-            runSignificance(cardName, run=outDir)
-            
-        print colored('##### Calculate the significance (exp)', 'red')
-        runSignificance(cardName, expected=True, run=outDir)
+      if blind == False:
+        print colored('##### Calculate the significance (obs)', 'red')
+        runSignificance(cardName, run=outDir)
+          
+      print colored('##### Calculate the significance (exp)', 'red')
+      runSignificance(cardName, expected=True, run=outDir)
         
     if args.tab == True:
-        print colored('##### Create tables', 'red')
-        if blind == False: 
-            os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --run=' + args.run + ' --card=' + cardName)
-        os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
+      print colored('##### Create tables', 'red')
+      if blind == False: 
+        os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --run=' + args.run + ' --card=' + cardName)
+      os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
 
 doRatio = args.ratio
 fitName = 'srFit'
 if doRatio: fitName = 'ratioFit'
 
-channels = []
-if args.chan == 'll':
-    for ch in ['ee', 'mumu', 'emu']:
-        channels.append('sr_'+ch)
-else: channels.append('sr_'+args.chan)
+shapes = []
 
-doSignalRegionFit(fitName, channels, 35, doRatio=doRatio, year=args.year, blind=args.blind)
+if args.chan == 'll':
+  for reg in ('sr_ee', 'zg_ee', 'np_ee','sr_mumu', 'zg_mumu', 'np_mumu', 'sr_emu'):
+    shapes.append(reg)
+else: 
+  shapes.append('sr_'+args.chan)
+  if not args.chan == 'emu':
+    shapes.append('zg_'+args.chan)
+    shapes.append('np_'+args.chan)
+
+doSignalRegionFit(fitName, shapes, 35, doRatio=doRatio, year=args.year, blind=args.blind, run=args.run)
 
 #goodnessOfFit('srFit', run=args.run+args.chan)
 #doLinearityCheck('srFit', run=args.run+args.chan)

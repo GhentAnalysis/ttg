@@ -58,11 +58,11 @@ linearSystematics['lumi'] = (None, 2.5)
 # Define linear systematics implemented as rate parameters
 #
 rateParameters = {}
-rateParameters['TTJets']   = 5.5
+rateParameters['TT_Dil']   = 5.5
 rateParameters['ZG']       = 10
 rateParameters['DY']       = 10
-rateParameters['single-t'] = 10
-rateParameters['other']    = 50
+rateParameters['singleTop'] = 10
+rateParameters['VVTo2L2Nu']    = 50   #other
 
 
 #
