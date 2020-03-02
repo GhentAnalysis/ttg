@@ -14,6 +14,10 @@ for i in ('Up', 'Down'):
   systematics['hdamp'+i]      = []
   systematics['ue'+i]         = []
   systematics['erd'+i]        = []
+  # TODO uncomment/ replace those below when new skims are ready
+  # electron and photon scale and resolution should be varied together
+  # systematics['ephScale'+i]     = []
+  # systematics['ephRes'+i]       = []
   systematics['eScale'+i]     = []
   systematics['eRes'+i]       = []
   systematics['phScale'+i]    = []

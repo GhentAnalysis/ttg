@@ -149,8 +149,7 @@ def switchBranches(default, variation):
 
 branchModifications = []
 for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
-  if args.type.count('e'  + var): branchModifications += [switchBranches('_lPtCorr',  '_lPt' + var),  switchBranches('_lECorr',  '_lE' + var)]
-  if args.type.count('ph' + var): branchModifications += [switchBranches('_phPtCorr', '_phPt' + var), switchBranches('_phECorr', '_phE' + var)]
+  if args.type.count('eph'  + var): branchModifications += [switchBranches('_lPtCorr',  '_lPt' + var),  switchBranches('_lECorr',  '_lE' + var)switchBranches('_phPtCorr', '_phPt' + var), switchBranches('_phECorr', '_phE' + var)]
 
 #
 # Get function calls to object selections and set selections based on the reducedTuple type
