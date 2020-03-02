@@ -37,13 +37,13 @@ def capVar(nomHist, varHist):
     return varHist
 
 # return a histogram with any change w.r.t. the nominal inverted
-# NOTE assuming we want up = a * nom, down = 1/a * nom. not nom - a, nom + a. up 
-# var = a * nom -> a = var / nom -> varInverse = nom * (nom / var)
+# NOTE assuming we want not nom - a, nom + a. up , not up = a * nom, down = 1/a * nom
+# up = nom + dev. down = nom - dev = nom - (up -nom) = 2* nom - up
 def invertVar(nomHist, varHist):
-  inverseHist = nomHist.Clone()
-  inverseHist.Multiply(nomHist)
-  inverseHist.Divide(varHist)
-  return inverseHist
+    inverseHist = nomHist.Clone()
+    for i in range(1, nomHist.GetNbinsX()+1):
+      inverseHist.SetBinContent(i, max(2. * nomHist.GetBinContent(i) - varHist.GetBinContent(i), 0.))
+    return inverseHist
 
 def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
   if not nonPromptSF: 
@@ -117,7 +117,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
             if 'erdDown' in sys:
               ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', 'erdUp', *promptSelectors)
               ErdUpnonprompt = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', 'erdUp', *nonpromptSelectors)
-              ErdUpprompt.Add(nonprompt)
+              ErdUpprompt.Add(ErdUpnonprompt)
               total = invertVar(nominal, ErdUpprompt)
             
             total = capVar(nominal, total)
