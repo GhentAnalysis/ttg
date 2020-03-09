@@ -16,5 +16,12 @@ with open('sysMappingsTemplate.json', 'r') as template:
           mapping.write('  "prop_binsr_mumu_bin' + i + '" : "Stats ' + mult + ' (mumu SR)",\n')
           mapping.write('  "prop_binzg_ee_bin' + i + '" : "Stats ' + mult + ' (ee Zg CR)",\n')
           mapping.write('  "prop_binzg_mumu_bin' + i + '" : "Stats ' + mult + ' (mumu Zg CR)",\n')
+        for year in ["2016", "2017", "2018"]:
+          for i, mult in [('2', '2j,0b'), ('3', '#geq3j,0b'), ('4', '1j,1b'), ('5', '2j1b'), ('6', '#geq3j,1b'), ('7', '2j2b'), ('8', '#geq3j,2b'), ('9', '#geq3j,#geq3b')]:   # AutoMCStats, bin numbering starts at 0!
+            mapping.write('  "prop_biny' + year + '_sr_emu_bin' + i + '" : "Stats ' + mult + ' (emu SR) ' + year + '",\n')
+            mapping.write('  "prop_biny' + year + '_sr_ee_bin' + i + '" : "Stats ' + mult + ' (ee SR) ' + year + '",\n')
+            mapping.write('  "prop_biny' + year + '_sr_mumu_bin' + i + '" : "Stats ' + mult + ' (mumu SR) ' + year + '",\n')
+            mapping.write('  "prop_biny' + year + '_zg_ee_bin' + i + '" : "Stats ' + mult + ' (ee Zg CR) ' + year + '",\n')
+            mapping.write('  "prop_biny' + year + '_zg_mumu_bin' + i + '" : "Stats ' + mult + ' (mumu Zg CR) ' + year + '",\n')
       else:
         mapping.write(line)
