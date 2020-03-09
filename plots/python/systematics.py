@@ -14,14 +14,8 @@ for i in ('Up', 'Down'):
   systematics['hdamp'+i]      = []
   systematics['ue'+i]         = []
   systematics['erd'+i]        = []
-  # TODO uncomment/ replace those below when new skims are ready
-  # electron and photon scale and resolution should be varied together
-  # systematics['ephScale'+i]     = []
-  # systematics['ephRes'+i]       = []
-  systematics['eScale'+i]     = []
-  systematics['eRes'+i]       = []
-  systematics['phScale'+i]    = []
-  systematics['phRes'+i]      = []
+  systematics['ephScale'+i]     = []
+  systematics['ephRes'+i]       = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
@@ -39,8 +33,9 @@ for i in ('Up', 'Down'):
 #
 for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
-for i in range(0, 100):
-  systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
+  # NOTE pdf temporarily off
+# for i in range(0, 100):
+#   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 
 #
 # Compile list to systematic to show
@@ -63,7 +58,8 @@ rateParameters['ZG']       = 10
 rateParameters['DY']       = 10
 rateParameters['singleTop'] = 10
 rateParameters['VVTo2L2Nu']    = 50   #other
-
+# TODO this is a placeholder value, determine actual value
+rateParameters['nonprompt']   = 10
 
 #
 # Function to apply the systematic to the cutstring, tree branches, reduceType
