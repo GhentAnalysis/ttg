@@ -58,7 +58,8 @@ rateParameters['ZG']       = 10
 rateParameters['DY']       = 10
 rateParameters['singleTop'] = 10
 rateParameters['VVTo2L2Nu']    = 50   #other
-
+# TODO this is a placeholder value, determine actual value
+rateParameters['nonprompt']   = 10
 
 #
 # Function to apply the systematic to the cutstring, tree branches, reduceType

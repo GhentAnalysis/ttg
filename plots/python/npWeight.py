@@ -55,6 +55,7 @@ class npWeight:
     # get Nevents estimate using ABCD in data, turn into weights by dividing by SR MC prediction
     # systematic uncertainty via relative uncertainty between ABCD prediction in MC vs MC in SR
     if dataDriven:
+      # print ''
       A, B, C, D = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
       B[2].Add(B[1] ,-1.)
       C[2].Add(C[1] ,-1.)
@@ -73,40 +74,27 @@ class npWeight:
           AestData.SetBinError(i, j, abs(B[0].GetBinContent(i, j)))
       self.est = AestData
       assert self.est
-    # for ABCD closure checking, purely in MC
+    # # for ABCD closure checking, purely in MC
     else:
       A, B, C, D = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
       # A est MC = B*C/D
-      C[0].Divide(D[0])
-      B[0].Multiply(C[0])
-      # deviation MC prediction A from MC A is estimate of syst error
-      est = B[0].Clone("est")
-      est.Divide(A[0])
-      B[0].Add(A[0], -1.)
-      B[0].Divide(A[0])
-      for i in range(1, B[0].GetNbinsX()+1):
-        for j in range(1, B[0].GetNbinsX()+1):
-          est.SetBinError(i, j, abs(B[0].GetBinContent(i, j)))
-      self.est = est
-      assert self.est
+      A = A[0].Integral()
+      B = B[0].Integral()
+      C = C[0].Integral()
+      D = D[0].Integral()
+      Nest = B*(C/D)
+      weight = Nest/A
+      self.est = weight
 
   def getWeight(self, tree, index):
     if (tree.MCreweight or self.dataDriven) and tree.nonPrompt:
-      pt  = tree.ph_pt
-      eta = abs(tree._phEta[tree.ph])
-      if pt >= 120: pt = 119 # last bin is valid to infinity
-      sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-      err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-      return (1+err*self.sigma)*sf
+      # pt  = tree.ph_pt
+      # eta = abs(tree._phEta[tree.ph])
+      # if pt >= 120: pt = 119 # last bin is valid to infinity
+      # sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
+      # err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
+      return self.est
     else: return 1.
-
-
-  def getTestWeight(self, pt, eta):
-    if pt >= 120: pt = 119 # last bin is valid to infinity
-    sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-    err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-    return (1+err*self.sigma)*sf
-
 
 if __name__ == '__main__':
   from ROOT import TCanvas

@@ -13,24 +13,18 @@
   "pdfTTGamma"    : "PDFs (t#bar{t}#gamma)",
   "pdfTTbar"      : "PDFs (t#bar{t})",
   "pdf"           : "PDFs",
-  "eRes"          : "Electron momentum resolution",
-  "phRes"         : "Photon momentum resolution",
-  "eScale"        : "Electron momentum scale",
-  "phScale"       : "Photon momentum scale",
+  "ephRes"        : "e/#gamma momentum resolution",
+  "ephScale"      : "e/#gamma momentum scale",
   "pu"            : "Pileup modeling",
   "JEC"           : "Jet energy scale",
   "JER"           : "Jet energy resolution",
   "bTagl"         : "b-tagging (light)",
   "bTagb"         : "b-tagging (heavy)",
-  "pvSF"          : "pixel veto sclafactor"
-  "NP"            : "nonprompt background estimation"
-  "fake_norm"     : "Hadronic fake normalization",
-  "hadronic_norm" : "Hadronic photon normalization",
-  "nonPrompt"     : "Non-prompt photon normalization",
+  "pvSF"          : "pixel veto sclafactor",
+  "NP"            : "nonprompt background estimation",
+  "nonprompt_norm"     : "Non-prompt photon normalization",
   "ZG_norm"       : "Z#gamma normalization",
   "DY_norm"       : "Drell-Yan normalization",
   "VVTo2L2Nu_norm"    : "Other normalization",
-  "singleTop_norm" : "Single-top normalization",
-  "TTJets_norm"   : "t#bar{t} normalization",
-  "SideBandUnc"   : "Sideband uncertainty"
+  "singleTop_norm" : "Single-top normalization"
 }
