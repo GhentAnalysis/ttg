@@ -1,12 +1,16 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
+
 import ROOT, os, numpy
 import cPickle as pickle
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, addHist
 from ttg.plots.plot import Plot
 from ttg.samples.Sample import getSampleFromStack
 from ttg.tools.lock import lock
+
+ROOT.TH1.SetDefaultSumw2()
+ROOT.TH2.SetDefaultSumw2()
 
 #
 # Plot class for 2D

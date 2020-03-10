@@ -54,8 +54,8 @@ TT_Dil                   hadronic_fakes_(highchgIso)          lineStyle     kGre
 +TT_Had
 
 
-DY_M10to50_LO            hadronic_fakes_(highchgIso)          lineStyle     kGreen                 _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            hadronic_fakes_(highchgIso)          lineStyle     kGreen                 _zgEventType<3
++DY_M10to50_LO
 
 -- hadlow
 TTGamma_Pr_Dil                    hadronic_fakes_(lowchgIso)          lineStyle     kRed
@@ -113,5 +113,5 @@ TT_Dil                   hadronic_fakes_(lowchgIso)          lineStyle     kRed 
 +TT_Had
 
 
-DY_M10to50_LO            hadronic_fakes_(lowchgIso)          lineStyle     kRed                 _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            hadronic_fakes_(lowchgIso)          lineStyle     kRed                 _zgEventType<3
++DY_M10to50_LO

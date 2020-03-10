@@ -47,8 +47,8 @@ TTGamma_Pr_Dil                    MC_(hadronic_fakes)          errorStyle    kGr
 TT_Dil                 MC_(hadronic_fakes)          errorStyle    kGreen                   _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(hadronic_fakes)          errorStyle    kGreen                   _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(hadronic_fakes)          errorStyle    kGreen                   _zgEventType<3
++DY_M10to50_LO
 
 -- HAD
 TTGamma_Pr_Dil                    MC_(hadronic_photons)        errorStyle     kRed
@@ -99,8 +99,8 @@ TTGamma_Pr_Dil                    MC_(hadronic_photons)        errorStyle     kR
 TT_Dil                 MC_(hadronic_photons)        errorStyle     kRed                     _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(hadronic_photons)        errorStyle     kRed                     _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(hadronic_photons)        errorStyle     kRed                     _zgEventType<3
++DY_M10to50_LO
 
 -- OTHER
 TTGamma_Pr_Dil                    MC_(genuine_photons)         errorStyle     kBlue
@@ -151,8 +151,8 @@ TTGamma_Pr_Dil                    MC_(genuine_photons)         errorStyle     kB
 TT_Dil                     MC_(genuine_photons)         errorStyle     kBlue                  _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(genuine_photons)         errorStyle     kBlue                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(genuine_photons)         errorStyle     kBlue                  _zgEventType<3
++DY_M10to50_LO
 
 TTGamma_Pr_Dil                    MC_(misidentified_electrons) errorStyle     kBlue
 +TTGamma_Pr_Sem
@@ -202,5 +202,5 @@ TTGamma_Pr_Dil                    MC_(misidentified_electrons) errorStyle     kB
 TT_Dil                 MC_(misidentified_electrons) errorStyle     kBlue                    _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(misidentified_electrons) errorStyle     kBlue                    _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(misidentified_electrons) errorStyle     kBlue                    _zgEventType<3
++DY_M10to50_LO

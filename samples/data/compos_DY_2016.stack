@@ -1,14 +1,14 @@
 -- MC
 
-DY_M10to50_LO             Drell-Yan_(genuine)         fillStyle     427                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             Drell-Yan_(genuine)         fillStyle     427                  _zgEventType<3
++DY_M10to50_LO
 
 %%%%%%%%%%%%%%%%%%%%%%%%% hadronic fakes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-DY_M10to50_LO             Drell-Yan_(hadronicFake)         fillStyle     427DARK                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             Drell-Yan_(hadronicFake)         fillStyle     427DARK                  _zgEventType<3
++DY_M10to50_LO
 
 %%%%%%%%%%%%%%%%%%%%%%%%% hadronic photons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-DY_M10to50_LO             Drell-Yan_(hadronicPhoton)         fillStyle     427BRIGHT                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             Drell-Yan_(hadronicPhoton)         fillStyle     427BRIGHT                  _zgEventType<3
++DY_M10to50_LO

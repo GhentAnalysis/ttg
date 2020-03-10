@@ -1,25 +1,25 @@
 -- MC
-TTGamma_Pr_Dil              nonprompt        lineStyle     814
+TTGamma_Pr_Dil              nonprompt        errorStyle     814
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
 
-TT_Dil                 nonprompt        lineStyle     814                     _ttgEventType<3
+TT_Dil                 nonprompt        errorStyle     814                     _ttgEventType<3
 +TT_Sem
 +TT_Had
 
 $ZG
-ZG_lowMLL                        nonprompt        lineStyle     814
+ZG_lowMLL                        nonprompt        errorStyle     814
 
-DY_M10to50_LO            nonprompt        lineStyle     814                    _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            nonprompt        errorStyle     814                    _zgEventType<3
++DY_M10to50_LO
 
-singleTop_tW_tbar          nonprompt        lineStyle     814
+singleTop_tW_tbar          nonprompt        errorStyle     814
 +singleTop_tW_t
 +singleTop_t_tbar
 +singleTop_t_t
 +singleTop_s
 
-VVTo2L2Nu                  nonprompt        lineStyle     814
+VVTo2L2Nu                  nonprompt        errorStyle     814
 +WWToLNuQQ
 +WWTo1L1Nu2Q
 +ZZTo2L2Q
@@ -58,27 +58,27 @@ VVTo2L2Nu                  nonprompt        lineStyle     814
 
 
 -- MCREW
-TTGamma_Pr_Dil              nonprompt-reweight        lineStyle     kBlue
+TTGamma_Pr_Dil              nonprompt-reweight        errorStyle     kBlue
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
 
-TT_Dil                 nonprompt-reweight        lineStyle     kBlue                     _ttgEventType<3
+TT_Dil                 nonprompt-reweight        errorStyle     kBlue                     _ttgEventType<3
 +TT_Sem
 +TT_Had
 
 $ZG
-ZG_lowMLL                        nonprompt-reweight        lineStyle     kBlue
+ZG_lowMLL                        nonprompt-reweight        errorStyle     kBlue
 
-DY_M10to50_LO            nonprompt-reweight        lineStyle     kBlue                    _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            nonprompt-reweight        errorStyle     kBlue                    _zgEventType<3
++DY_M10to50_LO
 
-singleTop_tW_tbar          nonprompt-reweight        lineStyle     kBlue
+singleTop_tW_tbar          nonprompt-reweight        errorStyle     kBlue
 +singleTop_tW_t
 +singleTop_t_tbar
 +singleTop_t_t
 +singleTop_s
 
-VVTo2L2Nu                  nonprompt-reweight        lineStyle     kBlue
+VVTo2L2Nu                  nonprompt-reweight        errorStyle     kBlue
 +WWToLNuQQ
 +WWTo1L1Nu2Q
 +ZZTo2L2Q

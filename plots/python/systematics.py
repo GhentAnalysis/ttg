@@ -14,14 +14,8 @@ for i in ('Up', 'Down'):
   systematics['hdamp'+i]      = []
   systematics['ue'+i]         = []
   systematics['erd'+i]        = []
-  # TODO uncomment/ replace those below when new skims are ready
-  # electron and photon scale and resolution should be varied together
-  # systematics['ephScale'+i]     = []
-  # systematics['ephRes'+i]       = []
-  systematics['eScale'+i]     = []
-  systematics['eRes'+i]       = []
-  systematics['phScale'+i]    = []
-  systematics['phRes'+i]      = []
+  systematics['ephScale'+i]     = []
+  systematics['ephRes'+i]       = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
@@ -39,8 +33,9 @@ for i in ('Up', 'Down'):
 #
 for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
-for i in range(0, 100):
-  systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
+# NOTE pdf temporarily off
+# for i in range(0, 100):
+#   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 
 #
 # Compile list to systematic to show
@@ -102,11 +97,13 @@ def getSigmaSyst(sys):
 # Special systematic samples for hdamp, ue, and erd
 #
 def getReplacementsForStack(sys, year):
+  if not sys:
+    return {}
   # no syst variation variation samples for 2016 (in miniAODv3 at least)
   if not year == '2016':
-    if sys and sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
+    if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
       return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
-    elif sys and sys == 'erdUp':
+    elif sys == 'erdUp' and year == '2017':
       return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
   return {}
 

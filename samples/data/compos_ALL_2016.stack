@@ -54,8 +54,8 @@ TT_Dil                     t#bar{t}_(genuine)         fillStyle     633         
 +TT_Had
 
 
-DY_M10to50_LO             Drell-Yan_(genuine)         fillStyle     427                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             Drell-Yan_(genuine)         fillStyle     427                  _zgEventType<3
++DY_M10to50_LO
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%% hadronic fakes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -115,8 +115,8 @@ TT_Dil                     t#bar{t}_(hadronicFake)         fillStyle     633DARK
 +TT_Had
 
 
-DY_M10to50_LO             Drell-Yan_(hadronicFake)         fillStyle     427DARK                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             Drell-Yan_(hadronicFake)         fillStyle     427DARK                  _zgEventType<3
++DY_M10to50_LO
 
 %%%%%%%%%%%%%%%%%%%%%%%%% hadronic photons %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -175,5 +175,5 @@ TT_Dil                     t#bar{t}_(hadronicPhoton)         fillStyle     633BR
 +TT_Had
 
 
-DY_M10to50_LO             Drell-Yan_(hadronicPhoton)         fillStyle     427BRIGHT                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             Drell-Yan_(hadronicPhoton)         fillStyle     427BRIGHT                  _zgEventType<3
++DY_M10to50_LO

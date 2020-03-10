@@ -54,5 +54,5 @@ TT_Dil                     t#bar{t}_(hadronicPhoton)         fillStyle     633BR
 +TT_Had
 
 
-DY_M10to50_LO             Drell-Yan_(hadronicPhoton)         fillStyle     427BRIGHT                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             Drell-Yan_(hadronicPhoton)         fillStyle     427BRIGHT                  _zgEventType<3
++DY_M10to50_LO

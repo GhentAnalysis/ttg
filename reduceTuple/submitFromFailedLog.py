@@ -31,14 +31,18 @@ for logfile in getLogs('./log'):
   finished  = False
   rootError = False
   command   = None
+  miscProblem = False
   with open(logfile) as logf:
     for line in logf:
       if 'SysError in <TFile::ReadBuffer>' in line: rootError = True
       if 'Error in <TChain::LoadTree>' in line:     rootError = True
       if 'Finished' in line or 'finished' in line:  finished  = True
+      if 'Could not produce all plots' in line:     
+        finished = True
+        miscProblem = True
       if 'Command:' in line:                        command   = line.split('Command: ')[-1].rstrip()
   if args.select and not all(command.count(sel) for sel in args.select): continue
-  if (not finished or (rootError and not args.tolerant)) and command: jobsToSubmit.append((command, logfile))
+  if (not finished or ((rootError or miscProblem) and not args.tolerant)) and command: jobsToSubmit.append((command, logfile))
 
 
 # Update latest git status before resubmitting

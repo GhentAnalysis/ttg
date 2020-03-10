@@ -1,6 +1,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
 
+
 #
 # Plot class
 # Still messy, contains a lot of functions, but does a lot of automatized work
@@ -15,6 +16,8 @@ from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
 from ttg.plots.systematics import constructQ2Sys, constructPdfSys
 from ttg.samples.Sample import getSampleFromStack
 
+ROOT.TH1.SetDefaultSumw2()
+ROOT.TH2.SetDefaultSumw2()
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
 #
@@ -738,8 +741,8 @@ def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
     try:
       loaded = plot.loadFromCache(os.path.join(plotDir, year, tag, channel, selection), None)
       for samp, hist in plot.histos.iteritems():
-        sourceHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, '', [samp.name+samp.texName])
-        sourceVarHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, sys, [samp.name+samp.texName])
+        sourceHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, '', [samp.nameNoSys+samp.texName])
+        sourceVarHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, sys, [samp.nameNoSys+samp.texName])
         destVarHist = applySysToOtherHist(sourceHist, sourceVarHist, hist)
         plots[i].histos[samp] = destVarHist
       log.info('systematic variation copied for plot ' + plot.name + ' from ' + sourceYear)

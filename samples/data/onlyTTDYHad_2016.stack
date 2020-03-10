@@ -1,5 +1,5 @@
 -- MC
-DY_M10to50_LO             All_(hadronicPhoton)             errorStyle    kBlue
-+DY_M50_LO
+DY_M50_LO             All_(hadronicPhoton)             errorStyle    kBlue
++DY_M10to50_LO
 +TT_Dil
-+TT_Dil_Alt
+%+TT_Dil_Alt

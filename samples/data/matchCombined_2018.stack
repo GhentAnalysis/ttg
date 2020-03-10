@@ -47,8 +47,8 @@ TTGamma_Pr_Dil                    MC_(genuine_photons)         fillStyle     kOr
 TT_Dil                     MC_(genuine_photons)         fillStyle     kOrange                  _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(genuine_photons)         fillStyle     kOrange                  _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(genuine_photons)         fillStyle     kOrange                  _zgEventType<3
++DY_M10to50_LO
 
 TTGamma_Pr_Dil                    MC_(hadronic_photons)        fillStyle     kRed
 +TTGamma_Pr_Sem
@@ -98,8 +98,8 @@ TTGamma_Pr_Dil                    MC_(hadronic_photons)        fillStyle     kRe
 TT_Dil                 MC_(hadronic_photons)        fillStyle     kRed                     _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(hadronic_photons)        fillStyle     kRed                     _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(hadronic_photons)        fillStyle     kRed                     _zgEventType<3
++DY_M10to50_LO
 
 TTGamma_Pr_Dil                    MC_(misidentified_electrons) fillStyle     kBlue
 +TTGamma_Pr_Sem
@@ -149,8 +149,8 @@ TTGamma_Pr_Dil                    MC_(misidentified_electrons) fillStyle     kBl
 TT_Dil                 MC_(misidentified_electrons) fillStyle     kBlue                    _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(misidentified_electrons) fillStyle     kBlue                    _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(misidentified_electrons) fillStyle     kBlue                    _zgEventType<3
++DY_M10to50_LO
 
 TTGamma_Pr_Dil                    MC_(hadronic_fakes)          fillStyle     kGreen
 +TTGamma_Pr_Sem
@@ -200,8 +200,8 @@ TTGamma_Pr_Dil                    MC_(hadronic_fakes)          fillStyle     kGr
 TT_Dil                 MC_(hadronic_fakes)          fillStyle     kGreen                   _ttgEventType<3
 +TT_Sem
 +TT_Had
-DY_M10to50_LO             MC_(hadronic_fakes)          fillStyle     kGreen                   _zgEventType<3
-+DY_M50_LO
+DY_M50_LO             MC_(hadronic_fakes)          fillStyle     kGreen                   _zgEventType<3
++DY_M10to50_LO
 
 
 -- Data

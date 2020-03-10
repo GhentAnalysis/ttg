@@ -1,5 +1,6 @@
 import ROOT, uuid, math
 ROOT.TH1.SetDefaultSumw2()
+ROOT.TH2.SetDefaultSumw2()
 
 ttgStyle = True # Set to False to return back to original style
 

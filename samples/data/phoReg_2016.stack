@@ -54,8 +54,8 @@ TT_Dil                   hadronic_photons_(#sigma_{i#etai#eta}_sideband)        
 +TT_Had
 
 
-DY_M10to50_LO            hadronic_photons_(#sigma_{i#etai#eta}_sideband)          lineStyle     kGreen                 _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            hadronic_photons_(#sigma_{i#etai#eta}_sideband)          lineStyle     kGreen                 _zgEventType<3
++DY_M10to50_LO
 
 
 -- hadpass
@@ -114,8 +114,8 @@ TT_Dil                   hadronic_photons_(#sigma_{i#etai#eta}_pass)          li
 +TT_Had
 
 
-DY_M10to50_LO            hadronic_photons_(#sigma_{i#etai#eta}_pass)          lineStyle     kBlack                 _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            hadronic_photons_(#sigma_{i#etai#eta}_pass)          lineStyle     kBlack                 _zgEventType<3
++DY_M10to50_LO
 
 
 -- fakeside
@@ -174,8 +174,8 @@ TT_Dil                   hadronic_fakes_(#sigma_{i#etai#eta}_sideband)          
 +TT_Had
 
 
-DY_M10to50_LO            hadronic_fakes_(#sigma_{i#etai#eta}_sideband)          lineStyle     kRed                 _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            hadronic_fakes_(#sigma_{i#etai#eta}_sideband)          lineStyle     kRed                 _zgEventType<3
++DY_M10to50_LO
 
 
 -- fakepass
@@ -234,5 +234,5 @@ TT_Dil                   hadronic_fakes_(#sigma_{i#etai#eta}_pass)          line
 +TT_Had
 
 
-DY_M10to50_LO            hadronic_fakes_(#sigma_{i#etai#eta}_pass)          lineStyle     kBlue                 _zgEventType<3
-+DY_M50_LO
+DY_M50_LO            hadronic_fakes_(#sigma_{i#etai#eta}_pass)          lineStyle     kBlue                 _zgEventType<3
++DY_M10to50_LO

@@ -15,8 +15,8 @@ TT_Dil                All_(hadronicPhoton)             errorStyle    kBlue      
 %$ZG
 %ZG_lowMLL                       All_(hadronicPhoton)               errorStyle    kBlue
 
-%DY_M10to50_LO             All_(hadronicPhoton)             errorStyle    kBlue                      _zgEventType<3
-%+DY_M50_LO
+%DY_M50_LO             All_(hadronicPhoton)             errorStyle    kBlue                      _zgEventType<3
+%+DY_M10to50_LO
 
 %singleTop_tW_tbar         All_(hadronicPhoton)              errorStyle    kBlue
 %+singleTop_tW_t

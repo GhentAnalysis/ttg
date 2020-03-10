@@ -328,7 +328,7 @@ for year in years:
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
   copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdUp', 'erdDown', 'isrUp', 'isrDown', 'fsrUp', 'fsrDown']
-
+  copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
   if not args.showSys and not copySyst:
 
 
