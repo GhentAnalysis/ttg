@@ -20,7 +20,7 @@
   "JER"           : "Jet energy resolution",
   "bTagl"         : "b-tagging (light)",
   "bTagb"         : "b-tagging (heavy)",
-  "pvSF"          : "pixel veto sclafactor",
+  "pvSF"          : "pixel veto scalefactor",
   "NP"            : "nonprompt background estimation",
   "nonprompt_norm"     : "Non-prompt photon normalization",
   "ZG_norm"       : "Z#gamma normalization",
