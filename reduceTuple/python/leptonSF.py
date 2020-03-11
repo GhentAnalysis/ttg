@@ -61,7 +61,7 @@ class LeptonSF:
     err = effMap.GetBinError(  effMap.GetXaxis().FindBin(x), effMap.GetYaxis().FindBin(y))
     return UncFloat(sf, err)
 
-  def getSF(self, tree, index, sigma=0):
+  def getSF(self, tree, index, elSigma=0, muSigma=0):
     flavor = tree._lFlavor[index]
     pt     = tree._lPt[index]  if flavor == 1 else tree._lPtCorr[index]
     eta    = tree._lEta[index] if flavor == 1 else tree._lEtaSC[index]
@@ -74,12 +74,13 @@ class LeptonSF:
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu)
       if hasattr(self, 'muGH'): # for 2016 self.muGH is defined and needs to be taken into account
         sf = (0.549792*sf + 0.450208*multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.muGH))
+      return (1+sf.sigma*muSigma)*sf.val
     elif abs(flavor) == 0:
       if pt >= 500: pt = 499 # last bin is valid to infinity
       if pt <= 10: pt = 11 # we don't go this low though
       sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele)
+      return (1+sf.sigma*elSigma)*sf.val
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)
 
-    return (1+sf.sigma*sigma)*sf.val
     # REMOVED 1% additional uncertainty to account for phase space differences between Z and ttbar (uncorrelated with TnP sys)

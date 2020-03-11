@@ -134,7 +134,7 @@ if not sample.isData:
       newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-    for sys in ['Up', 'Down']:                           newBranches += ['lWeight' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
+    for sys in ['Up', 'Down']:                           newBranches += ['lWeightMu' + sys + '/F','lWeightEl' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
     for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -260,8 +260,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
     l1, l2               = newVars.l1, newVars.l2
     newVars.lWeight      = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
-    newVars.lWeightUp    = leptonSF.getSF(c, l1, sigma=+1)*leptonSF.getSF(c, l2, sigma=+1)
-    newVars.lWeightDown  = leptonSF.getSF(c, l1, sigma=-1)*leptonSF.getSF(c, l2, sigma=-1)
+    newVars.lWeightMuUp    = leptonSF.getSF(c, l1, elSigma=0., muSigma=+1)*leptonSF.getSF(c, l2, elSigma=0., muSigma=+1)
+    newVars.lWeightMuDown  = leptonSF.getSF(c, l1, elSigma=0., muSigma=-1)*leptonSF.getSF(c, l2, elSigma=0., muSigma=-1)
+    newVars.lWeightElUp    = leptonSF.getSF(c, l1, elSigma=+1, muSigma=0.)*leptonSF.getSF(c, l2, elSigma=+1, muSigma=0.)
+    newVars.lWeightElDown  = leptonSF.getSF(c, l1, elSigma=-1, muSigma=0.)*leptonSF.getSF(c, l2, elSigma=-1, muSigma=0.)
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
 
     newVars.phWeight     = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
