@@ -82,6 +82,7 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, 
 try: os.makedirs(args.run + args.chan)
 except: pass
 # VVTo2L2Nu = other
+#  if a template is added for some reason, keep TTGamma first and nonprompt last
 templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 
 def writeRootFile(name, shapes, systematicVariations, year):
@@ -164,8 +165,8 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
         years = ['2016','2017','2018']
     
     log.info(' --- Signal regions fit (' + cardName + ') --- ')
-    extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:]]
-    extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:]]
+    extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:-1]]
+    extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:-1]]
     extraLines += ['* autoMCStats 0 1 1']
     
     if doRatio == True: # Special case in order to fit the ratio of ttGamma to ttbar [hardcoded numbers as discussed with 1l group]
