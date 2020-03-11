@@ -55,7 +55,9 @@ if not args.isChild:
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
   from ttg.plots.variations   import getVariations
-
+  if args.runSys and not os.path.exists(os.path.join(plotDir, args.year, args.tag, args.channel, args.selection, 'yield.pkl')):
+    log.info('Make sure the nominal plots exist before running systematics')
+    exit(0)
   if args.showSys and args.runSys: sysList = showSysList + ['stat']
   elif args.sys:                   sysList = [args.sys]
   else:                            sysList = [None] + (systematics.keys() if args.runSys else [])
@@ -293,7 +295,12 @@ totalPlots = []
 
 from ttg.tools.style import drawLumi
 
+# NOTE warning, temporary code
+from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
+
 for year in years:
+  # NOTE warning temporary code
+  leptonSF = LeptonSF(year)
   plots = makePlotList()
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
@@ -415,6 +422,12 @@ for year in years:
         c.FSRWeight = 1.
         if not sample.isData and args.sys:
           applySysToTree(sample.name, args.sys, c)
+        
+        #  NOTE Warning temporary code 
+        if args.sys == 'lSFUp':
+          c.lWeight  = leptonSF.getSF(c, c.l1, sigma=+1)*leptonSF.getSF(c, c.l2, sigma=+1)
+        if args.sys == 'lSFDown':
+          c.lWeight  = leptonSF.getSF(c, c.l1, sigma=-1)*leptonSF.getSF(c, c.l2, sigma=-1)
 
         if not passingFunctions(c): continue
         if selectPhoton:
@@ -439,7 +452,7 @@ for year in years:
           reWeight = npReweight.getWeight(c, i)
         else:
           reWeight = 1.
-        
+
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*reWeight

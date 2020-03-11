@@ -48,6 +48,7 @@ class LeptonSF_MVA:
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)
 
-    return (1+sqrt(sf.sigma**2+(0.01*sf.val)**2)*sigma)*sf.val                # 1% additional uncertainty to account for phase space differences between Z and ttbar (uncorrelated with TnP sys)
+    return (1+sf.sigma*sigma)*sf.val
+    # REMOVED 1% additional uncertainty to account for phase space differences between Z and ttbar (uncorrelated with TnP sys)
 
 

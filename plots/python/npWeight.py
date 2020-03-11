@@ -22,8 +22,18 @@ sourceHists ={'2016': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-newE/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20/photon_pt_etaB.pkl'),
 }
 
+relNonCl = {'2016': 0.0133162825688,
+            '2017': 0.0184699013251,
+            '2018': 0.0877586767457
+            }
+
+
+
+
+
+
 #   A/B             ch Iso  BD         ch Iso     BD
-#   C/D                     AC                    AC
+#   C/D                     AC                    ACnonCl
 #   A= B*(C/D)             sigma               onZ-offZ
 # def __init__(self, year, selection):
 
@@ -67,10 +77,7 @@ class npWeight:
       B[0].Add(A[0], -1.)               # relative deviation MC prediction A from MC A  (AMC -ApredMC)/AMC
       B[0].Divide(A[0])
       AestData.Divide(A[0])             # divide by A MC to get weights
-      B[0].Multiply(AestData)           # error on A prediction data = rel deviation in MC * A data prediction
-      for i in range(1, B[0].GetNbinsX()+1):
-        for j in range(1, B[0].GetNbinsX()+1):
-          AestData.SetBinError(i, j, abs(B[0].GetBinContent(i, j)))
+      AestData.Scale(1.+sigma*relNonCl[year])
       self.est = AestData
       assert self.est
     # for ABCD closure checking, purely in MC
@@ -92,22 +99,46 @@ class npWeight:
       pt  = tree.ph_pt
       eta = abs(tree._phEta[tree.ph])
       if pt >= 120: pt = 119 # last bin is valid to infinity
-      sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-      err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-      return (1+err*self.sigma)*sf
+      return self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
     else: return 1.
 
 
-  def getTestWeight(self, pt, eta):
-    if pt >= 120: pt = 119 # last bin is valid to infinity
-    sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-    err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-    return (1+err*self.sigma)*sf
+
+
 
 
 if __name__ == '__main__':
-  from ROOT import TCanvas
-  tester = npWeight('2016', True, 1.)
-  c1 = TCanvas('c', 'c', 800, 800)
-  tester.est.Draw('COLZ TEXT')
-  c1.SaveAs('sf16.png')
+  # calculate relative nonclosure
+  # get integral of any distribution for reweighted and non-reweighted
+  # relative non-closure = abs(rew - raw)/rew
+  # not very elegant, might make this auto read later, but closure check plots are needed to get these values
+  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-compRewAll-reweightsigMLL/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
+  hists = pickle.load(open(picklePath))['yield']
+  rew = None
+  raw = None
+  for name, hist in hists.iteritems():
+    if 'reweight' in name:
+      if not rew: rew = hist
+      else: rew.Add(hist)
+    else:
+      if not raw: raw = hist
+      else: raw.Add(hist)
+  rew = rew.Integral()
+  raw = raw.Integral()
+  nonClosure = abs(rew-raw)/rew
+  print nonClosure
+
+# if __name__ == '__main__':
+  # from ROOT import TCanvas
+  # tester = npWeight('2016', True, 1.)
+  # c1 = TCanvas('c', 'c', 800, 800)
+  # tester.est.Draw('COLZ TEXT')
+  # c1.SaveAs('sf16.png')
+
+
+  # OLD
+  # def getTestWeight(self, pt, eta):
+  #   if pt >= 120: pt = 119 # last bin is valid to infinity
+  #   sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
+  #   err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
+  #   return (1+err*self.sigma)*sf
