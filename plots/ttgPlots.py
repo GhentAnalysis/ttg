@@ -295,12 +295,7 @@ totalPlots = []
 
 from ttg.tools.style import drawLumi
 
-# NOTE warning, temporary code
-from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
-
 for year in years:
-  # NOTE warning temporary code
-  leptonSF = LeptonSF(year)
   plots = makePlotList()
   stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles[year]),
                     styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/' + stackFile + '_' + year + '.stack'),
@@ -381,7 +376,7 @@ for year in years:
       c.unmFake           = sample.texName.count('nonprompt') or sample.texName.count('unmFake')  or sample.texName.count('unmfake')  or args.tag.count("filterUnmFake")
       c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine, c.magicPhoton, c.mHad, c.mFake, c.unmHad, c.unmFake])
 
-      c.MCreweight        = sample.texName.lower().count('reweight') and args.channel == 'noData'
+      c.MCreweight        = sample.texName.lower().count('estimate') and args.channel == 'noData'
       c.nonPrompt         = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.magicPhoton, c.mHad, c.mFake, c.unmHad, c.unmFake])
       if args.tag.count('failOrSide'):
         c.failOrSide        = True
@@ -413,7 +408,7 @@ for year in years:
         if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01015 < #sigma_{i#etai#eta} < 0.012')
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
       
-      if args.tag.lower().count('reweight'):
+      if args.tag.lower().count('estimate'):
         npReweight = npWeight(c.year, dataDriven = args.channel != 'noData', sigma = getSigmaSyst(args.sys))
 
       for i in sample.eventLoop(cutString):
@@ -422,12 +417,6 @@ for year in years:
         c.FSRWeight = 1.
         if not sample.isData and args.sys:
           applySysToTree(sample.name, args.sys, c)
-        
-        #  NOTE Warning temporary code 
-        if args.sys == 'lSFUp':
-          c.lWeight  = leptonSF.getSF(c, c.l1, sigma=+1)*leptonSF.getSF(c, c.l2, sigma=+1)
-        if args.sys == 'lSFDown':
-          c.lWeight  = leptonSF.getSF(c, c.l1, sigma=-1)*leptonSF.getSF(c, c.l2, sigma=-1)
 
         if not passingFunctions(c): continue
         if selectPhoton:
@@ -448,14 +437,14 @@ for year in years:
         
         prefireWeight = 1. if c.year == '2018' or sample.isData else c._prefireWeight
         
-        if args.tag.lower().count('reweight') and c._phCutBasedMedium[c.ph] and selectPhoton:
-          reWeight = npReweight.getWeight(c, i)
+        if args.tag.lower().count('estimate') and c._phCutBasedMedium[c.ph] and selectPhoton:
+          estWeight = npReweight.getWeight(c, i)
         else:
-          reWeight = 1.
+          estWeight = 1.
 
         if sample.isData: eventWeight = 1.
         elif noWeight:    eventWeight = 1.
-        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*reWeight
+        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight
         
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]
@@ -561,6 +550,9 @@ for year in years:
         extraArgs['ratio']   = None
 
       if args.tag.count('IsoRegTTDil'):
+        extraArgs['ratio']   = None
+
+      if args.tag.count('norat'):
         extraArgs['ratio']   = None
 
       for norm in normalizeToMC:

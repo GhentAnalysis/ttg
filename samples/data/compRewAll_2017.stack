@@ -58,27 +58,27 @@ VVTo2L2Nu                  nonprompt        errorStyle     814
 
 
 -- MCREW
-TTGamma_Pr_Dil              nonprompt-reweight        errorStyle     kBlue
+TTGamma_Pr_Dil              nonprompt-estimate        errorStyle     kBlue
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
 
-TT_Dil                 nonprompt-reweight        errorStyle     kBlue                     _ttgEventType<3
+TT_Dil                 nonprompt-estimate        errorStyle     kBlue                     _ttgEventType<3
 +TT_Sem
 +TT_Had
 
 $ZG
-ZG_lowMLL                        nonprompt-reweight        errorStyle     kBlue
+ZG_lowMLL                        nonprompt-estimate        errorStyle     kBlue
 
-DY_M50_LO            nonprompt-reweight        errorStyle     kBlue                    _zgEventType<3
+DY_M50_LO            nonprompt-estimate        errorStyle     kBlue                    _zgEventType<3
 +DY_M10to50_LO
 
-singleTop_tW_tbar          nonprompt-reweight        errorStyle     kBlue
+singleTop_tW_tbar          nonprompt-estimate        errorStyle     kBlue
 +singleTop_tW_t
 +singleTop_t_tbar
 +singleTop_t_t
 +singleTop_s
 
-VVTo2L2Nu                  nonprompt-reweight        errorStyle     kBlue
+VVTo2L2Nu                  nonprompt-estimate        errorStyle     kBlue
 +WWToLNuQQ
 +WWTo1L1Nu2Q
 +ZZTo2L2Q
