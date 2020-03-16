@@ -204,7 +204,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
         if 'Up' in i:
           shapeSys[y].append(i.replace('Up',''))            
 
-    normSys = [(t+'_norm') for t in templates[1:]]
+    normSys = [(t+'_norm') for t in templates[1:-1]]
     
     allSys = {}
     for y in years:
@@ -235,25 +235,25 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
 
     if blind == False:
       print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
       print colored('##### Run fit diagnostics for obs (stat)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
         
     print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
+    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
     print colored('##### Run fit diagnostics for exp (stat)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)
+    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)
     
     print colored('##### Run NLL scan', 'red')
     rMin = 0.5
     rMax = 1.5
-    plotNLLScan(cardName, year, 'exp', trackParameters = [(t+'_norm') for t in templates[1:]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
+    plotNLLScan(cardName, year, 'exp', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
     
     if blind == False:
       if doRatio == True:
         rMin = 0.5
         rMax = 1.5
-      plotNLLScan(cardName, year, 'obs', trackParameters = [(t+'_norm') for t in templates[1:]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
+      plotNLLScan(cardName, year, 'obs', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
         
     poi = ['r']
     if blind == False:
@@ -283,8 +283,8 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     if args.tab == True:
       print colored('##### Create tables', 'red')
       if blind == False: 
-        os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --run=' + args.run + ' --card=' + cardName)
-      os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
+        os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName)
+      os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
 
 doRatio = args.ratio
 fitName = 'srFit'

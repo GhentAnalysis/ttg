@@ -59,7 +59,6 @@ rateParameters['ZG']       = 10
 rateParameters['DY']       = 10
 rateParameters['singleTop'] = 10
 rateParameters['VVTo2L2Nu']    = 50   #other
-
 #
 # Function to apply the systematic to the cutstring, tree branches, reduceType
 # When ':' is used in the sysVar, the first part selects a specific sample on which the sysVar should be applied
