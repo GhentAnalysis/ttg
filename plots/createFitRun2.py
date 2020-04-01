@@ -45,12 +45,6 @@ def invertVar(nomHist, varHist):
       inverseHist.SetBinContent(i, max(2. * nomHist.GetBinContent(i) - varHist.GetBinContent(i), 0.))
     return inverseHist
 
-def getSummedHists(templates, phoType , subDirs, plotName, sys):
-  sumHist = getHistFromPkl(subDirs, plotName, sys, [templates[0], phoType])
-  for t in templates[1:]:
-    sumHist.Add(getHistFromPkl(subDirs, plotName, sys, [t, phoType]))
-  return sumHist
-
 def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
   if not nonPromptSF: 
     return histTemp
@@ -92,28 +86,28 @@ def writeRootFile(name, shapes, systematicVariations, year):
     f = ROOT.TFile(fname, 'RECREATE')
 
     baseSelection = 'llg-mll40-signalRegion-offZ-llgNoZ-photonPt20'
-    onZSelection = 'llg-mll40-signalRegion-offZ-llgOnZ-photonPt20'
-    tag           = 'phoCBfull-reweightSigMLL'
+    tag           = 'phoCBfull-defaultEstimDD'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
-    channelMap = {'sr': baseSelection,'zg': onZSelection}
 
-    # write genuine separately
     for shape in shapes:
-      # Write the data histograms to the combine shapes file: SR (separate for ee, emu, mumu, SF), ZGamma (separate for ee and mumu)
-      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', '', [dataHistName[shape[3:]]]), mergeBins=False)
+      # Write the data histograms to the combine shapes file, separate for ee, emu, mumu
+      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', '', [dataHistName[shape[3:]]]), mergeBins=False)
       # write the MC histograms to the shapes file
-      for t in templates[:-1]:
-        promptSelectors     = [[t, '(genuine)']]
+      for t in templates:
+        if t == 'nonprompt':
+          Selectors     = [['NP', 'nonprompt']]
+        else:
+          Selectors     = [[t, '(genuine)']]
         q2Variations = []
         pdfVariations = []
         for sys in [''] + systematicVariations:
-          prompt    = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', sys, *promptSelectors)
+          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', sys, *Selectors)
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
           else:
             if 'erdDown' in sys:
-              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', 'erdUp', *promptSelectors)
+              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', 'erdUp', *Selectors)
               prompt = invertVar(nominal, ErdUpprompt)
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
@@ -127,32 +121,6 @@ def writeRootFile(name, shapes, systematicVariations, year):
           up, down = q2Sys(q2Variations)
           writeHist(f, shape+'q2Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'q2Down', t, down, mergeBins = False)
-
-      # write nonprompt (processes summed)
-      for sys in [''] + systematicVariations:
-        q2Variations = []
-        pdfVariations = []
-        # sum all nonprompt contributions
-        nonprompt = getSummedHists(templates[:-1], 'nonprompt', (year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', sys)
-        if sys == '':     nominal = nonprompt                                                   # Save nominal case to be used for q2/pdf calculations
-        if 'pdf' in sys:  pdfVariations += [nonprompt]                                          # Save all pdfVariations in list
-        elif 'q2' in sys: q2Variations += [nonprompt]                                           # Save all q2Variations in list
-        else:
-          if 'erdDown' in sys:
-            ErdUpnonprompt = getSummedHists(templates[:-1], 'nonprompt', (year, tag, shape[3:], channelMap[shape[:2]]), 'signalRegions', sys)
-            nonprompt = invertVar(nominal, ErdUpnonprompt)
-          nonprompt = capVar(nominal, nonprompt)
-          writeHist(f, shape+sys, 'nonprompt', nonprompt, mergeBins = False)    # Write nominal and other systematics   
-      # Calculation of up and down envelope pdf variations
-      if len(pdfVariations) > 0:
-        up, down = pdfSys(pdfVariations, nominal)
-        writeHist(f, shape+'pdfUp',   'nonprompt', up,   mergeBins = False)
-        writeHist(f, shape+'pdfDown', 'nonprompt', down, mergeBins = False)
-      # Calcualtion of up and down envelope q2 variations
-      if len(q2Variations) > 0:
-        up, down = q2Sys(q2Variations)
-        writeHist(f, shape+'q2Up',   'nonprompt', up,   mergeBins = False)
-        writeHist(f, shape+'q2Down', 'nonprompt', down, mergeBins = False)
     f.Close()
 
 ######################
@@ -293,12 +261,10 @@ if doRatio: fitName = 'ratioFit'
 shapes = []
 
 if args.chan == 'll':
-  for reg in ('sr_ee', 'zg_ee','sr_mumu', 'zg_mumu', 'sr_emu'):
+  for reg in ('sr_ee','sr_mumu', 'sr_emu'):
     shapes.append(reg)
 else: 
   shapes.append('sr_'+args.chan)
-  if not args.chan == 'emu':
-    shapes.append('zg_'+args.chan)
 
 doSignalRegionFit(fitName, shapes, 35, doRatio=doRatio, year=args.year, blind=args.blind, run=args.run)
 
