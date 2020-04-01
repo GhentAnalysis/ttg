@@ -50,7 +50,7 @@ def leptonE(tree, index):
 
 def looseLeptonSelector(tree, index):
   if tree._lFlavor[index] == 2:                         return False
-  if tree._relIso[index] > 0.4 and not c.leptonMVA:     return False
+  if tree._relIso[index] > 0.4 and not tree.leptonMVA:  return False
   if leptonPt(tree, index) < 15:                        return False
   if abs(tree._lEta[index]) > 2.4:                      return False
   if abs(tree._3dIPSig[index]) > 4:                     return False
@@ -169,6 +169,11 @@ def addGenPhotonInfo(t, n, index):
       n.genPhRelPt         = (t._gen_phPt[i]-t._phPt[n.ph])/t._gen_phPt[i]
       n.genPhPt            = t._gen_phPt[i]
       n.genPhEta           = t._gen_phEta[i]
+
+  try:
+    n.lhePhPt = t._lhePt[[i for i in t._lhePdgId].index(22)]
+  except:
+    n.lhePhPt = 0.
 
 def selectPhotons(t, n, minLeptons, isData):
   t.photons  = [p for p in range(t._nPh) if photonSelector(t, p, n, minLeptons)]
