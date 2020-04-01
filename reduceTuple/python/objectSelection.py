@@ -49,13 +49,13 @@ def leptonE(tree, index):
 
 
 def looseLeptonSelector(tree, index):
-  if tree._lFlavor[index] == 2:        return False
-  if tree._relIso[index] > 0.4:        return False
-  if leptonPt(tree, index) < 15:       return False
-  if abs(tree._lEta[index]) > 2.4:     return False
-  if abs(tree._3dIPSig[index]) > 4:    return False
-  if abs(tree._dxy[index]) > 0.05:     return False
-  if abs(tree._dz[index]) > 0.1:       return False
+  if tree._lFlavor[index] == 2:                         return False
+  if tree._relIso[index] > 0.4 and not c.leptonMVA:     return False
+  if leptonPt(tree, index) < 15:                        return False
+  if abs(tree._lEta[index]) > 2.4:                      return False
+  if abs(tree._3dIPSig[index]) > 4:                     return False
+  if abs(tree._dxy[index]) > 0.05:                      return False
+  if abs(tree._dz[index]) > 0.1:                        return False
   return tree._lPOGVeto[index]
 
 def electronSelector(tree, index):

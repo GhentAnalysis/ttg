@@ -57,28 +57,28 @@ VVTo2L2Nu                  other_(nonprompt)                 fillStyle     kViol
 +WG
 
 
--- MCREW
-TTGamma_Pr_Dil              nonprompt-estimate        errorStyle     kBlack
+-- NPestimate
+TTGamma_Pr_Dil              nonprompt-estimate_(MC)        errorStyle     kBlack
 +TTGamma_Pr_Sem
 +TTGamma_Pr_Had
 
-TT_Dil                 nonprompt-estimate        errorStyle     kBlack                      _ttgEventType<3
+TT_Dil                 nonprompt-estimate_(MC)        errorStyle     kBlack                      _ttgEventType<3
 +TT_Sem
 +TT_Had
 
 $ZG
-ZG_lowMLL                         nonprompt-estimate        errorStyle     kBlack
+ZG_lowMLL                         nonprompt-estimate_(MC)        errorStyle     kBlack
 
-DY_M50_LO             nonprompt-estimate        errorStyle     kBlack                     _zgEventType<3
+DY_M50_LO             nonprompt-estimate_(MC)        errorStyle     kBlack                     _zgEventType<3
 +DY_M10to50_LO
 
-singleTop_tW_tbar          nonprompt-estimate        errorStyle     kBlack
+singleTop_tW_tbar          nonprompt-estimate_(MC)        errorStyle     kBlack
 +singleTop_tW_t
 +singleTop_t_tbar
 +singleTop_t_t
 +singleTop_s
 
-VVTo2L2Nu                  nonprompt-estimate        errorStyle     kBlack
+VVTo2L2Nu                  nonprompt-estimate_(MC)        errorStyle     kBlack
 +WWToLNuQQ
 +WWTo1L1Nu2Q
 +ZZTo2L2Q

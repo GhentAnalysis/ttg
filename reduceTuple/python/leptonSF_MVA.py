@@ -30,7 +30,7 @@ class LeptonSF_MVA:
     assert self.mu
     assert self.ele
 
-  def getSF(self, tree, index, sigma=0):
+  def getSF(self, tree, index, elSigma=0, muSigma=0):
     flavor = tree._lFlavor[index]
     pt     = tree._lPt[index]  if flavor == 1 else tree._lPtCorr[index]
     eta    = tree._lEta[index] if flavor == 1 else tree._lEtaSC[index]
@@ -41,14 +41,12 @@ class LeptonSF_MVA:
       sf  = self.mu.GetBinContent(self.mu.GetXaxis().FindBin(pt), self.mu.GetYaxis().FindBin(eta))
       err = self.mu.GetBinError(self.mu.GetXaxis().FindBin(pt), self.mu.GetYaxis().FindBin(eta))
       sf = UncFloat(sf, err)
+      return (1+sf.sigma*muSigma)*sf.val
     elif abs(flavor) == 0:
       sf  = self.ele.GetBinContent(self.ele.GetXaxis().FindBin(pt), self.ele.GetYaxis().FindBin(eta))
       err = self.ele.GetBinError(self.ele.GetXaxis().FindBin(pt), self.ele.GetYaxis().FindBin(eta))
       sf = UncFloat(sf, err)
+      return (1+sf.sigma*elSigma)*sf.val
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)
-
-    return (1+sf.sigma*sigma)*sf.val
     # REMOVED 1% additional uncertainty to account for phase space differences between Z and ttbar (uncorrelated with TnP sys)
-
-

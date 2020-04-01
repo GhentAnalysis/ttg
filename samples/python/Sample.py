@@ -156,7 +156,15 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
       alias = info[0].strip('$')
       continue
     for i, j in replacements.iteritems():
-      if info[0] == i: info[0] = j
+      if info[0].count(i):
+        if j.count('OROFF'):
+          log.info('overlap removal disabled')
+          info = info[:4]
+        info[0] = info[0].replace(i , j.replace('OROFF', ''))
+        log.info('replaced ' + i + ' by ' + j.replace('OROFF', ''))
+    if info == 'DROP':
+      log.info('sample dropped')
+      continue
     if '--' in info:
       if len(stack):                                                                        # When "--", start a new stack
         allStacks.append(stack)
@@ -193,6 +201,12 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
           if channel == 'ee':   texName += ' (2e)'
           if channel == 'mumu': texName += ' (2#mu)'
           if channel == 'emu':  texName += ' (1e, 1#mu)'
+        if texName.count('nonprompt') and texName.count('estimate') and not texName.count('MC'): # same as for data, but no naming fanciness
+          if not texName.count(channel):
+            skip = True
+            alias = None
+            continue
+          texName = texName.split(':')[0]
         sample = getSampleFromList(stack, name, verbose=False)                              # Check if sample with same name already exists in this stack
         if not sample: sample = getSampleFromStack(allStacks, name, verbose=False)          # or other stack
         if sample:                                                                          # if yes, take it from there and make a deepcopy with different name

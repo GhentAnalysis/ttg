@@ -103,7 +103,17 @@ def getReplacementsForStack(sys, year):
     if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
       return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
     elif sys == 'erdUp' and year == '2017':
-      return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
+      return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd'}
+      # TODO change when had is available again
+      # return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
+
+    # TODO to be built in when new samples arrive
+    # OROFF turns off overlap removal
+    # if sys == 'erdUp'':
+    # return {'TTGamma_Cen_Dil' : 'TTGamma_Cen_Dil_erdOROFF', 'TTGamma_Cen_Sem' : 'TTGamma_Cen_Sem_erdOROFF', 'TTGamma_Cen_Had' : 'TTGamma_Cen_Had_erdOROFF',
+    #         'TTGamma_Cen_Dil_100to200' : 'DROP', 'TTGamma_Cen_Sem_100to200' : 'DROP', 'TTGamma_Cen_Had_100to200' : 'DROP',
+    #         'TTGamma_Cen_Dil_200toinf' : 'DROP', 'TTGamma_Cen_Sem_200toinf' : 'DROP', 'TTGamma_Cen_Had_200toinf' : 'DROP'
+    #         }
   return {}
 
 

@@ -1,4 +1,0 @@
--- pass
-TT_Dil                All_(hadronicFake,chgIso_pass)                  lineStyle    kGreen
--- fail
-TT_Dil                All_(hadronicFake,chgIso_fail)                 lineStyle    kRed

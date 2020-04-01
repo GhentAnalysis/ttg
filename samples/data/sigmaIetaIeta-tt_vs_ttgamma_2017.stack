@@ -1,9 +1,0 @@
--- MC (TTbar)
-TT_Dil               t#bar{t}_(#sigma_{i#etai#eta}_pass)             errorStyle     633       _ttgEventType<3
-+TT_Sem
-+TT_Had
-
--- MC (TTGamma)
-TTGamma_Pr_Dil               t#bar{t}#gamma_(#sigma_{i#etai#eta}_pass)       errorStyle     kOrange
-+TTGamma_Pr_Sem
-+TTGamma_Pr_Had

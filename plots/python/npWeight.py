@@ -5,37 +5,30 @@
 import os
 from ttg.tools.helpers import getObjFromFile, multiply
 from ttg.tools.uncFloat import UncFloat
+from ttg.plots.plotHelpers import createSignalRegions
+from ttg.tools.logger import getLogger
+log = getLogger()
 import pickle
 import time
 
-sourceHists ={'2016': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-newE/all/llg-mll40-njet1p-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-newE/all/llg-mll40-njet1p-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-newE/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-newE/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20/photon_pt_etaB.pkl'),
-              '2017': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-newE/all/llg-mll40-njet1p-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-newE/all/llg-mll40-njet1p-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-newE/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-newE/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20/photon_pt_etaB.pkl'),
-              '2018': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-newE/all/llg-mll40-njet1p-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-newE/all/llg-mll40-njet1p-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-newE/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-newE/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20/photon_pt_etaB.pkl'),
+sourceHists ={'2016': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
+              '2017': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
+              '2018': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
 }
 
-relNonCl = {'2016': 0.0133162825688,
-            '2017': 0.0184699013251,
-            '2018': 0.0877586767457
-            }
-
-
-
-
-
-
-#   A/B             ch Iso  BD         ch Iso     BD
-#   C/D                     AC                    ACnonCl
-#   A= B*(C/D)             sigma               onZ-offZ
-# def __init__(self, year, selection):
+closurePlots = {'2016': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
+                '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
+                '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl'
+}
 
 
 def sumHists(picklePath, plot):
@@ -57,88 +50,69 @@ def sumHists(picklePath, plot):
       print 'warning ' + name
   return (nHist, gHist, dHist)
 
+def getErrMap(picklePath):
+  hists = pickle.load(open(picklePath))['signalRegions']
+  est = None
+  sim = None
+  for name, hist in hists.iteritems():
+    if 'estimate' in name:
+      if not est: est = hist
+      else: est.Add(hist)
+    else:
+      if not sim: sim = hist
+      else: sim.Add(hist)
+
+  for i in range(1, sim.GetNbinsX()+1):
+    if est.GetBinContent(i) < 0.00000001 or sim.GetBinContent(i) < 0.00000001: est.SetBinContent(i, 0.)
+    else:
+      relDev = (est.GetBinContent(i)-sim.GetBinContent(i))/est.GetBinContent(i)
+      est.SetBinContent(i, relDev)
+  return est
 
 class npWeight:
-  def __init__(self, year, dataDriven, sigma):
+  def __init__(self, year, sigma):
     self.sigma = sigma
-    self.dataDriven = dataDriven
-    # get Nevents estimate using ABCD in data, turn into weights by dividing by SR MC prediction
-    # systematic uncertainty via relative uncertainty between ABCD prediction in MC vs MC in SR
-    if dataDriven:
-      A, B, C, D = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
-      B[2].Add(B[1] ,-1.)
-      C[2].Add(C[1] ,-1.)
-      D[2].Add(D[1], -1.)
-      C[2].Divide(D[2])
-      B[2].Multiply(C[2])
-      AestData = B[2]
-      C[0].Divide(D[0])                 # A est MC = B*C/D
-      B[0].Multiply(C[0])
-      B[0].Add(A[0], -1.)               # relative deviation MC prediction A from MC A  (AMC -ApredMC)/AMC
-      B[0].Divide(A[0])
-      AestData.Divide(A[0])             # divide by A MC to get weights
-      AestData.Scale(1.+sigma*relNonCl[year])
-      self.est = AestData
-      assert self.est
-    # for ABCD closure checking, purely in MC
-    else:
-      A, B, C, D = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
-      # A est MC = B*C/D
-      C[0].Divide(D[0])
-      B[0].Multiply(C[0])
-      # deviation MC prediction A from MC A is estimate of syst error
-      est = B[0].Clone("est")
-      est.Divide(A[0])
-      B[0].Add(A[0], -1.)
-      B[0].Divide(A[0])
-      self.est = est
-      assert self.est
+    try:
+      # for data driven estimate
+      histA, histB, histC, histD = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
+      histC[2].Add(histC[1], -1.)
+      histD[2].Add(histD[1], -1.)
+      histC[2].Divide(histD[2])
+      # need to do this to subtract genuine in sideband
+      dataB = histB[2].Clone()
+      histB[2].Add(histB[1], -1.)
+      histB[2].Divide(dataB)
+      histC[2].Multiply(histB[2])
+      self.dataEst = histC[2]
+      assert self.dataEst
+  
+      # for MC based estimate / closure test
+      histC[0].Divide(histD[0])
+      self.mcEst = histC[0]
+      assert self.mcEst
 
-  def getWeight(self, tree, index):
-    if (tree.MCreweight or self.dataDriven) and tree.nonPrompt:
+      # estimate of systematic uncertainty
+      self.errHist = getErrMap(closurePlots[year])
+    except:
+      self.errHist = False
+      log.warning('No NP estimate source plots available, no problem if not used later')
+
+  def getWeight(self, tree, isData):
+    if tree.NPestimate:
       pt  = tree.ph_pt
       eta = abs(tree._phEta[tree.ph])
       if pt >= 120: pt = 119 # last bin is valid to infinity
-      return self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
+      if isData:
+        sf =  self.dataEst.GetBinContent(self.dataEst.GetXaxis().FindBin(pt), self.dataEst.GetYaxis().FindBin(eta))
+      else:
+        sf =  self.mcEst.GetBinContent(self.mcEst.GetXaxis().FindBin(pt), self.mcEst.GetYaxis().FindBin(eta))
+      if self.errHist:
+        err = self.errHist.GetBinContent(createSignalRegions(tree)+1)
+      else:
+        err = 0.
+      return sf*(1.+self.sigma*err)
     else: return 1.
 
-
-
-
-
-
 if __name__ == '__main__':
-  # calculate relative nonclosure
-  # get integral of any distribution for reweighted and non-reweighted
-  # relative non-closure = abs(rew - raw)/rew
-  # not very elegant, might make this auto read later, but closure check plots are needed to get these values
-  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-compRewAll-reweightsigMLL/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
-  hists = pickle.load(open(picklePath))['yield']
-  rew = None
-  raw = None
-  for name, hist in hists.iteritems():
-    if 'reweight' in name:
-      if not rew: rew = hist
-      else: rew.Add(hist)
-    else:
-      if not raw: raw = hist
-      else: raw.Add(hist)
-  rew = rew.Integral()
-  raw = raw.Integral()
-  nonClosure = abs(rew-raw)/rew
-  print nonClosure
-
-# if __name__ == '__main__':
-  # from ROOT import TCanvas
-  # tester = npWeight('2016', True, 1.)
-  # c1 = TCanvas('c', 'c', 800, 800)
-  # tester.est.Draw('COLZ TEXT')
-  # c1.SaveAs('sf16.png')
-
-
-  # OLD
-  # def getTestWeight(self, pt, eta):
-  #   if pt >= 120: pt = 119 # last bin is valid to infinity
-  #   sf  = self.est.GetBinContent(self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-  #   err = self.est.GetBinError(  self.est.GetXaxis().FindBin(pt), self.est.GetYaxis().FindBin(eta))
-  #   return (1+err*self.sigma)*sf
+  tester = npWeight('2016', 0.)
+  tester.dataEst.Draw("COLZ TEXT")

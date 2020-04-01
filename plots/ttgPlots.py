@@ -13,6 +13,7 @@ argParser.add_argument('--channel',        action='store',      default=None)
 argParser.add_argument('--tag',            action='store',      default='phoCBfull')
 argParser.add_argument('--sys',            action='store',      default='')
 argParser.add_argument('--filterPlot',     action='store',      default=None)
+argParser.add_argument('--noZgCorr',       action='store_true', default=False,       help='do not correct Zg shape and yield')
 argParser.add_argument('--runSys',         action='store_true', default=False)
 argParser.add_argument('--showSys',        action='store_true', default=False)
 argParser.add_argument('--post',           action='store_true', default=False)
@@ -76,6 +77,7 @@ from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
 from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
 from ttg.plots.npWeight               import npWeight
+from ttg.plots.ZgWeight               import ZgWeight
 from math import pi
 
 ROOT.gROOT.SetBatch(True)
@@ -116,6 +118,33 @@ stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.
                     replacements = getReplacementsForStack(args.sys, args.year)
                     )
 
+# NOTE temp
+def nearestZ(tree):
+  distmll  = abs(91.1876 - tree.mll)
+  distmllg = abs(91.1876 - tree.mllg)
+  if distmll < distmllg:
+    return 0.
+  else:
+    return 1.
+
+def leptonPt(tree, index):
+  if tree._lFlavor[index]: return tree._lPt[index]
+  else:                    return tree._lPtCorr[index]
+
+def leptonE(tree, index):
+  if tree._lFlavor[index]: return tree._lE[index]
+  else:                    return tree._lECorr[index]
+
+def getLorentzVector(pt, eta, phi, e):
+  vector = ROOT.TLorentzVector()
+  vector.SetPtEtaPhiE(pt, eta, phi, e)
+  # log.info("got vect")
+  return vector
+
+def Zpt(tree):
+  first  = getLorentzVector(leptonPt(tree, tree.l1), tree._lEta[tree.l1], tree._lPhi[tree.l1], leptonE(tree, tree.l1))
+  second = getLorentzVector(leptonPt(tree, tree.l2), tree._lEta[tree.l2], tree._lPhi[tree.l2], leptonE(tree, tree.l2))
+  return (first+second).Pt()
 #
 # Define plots
 #
@@ -243,6 +272,10 @@ def makePlotList():
     plotList.append(Plot('rawJetDeepCSV',              'deepCSV(closest raw jet)',              lambda c : c._jetDeepCsv_b[closestRawJet(c)] + c._jetDeepCsv_bb[closestRawJet(c)],     (20, 0, 1)))
     plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
     plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
+    plotList.append(Plot('nearestZ',   'nearestZ',   lambda c : nearestZ(c),                                       [0., 1., 2.], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
+    plotList.append(Plot('Z_pt',                  'p_{T}(Z) (GeV)',                   lambda c : Zpt(c),                                            (20, 10, 200)))
+    plotList.append(Plot('ZplusPho_pt',           'p_{T}(Z) + p_{T}(pho) (GeV)',                   lambda c : Zpt(c)+c.ph_pt,                (30, 10, 300)))
+
     # extra plots only produced when asked
     if args.extraPlots.lower().count('cj'):
       plotList.append(Plot('j1jetNeutralHadronFraction',   'j1jetNeutralHadronFraction',        lambda c : jetNeutralHadronFraction(c, c.j1),                  (20, 0., 1.)))
@@ -280,7 +313,8 @@ def makePlotList():
   # if no kind of photon cut was made (also not in skim) (requiring nphotons=0 is allowed), or no Z-veto is applied -> can unblind
   phoReq = [selectPhoton, args.tag.count('pho'), args.selection.count('pho') and not args.selection.count('nphoton0')]
   noZReq = [args.selection.count('offZ'), args.selection.count('llgNoZ')]
-  if not any(phoReq) or not any(noZReq):
+  zReq = [args.selection.count('onZ'), args.selection.count('llgOnZ')]
+  if not any(phoReq) or (not any(noZReq) or any(zReq)):
     for p in plotList: p.blindRange = None
   return plotList
 
@@ -333,12 +367,8 @@ for year in years:
   copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
   if not args.showSys and not copySyst:
 
-
     if args.tag.lower().count('phocb'):                                           reduceType = 'phoCBFEB'
-    # elif args.tag.lower().count('clsel'):                                           reduceType = 'phoCB-clsel'
-    # elif args.tag.lower().count('photonmva'):                                       reduceType = 'photonMVA'
     else:                                                                           reduceType = 'pho'
-    # if args.tag.count('phoCBnew') or args.tag.count('phoCBfullnew'):                reduceType = 'phoCBnew' #for testing new skims
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
     reduceType = applySysToReduceType(reduceType, args.sys)
@@ -346,23 +376,39 @@ for year in years:
 
     from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
     dumpArrays = {}
+    origCB = phoCBfull
+    origTag = args.tag
     for sample in sum(stack, []):
+
+
       dumpArray = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]),
                    ("_phNeutralHadronIsolation", lambda c : c._phNeutralHadronIsolation[c.ph]),
                    ("_phPhotonIsolation", lambda c : c._phPhotonIsolation[c.ph]),
                    ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph]),
                    ('puChargedHadronIso', lambda c : c._puChargedHadronIso[c.ph]),
                    ('phoWorstChargedIsolation', lambda c : c._phoWorstChargedIsolation[c.ph])]
-      # dumpArray = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]) , ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph])]
-      # dumpArray = [("_runNb", lambda c : c._runNb) , ("_eventNb", lambda c : c._eventNb), ("_lumiBlock", lambda c : c._lumiBlock), ("ph_pt", lambda c : c.ph_pt)]
       dumpArray = [(variable, expression, []) for variable, expression in dumpArray]
       cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
-      cutString = applySysToString(sample.name, args.sys, cutString)
-      if args.sys and 'Scale' not in args.sys and sample.isData: continue
+      if not sample.isData and args.sys:
+        cutString = applySysToString(sample.name, args.sys, cutString)
+
+
+      NPestimate        = sample.texName.lower().count('estimate')
+      if args.sys and 'Scale' not in args.sys and sample.isData and not NPestimate: continue
+      # when estimating from the sideband the selection is changed for just these samples
+      if NPestimate:
+        phoCBfull = False
+        args.tag = args.tag.replace('passSigmaIetaIeta','')
+        args.tag = args.tag.replace('passChgIso','')
+        args.tag = args.tag.replace('phoCBfull','')
+        args.tag = args.tag + '-passChgIso-sidebandSigmaIetaIeta'
+
       c = sample.initTree(reducedType = reduceType)
       c.year = sample.name[:4] if year == "comb" else year
       lumiScale = lumiScales[c.year]
       c.data = sample.isData
+
+      c.NPestimate = NPestimate
 
       # Filter booleans
       c.genuine           = sample.texName.count('genuine') or args.tag.count("filterGenuine")
@@ -375,31 +421,17 @@ for year in years:
       c.unmHad            = sample.texName.count('nonprompt') or sample.texName.count('unmHad')   or sample.texName.count('unmhad')   or args.tag.count("filterUnmHad")
       c.unmFake           = sample.texName.count('nonprompt') or sample.texName.count('unmFake')  or sample.texName.count('unmfake')  or args.tag.count("filterUnmFake")
       c.checkMatch        = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.genuine, c.magicPhoton, c.mHad, c.mFake, c.unmHad, c.unmFake])
-
-      c.MCreweight        = sample.texName.lower().count('estimate') and args.channel == 'noData'
       c.nonPrompt         = any([c.hadronicPhoton, c.misIdEle, c.hadronicFake, c.magicPhoton, c.mHad, c.mFake, c.unmHad, c.unmFake])
-      if args.tag.count('failOrSide'):
-        c.failOrSide        = True
-        c.failSigmaIetaIeta = False
-        c.sideSigmaIetaIeta = False
-        c.passSigmaIetaIeta = True
-        c.sigmaIetaIeta1    = False
-        c.sigmaIetaIeta2    = False
-        c.failChgIso        = False
-        c.passChgIso        = True
-        c.lowChgIso         = False
-        c.highChgIso        = False
-      else:
-        c.failOrSide        = False
-        c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail')     or args.tag.count("failSigmaIetaIeta")
-        c.sideSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} sideband') or args.tag.count("sidebandSigmaIetaIeta")
-        c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
-        c.sigmaIetaIeta1    = sample.texName.count('sideband1') or args.tag.count("gapSigmaIetaIeta")
-        c.sigmaIetaIeta2    = sample.texName.count('sideband2') 
-        c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
-        c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
-        c.lowChgIso         = args.tag.count("lowchgIso") or sample.texName.count('lowchgIso')
-        c.highChgIso        = args.tag.count("highchgIso") or sample.texName.count('highchgIso')
+
+      c.failSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} fail')     or args.tag.count("failSigmaIetaIeta")
+      c.sideSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} sideband') or args.tag.count("sidebandSigmaIetaIeta")
+      c.passSigmaIetaIeta = sample.texName.count('#sigma_{i#etai#eta} pass') or args.tag.count("passSigmaIetaIeta") or args.tag.count("noChgIso")
+      c.sigmaIetaIeta1    = sample.texName.count('sideband1') or args.tag.count("gapSigmaIetaIeta")
+      c.sigmaIetaIeta2    = sample.texName.count('sideband2') 
+      c.failChgIso        = args.tag.count("failChgIso") or sample.texName.count('chgIso fail')
+      c.passChgIso        = args.tag.count("passChgIso") or sample.texName.count('chgIso pass')
+      c.lowChgIso         = args.tag.count("lowchgIso") or sample.texName.count('lowchgIso')
+      c.highChgIso        = args.tag.count("highchgIso") or sample.texName.count('highchgIso')
 
       if forward:
         if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.0272 < #sigma_{i#etai#eta} < 0.032')
@@ -408,8 +440,13 @@ for year in years:
         if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01015 < #sigma_{i#etai#eta} < 0.012')
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
       
-      if args.tag.lower().count('estimate'):
-        npReweight = npWeight(c.year, dataDriven = args.channel != 'noData', sigma = getSigmaSyst(args.sys))
+      # when creating input plots for corrections corrections can obviously not be applied yet
+      npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys))
+      try:
+        ZgReweight = ZgWeight(c.year)
+      except:
+        log.warning('No Zg estimate source plots available, no problem if not used later')
+        pass
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
@@ -423,13 +460,9 @@ for year in years:
           if phoCBfull and not c._phCutBasedMedium[c.ph]:  continue
           if forward and abs(c._phEta[c.ph]) < 1.566:      continue
           if not forward and abs(c._phEta[c.ph]) > 1.4442: continue
-
-          if c.failOrSide: # only fail Ch Iso OR sigma sideband 
-            if checkSigmaIetaIeta(c) and checkChgIso(c): continue
-          else:
-            if not checkSigmaIetaIeta(c): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
-            if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
-          if not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
+          if not checkSigmaIetaIeta(c): continue  # filter for sigmaIetaIeta sideband based on filter booleans (pass or fail)
+          if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
+          if not sample.isData and not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
 
         if not (selectPhoton and c._phPtCorr[c.ph] > 20): 
           c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
@@ -437,14 +470,15 @@ for year in years:
         
         prefireWeight = 1. if c.year == '2018' or sample.isData else c._prefireWeight
         
-        if args.tag.lower().count('estimate') and c._phCutBasedMedium[c.ph] and selectPhoton:
-          estWeight = npReweight.getWeight(c, i)
-        else:
-          estWeight = 1.
+        estWeight = npReweight.getWeight(c, sample.isData)
 
-        if sample.isData: eventWeight = 1.
+        if sample.name.lower().count('zg') and not args.noZgCorr:
+          zgw = ZgReweight.getWeight(c)
+        else: zgw = 1.
+
+        if sample.isData: eventWeight = estWeight
         elif noWeight:    eventWeight = 1.
-        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight
+        else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw
         
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]
@@ -456,7 +490,8 @@ for year in years:
             if sample.isData: array.append((expression(c), eventWeight))
             else:             array.append((expression(c), eventWeight))
       dumpArrays[sample.name] = {variable: array for variable, expression, array in dumpArray}
-
+      phoCBfull = origCB
+      args.tag = origTag
   if not args.showSys and copySyst:
     copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
 
@@ -487,7 +522,7 @@ for year in years:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
     if not plot.blindRange == None and not year == '2016':
       for sample, histo in plot.histos.iteritems():
-        if sample.isData:
+        if sample.isData and not 'estimate' in sample.texName:
           for bin in range(1, histo.GetNbinsX()+2):
             if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
               histo.SetBinContent(bin, 0)
@@ -558,7 +593,6 @@ for year in years:
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
         for logY in [False, True]:
-          # FIXME this used to be yRange = (0.0001, 0.75), why?
           if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.35)
           else:                                                                                             yRange = None
           extraTag  = '-log'    if logY else ''
@@ -617,7 +651,7 @@ for plot in totalPlots: # 1D plots
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
   if not plot.blindRange == None:
     for sample, histo in plot.histos.iteritems():
-      if sample.isData:
+      if sample.isData and not 'estimate' in sample.texName:
         for bin in range(1, histo.GetNbinsX()+2):
           if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
             histo.SetBinContent(bin, 0)

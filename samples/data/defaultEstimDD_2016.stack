@@ -1,0 +1,89 @@
+-- MC
+%TTGamma                    t#bar{t}#gamma_(genuine)        fillStyle     kOrange
+%+TTGamma_t
+%+TTGamma_tbar
+%+TTGamma_had
+
+TTGamma_Pr_Dil              t#bar{t}#gamma_(genuine)        fillStyle     kOrange
++TTGamma_Pr_Sem
++TTGamma_Pr_Had
+
+TT_Dil                 t#bar{t}_(genuine)              fillStyle     633                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+$ZG
+ZG_lowMLL                         Z#gamma_(genuine)               fillStyle     598
+
+DY_M50_LO              Drell-Yan_(genuine)             fillStyle     427                      _zgEventType<3
++DY_M10to50_LO
+
+singleTop_tW_tbar          single-t_(genuine)              fillStyle     797
++singleTop_tW_t
++singleTop_t_tbar
++singleTop_t_t
++singleTop_s
+
+VVTo2L2Nu                  other_(genuine)                 fillStyle     kViolet
++WWToLNuQQ
++WWTo1L1Nu2Q
++ZZTo2L2Q
++ZZTo2Q2Nu
++ZZTo4L
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWW
++WWZ
++WZZ
++ZZZ
++GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
++TTZ
++TTZ_M1to10
++TTWToLNu
++TTWToQQ
++tZq
++TTH
++TTWW
++TTWZ
++TTZZ
++TTTT
++tWll
++tWnunu
++tHq
++tHW
++WG
+
+
+$NPMu
+DoubleMuon                 nonprompt-estimate:mumu,SF,all,noData      fillStyle          814           isMuMu
++SingleMuon
+
+$NPEl
+DoubleEG                   nonprompt-estimate:ee,SF,all,noData        fillStyle          814           isEE
++SingleElectron
+
+$NPME
+MuonEG                     nonprompt-estimate:emu,all,noData          fillStyle          814           isEMu
++SingleMuon
++SingleElectron
+
+
+-- Data
+DoubleMuon                 data:mumu,SF,all      errorStyle    kBlack                   isMuMu
++SingleMuon
+
+$DoubleEG
+DoubleEG                   data:ee,SF,all        errorStyle    kBlack                   isEE
++SingleElectron
+
+MuonEG                     data:emu,all          errorStyle    kBlack                   isEMu
++SingleMuon
++SingleElectron

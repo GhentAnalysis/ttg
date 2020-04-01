@@ -1,4 +1,0 @@
--- pass
-TT_Dil                All_(magicPhoton,chgIso_pass)                  lineStyle    kGreen
--- fail
-TT_Dil                All_(magicPhoton,chgIso_fail)                 lineStyle    kRed
