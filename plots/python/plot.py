@@ -379,7 +379,7 @@ class Plot:
 
       histos_summed[sys] = None
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
-        if sys and 'Scale' in sys and not 'noData' in resultsDir:                                                                      # ugly hack to apply scale systematics on MC instead of data (only when data is available)
+        if sys and 'Scale' in sys and not 'noData' in resultsDir and not histName.count('estimate'):                                   # ugly hack to apply scale systematics on MC instead of data (only when data is available)
           data, dataSys = None, None
           for d in [d for d in allPlots[self.name] if d.count('data')]:                                                                # for data (if available depending on ee, mumu, emu, SF)
             data    = addHist(data,    allPlots[self.name][d])                                                                         # get nominal for data
@@ -432,7 +432,6 @@ class Plot:
           uncertaintyOther = histos_summed[sysOther].GetBinContent(i) - histos_summed[None].GetBinContent(i)
           if uncertainty*uncertaintyOther > 0 and abs(uncertainty) < abs(uncertaintyOther): continue                                  # Check if both up and down go to same direction, only take the maximum
           if (variation=='Up' and uncertainty > 0) or (variation=='Down' and uncertainty < 0):
-            if sys.count('fsr'): uncertainty *= 1/sqrt(2)                                                                             # Hacky, scale fsr uncertainty with 1/sqrt(2) as recommended for TOP pag (in the fit this is handled in the cards)
             if postFitInfo:      uncertainty  = applyPostFitConstraint(sys, uncertainty, postFitInfo)
             summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
@@ -753,3 +752,16 @@ def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
   if toRemove:
     for p in toRemove: plots.remove(p)
     toRemove = None
+
+# def freezeZgYield(plots, year, tag, channel, selection):
+#   for i, plot in enumerate(plots):
+#     try:
+#       for samp, hist in plot.histos.iteritems():
+#         if not 'ZG' in samp.nameNoSys: continue
+#         nomHist = getHistFromPkl((year, tag, channel, selection), plot.name, '', [samp.nameNoSys+samp.texName])
+#         hist.Scale(nomHist.Integral()/hist.Integral())
+#         plots[i].histos[samp] = hist
+#       log.debug('Zg yield frozen in plot ' + plot.name)
+#     except Exception as e:
+#       log.debug('Zg yield NOT frozen in plot ' + plot.name + ' bproblem:')
+#       log.debug(e)

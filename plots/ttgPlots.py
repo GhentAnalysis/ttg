@@ -29,6 +29,8 @@ args = argParser.parse_args()
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
+if args.noZgCorr: args.tag += '-noZgCorr'
+
 #
 # Check git and edit the info file
 #
@@ -242,6 +244,7 @@ def makePlotList():
     plotList.append(Plot('dbj2_deepCSV',               'deepCSV(dbj_{2})',                      lambda c : c._jetDeepCsv_b[c.dbj2] + c._jetDeepCsv_bb[c.dbj2], (20, 0, 1)))
     plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
+    plotList.append(Plot('signalRegionsZoomAlt',       'signal region',                         lambda c : min(6, createSignalRegionsZoom(c)),                 (7, 0, 7),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b'])))
     plotList.append(Plot('eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
     plotList.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',               lambda c : c.genPhPt,                                          (10, 10, 110)))
     plotList.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                    lambda c : abs(c.genPhEta),                                    (15, 0, 2.5), overflowBin=None))
@@ -371,6 +374,7 @@ for year in years:
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
+    origReducetype = reduceType
     reduceType = applySysToReduceType(reduceType, args.sys)
     log.info("using reduceType " + reduceType)
 
@@ -403,7 +407,7 @@ for year in years:
         args.tag = args.tag.replace('phoCBfull','')
         args.tag = args.tag + '-passChgIso-sidebandSigmaIetaIeta'
 
-      c = sample.initTree(reducedType = reduceType)
+      c = sample.initTree(reducedType = origReducetype if (args.sys.count('Scale') and NPestimate) else reduceType)
       c.year = sample.name[:4] if year == "comb" else year
       lumiScale = lumiScales[c.year]
       c.data = sample.isData
@@ -442,11 +446,15 @@ for year in years:
       
       # when creating input plots for corrections corrections can obviously not be applied yet
       npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys))
-      try:
-        ZgReweight = ZgWeight(c.year)
-      except:
-        log.warning('No Zg estimate source plots available, no problem if not used later')
-        pass
+      if not args.noZgCorr:
+        try:
+          nominal = os.path.join(plotDir, args.year, args.tag, 'CHAN', args.selection, 'signalRegions.pkl') if args.sys else ''
+          sysNoZgCorr = os.path.join(plotDir, args.year, args.tag + '-noZgCorr', 'CHAN', args.selection, 'signalRegions.pkl') if args.sys else ''
+          ZgReweight = ZgWeight(c.year, sys = args.sys, nominal = nominal, sysNoZgCorr = sysNoZgCorr)
+        except Exception as ex:
+          log.debug(ex)
+          log.warning('No Zg estimate source plots available, no problem if not used later')
+          pass
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
@@ -473,7 +481,7 @@ for year in years:
         estWeight = npReweight.getWeight(c, sample.isData)
 
         if sample.name.lower().count('zg') and not args.noZgCorr:
-          zgw = ZgReweight.getWeight(c)
+          zgw = ZgReweight.getWeight(c, channel = channelNumbering(c))
         else: zgw = 1.
 
         if sample.isData: eventWeight = estWeight
@@ -494,6 +502,9 @@ for year in years:
       args.tag = origTag
   if not args.showSys and copySyst:
     copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
+  # NOTE remove later
+  # if args.sys and not args.showSys:
+  #   freezeZgYield(plots, year, args.tag, args.channel, args.selection)
 
   plots = plotsToFill + loadedPlots
 

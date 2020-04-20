@@ -63,4 +63,5 @@ for plot in ['signalRegions', 'njets', 'nbtag']:
   legend.AddEntry(cor18,"2018","E")
   legend.Draw()
   c1.SaveAs('ZgCorrPlots/' + plot + '.pdf')
+  c1.SaveAs('ZgCorrPlots/' + plot + '.png')
 
