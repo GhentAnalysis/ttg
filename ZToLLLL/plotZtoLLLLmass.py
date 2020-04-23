@@ -171,6 +171,7 @@ def drawLumi():
 
 # Get plots
 for plot in getPlotNames():
+  if not 'lmisshits3_onz_promptMM_displEE' in plot: continue
   suff='prompt'+plot.split('_prompt')[-1]
   for i, plotSetting in enumerate(plots):
     if plotSetting in plot: 
@@ -259,9 +260,11 @@ for plot in getPlotNames():
   if 'pt' in plot.split('_')[0]: hratio.GetXaxis().SetTitle('p_{t}(lep) [GeV]') # temporary, fixed in next run of analyzeZtoLLLLmass.py
   if 'Pt' in plot.split('_')[0]: hratio.GetXaxis().SetTitle('p_{t}(#gamma) [GeV]')
 
+  print 'double displEleVars[7] = {%s};' % (', '.join(['%.3f' % hratio.GetBinContent(bin) for bin in range(1, 8)]))
+
   zwindow = 'onz' if 'onz' in plot else 'allz'
   plotDir = os.path.join(outdir, zwindow, suff)
   copyIndexPHP(plotDir + '/', outdir)
-  c.SaveAs(os.path.join(plotDir, plot+'.png'))
-  c.SaveAs(os.path.join(plotDir, plot+'.pdf'))
-  c.SaveAs(os.path.join(plotDir, plot+'.root'))
+#  c.SaveAs(os.path.join(plotDir, plot+'.png'))
+#  c.SaveAs(os.path.join(plotDir, plot+'.pdf'))
+#  c.SaveAs(os.path.join(plotDir, plot+'.root'))
