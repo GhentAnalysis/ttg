@@ -15,10 +15,10 @@ sourceHists ={'2016': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
-              '2017': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
+              '2017': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
               '2018': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
@@ -26,7 +26,7 @@ sourceHists ={'2016': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016
 }
 
 closurePlots = {'2016': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
-                '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
+                '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
                 '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl'
 }
 

@@ -74,7 +74,7 @@ if not args.isChild:
 #
 import ROOT
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
-from ttg.plots.plot2D                 import Plot2D, add2DPlots
+from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
 from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
@@ -147,6 +147,11 @@ def Zpt(tree):
   first  = getLorentzVector(leptonPt(tree, tree.l1), tree._lEta[tree.l1], tree._lPhi[tree.l1], leptonE(tree, tree.l1))
   second = getLorentzVector(leptonPt(tree, tree.l2), tree._lEta[tree.l2], tree._lPhi[tree.l2], leptonE(tree, tree.l2))
   return (first+second).Pt()
+
+def plphpt(tree):
+  try: return c._pl_phPt[0]
+  except: return -99.
+
 #
 # Define plots
 #
@@ -275,9 +280,14 @@ def makePlotList():
     plotList.append(Plot('rawJetDeepCSV',              'deepCSV(closest raw jet)',              lambda c : c._jetDeepCsv_b[closestRawJet(c)] + c._jetDeepCsv_bb[closestRawJet(c)],     (20, 0, 1)))
     plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
     plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
+    plotList.append(Plot2D('photon_pt_vspl', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140)))
+    plotList.append(Plot2D('photon_pt_vsplx', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('x') ))
+    plotList.append(Plot2D('photon_pt_vsply', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('y') ))
     plotList.append(Plot('nearestZ',   'nearestZ',   lambda c : nearestZ(c),                                       [0., 1., 2.], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
     plotList.append(Plot('Z_pt',                  'p_{T}(Z) (GeV)',                   lambda c : Zpt(c),                                            (20, 10, 200)))
     plotList.append(Plot('ZplusPho_pt',           'p_{T}(Z) + p_{T}(pho) (GeV)',                   lambda c : Zpt(c)+c.ph_pt,                (30, 10, 300)))
+    plotList.append(Plot('phMomType',             'phMomType',                                     lambda c : c.genPhMomPdg,                 (50, -25, 25)))
+    plotList.append(Plot('phMomTypeB',            'phMomType',                                     lambda c : abs(c.genPhMomPdg),            [0,8.5,9.5,10.5,18.5,20.5,21.5,22.5,23.5,24.5,25.5], histModifications=xAxisLabels(['quark','/','lepton','/','g','pho','Z','W','/'])))
 
     # extra plots only produced when asked
     if args.extraPlots.lower().count('cj'):
@@ -370,7 +380,8 @@ for year in years:
   copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
   if not args.showSys and not copySyst:
 
-    if args.tag.lower().count('phocb'):                                           reduceType = 'phoCBFEB'
+    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCBFEB'
+    elif args.tag.count('phoCB-ZGorig') or args.tag.count('phoCBfull-ZGorig'):        reduceType = 'phoCB-ZGorig'
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
@@ -449,8 +460,8 @@ for year in years:
       if not args.noZgCorr:
         try:
           nominal = os.path.join(plotDir, args.year, args.tag, 'CHAN', args.selection, 'signalRegions.pkl') if args.sys else ''
-          sysNoZgCorr = os.path.join(plotDir, args.year, args.tag + '-noZgCorr', 'CHAN', args.selection, 'signalRegions.pkl') if args.sys else ''
-          ZgReweight = ZgWeight(c.year, sys = args.sys, nominal = nominal, sysNoZgCorr = sysNoZgCorr)
+          # Zg correction factors are systematic-specific unless specified otherwise
+          ZgReweight = ZgWeight(c.year, sys = '' if args.tag.lower().count('methoda') else args.sys)
         except Exception as ex:
           log.debug(ex)
           log.warning('No Zg estimate source plots available, no problem if not used later')
@@ -529,6 +540,7 @@ for year in years:
   #
   noWarnings = True
   for plot in plots: # 1D plots
+    if isinstance(plot, Plot2D): continue
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
     if not plot.blindRange == None and not year == '2016':
@@ -537,7 +549,6 @@ for year in years:
           for bin in range(1, histo.GetNbinsX()+2):
             if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
               histo.SetBinContent(bin, 0)
-    if isinstance(plot, Plot2D): continue
     if plot.name == "yield":
       log.info("Yields: ")
       for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -627,8 +638,11 @@ for year in years:
   if not args.sys:
     for plot in plots: # 2D plots
       if not hasattr(plot, 'varY'): continue
+      if not args.showSys:
+        plot.applyMods()
+        plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
       for logY in [False, True]:
-        for option in ['SCAT', 'COLZ']:
+        for option in ['SCAT', 'COLZ', 'COLZ TEXT']:
           plot.draw(plot_directory = os.path.join(plotDir, year, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                     logZ           = False,
                     drawOption     = option,
@@ -658,6 +672,7 @@ lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018']
 
 noWarnings = True
 for plot in totalPlots: # 1D plots
+  if isinstance(plot, Plot2D): continue
   if not args.showSys:
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
   if not plot.blindRange == None:
@@ -666,7 +681,6 @@ for plot in totalPlots: # 1D plots
         for bin in range(1, histo.GetNbinsX()+2):
           if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
             histo.SetBinContent(bin, 0)
-  if isinstance(plot, Plot2D): continue
   if plot.name == "yield":
     log.info("Yields: ")
     for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -736,8 +750,11 @@ for plot in totalPlots: # 1D plots
 if not args.sys:
   for plot in totalPlots: # 2D plots
     if not hasattr(plot, 'varY'): continue
+    if not args.showSys:
+      plot.applyMods()
+      plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
     for logY in [False, True]:
-      for option in ['SCAT', 'COLZ']:
+      for option in ['SCAT', 'COLZ', 'COLZ TEXT']:
         plot.draw(plot_directory = os.path.join(plotDir, 'all', args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,

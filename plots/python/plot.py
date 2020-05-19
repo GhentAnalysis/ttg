@@ -615,9 +615,9 @@ class Plot:
         yMin.SetBinContent(i, min(yMin.GetBinContent(i), h.GetBinContent(i)*((1-h.sysValues['Down'].GetBinContent(i)) if hasattr(h, 'sysValues') else 1) - h.GetBinError(i)))
 
     # Check if at least two bins are filled, otherwise skip, unless yield
-    if len(self.getFilledBins(yMax)) < 2 and self.name != 'yield':
-      log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
-      return
+    # if len(self.getFilledBins(yMax)) < 2 and self.name != 'yield':
+    #   log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
+    #   return
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     canvas = getDefaultCanvas(ratio)
@@ -753,6 +753,8 @@ def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
     for p in toRemove: plots.remove(p)
     toRemove = None
 
+
+# TODO maybe generalize, otherwise might just have to use this for ttgamma instead
 # def freezeZgYield(plots, year, tag, channel, selection):
 #   for i, plot in enumerate(plots):
 #     try:

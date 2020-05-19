@@ -160,6 +160,7 @@ def addGenPhotonInfo(t, n, index):
   n.genPhPassParentage = False
   n.genPhPt            = -1
   n.genPhEta           = 99
+  n.genPhMomPdg        = -9999
   for i in range(t._gen_nPh):
     myDeltaR = deltaR(t._phEta[index], t._gen_phEta[i], t._phPhi[index], t._gen_phPhi[i])
     if myDeltaR < n.genPhDeltaR:
@@ -169,6 +170,7 @@ def addGenPhotonInfo(t, n, index):
       n.genPhRelPt         = (t._gen_phPt[i]-t._phPt[n.ph])/t._gen_phPt[i]
       n.genPhPt            = t._gen_phPt[i]
       n.genPhEta           = t._gen_phEta[i]
+      n.genPhMomPdg        = t._gen_phMomPdg[i]
 
   try:
     n.lhePhPt = t._lhePt[[i for i in t._lhePdgId].index(22)]
