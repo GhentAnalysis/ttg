@@ -723,6 +723,10 @@ class Plot:
 
     if saveGitInfo: copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
     log.info('Creating output files for ' + self.name)
+    # save postFit to cache only when plotting with all systematics
+    if postFitInfo and len(systematics) > 1 and not plot_directory.count('-log') and not plot_directory.count('-normMC'):
+      log.info('Saving postfit histograms to cache for ' + self.name)
+      self.saveToCache(plot_directory, '')
     for extension in extensions:
       ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
       log.info(ofile)

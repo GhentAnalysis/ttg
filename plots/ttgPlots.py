@@ -323,11 +323,11 @@ def makePlotList():
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
 
-  # if no kind of photon cut was made (also not in skim) (requiring nphotons=0 is allowed), or no Z-veto is applied -> can unblind
-  phoReq = [selectPhoton, args.tag.count('pho'), args.selection.count('pho') and not args.selection.count('nphoton0')]
-  noZReq = [args.selection.count('offZ'), args.selection.count('llgNoZ')]
-  zReq = [args.selection.count('onZ'), args.selection.count('llgOnZ')]
-  if not any(phoReq) or (not any(noZReq) or any(zReq)):
+  isSR = args.tag.lower().count('phocbfull') or (args.selection.count('passChgIso') and args.selection.count('passSigmaIetaIeta'))
+  # any sideband selection means we can unblind
+  isSideband = [args.selection.count('sidebandSigmaIetaIeta'), args.selection.count('failChgIso'), args.selection.count('onZ'), args.selection.count('llgOnZ')]
+  doBlind = isSR and not any(isSideband)
+  if not doBlind:
     for p in plotList: p.blindRange = None
   return plotList
 
@@ -459,7 +459,7 @@ for year in years:
       npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys))
       if not args.noZgCorr:
         try:
-          nominal = os.path.join(plotDir, args.year, args.tag, 'CHAN', args.selection, 'signalRegions.pkl') if args.sys else ''
+          # nominal = os.path.join(plotDir, args.year, args.tag, 'CHAN', args.selection, 'signalRegions.pkl') if args.sys else ''
           # Zg correction factors are systematic-specific unless specified otherwise
           ZgReweight = ZgWeight(c.year, sys = '' if args.tag.lower().count('methoda') else args.sys)
         except Exception as ex:
@@ -570,8 +570,9 @@ for year in years:
           linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
         extraArgs['systematics']       = showSysList
         extraArgs['linearSystematics'] = linearSystematics
+        extraArgs['postFitInfo']       = year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+        # log.info(extraArgs['postFitInfo'])
         extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
-        extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
 
 
       if args.channel != 'noData':
@@ -702,7 +703,7 @@ for plot in totalPlots: # 1D plots
       extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
-      extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+      # extraArgs['postFitInfo']       = year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
 
 
     if args.channel != 'noData':

@@ -8,8 +8,6 @@ from ttg.plots.systematics import linearSystematics
 #
 def mapName(name):
   if name == 'r':            return 'TTGamma_norm'
-  if name.count('hadronic'): return 'hadronic photons_norm'
-  if name.count('fake'):     return 'hadronic fakes_norm'
   else:                      return name
 
 
@@ -18,11 +16,12 @@ def mapName(name):
 #
 pullsAndConstraints = {}
 dataCard = None
-def updatePullsAndConstraints(newDataCard = 'srFit'):
+def updatePullsAndConstraints(newDataCard):
   global dataCard  # pylint: disable=W0603
   if not dataCard or dataCard != newDataCard:
     dataCard    = newDataCard
-    filename    = os.path.expandvars('$CMSSW_BASE/src/ttg/plots/combine/' + dataCard + '_fitDiagnostics.root')
+    # NOTE temp hardcode
+    filename    = os.path.expandvars('$CMSSW_BASE/src/ttg/plots/pulls/' + newDataCard + '_fitDiagnostics.root')
     resultsFile = ROOT.TFile(filename)
     fitResults  = resultsFile.Get("fit_s").floatParsFinal()
     for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
@@ -55,7 +54,7 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable
       name = sample if isinstance(sample, str) else (sample.name + sample.texName)
       if name.count('data'): continue                                                                            # Skip data
       for i in pullsAndConstraints:
-        if any(x in i for x in ['norm', 'prop', 'nonPrompt']): continue                                          # Skip warning for these cases
+        if any(x in i for x in ['norm', 'prop', 'NP']): continue                                          # Skip warning for these cases
         try:
           value = pullsAndConstraints[i][0]
           if i in linearSystematics and False:
