@@ -249,7 +249,8 @@ for plot in getPlotNames():
   if 'Pt' in plot.split('_')[0]: hratio.GetXaxis().SetTitle('p_{t}(#gamma) [GeV]')
 
   if 'lmisshits3_onz_promptMM_displEE' in plot:
-    print 'double displEleVars[7] = {%s};' % (', '.join(['%.3f' % hratio.GetBinContent(bin) for bin in range(1, 8)]))
+    nbins = hratio.GetNbinsX()
+    print 'double displEleVars[%s] = {%s};' % (nbins, ', '.join(['%.3f' % hratio.GetBinContent(bin) for bin in range(1, nbins+1)]))
 
   zwindow = 'onz' if 'onz' in plot else 'allz'
   plotDir = os.path.join(outdir, zwindow, suff)
