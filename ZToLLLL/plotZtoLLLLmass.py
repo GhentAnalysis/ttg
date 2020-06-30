@@ -13,7 +13,7 @@ argParser.add_argument('--dyExternal',     action='store_true')
 argParser.add_argument('--dyExternalAll',  action='store_true')
 args = argParser.parse_args()
 
-extra = '_dyExternalAll' if args.dyExternalAll else ('_dyExternal' if args.dyExternal else '_new')
+extra = '_dyExternalAll' if args.dyExternalAll else ('_dyExternal' if args.dyExternal else '')
 
 from ttg.tools.helpers import getObjFromFile, copyIndexPHP
 import glob
@@ -28,7 +28,7 @@ def getPlot(path, name):
   return h
 
 def getPlotNames():
-  f = ROOT.TFile(glob.glob(args.year + '_new/*/*.root')[0])
+  f = ROOT.TFile(glob.glob(args.year + '/*/*.root')[0])
   for k in f.GetListOfKeys():
     yield k.GetName()
 
@@ -172,7 +172,7 @@ for plot in getPlotNames():
 
   hists = []
   for label in labels:
-    h = getPlot(args.year + '_new/' +mcnames[label]+'/*.root', plot)
+    h = getPlot(args.year + '/' +mcnames[label]+'/*.root', plot)
     h.Rebin(rebin[iplot])
     for ibin in range(1, 1+h.GetNbinsX()):
       if h.GetBinContent(ibin)<0:
@@ -186,7 +186,7 @@ for plot in getPlotNames():
     hists.append(h)
     leg.AddEntry(h, label, 'F')
 
-  hdata = getPlot(args.year + '_new/' + dataname+'/*.root', plot)
+  hdata = getPlot(args.year + '/' + dataname+'/*.root', plot)
   hdata.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
   hdata.SetMarkerStyle(20)
   hdata.SetMarkerSize(0.8)

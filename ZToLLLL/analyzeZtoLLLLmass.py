@@ -143,7 +143,7 @@ if args.dyExternal:     outName += '_external'
 if args.dyExternalAll:  outName += '_externalAll'
 if args.dyInternal:     outName += '_internal'
 if args.overlapRemoved: outName += '_overlapRemoved'
-outName = '%s/%s/%s_%s.root' % (args.year + '_newSamples', outName, outName, str(args.subJob))
+outName = '%s/%s/%s_%s.root' % (args.year, outName, outName, str(args.subJob))
 
 try:    os.makedirs(os.path.dirname(outName))
 except: pass
