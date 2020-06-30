@@ -2,7 +2,7 @@
 import ROOT
 import sys, os
 import array
-import math as math
+import math
 
 #
 # Argument parser and logging
@@ -11,11 +11,13 @@ import os, argparse, sys
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',       action='store',      default='INFO',         nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'], help="Log level for logging")
 argParser.add_argument('--year',           action='store',      default=None)
-argParser.add_argument('--file',           action='store',      default=None)
+argParser.add_argument('--sample',         action='store',      default=None,           help='Sample for which to produce reducedTuple, as listed in samples/data/tuples*.conf')
 argParser.add_argument('--subJob',         action='store',      default=None,           help='The xth subjob for a sample')
+argParser.add_argument('--splitData',      action='store',      default=None,           help='Splits the data in its separate runs')
 argParser.add_argument('--isChild',        action='store_true', default=False)
 argParser.add_argument('--runLocal',       action='store_true', default=False)
 argParser.add_argument('--dyExternal',     action='store_true', default=False)
+argParser.add_argument('--overlapRemoved', action='store_true', default=False)
 argParser.add_argument('--dyInternal',     action='store_true', default=False)
 argParser.add_argument('--dyExternalAll',  action='store_true', default=False)
 argParser.add_argument('--dryRun',         action='store_true', default=False,          help='do not launch subjobs')
@@ -27,63 +29,37 @@ from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 
-def getXsec(path):
-  if '2018' in path and 'DYJetsToLL_M-50' in path and 'amcatnlo' in path: return None # there's no statistics in that sample
-  if   'ZGTo2LG'                   in path: return 117.864
-  elif 'ZGToLLG'                   in path: return 50.2
-  elif 'WGToLNuG'                  in path: return 489.
-  elif 'DYJetsToLL_M-10to50'       in path: return 18610.
-  elif 'DYJetsToLL_M-50'           in path: return 2008.0*3
-  elif 'ZZTo4L'                    in path: return 1.256*1.1
-  elif 'TTJets_DiLept'             in path: return 87.315
-  elif 'TTTo2L2Nu'                 in path: return 87.315
-  elif 'TTJets_SingleLeptFromT'    in path: return 182.17540224
-  elif 'TTJets_SingleLeptFromTbar' in path: return 182.17540224
-  elif 'TTToSemilepton'            in path: return 2*182.17540224
-  elif 'TTToSemiLepton'            in path: return 2*182.17540224
-  elif 'WZG'                       in path: return 0.04123
-  elif 'WZZ'                       in path: return 0.05565
-  elif 'WZTo3LNu'                  in path: return 38.2
-  elif 'data'                      in path: return 1.
-  else:                                     return None
-
-def getTotalJobs(path):
-  if   'ZGTo2LG'                   in path: return 10
-  elif 'ZGToLLG'                   in path: return 10
-  elif 'WGToLNuG'                  in path: return 10
-  elif 'DYJetsToLL_M-10to50'       in path: return 10
-  elif 'DYJetsToLL_M-50'           in path: return 10
-  elif 'ZZTo4L'                    in path: return 10
-  elif 'TTJets_DiLept'             in path: return 10
-  elif 'TTTo2L2Nu'                 in path: return 10
-  elif 'TTJets_SingleLeptFromT'    in path: return 10
-  elif 'TTJets_SingleLeptFromTbar' in path: return 10
-  elif 'TTToSemilepton'            in path: return 10
-  elif 'TTToSemiLepton'            in path: return 10
-  elif 'WZG'                       in path: return 10
-  elif 'WZZ'                       in path: return 10
-  elif 'WZTo3LNu'                  in path: return 10
-  elif 'data'                      in path: return 100 
-  else:                                     return None
-
+#
+# Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
+#
+from ttg.samples.Sample import createSampleList, getSampleFromList
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/ZToLLLL/tuples_%s.conf' % args.year))
 
 #
 # Submit subjobs
 #
 if not args.isChild:
-  import glob
-  jobs = []
-  for year in (['2016', '2016BCDEF', '2016GH', '2017', '2018'] if not args.year else [args.year]):
-    indir = '/pnfs/iihe/cms/store/user/mvit/samples/FINAL/%s/' % year.replace('BCDEF', '').replace('GH', '')
-    for s in (glob.glob(os.path.join(indir, '*.root')) if not args.file else [args.file.split('/')[-1]]):
-      if (args.dyExternal or args.dyExternalAll or args.dyInternal) and not 'DY' in s: continue
-      if getXsec(s):
-        for i in range(getTotalJobs(s)):
-          jobs.append((year, s.split('/')[-1].replace('.root', ''), str(i)))
-
   from ttg.tools.jobSubmitter import submitJobs
-  submitJobs(__file__, ('year', 'file', 'subJob'), jobs, argParser, jobLabel = "HNL", wallTime="25")
-  sys.exit(0)
+  if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
+
+  jobs = []
+  for sample in sampleList:
+    if args.dyExternal or args.dyInternal or args.dyExternalAll or args.overlapRemoved:
+      if not ('ZG' in sample.name or 'DY' in sample.name): continue
+    if sample.isData:
+      if args.splitData:                     splitData = [args.splitData]
+      elif '2016' in sample.productionLabel: splitData = ['B', 'C', 'D', 'E', 'F', 'G', 'H']
+      elif '2017' in sample.productionLabel: splitData = ['B', 'C', 'D', 'E', 'F']
+      elif '2018' in sample.productionLabel: splitData = ['A', 'B', 'C', 'D']
+    else:                                    splitData = [None]
+    jobs += [(sample.name, args.year, str(i), j) for i in xrange(sample.splitJobs) for j in splitData]
+  submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, jobLabel = "HN")
+  exit(0)
+
+
+sample = getSampleFromList(sampleList, args.sample)
+tree   = sample.initTree(shortDebug=False, splitData=args.splitData)
+
 
 def getLorentzVector(t, index):
   vector = ROOT.TLorentzVector()
@@ -151,8 +127,6 @@ def passMuoDisplMedium(tree, i):
     isGoodGlb = (tree._lGlobalMuon[i] and tree._lCQChi2Position[i]<12. and tree._lCQTrackKink[i]<20.)
     return ((tree._lPOGLoose[i] and isGoodGlb and tree._lMuonSegComp[i]>0.303) or (tree._lPOGLoose[i] and tree._lMuonSegComp[i]>0.451))
 
-
-
 # dxy binning
 dxybins = array.array('f', [0.0, 0.01, 0.011, 0.013, 0.015, 0.017, 0.019, 0.022, 0.025, 0.028, 0.032, 0.037, 0.042, 0.048, 0.055, 0.062, 0.071, 0.081, 0.092,
                             0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.23, 0.26, 0.3, 0.34, 0.39, 0.44, 0.5, 0.57, 0.65, 0.74, 0.85, 0.96, 
@@ -163,21 +137,13 @@ dxybins = array.array('f', [0.0, 0.01, 0.011, 0.013, 0.015, 0.017, 0.019, 0.022,
 trigmaskEle = 3 if args.year==2017 else 1
 trigmaskMuo = 3 if args.year==2016 else 1
 
-# We need to speed up this script, so split it
-def getEventRange(entries, totalJobs, subJob):                                                                # pylint: disable=R0201
-  thresholds = [i*entries/totalJobs for i in range(totalJobs)]+[entries]
-  return xrange(thresholds[subJob], thresholds[subJob+1])
-
-indir    = '/pnfs/iihe/cms/store/user/mvit/samples/FINAL/%s/' % args.year.replace('BCDEF', '').replace('GH', '')
-filename = os.path.join(indir, args.file + '.root')
-log.info('Analyzing ' + args.file)
-
 # Output file
-outName = filename.split('/')[-1].split('_')[1 if 'DY' in filename else 0].split('.root')[0].replace('2018','') + ('_ext' if 'ext' in filename else '') # there is really no structure in those files so you end up with a dragon like this
-if args.dyExternal:    outName += '_external'
-if args.dyExternalAll: outName += '_externalAll'
-if args.dyInternal:    outName += '_internal'
-outName = '%s/%s/%s_%s.root' % (args.year + '_new', outName, outName, str(args.subJob))
+outName = sample.name 
+if args.dyExternal:     outName += '_external'
+if args.dyExternalAll:  outName += '_externalAll'
+if args.dyInternal:     outName += '_internal'
+if args.overlapRemoved: outName += '_overlapRemoved'
+outName = '%s/%s/%s_%s.root' % (args.year + '_newSamples', outName, outName, str(args.subJob))
 
 try:    os.makedirs(os.path.dirname(outName))
 except: pass
@@ -189,20 +155,8 @@ if not args.overwrite and isValidRootFile(outName):
 
 fout = ROOT.TFile(outName, 'recreate')
 
-# Get tree
-file = ROOT.TFile.Open(filename)
-tree = file.Get('blackJackAndHookers/blackJackAndHookersTree')
-
-# Get weight
-if args.year=='2016':        lumi = 35.867
-elif args.year=='2016BCDEF': lumi = 35.867-16.3
-elif args.year=='2016GH':    lumi = 16.3 
-elif args.year=='2017':      lumi = 41.530
-elif args.year=='2018':      lumi = 59.688
-scale = 1.
-if 'data' not in filename:
-    hw    = file.Get('blackJackAndHookers/hCounter')
-    scale = getXsec(filename)*lumi*1000./hw.GetBinContent(1)
+if not sample.isData:
+  lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
 
 # Histo classes
 promptflavs = ['_promptEE', '_promptMM']
@@ -237,21 +191,19 @@ for promptflav in promptflavs:
           addHist('ooEmoop'+type+onz+suff,  '1/E-1/P', nbins=50, minX=0., maxX=0.15)
           addHist('dEtaInSeed'+type+onz+suff,  'dEtaInSeed', nbins=50, minX=-.01, maxX=.01)
 
-if args.year=='2016': mllMass=15
-else:                 mllMass=10
-
 from ttg.tools.progressBar import progressbar
-for iEvent in progressbar(getEventRange(tree.GetEntries(), getTotalJobs(filename), int(args.subJob)), args.file.split('/')[-1].split('_')[0], 100):
-    tree.GetEntry(iEvent)
+log.info('Starting event loop')
+for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
+    if tree.GetEntry(i) < 0: 
+      log.warning("problem reading entry, skipping")
+      continue
+
     if tree._nEle<1:   continue
     if tree._nLight<3: continue
-    if args.year=='2016BCDEF' and 'data' in filename and tree._runNb > 278808: continue
-    if args.year=='2016GH' and 'data' in filename and tree._runNb < 278820: continue
-     # Unfortunately, the overlap removal variable is still missing from these (extremely old?) tuples
-#    if 'DY' in filename and '2016' in year and tree._zgEventType<3: continue
-#    if 'DY' in filename and not '2016' in year and tree._zgOldEventType<3: continue
 
-
+    if args.overlapRemoved:
+      if 'DY' in args.sample and tree._zgEventType>=3: continue
+      if 'ZG' in args.sample and tree._hasInternalConversion: continue
 
     tightIndices = []
     looseIndices = []
@@ -329,25 +281,27 @@ for iEvent in progressbar(getEventRange(tree.GetEntries(), getTotalJobs(filename
         else:                                                             return -1
       except:                                                             return -1
 
-    if ('DY' in filename):
-      photonPt = max([getExternalPhotonPt(tree, i) for i in looseIndices + tightIndices])
+    if not args.overlapRemoved:
+      if ('DY' in args.sample):
+        photonPt = max([getExternalPhotonPt(tree, i) for i in looseIndices + tightIndices])
 
-      if args.dyExternal:
-        if photonPt > (10 if args.year=='2016' else 15) or photonPt < 0: continue
-      elif args.dyExternalAll:
-        if photonPt < 0: continue
-      elif args.dyInternal:
-        if photonPt > 0: continue
-      else:
-        if photonPt > (10 if args.year=='2016' else 15): continue
+        if args.dyExternal:
+          if photonPt > 15 or photonPt < 0: continue
+        elif args.dyExternalAll:
+          if photonPt < 0: continue
+        elif args.dyInternal:
+          if photonPt > 0: continue
+        elif not args.overlapRemoved:
+          if photonPt > 15: continue
 
-    if ('ZG' in filename):
-      photonPt = max([getExternalPhotonPt(tree, i) for i in looseIndices + tightIndices])
-      if photonPt < (10 if args.year=='2016' else 15): continue
+      if ('ZG' in args.sample):
+        photonPt = max([getExternalPhotonPt(tree, i) for i in looseIndices + tightIndices])
+        if photonPt < 15: continue
 
     def closestDeltaR(index):
       return min([deltaR(tree, index, i) for i in tightIndices])
 
+    scl = 1 if sample.isData else lumiWeights[0]*tree._weight
     def fillVariables(suffixes, index):
       hists['photonPt'+suffixes].Fill(getExternalPhotonPt(tree, index), scl)
       hists['dxy'+suffixes].Fill(abs(tree._dxy[index]), scl)
@@ -365,7 +319,6 @@ for iEvent in progressbar(getEventRange(tree.GetEntries(), getTotalJobs(filename
         hists['ooEmoop'+suffixes].Fill(tree._lEleInvMinusPInv[index], scl)
         hists['dEtaInSeed'+suffixes].Fill(tree._lEleDEtaInSeed[index], scl)
 
-    scl = 1 if 'data' in filename else scale * tree._weight
     if len(loosePair)==1:
       zmass = (getLorentzVector(tree, tightPair[0]) + getLorentzVector(tree, tightPair[1]) + getLorentzVector(tree, loosePair[0])).M()
       hists['zmass3'+suffix].Fill(zmass, scl)
