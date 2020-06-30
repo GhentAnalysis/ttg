@@ -189,6 +189,7 @@ for plot in getPlotNames():
   leg.SetFillStyle(0)
   leg.SetFillColor(0)
 
+  hists = []
   for label in labels:
     h = getPlot(args.year + '_new/' +mcnames[label]+'/*.root', plot)
     h.Rebin(rebin[iplot])
@@ -201,6 +202,7 @@ for plot in getPlotNames():
     h.SetFillColor(cols[label])
     h.GetXaxis().SetRangeUser(binmn[iplot], binmx[iplot])
     hstk.Add(h)
+    hists.append(h)
     leg.AddEntry(h, label, 'F')
 
   hdata = getPlot(args.year + '_new/' + dataname+'/*.root', plot)
@@ -208,6 +210,11 @@ for plot in getPlotNames():
   hdata.SetMarkerStyle(20)
   hdata.SetMarkerSize(0.8)
   hdata.Rebin(rebin[iplot])
+
+  if not hbkg.Integral(): continue
+  for h in hists:
+    h.Scale(hdata.Integral()/hbkg.Integral())
+  hbkg.Scale(hdata.Integral()/hbkg.Integral())
 
   c = ROOT.TCanvas('c_'+plot, 'c_'+plot, 600, 700)
   p1 = ROOT.TPad('p1', 'p1', 0., 0., 1., 0.25)
@@ -265,6 +272,6 @@ for plot in getPlotNames():
   zwindow = 'onz' if 'onz' in plot else 'allz'
   plotDir = os.path.join(outdir, zwindow, suff)
   copyIndexPHP(plotDir + '/', outdir)
-#  c.SaveAs(os.path.join(plotDir, plot+'.png'))
-#  c.SaveAs(os.path.join(plotDir, plot+'.pdf'))
-#  c.SaveAs(os.path.join(plotDir, plot+'.root'))
+  c.SaveAs(os.path.join(plotDir, plot+'.png'))
+  c.SaveAs(os.path.join(plotDir, plot+'.pdf'))
+  c.SaveAs(os.path.join(plotDir, plot+'.root'))
