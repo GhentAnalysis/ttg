@@ -50,45 +50,33 @@ nplot = len(plots)
 # Labels
 if args.dyExternal:
   labels = [
-        #'W #plus jets',
         'Z (10-50) ext',
         'Z (10-50) int',
         'Z (>50) ext',
         'Z (>50) int',
         'W#gamma',
         'Z#gamma',
-        #'WZ',
-        #'ZZ#rightarrow4l',
         't#bar{t}(2l)',
         't#bar{t}(1l)',
-        #'WZ#gamma'
     ]
 elif args.dyExternalAll:
   labels = [
-        #'W #plus jets',
         'Z (10-50) ext',
         'Z (10-50) int',
         'Z (>50) ext',
         'Z (>50) int',
         'W#gamma',
-        #'WZ',
-        #'ZZ#rightarrow4l',
         't#bar{t}(2l)',
         't#bar{t}(1l)',
-        #'WZ#gamma'
     ]
 else:
   labels = [
-      #'W #plus jets',
       'Z (10-50)',
       'Z (>50)',
       'W#gamma',
       'Z#gamma',
-      #'WZ',
-      #'ZZ#rightarrow4l',
       't#bar{t}(2l)',
       't#bar{t}(1l)',
-      #'WZ#gamma'
   ]
 
 
@@ -106,13 +94,8 @@ cols['Z#gamma'                    ] = ROOT.kMagenta-10
 cols['WZ'                         ] = ROOT.kPink+1
 cols['ZZ#rightarrow4l'            ] = ROOT.kRed-7
 cols['t#bar{t}(2l)'               ] = ROOT.kRed-10
-#cols['t#bar{t}#rightarrowl#bar{t}'] = ROOT.kOrange-9
-#cols['t#bar{t}#rightarrowtl'      ] = ROOT.kYellow-10
 cols['t#bar{t}(1l)'               ] = ROOT.kOrange-9
 cols['WZ#gamma'                   ] = ROOT.kSpring+1
-#cols[] = ROOT.kGreen-10
-#cols[] = ROOT.kTeal-9
-#cols[] = ROOT.kCyan-10
 
 # Histo classes
 promptflavs = ['_promptEE', '_promptMM']
@@ -122,7 +105,6 @@ outdir = '/user/tomc/public_html/hnl/danielePlots/%s' % (args.year + extra)
 
 
 mcnames = {}
-#mcnames['W #plus jets'               ] = 'WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8_realistic_v10_Fall17'
 mcnames['Z (10-50)'                  ] = 'M-10to50'
 mcnames['Z (10-50) ext'              ] = 'M-10to50_external' if args.dyExternal else 'M-10to50_externalAll'
 mcnames['Z (10-50) int'              ] = 'M-10to50_internal'
@@ -171,7 +153,6 @@ def drawLumi():
 
 # Get plots
 for plot in getPlotNames():
-  if not 'lmisshits3_onz_promptMM_displEE' in plot: continue
   suff='prompt'+plot.split('_prompt')[-1]
   for i, plotSetting in enumerate(plots):
     if plotSetting in plot: 
@@ -267,7 +248,8 @@ for plot in getPlotNames():
   if 'pt' in plot.split('_')[0]: hratio.GetXaxis().SetTitle('p_{t}(lep) [GeV]') # temporary, fixed in next run of analyzeZtoLLLLmass.py
   if 'Pt' in plot.split('_')[0]: hratio.GetXaxis().SetTitle('p_{t}(#gamma) [GeV]')
 
-  print 'double displEleVars[7] = {%s};' % (', '.join(['%.3f' % hratio.GetBinContent(bin) for bin in range(1, 8)]))
+  if 'lmisshits3_onz_promptMM_displEE' in plot:
+    print 'double displEleVars[7] = {%s};' % (', '.join(['%.3f' % hratio.GetBinContent(bin) for bin in range(1, 8)]))
 
   zwindow = 'onz' if 'onz' in plot else 'allz'
   plotDir = os.path.join(outdir, zwindow, suff)
