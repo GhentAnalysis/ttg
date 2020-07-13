@@ -9,6 +9,8 @@ import os
 from ttg.tools.uncFloat import UncFloat
 from ttg.tools.helpers  import getObjFromFile, multiply
 from math import sqrt
+import ROOT
+ROOT.gROOT.SetBatch(True)
 
 dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 
@@ -45,41 +47,63 @@ class LeptonSF:
       self.muGH += [getObjFromFile(os.path.expandvars(os.path.join(dataDir, filename)), key) for (filename, key) in keys_mu_GH['ID']]
       for effMap in self.muGH:
         assert effMap
-        effMap.ptY = (year == '2016')
-
-    for effMap in self.mu:  effMap.ptY = (year == '2016')
-    for effMap in self.ele: effMap.ptY = True
     for effMap in self.mu + self.ele: assert effMap
-
-    self.absEtaMu = year in ['2017','2018']
-    self.altEdge = year == '2018'
 
   @staticmethod
   def getPartialSF(effMap, x, y):
-    if effMap.ptY: x, y = y, x
-    sf  = effMap.GetBinContent(effMap.GetXaxis().FindBin(x), effMap.GetYaxis().FindBin(y))
-    err = effMap.GetBinError(  effMap.GetXaxis().FindBin(x), effMap.GetYaxis().FindBin(y))
+    sf  = effMap.GetBinContent(x, y)
+    err = effMap.GetBinError(x, y)
     return UncFloat(sf, err)
 
-  def getSF(self, tree, index, pt, elSigma=0, muSigma=0):
-    flavor = tree._lFlavor[index]
-    eta    = tree._lEta[index] if flavor == 1 else tree._lEtaSC[index]
-
+  def getTestSF(self, x, y, flavor, elSigma=0, muSigma=0):
     if abs(flavor) == 1:
-      if self.absEtaMu: eta = abs(eta)
-      if pt >= 120: pt = 119 # last bin is valid to infinity
-      if self.altEdge and pt <= 15: pt = 16
-      elif pt <= 20: pt = 21
-      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.mu)
+      sf = multiply( self.getPartialSF(effMap, x, y) for effMap in self.mu)
       if hasattr(self, 'muGH'): # for 2016 self.muGH is defined and needs to be taken into account
-        sf = (0.549792*sf + 0.450208*multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.muGH))
-      return (1+sf.sigma*muSigma)*sf.val
+        sf = (0.549792*sf + 0.450208*multiply( self.getPartialSF(effMap, x, y) for effMap in self.muGH))
+      return sf
     elif abs(flavor) == 0:
-      if pt >= 500: pt = 499 # last bin is valid to infinity
-      if pt <= 10: pt = 11 # we don't go this low though
-      sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.ele)
-      return (1+sf.sigma*elSigma)*sf.val
+      sf = multiply( self.getPartialSF(effMap, x, y) for effMap in self.ele)
+      # print sf
+      return sf
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)
 
     # REMOVED 1% additional uncertainty to account for phase space differences between Z and ttbar (uncorrelated with TnP sys)
+
+# draw histrograms of the SF and their errors
+if __name__ == '__main__':
+  for year in ['2016','2017','2018']:
+    SF = LeptonSF(year)
+    hist = SF.mu[0].Clone()
+    for i in range(1, hist.GetNbinsX()+1):
+      for j in range(1, hist.GetNbinsX()+1):
+        hist.SetBinContent(i, j, round(SF.getTestSF(i,j, 1).val, 4))
+    c1 = ROOT.TCanvas('c', 'c', 2400, 700)
+    hist.Draw('COLZ TEXT')
+    c1.SaveAs('sfMu' + year + '.png')
+
+    hist = SF.mu[0].Clone()
+    for i in range(1, hist.GetNbinsX()+1):
+      for j in range(1, hist.GetNbinsX()+1):
+        hist.SetBinContent(i, j, round(SF.getTestSF(i,j, 1).sigma, 4))
+    c1 = ROOT.TCanvas('c', 'c', 2400, 700)
+    hist.Draw('COLZ TEXT')
+    c1.SaveAs('errMu' + year + '.png')
+
+    hist = SF.ele[0].Clone()
+    for i in range(1, hist.GetNbinsX()+1):
+      for j in range(1, hist.GetNbinsX()+1):
+        hist.SetBinContent(i, j, round(SF.getTestSF(i,j, 0).val, 4))
+    c1 = ROOT.TCanvas('c', 'c', 2400, 700)
+    hist.Draw('COLZ TEXT')
+    c1.SaveAs('sfEl' + year + '.png')
+
+    hist = SF.ele[0].Clone()
+    for i in range(1, hist.GetNbinsX()+1):
+      for j in range(1, hist.GetNbinsX()+1):
+        print SF.getTestSF(i,j, 0).val
+        print SF.getTestSF(i,j, 0).sigma
+        hist.SetBinContent(i, j, round(SF.getTestSF(i,j, 0).sigma, 4))
+    c2 = ROOT.TCanvas('c', 'c', 2400, 700)
+    hist.Draw('COLZ TEXT')
+    c2.SaveAs('errEl' + year + '.png')

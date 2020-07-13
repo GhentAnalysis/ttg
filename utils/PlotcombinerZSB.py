@@ -92,45 +92,45 @@ def phoClosure(CRTF, CRLF, SRTF, SRLF, CRTH, CRLH, SRTH, SRLH, outName, plotName
 for plot in ['photon_pt_large','photon_eta_large','yield', 'signalRegions', 'njets','phBJetDeltaR','phJetDeltaR_small','phRawJetDeltaR_WIDE']:  
 # CL ALL 
 # clfullcb chiso Z
-    try: phoClosure(basePath +   'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      'ZSBplots/' + plot + '_ZSBChiso_clallcb_njet1p_nar.pdf',
+    try: phoClosure(basePath +   'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      'ZSBplots/' + plot + '_ZSBChiso_njet1p_nar.pdf',
                   plot
                   )
     except Exception as e:
       print(e)
 
 # clallcb sigma Z
-    try: phoClosure(basePath +   'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      'ZSBplots/' + plot + '_ZSBSigma_clallcb_njet1p_nar.pdf',
+    try: phoClosure(basePath +   'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      'ZSBplots/' + plot + '_ZSBSigma_njet1p_nar.pdf',
                   plot
                   )
     except Exception as e:
       print(e)
 
 # clallcb OR Z
-    try: phoClosure(basePath +   'phoCBfull-clallcb-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCBfull-clallcb-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCBfull-clallcb-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCBfull-clallcb-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      'ZSBplots/' + plot + '_ZSboth_clallcb_njet1p_nar.pdf',
+    try: phoClosure(basePath +   'phoCBfull-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYFake/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCBfull-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCBfull-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYHad/noData/llg-njet1p-onZnar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCBfull-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      'ZSBplots/' + plot + '_ZSboth_njet1p_nar.pdf',
                   plot
                   )
     except Exception as e:
@@ -139,45 +139,45 @@ for plot in ['photon_pt_large','photon_eta_large','yield', 'signalRegions', 'nje
 
 
 # CL ALL 
-    try: phoClosure(basePath +   'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      'ZSBplots/' + plot + '_ZSBChiso_clallcb_njet1p_Vnar.pdf',
+    try: phoClosure(basePath +   'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-passChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passSigmaIetaIeta-failChgIso-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      'ZSBplots/' + plot + '_ZSBChiso_njet1p_Vnar.pdf',
                   plot
                   )
     except Exception as e:
       print(e)
 
 # clallcb sigma Z
-    try: phoClosure(basePath +   'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      'ZSBplots/' + plot + '_ZSBSigma_clallcb_njet1p_Vnar.pdf',
+    try: phoClosure(basePath +   'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-passSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-passChgIso-sidebandSigmaIetaIeta-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      'ZSBplots/' + plot + '_ZSBSigma_njet1p_Vnar.pdf',
                   plot
                   )
     except Exception as e:
       print(e)
 
 # clallcb OR Z
-    try: phoClosure(basePath +   'phoCBfull-clallcb-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCBfull-clallcb-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCBfull-clallcb-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCBfull-clallcb-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      basePath + 'phoCB-clallcb-failOrSide-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
-                      'ZSBplots/' + plot + '_ZSboth_clallcb_njet1p_Vnar.pdf',
+    try: phoClosure(basePath +   'phoCBfull-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYFake/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCBfull-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYFake/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCBfull-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYHad/noData/llg-njet1p-onZverynar-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCBfull-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      basePath + 'phoCB-failOrSide-onlyTTDYHad/noData/llg-njet1p-offZ-llgNoZ-photonPt20/'+ plot + '.pkl',
+                      'ZSBplots/' + plot + '_ZSboth_njet1p_Vnar.pdf',
                   plot
                   )
     except Exception as e:

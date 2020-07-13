@@ -91,6 +91,7 @@ forward     = args.tag.count('forward')
 prefire     = args.tag.count('prefireCheck')
 noWeight    = args.tag.count('noWeight')
 normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay', 'compareWithTT', 'compareTTSys', 'compareTTGammaSys', 'normalize', 'IsoRegTTDil', 'IsoFPTTDil'])
+onlyMC = args.tag.count('onlyMC')
 
 selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
@@ -112,6 +113,7 @@ if args.year == 'all':
       exit(0)
 
 tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/tuples_' + y + '.conf') for y in ['2016', '2017', '2018', 'comb']}
+# tupleFiles = {y : os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_' + y + '.conf') for y in ['2016']}
 
 # when running over all years, just initialise the plots with the stack for 16
 stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.year == 'all' else args.year]),
@@ -155,7 +157,7 @@ def plphpt(tree):
 #
 # Define plots
 #
-Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'))
+Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'), modTexLeg = [('(genuine)', '')] if args.tag.lower().count('nice') else [])
 Plot2D.setDefaults(stack=stack)
 
 from ttg.plots.plotHelpers  import *
@@ -283,6 +285,11 @@ def makePlotList():
     plotList.append(Plot2D('photon_pt_vspl', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140)))
     plotList.append(Plot2D('photon_pt_vsplx', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('x') ))
     plotList.append(Plot2D('photon_pt_vsply', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('y') ))
+# TODO temp 
+    plotList.append(Plot('max_l_SigmaIetaIeta', '#sigma_{i#etai#eta}(l max)',           lambda c : max(c._lElectronSigmaIetaIeta[c.l1], c._lElectronSigmaIetaIeta[c.l2]),                           (80, 0, 0.04)))
+    plotList.append(Plot('max_l_SigmaIetaIetaFP', '#sigma_{i#etai#eta}(l max)',           lambda c : max(c._lElectronSigmaIetaIeta[c.l1], c._lElectronSigmaIetaIeta[c.l2]),                           [-0.01,0.011,0.8]))
+    plotList.append(Plot2D('mll_mllg', 'm(ll) (GeV)', lambda c : c.mll , (25, 0, 500), 'm(ll#gamma) (GeV)', lambda c : c.mllg , (40, 0, 800) ))
+
     plotList.append(Plot('nearestZ',   'nearestZ',   lambda c : nearestZ(c),                                       [0., 1., 2.], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
     plotList.append(Plot('Z_pt',                  'p_{T}(Z) (GeV)',                   lambda c : Zpt(c),                                            (20, 10, 200)))
     plotList.append(Plot('ZplusPho_pt',           'p_{T}(Z) + p_{T}(pho) (GeV)',                   lambda c : Zpt(c)+c.ph_pt,                (30, 10, 300)))
@@ -381,6 +388,7 @@ for year in years:
   if not args.showSys and not copySyst:
 
     if args.tag.lower().count('phocb'):                                             reduceType = 'phoCBFEB'
+    # if args.tag.lower().count('phocb'):                                             reduceType = 'phoCBtest'
     elif args.tag.count('phoCB-ZGorig') or args.tag.count('phoCBfull-ZGorig'):        reduceType = 'phoCB-ZGorig'
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
@@ -396,13 +404,16 @@ for year in years:
     for sample in sum(stack, []):
 
 
-      dumpArray = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]),
-                   ("_phNeutralHadronIsolation", lambda c : c._phNeutralHadronIsolation[c.ph]),
-                   ("_phPhotonIsolation", lambda c : c._phPhotonIsolation[c.ph]),
-                   ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph]),
-                   ('puChargedHadronIso', lambda c : c._puChargedHadronIso[c.ph]),
-                   ('phoWorstChargedIsolation', lambda c : c._phoWorstChargedIsolation[c.ph])]
+      # dumpArray = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]),
+      #              ("_phNeutralHadronIsolation", lambda c : c._phNeutralHadronIsolation[c.ph]),
+      #              ("_phPhotonIsolation", lambda c : c._phPhotonIsolation[c.ph]),
+      #              ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph]),
+      #              ('puChargedHadronIso', lambda c : c._puChargedHadronIso[c.ph]),
+                  #  ('phoWorstChargedIsolation', lambda c : c._phoWorstChargedIsolation[c.ph])]
+      dumpArray = [("ph_pt", lambda c : c.ph_pt),
+                   ("pl_ph_pt", lambda c : plphpt(c))]
       dumpArray = [(variable, expression, []) for variable, expression in dumpArray]
+      weightArray = []
       cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
       if not sample.isData and args.sys:
         cutString = applySysToString(sample.name, args.sys, cutString)
@@ -506,9 +517,10 @@ for year in years:
 
         if args.dumpArrays:
           for variable, expression, array in dumpArray:
-            if sample.isData: array.append((expression(c), eventWeight))
-            else:             array.append((expression(c), eventWeight))
-      dumpArrays[sample.name] = {variable: array for variable, expression, array in dumpArray}
+            array.append(expression(c))
+          weightArray.append(eventWeight)
+      dumpArrays[sample.name + sample.texName] = {variable: array for variable, expression, array in dumpArray}
+      dumpArrays[sample.name + sample.texName]['eventWeight'] = weightArray
       phoCBfull = origCB
       args.tag = origTag
   if not args.showSys and copySyst:
@@ -558,7 +570,7 @@ for year in years:
   #
     if not args.sys or args.showSys:
       extraArgs = {}
-      normalizeToMC = [False, True] if args.channel != 'noData' else [False]
+      normalizeToMC = [False, True] if (args.channel != 'noData' and not onlyMC) else [False]
       if args.tag.count('onlydata'):
         extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
         extraArgs['systematics'] = ['sideBandUnc']
@@ -570,7 +582,7 @@ for year in years:
           linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
         extraArgs['systematics']       = showSysList
         extraArgs['linearSystematics'] = linearSystematics
-        extraArgs['postFitInfo']       = year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+        extraArgs['postFitInfo']       = (year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit')) if args.post else None
         # log.info(extraArgs['postFitInfo'])
         extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
 
@@ -629,7 +641,7 @@ for year in years:
                     logY              = logY,
                     sorting           = False,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-                    drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')),
+                    drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)),
                     # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                     **extraArgs
           )
@@ -647,7 +659,7 @@ for year in years:
           plot.draw(plot_directory = os.path.join(plotDir, year, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                     logZ           = False,
                     drawOption     = option,
-                    drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')))
+                    drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)))
                     
   if args.dumpArrays: 
     dumpArrays["info"] = " ".join(s for s in [args.year, args.selection, args.channel, args.tag, args.sys] if s) 
@@ -690,7 +702,7 @@ for plot in totalPlots: # 1D plots
   #
   if not args.sys or args.showSys:
     extraArgs = {}
-    normalizeToMC = [False, True] if args.channel != 'noData' else [False]
+    normalizeToMC = [False, True] if (args.channel != 'noData' and not onlyMC) else [False]
     if args.tag.count('onlydata'):
       extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
       extraArgs['systematics'] = ['sideBandUnc']
@@ -741,7 +753,7 @@ for plot in totalPlots: # 1D plots
                   logY              = logY,
                   sorting           = False,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-                  drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
+                  drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData' or onlyMC)),
                   # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                   **extraArgs
         )
@@ -759,6 +771,6 @@ if not args.sys:
         plot.draw(plot_directory = os.path.join(plotDir, 'all', args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,
-                  drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')))
+                  drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData' or onlyMC)))
 if noWarnings: log.info('Finished')
 else:          log.info('Could not produce all plots - finished')

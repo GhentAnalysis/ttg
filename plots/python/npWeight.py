@@ -10,6 +10,7 @@ from ttg.tools.logger import getLogger
 log = getLogger()
 import pickle
 import time
+import ROOT
 
 sourceHists ={'2016': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
@@ -114,5 +115,14 @@ class npWeight:
     else: return 1.
 
 if __name__ == '__main__':
+  ROOT.gROOT.SetBatch(True)
+  ROOT.gStyle.SetPadRightMargin(0.12)
+  ROOT.TH2.SetDefaultSumw2()
+  ROOT.gStyle.SetOptStat('')
+  ROOT.gStyle.SetPaintTextFormat("4.4f")
   tester = npWeight('2016', 0.)
-  tester.dataEst.Draw("COLZ TEXT")
+  c1 = ROOT.TCanvas('c', 'c', 900, 800)
+  tester.dataEst.Draw("COLZ TEXT E")
+  c1.SaveAs('npWeightMap.png')
+
+  

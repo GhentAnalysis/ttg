@@ -40,12 +40,15 @@ def getLorentzVector(pt, eta, phi, e):
 # Individual lepton selector
 #
 def leptonPt(tree, index):
-  if tree._lFlavor[index]: return tree._lPt[index]
-  else:                    return tree._lPtCorr[index]
+  if tree._lFlavor[index]: return getattr(tree, '_lPt'+tree.muvar)[index]
+  else:                    return getattr(tree, '_lPt'+tree.egvar)[index]
 
 def leptonE(tree, index):
-  if tree._lFlavor[index]: return tree._lE[index]
-  else:                    return tree._lECorr[index]
+  if tree._lFlavor[index]: return getattr(tree, '_lE'+tree.muvar)[index]
+  else:                    return getattr(tree, '_lE'+tree.egvar)[index]
+
+def photonPt(tree, index): return getattr(tree, '_phPt'+tree.egvar)[index]
+def photonE(tree, index):  return getattr(tree, '_phE'+tree.egvar)[index]
 
 
 def looseLeptonSelector(tree, index):
@@ -129,7 +132,7 @@ def selectLeptons(t, n, minLeptons):
 # Photon selector with reduced cut based ID Fall17V2 (i.e. leaving out chgIso and sigmaIetaIeta cuts)
 #
 def photonCutBasedReduced(c, index):
-  pt = c._phPtCorr[index]
+  pt = photonPt(c, index)
   if abs(c._phEtaSC[index]) < 1.479:
     if c._phHadTowOverEm[index] > 0.02197:                                         return False
     if c._phNeutralHadronIsolation[index] > 1.189 + 0.01512*pt + 0.00002259*pt*pt: return False
@@ -144,9 +147,8 @@ def photonCutBasedReduced(c, index):
 def photonSelector(tree, index, n, minLeptons):
   if abs(tree._phEta[index]) > 1.4442 and abs(tree._phEta[index]) < 1.566:      return False
   if abs(tree._phEta[index]) > 2.5:                                             return False
-  if tree._phPtCorr[index] < 15:                                                return False
+  if photonPt(tree, index) < 15:                                                return False
   if tree._phHasPixelSeed[index] and not tree.noPixelSeedVeto:                  return False
-  if not tree._phPassElectronVeto[index]:                                       return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.4: return False
   if tree.phomvasb:             return tree._phMvaF17v2[index] > -0.60
@@ -167,7 +169,7 @@ def addGenPhotonInfo(t, n, index):
       n.genPhDeltaR        = myDeltaR
       n.genPhPassParentage = t._gen_phPassParentage[i]
       n.genPhMinDeltaR     = t._gen_phMinDeltaR[i]
-      n.genPhRelPt         = (t._gen_phPt[i]-t._phPt[n.ph])/t._gen_phPt[i]
+      n.genPhRelPt         = (t._gen_phPt[i]-photonPt(t, n.ph))/t._gen_phPt[i]
       n.genPhPt            = t._gen_phPt[i]
       n.genPhEta           = t._gen_phEta[i]
       n.genPhMomPdg        = t._gen_phMomPdg[i]
@@ -184,7 +186,7 @@ def selectPhotons(t, n, minLeptons, isData):
   # n.nphotons = len(t.photons)
   if len(t.photons):
     n.ph    = t.photons[0]
-    n.ph_pt = t._phPtCorr[n.ph]
+    n.ph_pt = photonPt(t, n.ph)
     if not isData: addGenPhotonInfo(t, n, n.ph)
   # NOTE point of dispute: exact way to require 1 photon
   return (len(t.photons) == 1 or not t.doPhotonCut)
@@ -198,7 +200,7 @@ def selectPhotons(t, n, minLeptons, isData):
 def makeInvariantMasses(t, n):
   first  = getLorentzVector(leptonPt(t, n.l1), t._lEta[n.l1], t._lPhi[n.l1], leptonE(t, n.l1))   if len(t.leptons) > 0 else None
   second = getLorentzVector(leptonPt(t, n.l2), t._lEta[n.l2], t._lPhi[n.l2], leptonE(t, n.l2))   if len(t.leptons) > 1 else None
-  photon = getLorentzVector(t._phPtCorr[n.ph], t._phEta[n.ph], t._phPhi[n.ph], t._phECorr[n.ph]) if len(t.photons) > 0 else None
+  photon = getLorentzVector(photonPt(t, n.ph), t._phEta[n.ph], t._phPhi[n.ph], photonE(t, n.ph)) if len(t.photons) > 0 else None
 
   n.mll  = (first+second).M()        if first and second else -1
   n.mllg = (first+second+photon).M() if first and second and photon else -1

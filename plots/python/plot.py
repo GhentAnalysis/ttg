@@ -124,14 +124,16 @@ class Plot:
   defaultTexY         = None
   defaultOverflowBin  = None
   defaultNormBinWidth = None
+  defaultModTexLeg    = None
 
   @staticmethod
-  def setDefaults(stack = None, texY="Events", overflowBin='upper'):
+  def setDefaults(stack = None, texY="Events", overflowBin='upper', modTexLeg=[]):
     Plot.defaultStack       = stack
     Plot.defaultTexY        = texY
     Plot.defaultOverflowBin = overflowBin
+    Plot.defaultModTexLeg = modTexLeg
 
-  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[], blindRange = []):
+  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[], blindRange = [], modTexLeg=[]):
     self.stack             = stack        if stack else Plot.defaultStack
     self.texY              = texY         if texY else Plot.defaultTexY
     self.overflowBin       = overflowBin  if overflowBin != 'default'  else Plot.defaultOverflowBin
@@ -142,6 +144,7 @@ class Plot:
     self.histModifications = histModifications
     self.scaleFactor       = None
     self.blindRange        = blindRange
+    self.modTexLeg         = modTexLeg if modTexLeg else Plot.defaultModTexLeg
 
     if type(binning)==type([]):   self.binning = (len(binning)-1, numpy.array(binning))
     elif type(binning)==type(()): self.binning = binning
@@ -340,8 +343,11 @@ class Plot:
     legend.SetFillStyle(0)
     legend.SetShadowColor(ROOT.kWhite)
     legend.SetBorderSize(0)
-
-    for h in sum(histos, []): legend.AddEntry(h, h.texName, h.legendStyle)
+    for h in sum(histos, []): 
+      texLabel = h.texName
+      for a, b in self.modTexLeg:
+        texLabel = texLabel.replace(a, b)
+      legend.AddEntry(h, texLabel, h.legendStyle)
     return legend
 
 

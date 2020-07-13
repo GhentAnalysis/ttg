@@ -70,7 +70,7 @@ ROOT.gROOT.SetBatch(True)
 sample = getSampleFromList(sampleList, args.sample, args.year)
 c      = sample.initTree(shortDebug=args.debug, splitData=args.splitData)
 c.year = sample.year #access to year wherever chain is passed to function, prevents having to pass year every time
-forSys = (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr'))  # Tuple is created for specific sys
+forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
 
 
 if not sample.isData:
@@ -102,7 +102,8 @@ outputFile.cd()
 # unusedBranches = ["HLT", "Flag", "HN", "tau", "Ewk", "lMuon", "miniIso", "closest", "_pt", "decay"]
 unusedBranches = ["HLT", "Flag", "HN", "tau", "Ewk", "lMuon", "decay"]
 # deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron"]
-deleteBranches = ["Scale", "Res", "pass", "met", "lElectron"]
+# deleteBranches = ["Scale", "Res", "pass", "met", "lElectron"]
+deleteBranches = ["Scale", "Res", "pass", "met"]
 if not sample.isData:
   # unusedBranches += ["gen_nL", "gen_l", "gen_met"]
   # deleteBranches += ["heWeight", "gen_ph"]
@@ -144,12 +145,19 @@ newVars = makeBranches(outputTree, newBranches)
 #
 # Replace branches for systematic runs
 #
-def switchBranches(default, variation):
-  return lambda chain: setattr(chain, default, getattr(chain, variation))
+# def switchBranches(default, variation):
+#   return lambda chain: setattr(chain, default, getattr(chain, variation))
 
-branchModifications = []
-for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
-  if args.type.count('eph'  + var): branchModifications += [switchBranches('_lPtCorr',  '_lPt' + var),  switchBranches('_lECorr',  '_lE' + var), switchBranches('_phPtCorr', '_phPt' + var), switchBranches('_phECorr', '_phE' + var)]
+
+c.egvar = ([var for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown'] if 'eph' + var in args.type] + ['Corr'])[0]
+c.muvar = ([var for var in ['ScaleUp', 'ScaleDown'] if 'mu' + var in args.type] + ['Corr'])[0]
+
+newVars.egvar = c.egvar
+newVars.muvar = c.muvar
+
+# branchModifications = []
+# for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
+#   if args.type.count('eph'  + var): branchModifications += [switchBranches('_lPtCorr',  '_lPt' + var),  switchBranches('_lECorr',  '_lE' + var), switchBranches('_phPtCorr', '_phPt' + var), switchBranches('_phECorr', '_phE' + var)]
 
 #
 # Get function calls to object selections and set selections based on the reducedTuple type
@@ -195,7 +203,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   if c.GetEntry(i) < 0: 
     log.warning("problem reading entry, skipping")
     continue
-  for s in branchModifications: s(c)
+  # for s in branchModifications: s(c)
 
   if not selectLeptons(c, newVars, 2):                continue
   if not selectPhotons(c, newVars, 2, sample.isData): continue
@@ -258,27 +266,28 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
 
 
-    l1, l2               = newVars.l1, newVars.l2
-    newVars.lWeight      = leptonSF.getSF(c, l1)*leptonSF.getSF(c, l2)
-    newVars.lWeightMuUp    = leptonSF.getSF(c, l1, elSigma=0., muSigma=+1)*leptonSF.getSF(c, l2, elSigma=0., muSigma=+1)
-    newVars.lWeightMuDown  = leptonSF.getSF(c, l1, elSigma=0., muSigma=-1)*leptonSF.getSF(c, l2, elSigma=0., muSigma=-1)
-    newVars.lWeightElUp    = leptonSF.getSF(c, l1, elSigma=+1, muSigma=0.)*leptonSF.getSF(c, l2, elSigma=+1, muSigma=0.)
-    newVars.lWeightElDown  = leptonSF.getSF(c, l1, elSigma=-1, muSigma=0.)*leptonSF.getSF(c, l2, elSigma=-1, muSigma=0.)
-    newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1)*leptonTrackingSF.getSF(c, l2)
+    l1, l2, l1_pt, l2_pt   = newVars.l1, newVars.l2, newVars.l1_pt, newVars.l2_pt
+    newVars.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
+    newVars.lWeightMuUp    = leptonSF.getSF(c, l1, l1_pt, elSigma=0., muSigma=+1)*leptonSF.getSF(c, l2, l2_pt, elSigma=0., muSigma=+1)
+    newVars.lWeightMuDown  = leptonSF.getSF(c, l1, l1_pt, elSigma=0., muSigma=-1)*leptonSF.getSF(c, l2, l2_pt, elSigma=0., muSigma=-1)
+    newVars.lWeightElUp    = leptonSF.getSF(c, l1, l1_pt, elSigma=+1, muSigma=0.)*leptonSF.getSF(c, l2, l2_pt, elSigma=+1, muSigma=0.)
+    newVars.lWeightElDown  = leptonSF.getSF(c, l1, l1_pt, elSigma=-1, muSigma=0.)*leptonSF.getSF(c, l2, l2_pt, elSigma=-1, muSigma=0.)
+    newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
 
-    newVars.phWeight     = photonSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
-    newVars.phWeightUp   = photonSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
-    newVars.phWeightDown = photonSF.getSF(c, newVars.ph, sigma=-1) if len(c.photons) > 0 else 1
+    ph, ph_pt = newVars.ph, newVars.ph_pt
+    newVars.phWeight     = photonSF.getSF(c, ph, ph_pt) if len(c.photons) > 0 else 1
+    newVars.phWeightUp   = photonSF.getSF(c, ph, ph_pt, sigma=+1) if len(c.photons) > 0 else 1
+    newVars.phWeightDown = photonSF.getSF(c, ph, ph_pt, sigma=-1) if len(c.photons) > 0 else 1
 
-    newVars.PVWeight     = pixelVetoSF.getSF(c, newVars.ph) if len(c.photons) > 0 else 1
-    newVars.PVWeightUp   = pixelVetoSF.getSF(c, newVars.ph, sigma=+1) if len(c.photons) > 0 else 1
-    newVars.PVWeightDown = pixelVetoSF.getSF(c, newVars.ph, sigma=-1) if len(c.photons) > 0 else 1
+    newVars.PVWeight     = pixelVetoSF.getSF(c, ph, ph_pt) if len(c.photons) > 0 else 1
+    newVars.PVWeightUp   = pixelVetoSF.getSF(c, ph, ph_pt, sigma=+1) if len(c.photons) > 0 else 1
+    newVars.PVWeightDown = pixelVetoSF.getSF(c, ph, ph_pt, sigma=-1) if len(c.photons) > 0 else 1
 
     # method 1a
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
       setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets))
 
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2)
+    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
     newVars.triggerWeight      = trigWeight
     newVars.triggerWeightUp    = trigWeight+trigErr
     newVars.triggerWeightDown  = trigWeight-trigErr

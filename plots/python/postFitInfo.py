@@ -21,7 +21,7 @@ def updatePullsAndConstraints(newDataCard):
   if not dataCard or dataCard != newDataCard:
     dataCard    = newDataCard
     # NOTE temp hardcode
-    filename    = os.path.expandvars('$CMSSW_BASE/src/ttg/plots/pulls/' + newDataCard + '_fitDiagnostics.root')
+    filename    = os.path.expandvars('$CMSSW_BASE/src/ttg/plots/pulls/' + newDataCard + '_fitDiagnostics_obs.root')
     resultsFile = ROOT.TFile(filename)
     fitResults  = resultsFile.Get("fit_s").floatParsFinal()
     for r in [fitResults.at(i) for i in range(fitResults.getSize())]:

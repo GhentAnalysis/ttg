@@ -46,7 +46,8 @@ def getOutliers(var, varHists, totDown, totUp, totalCentral):
       down = round(100.*(down-central)/central, rounding)
       up   = round(100.*(up-central)/central, rounding)
      #  if abs(up) > 2.0 * abs(totUp) or abs(down) > 2.0 * abs(totDown):
-      if abs(up) > 1.5 * abs(totUp) or abs(down) > 1.5 * abs(totDown) or 'ZG' in name:
+      # if abs(up) > 1.5 * abs(totUp) or abs(down) > 1.5 * abs(totDown) or 'ZG' in name:
+      if 'ZG' in name:
         outLiers[name] = [down, up, str(round(100.* central/totalCentral, rounding)) + '%'  ]
   return outLiers
 
@@ -58,8 +59,10 @@ variations.remove('q2')
 def getEffect(year):
   # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-VR/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
   # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-VR-noZgCorr/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
-  # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-JUN/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
-  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-niceEstimDD-JUN/mumu/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
+  # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
+  # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-AP-MA/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
+  # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-AP/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
+  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgest/all//llg-mll40-offZ-llgOnZ-photonPt20/yield.pkl'
   print picklePath.replace('/storage_mnt/storage/user/gmestdac/public_html/ttG/','')
   varHists = pickle.load(open(picklePath))
   central = getYieldMC(varHists['yield'])
@@ -90,14 +93,40 @@ def getEffect(year):
 
 varYears = {}
 outYears = {}
-for year in ['2016', '2017', '2018']:
+
+for year in ['2017']:
   varYears[year], outYears[year] = getEffect(year)
-print '\t' '2016' + '\t \t' + '2017' + '\t \t' + '2018'
-for sys in varYears['2016'].keys():
-  print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2017'][sys]) + '\t' + str(varYears['2018'][sys]),
+
+for sys in varYears['2017'].keys():
+  print sys + '\t' + str(varYears['2017'][sys]),
   try:
     for name, effect in outYears['2017'][sys].iteritems():
       print '\t' + name[:10] + '    ' + str(effect),
   except:
     pass
   print ''
+
+a = 0
+b = 0
+for i in outYears['2017'].values():
+  a += i['ZG_Z#gamma (genuine)Z#gamma (genuine)'][0]**2.
+  b += i['ZG_Z#gamma (genuine)Z#gamma (genuine)'][1]**2.
+a = a**0.5
+b = b**0.5
+
+print a
+print b
+
+# print outYears['2017']
+
+# for year in ['2016', '2017', '2018']:
+#   varYears[year], outYears[year] = getEffect(year)
+# print '\t' '2016' + '\t \t' + '2017' + '\t \t' + '2018'
+# for sys in varYears['2016'].keys():
+#   print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2017'][sys]) + '\t' + str(varYears['2018'][sys]),
+#   try:
+#     for name, effect in outYears['2017'][sys].iteritems():
+#       print '\t' + name[:10] + '    ' + str(effect),
+#   except:
+#     pass
+#   print ''

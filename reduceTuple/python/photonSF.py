@@ -24,10 +24,8 @@ class PhotonSF:
     err = effMap.GetBinError(  effMap.GetXaxis().FindBin(eta), effMap.GetYaxis().FindBin(pt))
     return UncFloat(sf, err)
 
-  def getSF(self, tree, index, sigma=0):
-    pt  = tree._phPt[index]
+  def getSF(self, tree, index, pt, sigma=0):
     eta = abs(tree._phEta[index])
-
     if pt >= 499: pt = 499 # last bin is valid to infinity
     sf = multiply( self.getPartialSF(effMap, pt, eta) for effMap in self.pho )
 
