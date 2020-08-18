@@ -11,22 +11,14 @@ log = getLogger()
 # All functions to select objects, as well as some functions which add new variables based on the selected objects to the tree
 #
 
-# NOTE photonmva curretly disabled
-
 #
 # Set ID options on chain using type string
 #
 def setIDSelection(c, reducedTupleType):
   c.doPhotonCut         = reducedTupleType.count('pho')
   c.photonCutBased      = reducedTupleType.count('phoCB')
-  c.photonMVA           = reducedTupleType.lower().count('photonmva')
-  c.phomvasb            = reducedTupleType.lower().count('phomvasb')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
   c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
-  c.leptonMVA           = reducedTupleType.lower().count("leptonmva")
-  c.tthMVA              = reducedTupleType.lower().count("tthmva")
-  c.MvaAndCB            = reducedTupleType.lower().count("mvaandcb")
-
 
 #
 # Helper functions
@@ -51,37 +43,39 @@ def photonPt(tree, index): return getattr(tree, '_phPt'+tree.egvar)[index]
 def photonE(tree, index):  return getattr(tree, '_phE'+tree.egvar)[index]
 
 
-def looseLeptonSelector(tree, index):
-  if tree._lFlavor[index] == 2:                         return False
-  if tree._relIso[index] > 0.4 and not tree.leptonMVA:  return False
-  if leptonPt(tree, index) < 15:                        return False
-  if abs(tree._lEta[index]) > 2.4:                      return False
-  if abs(tree._3dIPSig[index]) > 4:                     return False
-  if abs(tree._dxy[index]) > 0.05:                      return False
-  if abs(tree._dz[index]) > 0.1:                        return False
-  return tree._lPOGVeto[index]
+
+def baseElectronSelector(tree, index):
+  if not abs(tree._dxy[index]) < 0.05:                  return False
+  if not abs(tree._dz[index]) < 0.1:                    return False
+  if not abs(tree._3dIPSig[index]) < 8:                 return False
+  if not tree._lElectronMissingHits[index] < 2:         return False
+  if not tree._miniIso[index] < 0.4:                    return False
+  if not tree._lElectronPassConvVeto[index]:            return False
+  return True
+
+def baseMuonSelector(tree, index):
+  if not tree._lPOGMedium[index]:                       return False
+  if not abs(tree._dxy[index]) < 0.05:                  return False
+  if not abs(tree._dz[index]) < 0.1:                    return False
+  if not abs(tree._3dIPSig[index]) < 8:                 return False
+  if not tree._miniIso[index] < 0.4:                    return False
+  return True
 
 def electronSelector(tree, index):
+  if not baseElectronSelector(tree, index):             return False
   for i in xrange(tree._nMu): # cleaning electrons around muons
-    if not looseLeptonSelector(tree, i): continue
+    if not (tree._lFlavor[i] == 1 and baseMuonSelector(tree, i)): continue
     if deltaR(tree._lEta[i], tree._lEta[index], tree._lPhi[i], tree._lPhi[index]) < 0.02: return False
-  if 1.4442 < abs(tree._lEtaSC[index]) < 1.566: return False
-  if tree.MvaAndCB:      return  (tree._lPOGTight[index] and tree._leptonMvatZq[index] > -0.4)
-  elif tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
-  else:                return tree._lPOGTight[index]
+  if 1.4442 < abs(tree._lEtaSC[index]) < 1.566:         return False
+  return tree._leptonMvaTOP[index] > -.55
 
 def muonSelector(tree, index):
-  if tree.MvaAndCB:      return  (tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15 and tree._leptonMvatZq[index] > -0.4)
-  elif tree.leptonMVA:      return tree._leptonMvatZq[index] > -0.4
-  else: return tree._lPOGMedium[index] and tree._relIso0p4MuDeltaBeta[index] < 0.15
+  if not baseMuonSelector(tree, index):                 return False
+  return tree._leptonMvaTOP[index] > -0.45
 
 def leptonSelector(tree, index):
   if leptonPt(tree, index) < 15:       return False
   if abs(tree._lEta[index]) > 2.4:     return False
-  if abs(tree._3dIPSig[index]) > 4:    return False
-  if abs(tree._dxy[index]) > 0.05:     return False
-  if abs(tree._dz[index]) > 0.1:       return False
-  if tree._relIso[index] > 0.12 and not tree.leptonMVA: return False
   if   tree._lFlavor[index] == 0:      return electronSelector(tree, index)
   elif tree._lFlavor[index] == 1:      return muonSelector(tree, index)
   else:                                return False
@@ -106,7 +100,6 @@ def select2l(t, n):
   n.isEMu           = (t._lFlavor[n.l1]==0 and t._lFlavor[n.l2]==1) or (t._lFlavor[n.l1]==1 and t._lFlavor[n.l2]==0)
   n.isMuMu          = (t._lFlavor[n.l1]==1 and t._lFlavor[n.l2]==1)
   n.isOS            = t._lCharge[n.l1] != t._lCharge[n.l2]
-  n.looseLeptonVeto = len([i for i in xrange(t._nLight) if looseLeptonSelector(t, i)]) <= 2
   return leptonPt(t, n.l1) > 25 and n.isOS
 
 
@@ -119,7 +112,6 @@ def select1l(t, n):
   n.l1_pt           = ptAndIndex[0][0]
   n.isE             = (t._lFlavor[n.l1] == 0)
   n.isMu            = (t._lFlavor[n.l1] == 1)
-  n.looseLeptonVeto = len([i for i in xrange(t._nLight) if looseLeptonSelector(t, i)]) <= 1
   return True
 
 def selectLeptons(t, n, minLeptons):
@@ -132,7 +124,8 @@ def selectLeptons(t, n, minLeptons):
 # Photon selector with reduced cut based ID Fall17V2 (i.e. leaving out chgIso and sigmaIetaIeta cuts)
 #
 def photonCutBasedReduced(c, index):
-  pt = photonPt(c, index)
+  # always use nominal here, since the full id used later on uses nominal pt
+  pt = c._phPtCorr[index]
   if abs(c._phEtaSC[index]) < 1.479:
     if c._phHadTowOverEm[index] > 0.02197:                                         return False
     if c._phNeutralHadronIsolation[index] > 1.189 + 0.01512*pt + 0.00002259*pt*pt: return False
@@ -151,9 +144,7 @@ def photonSelector(tree, index, n, minLeptons):
   if tree._phHasPixelSeed[index] and not tree.noPixelSeedVeto:                  return False
   for i in ([] if minLeptons == 0 else ([n.l1] if minLeptons==1 else [n.l1, n.l2])):
     if deltaR(tree._lEta[i], tree._phEta[index], tree._lPhi[i], tree._phPhi[index]) < 0.4: return False
-  if tree.phomvasb:             return tree._phMvaF17v2[index] > -0.60
   if tree.photonCutBased:       return photonCutBasedReduced(tree, index)
-  # if tree.photonMVA:            return tree._phMvaF17v2[index] > 0.20
   return True
 
 def addGenPhotonInfo(t, n, index):

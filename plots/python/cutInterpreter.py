@@ -21,6 +21,9 @@ special_cuts = {
     'nol2gWindow':         '!(ml2g>55&&ml2g<80)',
 
     'signalRegion':        '(njets>1)||(njets==1&&ndbjets==1)',   # signal regions small
+    'signalRegionA':       '((njets>1)||(njets==1&&ndbjets==1))||(isEMu&&njets>0)',
+    'signalRegionB':       '(((njets>1)||(njets==1&&ndbjets==1))&&isEMu)||(ndbjets>0)',
+    'signalRegionAB':      '(isEMu&&njets>0)||(ndbjets>0)',
     'PLsignalRegion':      '(PLnjets>1)||(PLnjets==1&&PLndbjets==1)',   # signal regions small
 
     'all':                 '(1)',

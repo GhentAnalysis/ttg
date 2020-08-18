@@ -59,29 +59,8 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
       if len(filtered) == 1:   hist = addHist(hist, filtered[filtered.keys()[0]])
       elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
   else:                        log.error('Missing cache file ' + resultFile)
-  if 'Scale' in sys and not any('MuonEG' in sel for sel in selectors):
-    data    = getHistFromPkl(subdirs, plotName, '',   ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
-    dataSys = getHistFromPkl(subdirs, plotName, sys,  ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
-    hist = applySysToOtherHist(data, dataSys, hist)
   if not hist: log.error('Missing ' + str(selectors) + ' for plot ' + plotName + ' in ' + resultFile)
   return hist
-
-#
-# Get systematic uncertainty on sideband template: based on shape difference of ttbar hadronicFakes in sideband and nominal region
-# (broken - unused)
-#
-
-# TODO check if this is still useable, if so update (nothing updated yet)
-def applySidebandUnc(hist, plot, resultsDir, up):
-  selection     = resultsDir.split('/')[-1]
-  ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets', 'hadronicFake', 'pass'])
-  ttbarSideband = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets', 'hadronicFake,0.012'])
-  normalizeBinWidth(ttbarNominal, 1)
-  normalizeBinWidth(ttbarSideband, 1)
-  ttbarNominal.Scale(1./ttbarNominal.Integral("width"))
-  ttbarSideband.Scale(1./ttbarSideband.Integral("width"))
-  if up: return applySysToOtherHist(ttbarNominal, ttbarSideband, hist)
-  else:  return applySysToOtherHist(ttbarSideband, ttbarNominal, hist)
 
 
 #
@@ -377,25 +356,15 @@ class Plot:
     histos_splitted = {}
     for sys in [None] + sysKeys:
       histos_splitted[sys] = {}
-      if sys and not any(x in sys for x in ['Stat', 'sideBand', 'Scale']): plotName = self.name+sys                                    # in the 2D cache, the first key is plotname+sys
-      else:                                                                plotName = self.name                                        # for nominal and some exceptions
+      if sys and not 'Stat' in sys: plotName = self.name+sys                                                                           # in the 2D cache, the first key is plotname+sys
+      else:                         plotName = self.name                                                                               # for nominal and some exceptions
 
       if plotName not in allPlots:                                                                                                     # check if sys variation has been run already
         log.error('No ' + sys + ' variation found for ' +  self.name)
 
       histos_summed[sys] = None
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
-        if sys and 'Scale' in sys and not 'noData' in resultsDir and not histName.count('estimate'):                                   # ugly hack to apply scale systematics on MC instead of data (only when data is available)
-          data, dataSys = None, None
-          for d in [d for d in allPlots[self.name] if d.count('data')]:                                                                # for data (if available depending on ee, mumu, emu, SF)
-            data    = addHist(data,    allPlots[self.name][d])                                                                         # get nominal for data
-            dataSys = addHist(dataSys, allPlots[self.name+sys][d])                                                                     # and the eScale or phScale sys for data
-          h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName].Clone())                                                 # apply the eScale or phScale sys on MC
-        elif sys and 'sideBand' in sys:                                                                                                # ugly hack to apply side band uncertainty
-          h = applySidebandUnc(allPlots[self.name][histName].Clone(), self.name, resultsDir, 'Up' in sys)
-        else:                                                                                                                          # normal case, simply taken from cache
-          h = allPlots[plotName][histName].Clone()
-
+        h = allPlots[plotName][histName].Clone()
         if sys and 'StatUp' in sys and sys.replace('StatUp', '') in histName:                                                          # MC statistics for plots
           for i in range(0, h.GetNbinsX()+1):
             h.SetBinContent(i, h.GetBinContent(i)+h.GetBinError(i))

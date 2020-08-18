@@ -16,12 +16,14 @@ for i in ('Up', 'Down'):
   systematics['erd'+i]        = []
   systematics['ephScale'+i]     = []
   systematics['ephRes'+i]       = []
+  systematics['muScale'+i]      = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
   systematics['pvSF'+i]       = [('PVWeight',      'PVWeight'+i)]
-  systematics['lSFEl'+i]      = [('lWeight',       'lWeightEl'+i)]
-  systematics['lSFMu'+i]      = [('lWeight',       'lWeightMu'+i)]
+  systematics['lSFSy'+i]      = [('lWeight',       'lWeightSyst'+i)]
+  systematics['lSFEl'+i]      = [('lWeight',       'lWeightElStat'+i)]
+  systematics['lSFMu'+i]      = [('lWeight',       'lWeightMuStat'+i)]
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
   systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
@@ -99,21 +101,27 @@ def getReplacementsForStack(sys, year):
   if not sys:
     return {}
   # no syst variation variation samples for 2016 (in miniAODv3 at least)
-  if not year == '2016':
-    if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
-      return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
-    elif sys == 'erdUp' and year == '2017':
-      return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd'}
+  # if not year == '2016':
+  # if not year == '2017':
+  # TODO if works universally just remove conditions
+  if True:
+    # if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
+    #   return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
+    # elif sys == 'erdUp' and year == '2017':
+    #   return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd'}
       # TODO change when had is available again
       # return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
 
     # TODO to be built in when new samples arrive
     # OROFF turns off overlap removal
-    # if sys == 'erdUp'':
-    # return {'TTGamma_Cen_Dil' : 'TTGamma_Cen_Dil_erdOROFF', 'TTGamma_Cen_Sem' : 'TTGamma_Cen_Sem_erdOROFF', 'TTGamma_Cen_Had' : 'TTGamma_Cen_Had_erdOROFF',
-    #         'TTGamma_Cen_Dil_100to200' : 'DROP', 'TTGamma_Cen_Sem_100to200' : 'DROP', 'TTGamma_Cen_Had_100to200' : 'DROP',
-    #         'TTGamma_Cen_Dil_200toinf' : 'DROP', 'TTGamma_Cen_Sem_200toinf' : 'DROP', 'TTGamma_Cen_Had_200toinf' : 'DROP'
-    #         }
+    ttgsampsw = {'erdUp':'erd', 'ueDown':'uedown', 'ueUp':'ueup'}
+    if sys in ttgsampsw.keys():
+      sw = ttgsampsw[sys]
+      return {'TTGamma_Dil'  : 'TTGamma_Dil_' + sw + 'OROFF', 'TTGamma_Sem'   : 'TTGamma_Sem_' + sw + 'OROFF', 'TTGamma_Had' : 'TTGamma_HadOROFF',
+              'TTGamma_DilA' : 'DROP',                 'TTGamma_SemA' : 'DROP',                  'TTGamma_HadA' : 'DROP',
+              'TTGamma_DilB' : 'DROP',                 'TTGamma_SemB' : 'DROP',                  'TTGamma_HadB' : 'DROP'
+              }
+
   return {}
 
 
