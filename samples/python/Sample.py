@@ -31,7 +31,7 @@ class Sample:                                                                   
     self.splitJobs       = splitJobs
     self.isData          = (xsec == 'data')
     self.xsec            = eval(xsec) if not self.isData else None
-    self.year            = productionLabel.split('-')[0]
+    self.year            = productionLabel.split('-')[0].split('_')[0]
     self.texName         = None
     self.style           = None 
     self.listOfFiles     = None
@@ -136,6 +136,8 @@ def createSampleList(*filenames):
     sampleInfos = [line.split('%')[0].strip() for line in open(filename)]                     # Strip % comments and \n charachters
     sampleInfos = [line.split() for line in sampleInfos if line]                              # Get lines into tuples
     for name, path, productionLabel, splitJobs, xsec in sampleInfos:
+      # log.info(filename)
+      # log.info(name)
       yield Sample(name, path, productionLabel, int(splitJobs), xsec)
 
 #
@@ -156,13 +158,13 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
       alias = info[0].strip('$')
       continue
     for i, j in replacements.iteritems():
-      if info[0].count(i):
+      if info[0] == i:
         if j.count('OROFF'):
           log.info('overlap removal disabled')
-          info = info[:4]
+          if len(info)>4: info[4] = '_ttgEventType>2'
         info[0] = info[0].replace(i , j.replace('OROFF', ''))
         log.info('replaced ' + i + ' by ' + j.replace('OROFF', ''))
-    if info == 'DROP':
+    if info[0]=='DROP':
       log.info('sample dropped')
       continue
     if '--' in info:

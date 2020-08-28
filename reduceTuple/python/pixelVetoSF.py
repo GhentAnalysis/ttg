@@ -19,8 +19,7 @@ class pixelVetoSF:
       self.errs = getObjFromFile(os.path.expandvars(os.path.join(dataDir, "HasPix_2018.root")), "eleVeto_Unc")
     assert self.vetoHist
 
-  def getSF(self, tree, index, sigma=0):
-    pt  = tree._phPt[index]
+  def getSF(self, tree, index, pt, sigma=0):
     eta = abs(tree._phEta[index])
     if pt >= 199: pt = 199
     if pt <= 11: pt = 11

@@ -1,0 +1,8 @@
+-- ZG,ISR
+ZG_lowMLL                    Z#gamma_(ISR)    lineStyle     kOrange                  _zgEventType==8
+
+-- ZG,t/b
+ZG_lowMLL                    Z#gamma_(t/b)    lineStyle     42                       (_zgEventType==7||_zgEventType==3)
+
+-- ZG,W/l
+ZG_lowMLL                    Z#gamma_(W/l)    lineStyle     41                       (_zgEventType==6||_zgEventType==5||_zgEventType==4)

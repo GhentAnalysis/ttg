@@ -61,9 +61,8 @@ class LeptonSF:
     err = effMap.GetBinError(  effMap.GetXaxis().FindBin(x), effMap.GetYaxis().FindBin(y))
     return UncFloat(sf, err)
 
-  def getSF(self, tree, index, elSigma=0, muSigma=0):
+  def getSF(self, tree, index, pt, elSigma=0, muSigma=0):
     flavor = tree._lFlavor[index]
-    pt     = tree._lPt[index]  if flavor == 1 else tree._lPtCorr[index]
     eta    = tree._lEta[index] if flavor == 1 else tree._lEtaSC[index]
 
     if abs(flavor) == 1:

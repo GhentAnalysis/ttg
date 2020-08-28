@@ -16,6 +16,7 @@ for i in ('Up', 'Down'):
   systematics['erd'+i]        = []
   systematics['ephScale'+i]     = []
   systematics['ephRes'+i]       = []
+  systematics['muScale'+i]      = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]

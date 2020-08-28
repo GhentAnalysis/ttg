@@ -40,13 +40,11 @@ class TriggerEfficiency:
     valErr = sqrt(valErr**2+sysUnc**2)
     return (val, valErr)
 
-  def getSF(self, tree, l1, l2):
+  def getSF(self, tree, l1, l2, pt1, pt2):
     eta1    = abs(tree._lEta[l1])
     eta2    = abs(tree._lEta[l2])
     flavor1 = tree._lFlavor[l1]
     flavor2 = tree._lFlavor[l2]
-    pt1     = tree._lPt[l1] if flavor1 else tree._lPtCorr[l1]
-    pt2     = tree._lPt[l2] if flavor2 else tree._lPtCorr[l2]
 
     if pt1 < pt2: raise ValueError ( "Sort leptons wrt pt." )
 

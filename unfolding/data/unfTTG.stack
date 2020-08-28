@@ -1,0 +1,9 @@
+-- MC
+TTG_Dil              t#bar{t}#gamma        fillStyle     kOrange
++TTG_Sem
++TTG_Had
+
+%-- MC
+%TTGamma_Pr_Dil              t#bar{t}#gamma        fillStyle     kOrange
+%+TTGamma_Pr_Sem
+%+TTGamma_Pr_Had

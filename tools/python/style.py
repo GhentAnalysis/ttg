@@ -24,7 +24,10 @@ def setDefault2D(isColZ=False):
   if isColZ: ROOT.gStyle.SetPadRightMargin(0.15)
   ROOT.gStyle.SetTitleX(0.005)
   ROOT.gStyle.SetTitleY(0.985)
-  ROOT.gStyle.SetPalette(1)
+  ROOT.gStyle.SetPaintTextFormat("3.2f")
+  ROOT.gStyle.SetTextSize(0.07)
+  ROOT.gStyle.SetOptStat(0)
+  ROOT.gStyle.SetPalette(95)
   ROOT.gROOT.ForceStyle()
 
 

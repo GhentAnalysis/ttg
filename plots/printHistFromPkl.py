@@ -4,7 +4,7 @@ import ROOT, os, uuid, numpy, math
 import cPickle as pickle
 from math import sqrt
 
-fname = '/afs/cern.ch/user/k/kskovpen/public/ttG/2016/phoCBfull_compos_ALL/ee/llg-mll40-offZ-llgNoZ-signalRegion-photonPt20/signalRegions.pkl'
+fname = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl'
 
 fPkl = pickle.load( open( fname, "rb" ) )
 

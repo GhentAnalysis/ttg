@@ -12,6 +12,74 @@ from ttg.tools.lock import lock
 ROOT.TH1.SetDefaultSumw2()
 ROOT.TH2.SetDefaultSumw2()
 
+
+def equalBinning():
+  def equalizeBins(hists):
+    nx = hists.values()[0].GetXaxis().GetNbins()
+    ny = hists.values()[0].GetYaxis().GetNbins()
+    template = ROOT.TH2F('template', 'template', nx, numpy.array(range(nx+1)).astype(float), ny, numpy.array(range(ny+1)).astype(float))
+    for key in hists.keys():
+      newHist = template.Clone(hists[key].GetName())
+      for i in range(nx+1):
+        for j in range(ny+1):
+          newHist.SetBinContent(i,j, hists[key].GetBinContent(i, j))
+          newHist.SetBinError(i,j, hists[key].GetBinError(i, j))
+      for i in range(1, nx+1):
+        newHist.GetXaxis().SetBinLabel(i, str(int(hists[key].GetXaxis().GetBinLowEdge(i))) + '-' + str(int(hists[key].GetXaxis().GetBinUpEdge(i))) )
+      for i in range(1, ny+1):
+        newHist.GetYaxis().SetBinLabel(i, str(int(hists[key].GetYaxis().GetBinLowEdge(i))) + '-' + str(int(hists[key].GetYaxis().GetBinUpEdge(i))) )
+      hists[key]=newHist
+  return [equalizeBins]
+
+
+# def xAxisLabels2D(labels):
+#   def xapplyLabels(hists):
+#     for i, l in enumerate(labels):
+#       for h in hists:
+#         h.GetXaxis().SetBinLabel(i+1, l)
+#   return [xapplyLabels]
+
+# def yAxisLabels2D(labels):
+#   def yapplyLabels(hists):
+#     for h in hists:
+#       for i, l in enumerate(labels):
+#         h.GetYaxis().SetBinLabel(i+1, l)
+#   return [yapplyLabels]
+
+def normalizeAlong(axis):
+  # normalize every column
+  if axis == 'y':
+    def normAlongY(hists):
+      hists = hists.values()
+      sumH = hists[0].Clone()
+      for h in hists[1:]:
+        sumH.Add(h)
+      proj = sumH.ProjectionX("projx", 1)
+      for h in hists:
+        for i in range(1, h.GetXaxis().GetNbins()+1):
+          for j in range(1, h.GetYaxis().GetNbins()+1):
+            if proj.GetBinContent(i) == 0 and h.GetBinContent(i, j) == 0: continue
+            h.SetBinContent(i, j, h.GetBinContent(i, j)/proj.GetBinContent(i))
+    return [normAlongY]
+  # normalize every row
+  elif axis == 'x':
+    def normAlongX(hists):
+      hists = hists.values()
+      sumH = hists[0].Clone()
+      for h in hists[1:]:
+        sumH.Add(h)
+      proj = sumH.ProjectionY("projy", 1)
+      for h in hists:
+        for i in range(1, h.GetXaxis().GetNbins()+1):
+          for j in range(1, h.GetYaxis().GetNbins()+1):
+            if proj.GetBinContent(j) == 0 and h.GetBinContent(i, j) == 0: continue
+            h.SetBinContent(i, j, h.GetBinContent(i, j)/proj.GetBinContent(j))
+    return [normAlongX]  
+  else:
+    log.debug('invalid axis to normlize along')
+    return[]
+
+  
 #
 # Plot class for 2D
 # Disable warnings about different number of arguments for overriden method 
@@ -24,10 +92,11 @@ class Plot2D(Plot):
   def setDefaults(stack = None):
     Plot2D.defaultStack = stack
 
-  def __init__(self, name, texX, varX, binningX, texY, varY, binningY, stack=None):  # pylint: disable=R0913
+  def __init__(self, name, texX, varX, binningX, texY, varY, binningY, stack=None, histModifications=[]):  # pylint: disable=R0913
     Plot.__init__(self, name, texX, varX, binningX, stack=(stack if stack else Plot2D.defaultStack), texY=texY, overflowBin=False, normBinWidth=False)
     self.varY        = varY
     self.binningX    = self.binning
+    self.histModifications = histModifications
 
     if type(binningY)==type([]):   self.binningY = (len(binningY)-1, numpy.array(binningY))
     elif type(binningY)==type(()): self.binningY = binningY
@@ -74,6 +143,13 @@ class Plot2D(Plot):
     with lock(resultFile, 'wb', existingLock=True) as f: pickle.dump(allPlots, f)
     log.info("Plot " + plotName + " saved to cache")
 
+  def applyMods(self):
+    # different from 1D plots, hand all hists to modification function
+    for modification in self.histModifications: 
+      if type(modification) == list: 
+        modification[0](self.histos)
+      else: 
+        modification(self.histos)
 
   #
   # Draw function, might need some refactoring
@@ -87,6 +163,7 @@ class Plot2D(Plot):
           drawObjects = None,
           drawOption = 'COLZ',
           widths = None,
+          histModifications = [],
           ):
     ''' plot: a Plot2D instance
         zRange: None ( = ROOT default) or [low, high] 
@@ -97,10 +174,10 @@ class Plot2D(Plot):
     '''
 
     import ttg.tools.style as style
-    style.setDefault2D(drawOption=='COLZ')
+    style.setDefault2D(drawOption.count('COLZ'))
 
     # default_widths    
-    default_widths = {'y_width':500, 'x_width':500, 'y_ratio_width':200}
+    default_widths = {'y_width':800, 'x_width':800, 'y_ratio_width':200}
     if widths: default_widths.update(widths)
 
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}

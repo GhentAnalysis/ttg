@@ -29,6 +29,8 @@ args = argParser.parse_args()
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
+if args.noZgCorr: args.tag += '-noZgCorr'
+
 #
 # Check git and edit the info file
 #
@@ -72,7 +74,7 @@ if not args.isChild:
 #
 import ROOT
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
-from ttg.plots.plot2D                 import Plot2D, add2DPlots
+from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
 from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
@@ -89,6 +91,7 @@ forward     = args.tag.count('forward')
 prefire     = args.tag.count('prefireCheck')
 noWeight    = args.tag.count('noWeight')
 normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck', 'splitOverlay', 'compareWithTT', 'compareTTSys', 'compareTTGammaSys', 'normalize', 'IsoRegTTDil', 'IsoFPTTDil'])
+onlyMC = args.tag.count('onlyMC')
 
 selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
@@ -127,13 +130,12 @@ def nearestZ(tree):
   else:
     return 1.
 
+# NOTE always nominal values
 def leptonPt(tree, index):
-  if tree._lFlavor[index]: return tree._lPt[index]
-  else:                    return tree._lPtCorr[index]
+  return tree._lPtCorr[index]
 
 def leptonE(tree, index):
-  if tree._lFlavor[index]: return tree._lE[index]
-  else:                    return tree._lECorr[index]
+  return tree._lECorr[index]
 
 def getLorentzVector(pt, eta, phi, e):
   vector = ROOT.TLorentzVector()
@@ -145,10 +147,15 @@ def Zpt(tree):
   first  = getLorentzVector(leptonPt(tree, tree.l1), tree._lEta[tree.l1], tree._lPhi[tree.l1], leptonE(tree, tree.l1))
   second = getLorentzVector(leptonPt(tree, tree.l2), tree._lEta[tree.l2], tree._lPhi[tree.l2], leptonE(tree, tree.l2))
   return (first+second).Pt()
+
+def plphpt(tree):
+  try: return c._pl_phPt[0]
+  except: return -99.
+
 #
 # Define plots
 #
-Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'))
+Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'), modTexLeg = [('(genuine)', '')] if args.tag.lower().count('nice') else [])
 Plot2D.setDefaults(stack=stack)
 
 from ttg.plots.plotHelpers  import *
@@ -160,7 +167,7 @@ def makePlotList():
   if args.tag.count('randomConeCheck'):
     plotList.append(Plot('photon_chargedIso',          'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (20, 0, 20)))
     plotList.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) (GeV)',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80, 0, 20)))
-    plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c._phPtCorr[c.ph], (20, 0, 2)))
+    plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c.ph_pt, (20, 0, 2)))
   else:
     plotList.append(Plot('yield',                      'yield',                                 lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
     plotList.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : c._nVertex,                                         (50, 0, 50)))
@@ -168,6 +175,7 @@ def makePlotList():
     plotList.append(Plot('nphoton',                    'number of photons',                     lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
     plotList.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (24, 15, 135)))
     plotList.append(Plot('photon_pt_large',            'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            [15., 30., 45., 60., 80., 120.]))
+    plotList.append(Plot('photon_pt_EGM',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            [20., 35., 50., 100., 200., 500., 600.]))
     plotList.append(Plot('photon_eta',                 '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                (15, 0, 2.5)))
     plotList.append(Plot('photon_eta_large',           '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
     plotList.append(Plot('photon_phi',                 '#phi(#gamma)',                          lambda c : c._phPhi[c.ph],                                     (10, -pi, pi)))
@@ -242,6 +250,7 @@ def makePlotList():
     plotList.append(Plot('dbj2_deepCSV',               'deepCSV(dbj_{2})',                      lambda c : c._jetDeepCsv_b[c.dbj2] + c._jetDeepCsv_bb[c.dbj2], (20, 0, 1)))
     plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
+    plotList.append(Plot('signalRegionsZoomAlt',       'signal region',                         lambda c : min(6, createSignalRegionsZoom(c)),                 (7, 0, 7),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b'])))
     plotList.append(Plot('eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
     plotList.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',               lambda c : c.genPhPt,                                          (10, 10, 110)))
     plotList.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                    lambda c : abs(c.genPhEta),                                    (15, 0, 2.5), overflowBin=None))
@@ -249,7 +258,7 @@ def makePlotList():
     plotList.append(Plot('genPhoton_DeltaR',           '#DeltaR(gen #gamma, #gamma)',           lambda c : c.genPhDeltaR,                                      (30, 0, 0.6)))
     plotList.append(Plot('genPhoton_relPt',            'rel p_{T}',                             lambda c : c.genPhRelPt,                                       (20, -0.2, 0.2)))
     plotList.append(Plot('photonCategory',             'photonCategory',                        lambda c : photonCategoryNumber(c),                            (7, 0.5, 7.5), histModifications=xAxisLabels(['genuine', 'misIdEle', 'hadronic', 'fake', 'magic', 'unmHad', 'unmFake'])))
-    plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
+    plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phECorr[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
     plotList.append(Plot('phRawJetDeltaR',             'raw #DeltaR(#gamma, j) ',               lambda c : rawJetDeltaR(c),                                    (45, 0, 0.3), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
     plotList.append(Plot('phL1DeltaR_small',           '#DeltaR(#gamma, l_{1})',                lambda c : c.phL1DeltaR,                                       (50, 0, 5)))
     plotList.append(Plot('phL2DeltaR_small',           '#DeltaR(#gamma, l_{2})',                lambda c : c.phL2DeltaR,                                       (50, 0, 5)))
@@ -272,9 +281,19 @@ def makePlotList():
     plotList.append(Plot('rawJetDeepCSV',              'deepCSV(closest raw jet)',              lambda c : c._jetDeepCsv_b[closestRawJet(c)] + c._jetDeepCsv_bb[closestRawJet(c)],     (20, 0, 1)))
     plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
     plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
-    plotList.append(Plot('nearestZ',   'nearestZ',   lambda c : nearestZ(c),                                       [0., 1., 2.], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
-    plotList.append(Plot('Z_pt',                  'p_{T}(Z) (GeV)',                   lambda c : Zpt(c),                                            (20, 10, 200)))
-    plotList.append(Plot('ZplusPho_pt',           'p_{T}(Z) + p_{T}(pho) (GeV)',                   lambda c : Zpt(c)+c.ph_pt,                (30, 10, 300)))
+    plotList.append(Plot2D('photon_pt_vspl', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140)))
+    plotList.append(Plot2D('photon_pt_vsplx', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('x') ))
+    plotList.append(Plot2D('photon_pt_vsply', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('y') ))
+# TODO temp 
+    # plotList.append(Plot('max_l_SigmaIetaIeta', '#sigma_{i#etai#eta}(l max)',           lambda c : max(c._lElectronSigmaIetaIeta[c.l1], c._lElectronSigmaIetaIeta[c.l2]),                           (80, 0, 0.04)))
+    # plotList.append(Plot('max_l_SigmaIetaIetaFP', '#sigma_{i#etai#eta}(l max)',           lambda c : max(c._lElectronSigmaIetaIeta[c.l1], c._lElectronSigmaIetaIeta[c.l2]),                           [-0.01,0.011,0.8]))
+    # plotList.append(Plot2D('mll_mllg', 'm(ll) (GeV)', lambda c : c.mll , (25, 0, 500), 'm(ll#gamma) (GeV)', lambda c : c.mllg , (40, 0, 800) ))
+# 
+    # plotList.append(Plot('nearestZ',   'nearestZ',   lambda c : nearestZ(c),                                       [0., 1., 2.], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
+    # plotList.append(Plot('Z_pt',                  'p_{T}(Z) (GeV)',                   lambda c : Zpt(c),                                            (20, 10, 200)))
+    # plotList.append(Plot('ZplusPho_pt',           'p_{T}(Z) + p_{T}(pho) (GeV)',                   lambda c : Zpt(c)+c.ph_pt,                (30, 10, 300)))
+    # plotList.append(Plot('phMomType',             'phMomType',                                     lambda c : c.genPhMomPdg,                 (50, -25, 25)))
+    # plotList.append(Plot('phMomTypeB',            'phMomType',                                     lambda c : abs(c.genPhMomPdg),            [0,8.5,9.5,10.5,18.5,20.5,21.5,22.5,23.5,24.5,25.5], histModifications=xAxisLabels(['quark','/','lepton','/','g','pho','Z','W','/'])))
 
     # extra plots only produced when asked
     if args.extraPlots.lower().count('cj'):
@@ -310,11 +329,11 @@ def makePlotList():
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
 
-  # if no kind of photon cut was made (also not in skim) (requiring nphotons=0 is allowed), or no Z-veto is applied -> can unblind
-  phoReq = [selectPhoton, args.tag.count('pho'), args.selection.count('pho') and not args.selection.count('nphoton0')]
-  noZReq = [args.selection.count('offZ'), args.selection.count('llgNoZ')]
-  zReq = [args.selection.count('onZ'), args.selection.count('llgOnZ')]
-  if not any(phoReq) or (not any(noZReq) or any(zReq)):
+  isSR = args.tag.lower().count('phocbfull') or (args.selection.count('passChgIso') and args.selection.count('passSigmaIetaIeta'))
+  # any sideband selection means we can unblind
+  isSideband = [args.selection.count('sidebandSigmaIetaIeta'), args.selection.count('failChgIso'), args.selection.count('onZ'), args.selection.count('llgOnZ')]
+  doBlind = isSR and not any(isSideband)
+  if not doBlind:
     for p in plotList: p.blindRange = None
   return plotList
 
@@ -363,14 +382,18 @@ for year in years:
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
-  copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdUp', 'erdDown', 'isrUp', 'isrDown', 'fsrUp', 'fsrDown']
-  copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
+  # TODO check if still needed
+  copySyst = False
+  # copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdDown', 'isrUp', 'isrDown', 'fsrUp', 'fsrDown']
+  # copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
   if not args.showSys and not copySyst:
 
-    if args.tag.lower().count('phocb'):                                           reduceType = 'phoCBFEB'
+    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-SKRT'
+    # elif args.tag.count('phoCB-ZGorig') or args.tag.count('phoCBfull-ZGorig'):        reduceType = 'phoCB-ZGorig'
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
+    origReducetype = reduceType
     reduceType = applySysToReduceType(reduceType, args.sys)
     log.info("using reduceType " + reduceType)
 
@@ -380,21 +403,17 @@ for year in years:
     origTag = args.tag
     for sample in sum(stack, []):
 
-
-      dumpArray = [("_phChargedIsolation", lambda c : c._phChargedIsolation[c.ph]),
-                   ("_phNeutralHadronIsolation", lambda c : c._phNeutralHadronIsolation[c.ph]),
-                   ("_phPhotonIsolation", lambda c : c._phPhotonIsolation[c.ph]),
-                   ("_phSigmaIetaIeta", lambda c : c._phSigmaIetaIeta[c.ph]),
-                   ('puChargedHadronIso', lambda c : c._puChargedHadronIso[c.ph]),
-                   ('phoWorstChargedIsolation', lambda c : c._phoWorstChargedIsolation[c.ph])]
+      dumpArray = [("ph_pt", lambda c : c.ph_pt),
+                   ("pl_ph_pt", lambda c : plphpt(c))]
       dumpArray = [(variable, expression, []) for variable, expression in dumpArray]
+      weightArray = []
       cutString, passingFunctions = cutStringAndFunctions(args.selection, args.channel)
       if not sample.isData and args.sys:
         cutString = applySysToString(sample.name, args.sys, cutString)
 
 
       NPestimate        = sample.texName.lower().count('estimate')
-      if args.sys and 'Scale' not in args.sys and sample.isData and not NPestimate: continue
+      if args.sys and sample.isData and not NPestimate: continue
       # when estimating from the sideband the selection is changed for just these samples
       if NPestimate:
         phoCBfull = False
@@ -403,7 +422,8 @@ for year in years:
         args.tag = args.tag.replace('phoCBfull','')
         args.tag = args.tag + '-passChgIso-sidebandSigmaIetaIeta'
 
-      c = sample.initTree(reducedType = reduceType)
+      c = sample.initTree(reducedType = origReducetype if NPestimate else reduceType)
+      # c = sample.initTree(reducedType = origReducetype if ((args.sys.count('Scale') or args.sys.count('Res')) and NPestimate) else reduceType)
       c.year = sample.name[:4] if year == "comb" else year
       lumiScale = lumiScales[c.year]
       c.data = sample.isData
@@ -441,12 +461,20 @@ for year in years:
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
       
       # when creating input plots for corrections corrections can obviously not be applied yet
-      npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys))
-      try:
-        ZgReweight = ZgWeight(c.year)
-      except:
-        log.warning('No Zg estimate source plots available, no problem if not used later')
-        pass
+      altS = '-signalRegion-'
+      if NPestimate and args.selection.count('signalRegionA'): altS  = '-signalRegionA-'
+      if NPestimate and args.selection.count('signalRegionB'): altS  = '-signalRegionB-'
+      if NPestimate and args.selection.count('signalRegionAB'): altS = '-signalRegionAB-'
+
+      npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys), altS=altS)
+      if not args.noZgCorr:
+        try:
+          # Zg correction factors are systematic-specific unless specified otherwise
+          ZgReweight = ZgWeight(c.year, sys = '' if args.tag.lower().count('methoda') else args.sys)
+        except Exception as ex:
+          log.debug(ex)
+          log.warning('No Zg estimate source plots available, no problem if not used later')
+          pass
 
       for i in sample.eventLoop(cutString):
         c.GetEntry(i)
@@ -464,7 +492,7 @@ for year in years:
           if not checkChgIso(c):        continue  # filter for chargedIso sideband based on filter booleans (pass or fail)
           if not sample.isData and not checkMatch(c):         continue  # filter using AN15-165 definitions based on filter booleans (genuine, hadronicPhoton, misIdEle or hadronicFake)
 
-        if not (selectPhoton and c._phPtCorr[c.ph] > 20): 
+        if not (selectPhoton and c.ph_pt > 20): 
           c.phWeight  = 1.                             # Note: photon SF is 0 when pt < 20 GeV
           c.PVWeight  = 1.
         
@@ -473,13 +501,13 @@ for year in years:
         estWeight = npReweight.getWeight(c, sample.isData)
 
         if sample.name.lower().count('zg') and not args.noZgCorr:
-          zgw = ZgReweight.getWeight(c)
+          zgw = ZgReweight.getWeight(c, channel = channelNumbering(c))
         else: zgw = 1.
 
         if sample.isData: eventWeight = estWeight
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw
-        
+
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]
 
@@ -487,13 +515,17 @@ for year in years:
 
         if args.dumpArrays:
           for variable, expression, array in dumpArray:
-            if sample.isData: array.append((expression(c), eventWeight))
-            else:             array.append((expression(c), eventWeight))
-      dumpArrays[sample.name] = {variable: array for variable, expression, array in dumpArray}
+            array.append(expression(c))
+          weightArray.append(eventWeight)
+      dumpArrays[sample.name + sample.texName] = {variable: array for variable, expression, array in dumpArray}
+      dumpArrays[sample.name + sample.texName]['eventWeight'] = weightArray
       phoCBfull = origCB
       args.tag = origTag
   if not args.showSys and copySyst:
     copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
+  # TODO to to be implemented
+  # if args.sys and any(x in 'args.sys' for x in ['q2','pdf']) and not args.showSys:
+  #  freezeTTGYield(plots, year, args.tag, args.channel, args.selection)
 
   plots = plotsToFill + loadedPlots
 
@@ -518,6 +550,7 @@ for year in years:
   #
   noWarnings = True
   for plot in plots: # 1D plots
+    if isinstance(plot, Plot2D): continue
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
     if not plot.blindRange == None and not year == '2016':
@@ -526,7 +559,6 @@ for year in years:
           for bin in range(1, histo.GetNbinsX()+2):
             if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
               histo.SetBinContent(bin, 0)
-    if isinstance(plot, Plot2D): continue
     if plot.name == "yield":
       log.info("Yields: ")
       for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -536,7 +568,7 @@ for year in years:
   #
     if not args.sys or args.showSys:
       extraArgs = {}
-      normalizeToMC = [False, True] if args.channel != 'noData' else [False]
+      normalizeToMC = [False, True] if (args.channel != 'noData' and not onlyMC) else [False]
       if args.tag.count('onlydata'):
         extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
         extraArgs['systematics'] = ['sideBandUnc']
@@ -548,8 +580,9 @@ for year in years:
           linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
         extraArgs['systematics']       = showSysList
         extraArgs['linearSystematics'] = linearSystematics
+        extraArgs['postFitInfo']       = (year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit')) if args.post else None
+        # log.info(extraArgs['postFitInfo'])
         extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
-        extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
 
 
       if args.channel != 'noData':
@@ -606,7 +639,7 @@ for year in years:
                     logY              = logY,
                     sorting           = False,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-                    drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')),
+                    drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)),
                     # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                     **extraArgs
           )
@@ -616,12 +649,15 @@ for year in years:
   if not args.sys:
     for plot in plots: # 2D plots
       if not hasattr(plot, 'varY'): continue
+      if not args.showSys:
+        plot.applyMods()
+        plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
       for logY in [False, True]:
-        for option in ['SCAT', 'COLZ']:
+        for option in ['SCAT', 'COLZ', 'COLZ TEXT']:
           plot.draw(plot_directory = os.path.join(plotDir, year, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                     logZ           = False,
                     drawOption     = option,
-                    drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData')))
+                    drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)))
                     
   if args.dumpArrays: 
     dumpArrays["info"] = " ".join(s for s in [args.year, args.selection, args.channel, args.tag, args.sys] if s) 
@@ -647,6 +683,7 @@ lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018']
 
 noWarnings = True
 for plot in totalPlots: # 1D plots
+  if isinstance(plot, Plot2D): continue
   if not args.showSys:
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
   if not plot.blindRange == None:
@@ -655,7 +692,6 @@ for plot in totalPlots: # 1D plots
         for bin in range(1, histo.GetNbinsX()+2):
           if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
             histo.SetBinContent(bin, 0)
-  if isinstance(plot, Plot2D): continue
   if plot.name == "yield":
     log.info("Yields: ")
     for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -664,7 +700,7 @@ for plot in totalPlots: # 1D plots
   #
   if not args.sys or args.showSys:
     extraArgs = {}
-    normalizeToMC = [False, True] if args.channel != 'noData' else [False]
+    normalizeToMC = [False, True] if (args.channel != 'noData' and not onlyMC) else [False]
     if args.tag.count('onlydata'):
       extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
       extraArgs['systematics'] = ['sideBandUnc']
@@ -677,7 +713,7 @@ for plot in totalPlots: # 1D plots
       extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
-      extraArgs['postFitInfo']       = ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+      # extraArgs['postFitInfo']       = year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
 
 
     if args.channel != 'noData':
@@ -715,7 +751,7 @@ for plot in totalPlots: # 1D plots
                   logY              = logY,
                   sorting           = False,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-                  drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')),
+                  drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData' or onlyMC)),
                   # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                   **extraArgs
         )
@@ -725,11 +761,14 @@ for plot in totalPlots: # 1D plots
 if not args.sys:
   for plot in totalPlots: # 2D plots
     if not hasattr(plot, 'varY'): continue
+    if not args.showSys:
+      plot.applyMods()
+      plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
     for logY in [False, True]:
-      for option in ['SCAT', 'COLZ']:
+      for option in ['SCAT', 'COLZ', 'COLZ TEXT']:
         plot.draw(plot_directory = os.path.join(plotDir, 'all', args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                   logZ           = False,
                   drawOption     = option,
-                  drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData')))
+                  drawObjects    = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData' or onlyMC)))
 if noWarnings: log.info('Finished')
 else:          log.info('Could not produce all plots - finished')
