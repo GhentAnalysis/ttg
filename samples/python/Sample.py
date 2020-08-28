@@ -158,13 +158,13 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
       alias = info[0].strip('$')
       continue
     for i, j in replacements.iteritems():
-      if info[0] == i:
+      if info[0].strip('+') == i:
         if j.count('OROFF'):
           log.info('overlap removal disabled')
           if len(info)>4: info[4] = '_ttgEventType>2'
         info[0] = info[0].replace(i , j.replace('OROFF', ''))
         log.info('replaced ' + i + ' by ' + j.replace('OROFF', ''))
-    if info[0]=='DROP':
+    if info[0].count('DROP'):
       log.info('sample dropped')
       continue
     if '--' in info:
