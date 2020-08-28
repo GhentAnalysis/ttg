@@ -196,10 +196,14 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
         
     os.system('cp '+inFileName+' '+outFileName)
 
+    suffix = ('_statOnly_' if statOnly else '_') + mode
+    os.system('cp '+ './' + run + '/' + dataCard + '_fitDiagnostics.root ' + './' + run + '/' + dataCard + '_fitDiagnostics' + suffix + '.root')
+
     if statOnly: 
         getStatResult(logFile)
     else:        
         return analyzeDiagnosticsFile('./' + run + '/' + dataCard + '_fitDiagnostics.root', logFile)
+    # copy the fitDiagnostics file (needed for postFit pulls) so it does not get overwritten
 
 #
 # Run significance
@@ -406,7 +410,7 @@ def goodnessOfFit(dataCard, algo='saturated', run='combine'):
 # Write the card including all systematics and shapes
 # Might need refactoring
 #
-def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine', year='2016'): # pylint: disable=R0914,R0913,R0912
+def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine', year='2016', correlations={}): # pylint: disable=R0914,R0913,R0912
   if not templatesNoSys: templatesNoSys = []
 
   def tab(entries, column='12'):
@@ -421,7 +425,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       else:                      return '-'
     else:                        return value
 
-  def shapeSys(shape, template, sys):
+  def shapeSys(shape, template, sys, val='1'):
     if ':' in sys:
       try:    selectTemplate, selectShape, sys   = sys.split(':')
       except: (selectTemplate, sys), selectShape = sys.split(':'), None
@@ -434,7 +438,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     elif selectTemplate and selectTemplate != template: return '-'
     elif scaleShape and sys in scaleShape:              return '%.4f' % scaleShape[sys]
     elif sys == 'nonPrompt' and shape == 'tt':          return '-' # hacky way, but easiest to currently implement
-    else:                                               return '1'
+    else:                                               return val
 
   cardFile = run + '/' + cardName + '_' + year + '.txt'
   print cardFile
@@ -458,7 +462,14 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      f.write(tab([shapeSys(None, None, sys), 'shapeN'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
+      corFrac = correlations.get(sys)
+      # f.write(tab([shapeSys(None, None, sys), 'shapeN'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
+      if corFrac:
+        f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(corFrac)) for s in shapes for t in templates+templatesNoSys]))
+        unCorFrac = str(round((1.-corFrac**2.)**0.5, 6))
+        f.write(tab([shapeSys(None, None, sys + '_' + year), 'shape'] + [shapeSys(s, t, sys, unCorFrac) for s in shapes for t in templates+templatesNoSys]))
+      else:
+        f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
 
     f.write('-'*400 + '\n')
     for extraLine in extraLines:

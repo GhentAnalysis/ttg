@@ -6,8 +6,10 @@
       \hline
       Pileup modeling                                     & all                   & shape             &                & IMPACT:pu  \\
       Trigger efficiency                                  & all                   & shape             &                & IMPACT:trigger  \\
-      Electron selection efficiency                       & all                   & shape             &                & IMPACT:lSFMu  \\
-      Muon selection efficiency                           & all                   & shape             &                & IMPACT:lSFEl  \\
+      Prefiring                                           & all                   & shape             &                & IMPACT:pf  \\
+      Electron selection efficiency (stat)                & all                   & shape             &                & IMPACT:lSFMu  \\
+      Muon selection efficiency (stat)                    & all                   & shape             &                & IMPACT:lSFEl  \\
+      Lepton selection efficiency (syst)                  & all                   & shape             &                & IMPACT:lSFSy  \\
       Photon selection efficiency                         & all                   & shape             &                & IMPACT:phSF  \\
       Jet energy scale                                    & all                   & shape             &                & IMPACT:JEC  \\
       Jet energy resolution                               & all                   & shape             &                & IMPACT:JER  \\
@@ -21,17 +23,15 @@
       $e/\gamma$ momentum Scale                           & all                   & shape             &                & IMPACT:ephScale  \\
       pixel veto scalefactor                              & all                   & shape             &                & IMPACT:pvSF  \\
       PDFs                                                & all                   & shape             &                & IMPACT:pdf  \\
+      Colour reconnection ($t#bar{t}#gamma$)              & $t#bar{t}#gamma$      & shape             &                & IMPACT:erd  \\
+      Underlying event ($t#bar{t}#gamma$)                 & $t#bar{t}#gamma$      & shape             &                & IMPACT:ue  \\
       nonprompt background estimation                     & nonprompt             & shape             &                & IMPACT:NP  \\
-      Colour reconnection $(t\bar{t})$                    & $t\bar{t}$            & shape             &                & IMPACT:erd  \\
-      ME-PS matching scale $(t\bar{t})$                   & $t\bar{t}$            & shape             &                & IMPACT:hdamp  \\
-      Underlying event $(t\bar{t})$                       & $t\bar{t}$            & shape             &                & IMPACT:ue  \\
-      $t\bar{t}$ normalization                            & $t\bar{t}$            & rate parameter    & 5.5\%          & IMPACT:TT_Dil_norm  \\
-      $Z\gamma$ normalization                             & $Z\gamma$             & rate parameter    & 10\%           & IMPACT:ZG_norm  \\
-      Drell-Yan normalization                             & Drell-Yan             & rate parameter    & 10\%           & IMPACT:DY_norm  \\
-      Single-$t$ normalization                            & Single-$t$            & rate parameter    & 10\%           & IMPACT:singleTop_norm  \\
-      Other normalization                                 & Other                 & rate parameter    & 50\%           & IMPACT:VVTo2L2Nu_norm  \\
+      $Z\gamma$ normalization                             & $Z\gamma$             & rate parameter    & 3\%            & IMPACT:ZG_norm  \\
+      $t\gamma$ normalization                             & $t\gamma$             & rate parameter    & 10\%           & IMPACT:singleTop_norm  \\
+      Other normalization                                 & $X\gamma$             & rate parameter    & 50\%           & IMPACT:VVTo2L2Nu_norm  \\
     \end{tabular}
   \caption{Summary of considered nuisances and their impact on $t\bar{t}\gamma$.}
   \end{table}
   %}
-  
+
+  % TODO add hdamp of ttg hdamp samples get added

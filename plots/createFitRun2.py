@@ -9,6 +9,7 @@ argParser.add_argument('--run', action='store', default='combine', help="custom 
 argParser.add_argument('--chan', action='store', default='ee', help="dilepton channel name", choices=['ee', 'mumu', 'emu', 'll'])
 argParser.add_argument('--year', action='store', default='2016', help="year of data taking", choices=['2016', '2017', '2018', 'All'])
 argParser.add_argument('--tab', action='store_true', help="produce tables")
+argParser.add_argument('--noPartial', action='store_true', help="don't apply partial correlations")
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -77,7 +78,11 @@ try: os.makedirs(args.run + args.chan)
 except: pass
 # VVTo2L2Nu = other
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
-templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
+# templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
+templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
+# correlations = {'isr':0.5, 'fsr':0.75}
+correlations = {}
+
 
 def writeRootFile(name, shapes, systematicVariations, year):
 
@@ -85,8 +90,8 @@ def writeRootFile(name, shapes, systematicVariations, year):
     print fname
     f = ROOT.TFile(fname, 'RECREATE')
 
-    baseSelection = 'llg-mll40-signalRegion-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-defaultEstimDD'
+    baseSelection = 'llg-mll20-signalRegion-offZ-llgNoZ-photonPt20'
+    tag           = 'phoCBfull-niceEstimDD'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
     for shape in shapes:
@@ -94,33 +99,50 @@ def writeRootFile(name, shapes, systematicVariations, year):
       writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', '', [dataHistName[shape[3:]]]), mergeBins=False)
       # write the MC histograms to the shapes file
       for t in templates:
-        if t == 'nonprompt':
-          Selectors     = [['NP', 'nonprompt']]
-        else:
-          Selectors     = [[t, '(genuine)']]
+        # if t == 'nonprompt':
+        #   Selectors     = [['NP', 'nonprompt']]
+        # else:
+        #   Selectors     = [[t, '(genuine)']]
+          # the nominal ttg samples consist of 3 pt ranges, sum them
+          # Selectors[0] += ['@']
         q2Variations = []
         pdfVariations = []
         for sys in [''] + systematicVariations:
+          log.info(sys)
+          if t == 'nonprompt':
+            Selectors     = [['NP', 'nonprompt']]
+          elif t == 'TTGamma' and not sys in ['ueUp', 'ueDown', 'erdUp']:
+            Selectors     = [['TTGamma_Dilt', '(genuine)'],['TTGamma_DilAt', '(genuine)'],['TTGamma_DilBt', '(genuine)']]
+          else:
+            Selectors     = [[t, '(genuine)']]
+          
           prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', sys, *Selectors)
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
           else:
             if 'erdDown' in sys:
-              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', 'erdUp', *Selectors)
+              sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
+              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', 'erdUp', *sel)
               prompt = invertVar(nominal, ErdUpprompt)
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
+            sysUncor = sys.replace('Up', '_' + year +'Up').replace('Down', '_' + year +'Down')
+            writeHist(f, shape+sysUncor, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
         # Calculation of up and down envelope pdf variations
         if len(pdfVariations) > 0:
           up, down = pdfSys(pdfVariations, nominal)
           writeHist(f, shape+'pdfUp',   t, up,   mergeBins = False)
           writeHist(f, shape+'pdfDown', t, down, mergeBins = False)
+          writeHist(f, shape+'pdf_' + year + 'Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdf_' + year + 'Down', t, down, mergeBins = False)
         # Calcualtion of up and down envelope q2 variations
         if len(q2Variations) > 0:
           up, down = q2Sys(q2Variations)
           writeHist(f, shape+'q2Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'q2Down', t, down, mergeBins = False)
+          writeHist(f, shape+'q2_' + year + 'Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2_' + year + 'Down', t, down, mergeBins = False)
     f.Close()
 
 ######################
@@ -182,6 +204,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     for y in years:
       writeRootFile(cardName, shapes, nameSys[y], y)
     
+    # TODO turn back on
     print colored('##### Plot shape systematic variations', 'red')
     for y in years:
       for shape in shapes:
@@ -191,26 +214,31 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
-      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y)
+      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
       cards.append(outDir+'/'+cardName+'_'+y+'.txt')
-      ##writeCard(cardName, shapes, templates, None, extraLines, showSysList, {}, scaleShape={'fsr': 1/sqrt(2)})
-      ##writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], {}, scaleShape={'fsr': 1/sqrt(2)})
     if len(years) == 1:
       os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')
     else:
-      for i in range(3): cards[i] = cardName+'_'+y+'.txt'
-      p = subprocess.Popen(['combineCards.py','y2016='+cards[0],'y2017='+cards[1],'y2018='+cards[2]], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+      for i, y in enumerate(years): 
+        cards[i] = cardName+'_'+y
+        # if not args.noPartial:
+        #   p = subprocess.Popen(['partialCorrelationEdit.py', cards[i] + '.txt', '--process=isr,0.5:fsr,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+'.root'], cwd=outDir, stdout=open(outDir+'/pcorLog'+y+cardName+'.txt','wb')); p.wait()
+      # p = subprocess.Popen(['combineCards.py','y2016=pCor'+cards[0] + '.txt','y2017=pCor'+cards[1] + '.txt','y2018=pCor'+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+      p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+          
+      # p = subprocess.Popen(['partialCorrelationEdit.py', cards[i], '--process=jes_1,0.5:jes_2,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+ '.root'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+          # 'partialCorrelationEdit.py', cards[i], '--process' + 'jes_1,0.5:jes_2,0.75', '--postfix-uncorr _' + y, '--output-txt pCor' + cards[i]+ '.txt', '--output-root pCor' + cards[i]+ '.root'
 
-    if blind == False:
-      print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
-      print colored('##### Run fit diagnostics for obs (stat)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
-        
-    print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
     print colored('##### Run fit diagnostics for exp (stat)', 'red')
     runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)
+    print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
+    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
+
+    if blind == False:
+      print colored('##### Run fit diagnostics for obs (stat)', 'red')
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
+      print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
     
     print colored('##### Run NLL scan', 'red')
     rMin = 0.5

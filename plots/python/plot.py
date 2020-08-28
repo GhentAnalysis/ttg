@@ -59,29 +59,8 @@ def getHistFromPkl(subdirs, plotName, sys, *selectors):
       if len(filtered) == 1:   hist = addHist(hist, filtered[filtered.keys()[0]])
       elif len(filtered) > 1:  log.error('Multiple possibilities to look for ' + str(selector) + ': ' + str(filtered.keys()))
   else:                        log.error('Missing cache file ' + resultFile)
-  if 'Scale' in sys and not any('MuonEG' in sel for sel in selectors):
-    data    = getHistFromPkl(subdirs, plotName, '',   ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
-    dataSys = getHistFromPkl(subdirs, plotName, sys,  ['MuonEG'], ['DoubleEG'], ['DoubleMuon'])
-    hist = applySysToOtherHist(data, dataSys, hist)
   if not hist: log.error('Missing ' + str(selectors) + ' for plot ' + plotName + ' in ' + resultFile)
   return hist
-
-#
-# Get systematic uncertainty on sideband template: based on shape difference of ttbar hadronicFakes in sideband and nominal region
-# (broken - unused)
-#
-
-# TODO check if this is still useable, if so update (nothing updated yet)
-def applySidebandUnc(hist, plot, resultsDir, up):
-  selection     = resultsDir.split('/')[-1]
-  ttbarNominal  = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets', 'hadronicFake', 'pass'])
-  ttbarSideband = getHistFromPkl(('sigmaIetaIeta-ttpow-hadronicFake-bins', 'all', selection), plot, '', ['TTJets', 'hadronicFake,0.012'])
-  normalizeBinWidth(ttbarNominal, 1)
-  normalizeBinWidth(ttbarSideband, 1)
-  ttbarNominal.Scale(1./ttbarNominal.Integral("width"))
-  ttbarSideband.Scale(1./ttbarSideband.Integral("width"))
-  if up: return applySysToOtherHist(ttbarNominal, ttbarSideband, hist)
-  else:  return applySysToOtherHist(ttbarSideband, ttbarNominal, hist)
 
 
 #
@@ -124,14 +103,16 @@ class Plot:
   defaultTexY         = None
   defaultOverflowBin  = None
   defaultNormBinWidth = None
+  defaultModTexLeg    = None
 
   @staticmethod
-  def setDefaults(stack = None, texY="Events", overflowBin='upper'):
+  def setDefaults(stack = None, texY="Events", overflowBin='upper', modTexLeg=[]):
     Plot.defaultStack       = stack
     Plot.defaultTexY        = texY
     Plot.defaultOverflowBin = overflowBin
+    Plot.defaultModTexLeg = modTexLeg
 
-  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[], blindRange = []):
+  def __init__(self, name, texX, varX, binning, stack=None, texY=None, overflowBin='default', normBinWidth='default', histModifications=[], blindRange = [], modTexLeg=[]):
     self.stack             = stack        if stack else Plot.defaultStack
     self.texY              = texY         if texY else Plot.defaultTexY
     self.overflowBin       = overflowBin  if overflowBin != 'default'  else Plot.defaultOverflowBin
@@ -142,6 +123,7 @@ class Plot:
     self.histModifications = histModifications
     self.scaleFactor       = None
     self.blindRange        = blindRange
+    self.modTexLeg         = modTexLeg if modTexLeg else Plot.defaultModTexLeg
 
     if type(binning)==type([]):   self.binning = (len(binning)-1, numpy.array(binning))
     elif type(binning)==type(()): self.binning = binning
@@ -340,8 +322,11 @@ class Plot:
     legend.SetFillStyle(0)
     legend.SetShadowColor(ROOT.kWhite)
     legend.SetBorderSize(0)
-
-    for h in sum(histos, []): legend.AddEntry(h, h.texName, h.legendStyle)
+    for h in sum(histos, []): 
+      texLabel = h.texName
+      for a, b in self.modTexLeg:
+        texLabel = texLabel.replace(a, b)
+      legend.AddEntry(h, texLabel, h.legendStyle)
     return legend
 
 
@@ -371,25 +356,15 @@ class Plot:
     histos_splitted = {}
     for sys in [None] + sysKeys:
       histos_splitted[sys] = {}
-      if sys and not any(x in sys for x in ['Stat', 'sideBand', 'Scale']): plotName = self.name+sys                                    # in the 2D cache, the first key is plotname+sys
-      else:                                                                plotName = self.name                                        # for nominal and some exceptions
+      if sys and not 'Stat' in sys: plotName = self.name+sys                                                                           # in the 2D cache, the first key is plotname+sys
+      else:                         plotName = self.name                                                                               # for nominal and some exceptions
 
       if plotName not in allPlots:                                                                                                     # check if sys variation has been run already
         log.error('No ' + sys + ' variation found for ' +  self.name)
 
       histos_summed[sys] = None
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
-        if sys and 'Scale' in sys and not 'noData' in resultsDir:                                                                      # ugly hack to apply scale systematics on MC instead of data (only when data is available)
-          data, dataSys = None, None
-          for d in [d for d in allPlots[self.name] if d.count('data')]:                                                                # for data (if available depending on ee, mumu, emu, SF)
-            data    = addHist(data,    allPlots[self.name][d])                                                                         # get nominal for data
-            dataSys = addHist(dataSys, allPlots[self.name+sys][d])                                                                     # and the eScale or phScale sys for data
-          h = applySysToOtherHist(data, dataSys, allPlots[plotName][histName].Clone())                                                 # apply the eScale or phScale sys on MC
-        elif sys and 'sideBand' in sys:                                                                                                # ugly hack to apply side band uncertainty
-          h = applySidebandUnc(allPlots[self.name][histName].Clone(), self.name, resultsDir, 'Up' in sys)
-        else:                                                                                                                          # normal case, simply taken from cache
-          h = allPlots[plotName][histName].Clone()
-
+        h = allPlots[plotName][histName].Clone()
         if sys and 'StatUp' in sys and sys.replace('StatUp', '') in histName:                                                          # MC statistics for plots
           for i in range(0, h.GetNbinsX()+1):
             h.SetBinContent(i, h.GetBinContent(i)+h.GetBinError(i))
@@ -432,7 +407,6 @@ class Plot:
           uncertaintyOther = histos_summed[sysOther].GetBinContent(i) - histos_summed[None].GetBinContent(i)
           if uncertainty*uncertaintyOther > 0 and abs(uncertainty) < abs(uncertaintyOther): continue                                  # Check if both up and down go to same direction, only take the maximum
           if (variation=='Up' and uncertainty > 0) or (variation=='Down' and uncertainty < 0):
-            if sys.count('fsr'): uncertainty *= 1/sqrt(2)                                                                             # Hacky, scale fsr uncertainty with 1/sqrt(2) as recommended for TOP pag (in the fit this is handled in the cards)
             if postFitInfo:      uncertainty  = applyPostFitConstraint(sys, uncertainty, postFitInfo)
             summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
@@ -616,9 +590,9 @@ class Plot:
         yMin.SetBinContent(i, min(yMin.GetBinContent(i), h.GetBinContent(i)*((1-h.sysValues['Down'].GetBinContent(i)) if hasattr(h, 'sysValues') else 1) - h.GetBinError(i)))
 
     # Check if at least two bins are filled, otherwise skip, unless yield
-    if len(self.getFilledBins(yMax)) < 2 and self.name != 'yield':
-      log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
-      return
+    # if len(self.getFilledBins(yMax)) < 2 and self.name != 'yield':
+    #   log.info('Seems all events end up in the same bin for ' + self.name + ', will not produce output for this uninteresting plot')
+    #   return
 
     # Get the canvas, which includes canvas.topPad and canvas.bottomPad
     canvas = getDefaultCanvas(ratio)
@@ -724,6 +698,10 @@ class Plot:
 
     if saveGitInfo: copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
     log.info('Creating output files for ' + self.name)
+    # save postFit to cache only when plotting with all systematics
+    if postFitInfo and len(systematics) > 1 and not plot_directory.count('-log') and not plot_directory.count('-normMC'):
+      log.info('Saving postfit histograms to cache for ' + self.name)
+      self.saveToCache(plot_directory, '')
     for extension in extensions:
       ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
       log.info(ofile)
@@ -753,3 +731,18 @@ def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
   if toRemove:
     for p in toRemove: plots.remove(p)
     toRemove = None
+
+
+# TODO maybe generalize, otherwise might just have to use this for ttgamma instead
+# def freezeZgYield(plots, year, tag, channel, selection):
+#   for i, plot in enumerate(plots):
+#     try:
+#       for samp, hist in plot.histos.iteritems():
+#         if not 'ZG' in samp.nameNoSys: continue
+#         nomHist = getHistFromPkl((year, tag, channel, selection), plot.name, '', [samp.nameNoSys+samp.texName])
+#         hist.Scale(nomHist.Integral()/hist.Integral())
+#         plots[i].histos[samp] = hist
+#       log.debug('Zg yield frozen in plot ' + plot.name)
+#     except Exception as e:
+#       log.debug('Zg yield NOT frozen in plot ' + plot.name + ' bproblem:')
+#       log.debug(e)
