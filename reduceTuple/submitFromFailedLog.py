@@ -9,9 +9,9 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='Use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='Do not launch subjobs')
-argParser.add_argument('--cleanFolders',   action='store_true', default=False,  help='Remove empty folders')
 argParser.add_argument('--select',   nargs='*', type=str, default=[],     help='Resubmit only commands containing all strings given here')
 argParser.add_argument('--tolerant', action='store_true', default=False,  help='don not consider e.g. a missing tuple file a reason for resubmit')
+argParser.add_argument('--cleanFolders',   action='store_true', default=False,  help='Remove empty folders')
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -43,6 +43,10 @@ for logfile in getLogs('./log'):
         finished = True
         miscProblem = True
       if 'Command:' in line:                        command   = line.split('Command: ')[-1].rstrip()
+  if not command: 
+    log.info('no valid command??')
+    log.info(logfile)
+    continue
   if args.select and not all(command.count(sel) for sel in args.select): continue
   if (not finished or ((rootError or miscProblem) and not args.tolerant)) and command: jobsToSubmit.append((command, logfile))
 

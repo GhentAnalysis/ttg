@@ -26,7 +26,7 @@ sourceHists ={'2016': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2016/p
                         '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
 }
 
-closurePlots = {'2016': '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
+closurePlots = {'2016': '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-compRewContribMC-forNPclosure-noZgCorr//noData/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
                 '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
                 '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl'
 }

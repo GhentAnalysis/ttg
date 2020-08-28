@@ -10,11 +10,11 @@
 
 
 
-# ./ttgPlots.py --year 2016 --channel ee --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
-# ./ttgPlots.py --year 2016 --channel mumu --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
-# ./ttgPlots.py --year 2016 --channel emu --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
-# ./ttgPlots.py --year 2016 --channel SF --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
-# ./ttgPlots.py --year 2016 --channel all --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
+./ttgPlots.py --year 2016 --channel ee --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
+./ttgPlots.py --year 2016 --channel mumu --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
+./ttgPlots.py --year 2016 --channel emu --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
+./ttgPlots.py --year 2016 --channel SF --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
+./ttgPlots.py --year 2016 --channel all --selection llg-mll40-signalRegion-offZ-llgNoZ-photonPt20 --tag phoCBfull-defaultEstimDD
 
 
 

@@ -158,6 +158,8 @@ c.muvar = ([var for var in ['ScaleUp', 'ScaleDown'] if 'mu' + var in args.type] 
 newVars.egvar = c.egvar
 newVars.muvar = c.muvar
 
+pcut = sample.name.count('PCUT')
+
 # branchModifications = []
 # for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown']:
 #   if args.type.count('eph'  + var): branchModifications += [switchBranches('_lPtCorr',  '_lPt' + var),  switchBranches('_lECorr',  '_lE' + var), switchBranches('_phPtCorr', '_phPt' + var), switchBranches('_phECorr', '_phE' + var)]
@@ -214,6 +216,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   if not selectPhotons(c, newVars, 2, sample.isData): continue
   if not c._passMETFilters:                           continue
 
+  if pcut and not newVars.lhePhPt<100: continue
+  
   if sample.isData:
     if sample.name.count('DoubleMuon') and not c._passTrigger_mm:                                      continue
     if sample.name.count('DoubleEG')   and not c._passTrigger_ee:                                      continue

@@ -16,7 +16,7 @@ for i in ('Up', 'Down'):
   systematics['erd'+i]        = []
   systematics['ephScale'+i]     = []
   systematics['ephRes'+i]       = []
-  systematics['muScale'+i]      = []
+  # systematics['muScale'+i]      = [] 
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
@@ -56,11 +56,12 @@ linearSystematics['lumi'] = (None, 2.5)
 # Define linear systematics implemented as rate parameters
 #
 rateParameters = {}
-rateParameters['TT_Dil']   = 5.5
-rateParameters['ZG']       = 10
-rateParameters['DY']       = 10
+# rateParameters['TT_Dil']   = 5.5
+# rateParameters['ZG']       = 10
+rateParameters['ZG']       = 3   #we consider 70% of the Zg yield to be constrained by the correction
+# rateParameters['DY']       = 10
 rateParameters['singleTop'] = 10
-rateParameters['VVTo2L2Nu']    = 50   #other
+rateParameters['VVTo2L2Nu']    = 30   #other
 #
 # Function to apply the systematic to the cutstring, tree branches, reduceType
 # When ':' is used in the sysVar, the first part selects a specific sample on which the sysVar should be applied
@@ -94,35 +95,50 @@ def getSigmaSyst(sys):
   return 0.
 
 
-#
+# #
+# # Special systematic samples for hdamp, ue, and erd
+# #
+# def getReplacementsForStack(sys, year):
+#   if not sys:
+#     return {}
+#   # no syst variation variation samples for 2016 (in miniAODv3 at least)
+#   # if not year == '2016':
+#   # if not year == '2017':
+#   # TODO if works universally just remove conditions
+#   if True:
+#     # if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
+#     #   return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
+#     # elif sys == 'erdUp' and year == '2017':
+#     #   return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd'}
+#       # TODO change when had is available again
+#       # return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
+
+#     # TODO to be built in when new samples arrive
+#     # OROFF turns off overlap removal
+#     ttgsampsw = {'erdUp':'erd', 'ueDown':'uedown', 'ueUp':'ueup'}
+#     if sys in ttgsampsw.keys():
+#       sw = ttgsampsw[sys]
+#       return {'TTGamma_Dil'  : 'TTGamma_Dil_' + sw + 'OROFF', 'TTGamma_Sem'   : 'TTGamma_Sem_' + sw + 'OROFF', 'TTGamma_Had' : 'TTGamma_HadOROFF',
+#               'TTGamma_DilA' : 'DROP',                 'TTGamma_SemA' : 'DROP',                  'TTGamma_HadA' : 'DROP',
+#               'TTGamma_DilB' : 'DROP',                 'TTGamma_SemB' : 'DROP',                  'TTGamma_HadB' : 'DROP'
+#               }
+
+#   return {}
+
+
+
 # Special systematic samples for hdamp, ue, and erd
 #
 def getReplacementsForStack(sys, year):
-  if not sys:
-    return {}
-  # no syst variation variation samples for 2016 (in miniAODv3 at least)
-  # if not year == '2016':
-  # if not year == '2017':
-  # TODO if works universally just remove conditions
-  if True:
-    # if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
-    #   return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
-    # elif sys == 'erdUp' and year == '2017':
-    #   return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd'}
-      # TODO change when had is available again
-      # return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
-
-    # TODO to be built in when new samples arrive
-    # OROFF turns off overlap removal
+  if sys:
     ttgsampsw = {'erdUp':'erd', 'ueDown':'uedown', 'ueUp':'ueup'}
     if sys in ttgsampsw.keys():
       sw = ttgsampsw[sys]
-      return {'TTGamma_Dil'  : 'TTGamma_Dil_' + sw + 'OROFF', 'TTGamma_Sem'   : 'TTGamma_Sem_' + sw + 'OROFF', 'TTGamma_Had' : 'TTGamma_HadOROFF',
+      return {'TTGamma_DilPCUT' : 'TTGamma_Dil_' + sw, 'TTGamma_SemPCUT' : 'TTGamma_Sem_' + sw,  'TTGamma_HadPCUT' : 'TTGamma_Had',
               'TTGamma_DilA' : 'DROP',                 'TTGamma_SemA' : 'DROP',                  'TTGamma_HadA' : 'DROP',
               'TTGamma_DilB' : 'DROP',                 'TTGamma_SemB' : 'DROP',                  'TTGamma_HadB' : 'DROP'
               }
-
-  return {}
+  else: return {}
 
 
 #

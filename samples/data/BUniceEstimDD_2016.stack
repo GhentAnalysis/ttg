@@ -1,11 +1,13 @@
 -- MC
-TTGamma_DilPCUT              t#bar{t}#gamma_(genuine)        fillStyle     kOrange                  _ttgEventType>2
-+TTGamma_SemPCUT
-+TTGamma_HadPCUT
-+TTGamma_DilA
+TTGamma_Dil              t#bar{t}#gamma_(genuine)        fillStyle     kOrange                  (_ttgEventType>2&&lhePhPt<100)
++TTGamma_Sem
++TTGamma_Had
+
+TTGamma_DilA              t#bar{t}#gamma_(genuine)        fillStyle     kOrange                  _ttgEventType>2
 +TTGamma_SemA
 +TTGamma_HadA
-+TTGamma_DilB
+
+TTGamma_DilB              t#bar{t}#gamma_(genuine)        fillStyle     kOrange                  _ttgEventType>2
 +TTGamma_SemB
 +TTGamma_HadB
 

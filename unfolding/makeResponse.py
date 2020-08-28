@@ -87,20 +87,6 @@ def checkFid(c):
   return True
 
 
-
-
-# def equalizeBins(hist):
-#   nx = hist.GetXaxis().GetNbins()
-#   ny = hist.GetYaxis().GetNbins()
-  
-#   newHist = ROOT.TH2F(hist.GetName(), hist.GetName(), nx, numpy.array(range(nx+1)).astype(float), ny, numpy.array(range(ny+1)).astype(float))
-#   for i in range(nx+1):
-#     for j in range(ny+1):
-#       newHist.SetBinContent(i,j, hist.GetBinContent(i, j))
-#       newHist.SetBinError(i,j, hist.GetBinError(i, j))
-#   return newHist
-
-
 ########## PREPARE PLOTS ##########
 Plot.setDefaults(stack=stack, texY = 'Events')
 Plot2D.setDefaults(stack=stack)
@@ -111,65 +97,42 @@ def ifRec(c, val, under):
   else: return under-1.
 
 
-compBinA = [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]
-compBinB = [20., 35., 50., 65., 80., 95., 110., 140., 180., 300.]
-# TODO  normalize along code might not be a great combo with the underflow system
+
+dRBinRec = [ 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 4.2 ]
+dRBinGen = [ 0.4, 1.0, 1.6, 2.2, 2.8, 3.4, 4.2 ]
+
+etaBinRec = (15, -1.5, 1.5)
+etaBinGen = (5, -1.5, 1.5)
+
+absEtaBinRec = (15, 0., 1.5)
+absEtaBinGen = (5, 0., 1.5)
+
+ptBinRec = (31, 20, 330)
+ptBinGen = (11, 20, 350)
+
 plotListRecFid = []
-plotListRecFid.append(Plot('RecFidnphoton',                         'number of photons',               lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
-plotListRecFid.append(Plot('RecFidnjets',                           'number of jets',                  lambda c : c.njets,                                            (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidnbjets',                          'number of bjets',                 lambda c : c.ndbjets,                                          (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidPLnphoton',                       'number of PL photons',            lambda c : c.PLnphotons,                                       (4,  -0.5, 3.5)))
-plotListRecFid.append(Plot('RecFidPLnjets',                         'number of PL jets',               lambda c : c.PLnjets,                                          (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidPLnbjets',                        'number of PL bjets',              lambda c : c.PLndbjets,                                        (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidsignalRegionsZoom',               'signal region',                   lambda c : createSignalRegionsZoom(c),                        (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
-
-plotListRecFid.append(Plot('RecFid_PLph_ptA',                  'PLphoton pT',               lambda c : c.PLph_pt,  compBinA))
-plotListRecFid.append(Plot('RecFid_PLph_ptB',                  'PLphoton pT',               lambda c : c.PLph_pt,  compBinB))
-
 plotListRec = []
-plotListRec.append(Plot('Rec_nphoton',                  'number of photons',               lambda c : c.nphotons,                                       (4,  -0.5, 3.5)))
-plotListRec.append(Plot('Rec_njets',                    'number of jets',                  lambda c : c.njets,                                          (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_nbjets',                   'number of bjets',                 lambda c : c.ndbjets,                                        (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_PLnphoton',                'number of PL photons',            lambda c : c.PLnphotons,                                     (4,  -0.5, 3.5)))
-plotListRec.append(Plot('Rec_PLnjets',                  'number of PL jets',               lambda c : c.PLnjets,                                        (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_PLnbjets',                 'number of PL bjets',              lambda c : c.PLndbjets,                                      (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_signalRegionsZoom',        'signal region',                   lambda c : createSignalRegionsZoom(c),                       (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
 
+plotListOut = []
 plotListFid = []
-plotListFid.append(Plot('Fid_nphoton',                  'number of photons',               lambda c : c.nphotons,                                       (4,  -0.5, 3.5)))
-plotListFid.append(Plot('Fid_njets',                    'number of jets',                  lambda c : c.njets,                                          (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_nbjets',                   'number of bjets',                 lambda c : c.ndbjets,                                        (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_PLnphoton',                'number of PL photons',            lambda c : c.PLnphotons,                                     (4,  -0.5, 3.5)))
-plotListFid.append(Plot('Fid_PLnjets',                  'number of PL jets',               lambda c : c.PLnjets,                                        (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_PLnbjets',                 'number of PL bjets',              lambda c : c.PLndbjets,                                      (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_signalRegionsZoom',        'signal region',                   lambda c : createSignalRegionsZoom(c),                       (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
 
-plotListFid.append(Plot('Fid_PLph_ptA',                  'PLphoton pT',               lambda c : c.PLph_pt,  compBinA))
-plotListFid.append(Plot('Fid_PLph_ptB',                  'PLphoton pT',               lambda c : c.PLph_pt,  compBinB))
+photon_eta',                 '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph])
+plotListFid.append(Plot2D('response_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : ifRec(c, c.ph_pt, 20.) ,                                 ptBinRec,       'PL p_{T}(#gamma) (GeV)',     lambda c : c.PLph_pt ,                                    ptBinGen))
+plotListFid.append(Plot2D('response_phEta',           '#eta(#gamma)',                   lambda c : ifRec(c, lambda c : c._phEta[c.ph], -1.5) ,              etaBinRec,      'PL p_{T}(#gamma) (GeV)',     lambda c : c._pl_phEta[c.ph] ,                            etaBinGen))
+plotListFid.append(Plot2D('response_phAbsEta',        '|#eta|(#gamma)',                 lambda c : ifRec(c, lambda c : abs(c._phEta[c.ph]), 0.) ,           absEtaBinRec,   'PL p_{T}(#gamma) (GeV)',     lambda c : abs(c._pl_phEta[c.ph]) ,                       absEtaBinGen))
+plotListFid.append(Plot2D('response_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : ifRec(c, deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]), 0.4) ,  dRBinRec,       'PL #Delta#phi(ll)',          lambda c : deltaPhi(c._pl_lPhi[c.l1], c._pl_lPhi[c.l2]) , dRBinGen))
+plotListFid.append(Plot2D('response_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : ifRec(c, c.PLphL1DeltaR, 0.4) ,                          dRBinRec,       'PL #DeltaR(#gamma, l)',      lambda c : c.PLphL1DeltaR ,                               dRBinGen))
+
+
 
 plotListFid.append(Plot2D('response',                'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) ,  (23, 20, 135),    'PL p_{T}(#gamma) (GeV)',     lambda c : c.PLph_pt , (12, 20, 140)))
-plotListFid.append(Plot2D('responseOther',           'PL p_{T}(#gamma) (GeV)',          lambda c : c.PLph_pt ,               (12, 20, 140),    'p_{T}(#gamma) (GeV)',        lambda c : ifRec(c, c.ph_pt, 20.) , (23, 20, 135)))
-plotListFid.append(Plot2D('photon_pt_vsplx',         'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) ,  (23, 20, 135),    'PL p_{T}(#gamma) (GeV)',     lambda c : c.PLph_pt , (12, 20, 140), histModifications=normalizeAlong('x') ))
 
 
 plotListFid.append(Plot2D('compA_response',                'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) ,  compBinA,    'PL p_{T}(#gamma) (GeV)',     lambda c : c.PLph_pt , compBinA, histModifications=[ equalBinning()]                          ))
-plotListFid.append(Plot2D('compA_responseOther',           'PL p_{T}(#gamma) (GeV)',          lambda c : c.PLph_pt ,               compBinA,    'p_{T}(#gamma) (GeV)',        lambda c : ifRec(c, c.ph_pt, 20.) , compBinA, histModifications=[ equalBinning()]             ))
-plotListFid.append(Plot2D('compA_photon_pt_vsplx',         'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) ,  compBinA,    'PL p_{T}(#gamma) (GeV)',     lambda c : c.PLph_pt , compBinA, histModifications=[normalizeAlong('x'), equalBinning()] ))
 
 
 plotListFid.append(Plot2D('compB_response',                'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) ,  compBinB,    'PL p_{T}(#gamma) (GeV)',     lambda c : c.PLph_pt , compBinB , histModifications=[equalBinning()]                         ))
-plotListFid.append(Plot2D('compB_responseOther',           'PL p_{T}(#gamma) (GeV)',          lambda c : c.PLph_pt ,               compBinB,    'p_{T}(#gamma) (GeV)',        lambda c : ifRec(c, c.ph_pt, 20.) , compBinB, histModifications=[equalBinning()]             ))
-plotListFid.append(Plot2D('compB_photon_pt_vsplx',         'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) ,  compBinB,    'PL p_{T}(#gamma) (GeV)',     lambda c : c.PLph_pt , compBinB, histModifications=[normalizeAlong('x'), equalBinning()] ))
 
-
-plotListOut = []
-plotListOut.append(Plot('Out_nphoton',                  'number of photons',               lambda c : c.nphotons,                                       (4,  -0.5, 3.5)))
-plotListOut.append(Plot('Out_njets',                    'number of jets',                  lambda c : c.njets,                                          (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_nbjets',                   'number of bjets',                 lambda c : c.ndbjets,                                        (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_PLnphoton',                'number of PL photons',            lambda c : c.PLnphotons,                                     (4,  -0.5, 3.5)))
-plotListOut.append(Plot('Out_PLnjets',                  'number of PL jets',               lambda c : c.PLnjets,                                        (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_PLnbjets',                 'number of PL bjets',              lambda c : c.PLndbjets,                                      (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_signalRegionsZoom',        'signal region',                   lambda c : createSignalRegionsZoom(c),                       (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
 
 plotListOut.append(Plot('Out_ph_ptA',                  'photon pT',               lambda c : c.ph_pt,  compBinA))
 plotListOut.append(Plot('Out_ph_ptB',                  'photon pT',               lambda c : c.ph_pt,  compBinB))
