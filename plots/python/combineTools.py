@@ -90,7 +90,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = None, run='
 # Run fit diagnostics
 # Disable pylint "too many branches" until CMSSW has a recent pylint version which takes nested functions into account
 #
-def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR = 1, statOnly=False, alsoBOnly=False, mode='exp', run='combine'):
+def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR = 1, statOnly=False, alsoBOnly=False, mode='exp', run='combine', masked=False):
     
     def getParam(filename, param):
         
@@ -165,8 +165,9 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
     elif toys:   logFile = dataCard + '_toys'
     else:        logFile = dataCard
 
-    combineCommand  = 'text2workspace.py ' + dataCard + '.txt;'
-    combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace'
+    combineCommand  = 'text2workspace.py ' + dataCard + '.txt' + (' --channel-masks' if masked else '') + ';'
+    # note: blindly following combine tutorial would give --setParameters mask_msk=1, cehcking datacard --> 3 channels to be masked separtely, confirm in srFit.log
+    combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace' + (' --setParameters mask_msk_sr_ee=1,mask_msk_sr_emu=1,mask_msk_sr_mumu=1' if masked else '')
     print combineCommand
     
     otherCommands   = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',

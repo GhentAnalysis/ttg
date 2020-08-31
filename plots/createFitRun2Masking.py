@@ -10,6 +10,7 @@ argParser.add_argument('--chan', action='store', default='ee', help="dilepton ch
 argParser.add_argument('--year', action='store', default='2016', help="year of data taking", choices=['2016', '2017', '2018', 'All'])
 argParser.add_argument('--tab', action='store_true', help="produce tables")
 argParser.add_argument('--noPartial', action='store_true', help="don't apply partial correlations")
+argParser.add_argument('--masked', action='store', default=None, help="add ad masked distribution")
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -84,8 +85,8 @@ templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 correlations = {}
 
 
-def writeRootFile(name, shapes, systematicVariations, year):
-
+def writeRootFile(name, shapes, systematicVariations, year, distribution='signalRegions'):
+    name = name if distribution == 'signalRegions' else (name + '_' + distribution)
     fname = args.run + args.chan + '/' + name + '_' + year + '_shapes.root'
     print fname
     f = ROOT.TFile(fname, 'RECREATE')
@@ -96,7 +97,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
 
     for shape in shapes:
       # Write the data histograms to the combine shapes file, separate for ee, emu, mumu
-      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', '', [dataHistName[shape[3:]]]), mergeBins=False)
+      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), distribution, '', [dataHistName[shape[3:]]]), mergeBins=False)
       # write the MC histograms to the shapes file
       for t in templates:
         # if t == 'nonprompt':
@@ -116,14 +117,14 @@ def writeRootFile(name, shapes, systematicVariations, year):
           else:
             Selectors     = [[t, '(genuine)']]
           
-          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', sys, *Selectors)
+          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), distribution, sys, *Selectors)
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
           else:
             if 'erdDown' in sys:
               sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
-              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', 'erdUp', *sel)
+              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), distribution, 'erdUp', *sel)
               prompt = invertVar(nominal, ErdUpprompt)
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
@@ -148,7 +149,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
 ######################
 # Signal regions fit #
 ######################
-def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', run='combine', blind=False):
+def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', run='combine', blind=False, masked=None):
 
     years = [year]
     if year == 'All': 
@@ -199,89 +200,43 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     allSys = {}
     for y in years:
       allSys[y] = shapeSys[y] + normSys
-    
     print colored('##### Prepare ROOT file with histograms', 'red')
     for y in years:
       writeRootFile(cardName, shapes, nameSys[y], y)
+      if masked:
+        writeRootFile(cardName, shapes, nameSys[y], y, distribution=masked)
     
-    # TODO turn back on
-    print colored('##### Plot shape systematic variations', 'red')
-    for y in years:
-      for shape in shapes:
-        fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
-        plotSys(fileName, shape[:2], shape[3:], templates, nameSys[y], y, args.year, args.run, comb=args.chan=='ll')
-
     print colored('##### Prepare data card', 'red')
     cards = []
+    mskCards = []
     for y in years:
       writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
-      cards.append(outDir+'/'+cardName+'_'+y+'.txt')
+      if masked:
+        writeCard(cardName + '_' + masked , shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
+        mskCards.append(cardName + '_' + masked +'_'+y+'.txt')
+      cards.append(cardName+'_'+y+'.txt')
     if len(years) == 1:
-      os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')
+      if masked:
+        log.info('combineCards.py main='+ cards[0]+ ' msk='+ mskCards[0])
+        p = subprocess.Popen(['combineCards.py','main='+cards[0] ,'msk='+mskCards[0]], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+      else:
+        os.system('cp '+ outDir +'/' + cards[0]+' '+outDir+'/'+cardName+'.txt')
     else:
       for i, y in enumerate(years): 
         cards[i] = cardName+'_'+y
-        # if not args.noPartial:
-        #   p = subprocess.Popen(['partialCorrelationEdit.py', cards[i] + '.txt', '--process=isr,0.5:fsr,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+'.root'], cwd=outDir, stdout=open(outDir+'/pcorLog'+y+cardName+'.txt','wb')); p.wait()
-      # p = subprocess.Popen(['combineCards.py','y2016=pCor'+cards[0] + '.txt','y2017=pCor'+cards[1] + '.txt','y2018=pCor'+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
       p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
-          
-      # p = subprocess.Popen(['partialCorrelationEdit.py', cards[i], '--process=jes_1,0.5:jes_2,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+ '.root'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
-          # 'partialCorrelationEdit.py', cards[i], '--process' + 'jes_1,0.5:jes_2,0.75', '--postfix-uncorr _' + y, '--output-txt pCor' + cards[i]+ '.txt', '--output-root pCor' + cards[i]+ '.root'
+          # TODO implement channel masking with multiple years
 
     print colored('##### Run fit diagnostics for exp (stat)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)
+    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir, masked=masked)
     print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
+    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir, masked=masked)
 
     if blind == False:
       print colored('##### Run fit diagnostics for obs (stat)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir, masked=masked)
       print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
-    
-    print colored('##### Run NLL scan', 'red')
-    rMin = 0.5
-    rMax = 1.5
-    plotNLLScan(cardName, year, 'exp', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
-    
-    if blind == False:
-      if doRatio == True:
-        rMin = 0.5
-        rMax = 1.5
-      plotNLLScan(cardName, year, 'obs', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
-        
-    poi = ['r']
-    if blind == False:
-      print colored('##### Run impacts (obs)', 'red')        
-      runImpacts(cardName, year, perPage, poi=poi, doRatio=doRatio, run=outDir)
-
-    print colored('##### Run impacts (exp)', 'red')
-    runImpacts(cardName, year, perPage, toys=True, poi=poi, doRatio=doRatio, run=outDir)
-
-    if blind == False:
-      print colored('##### Run channel compatibility (obs)', 'red')
-      runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir)
-      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='obs', addNominal=True)
-        
-    print colored('##### Run channel compatibility (exp)', 'red')
-    runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir)
-    plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='exp', addNominal=True)
-    
-    if doRatio == False:
-      if blind == False:
-        print colored('##### Calculate the significance (obs)', 'red')
-        runSignificance(cardName, run=outDir)
-          
-      print colored('##### Calculate the significance (exp)', 'red')
-      runSignificance(cardName, expected=True, run=outDir)
-        
-    if args.tab == True:
-      print colored('##### Create tables', 'red')
-      if blind == False: 
-        os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName)
-      os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
-
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir, masked=masked)
 doRatio = args.ratio
 fitName = 'srFit'
 if doRatio: fitName = 'ratioFit'
@@ -294,7 +249,7 @@ if args.chan == 'll':
 else: 
   shapes.append('sr_'+args.chan)
 
-doSignalRegionFit(fitName, shapes, 35, doRatio=doRatio, year=args.year, blind=args.blind, run=args.run)
+doSignalRegionFit(fitName, shapes, 35, doRatio=doRatio, year=args.year, blind=args.blind, run=args.run, masked=args.masked)
 
 #goodnessOfFit('srFit', run=args.run+args.chan)
 #doLinearityCheck('srFit', run=args.run+args.chan)
