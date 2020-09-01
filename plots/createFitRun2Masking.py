@@ -10,7 +10,7 @@ argParser.add_argument('--chan', action='store', default='ee', help="dilepton ch
 argParser.add_argument('--year', action='store', default='2016', help="year of data taking", choices=['2016', '2017', '2018', 'All'])
 argParser.add_argument('--tab', action='store_true', help="produce tables")
 argParser.add_argument('--noPartial', action='store_true', help="don't apply partial correlations")
-argParser.add_argument('--masked', action='store', default=None, help="add ad masked distribution")
+argParser.add_argument('--masked', action='store_true', default=None, help="add masked distributions")
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -83,6 +83,9 @@ except: pass
 templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 # correlations = {'isr':0.5, 'fsr':0.75}
 correlations = {}
+
+
+maskedDist = ['photon_pt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']
 
 
 def writeRootFile(name, shapes, systematicVariations, year, distribution='signalRegions'):
@@ -204,21 +207,22 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     for y in years:
       writeRootFile(cardName, shapes, nameSys[y], y)
       if masked:
-        writeRootFile(cardName, shapes, nameSys[y], y, distribution=masked)
+        for distr in maskedDist:
+          writeRootFile(cardName, shapes, nameSys[y], y, distribution=distr)
     
     print colored('##### Prepare data card', 'red')
     cards = []
-    mskCards = []
     for y in years:
       writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
-      if masked:
-        writeCard(cardName + '_' + masked , shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
-        mskCards.append(cardName + '_' + masked +'_'+y+'.txt')
       cards.append(cardName+'_'+y+'.txt')
+      if masked:
+        for distr in maskedDist:
+          writeCard(cardName + '_' + distr , shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
     if len(years) == 1:
       if masked:
-        log.info('combineCards.py main='+ cards[0]+ ' msk='+ mskCards[0])
-        p = subprocess.Popen(['combineCards.py','main='+cards[0] ,'msk='+mskCards[0]], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+        combArgs= ['main=' + cards[0]] + [distr + '=' +cardName + '_' + distr +'_'+y+'.txt' for distr in maskedDist]
+        log.info('combineCards.py '+ ' '.join(combArgs))
+        p = subprocess.Popen(['combineCards.py']+combArgs, cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
       else:
         os.system('cp '+ outDir +'/' + cards[0]+' '+outDir+'/'+cardName+'.txt')
     else:
@@ -226,17 +230,16 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
         cards[i] = cardName+'_'+y
       p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
           # TODO implement channel masking with multiple years
-
     print colored('##### Run fit diagnostics for exp (stat)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir, masked=masked)
+    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir, maskedDist=maskedDist)
     print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir, masked=masked)
+    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir, maskedDist=maskedDist)
 
     if blind == False:
       print colored('##### Run fit diagnostics for obs (stat)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir, masked=masked)
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir, maskedDist=maskedDist)
       print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir, masked=masked)
+      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir, maskedDist=maskedDist)
 doRatio = args.ratio
 fitName = 'srFit'
 if doRatio: fitName = 'ratioFit'
