@@ -61,7 +61,7 @@ def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
   return hist
 
 from ttg.plots.replaceShape import replaceShape
-def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, shape=None, mergeBins=False):
+def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, shape=None, mergeBins=False, addOverflow=True):
     hist = histTemp.Clone()
     if norm:  normalizeBinWidth(hist, norm)
     if shape: hist = replaceShape(hist, shape)
@@ -71,6 +71,12 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, 
             hist.SetBinError(i, 0)
     if mergeBins:
         hist.Rebin(hist.GetNbinsX())
+    if addOverflow:
+      nbins = hist.GetNbinsX()
+      hist.SetBinContent(nbins, hist.GetBinContent(nbins) + hist.GetBinContent(nbins + 1))
+      hist.SetBinError(nbins, sqrt(hist.GetBinError(nbins)**2 + hist.GetBinError(nbins + 1)**2))
+      hist.SetBinContent(nbins+1, 0.)
+      hist.SetBinError(nbins+1, 0.)
     if not rootFile.GetDirectory(name): rootFile.mkdir(name)
     rootFile.cd(name)
     protectHist(hist).Write(template)
@@ -85,7 +91,7 @@ templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 correlations = {}
 
 
-maskedDist = ['photon_pt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']
+maskedDist = ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']
 
 
 def writeRootFile(name, shapes, systematicVariations, year, distribution='signalRegions'):
@@ -103,20 +109,11 @@ def writeRootFile(name, shapes, systematicVariations, year, distribution='signal
       writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), distribution, '', [dataHistName[shape[3:]]]), mergeBins=False)
       # write the MC histograms to the shapes file
       for t in templates:
-        # if t == 'nonprompt':
-        #   Selectors     = [['NP', 'nonprompt']]
-        # else:
-        #   Selectors     = [[t, '(genuine)']]
-          # the nominal ttg samples consist of 3 pt ranges, sum them
-          # Selectors[0] += ['@']
         q2Variations = []
         pdfVariations = []
         for sys in [''] + systematicVariations:
-          # log.info(sys)
           if t == 'nonprompt':
             Selectors     = [['NP', 'nonprompt']]
-          # elif t == 'TTGamma' and not sys in ['ueUp', 'ueDown', 'erdUp']:
-          #   Selectors     = [['TTGamma_Dilt', '(genuine)'],['TTGamma_DilAt', '(genuine)'],['TTGamma_DilBt', '(genuine)']]
           else:
             Selectors     = [[t, '(genuine)']]
           

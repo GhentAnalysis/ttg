@@ -470,8 +470,8 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       corFrac = correlations.get(sys)
       # f.write(tab([shapeSys(None, None, sys), 'shapeN'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
       if corFrac:
-        f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(corFrac)) for s in shapes for t in templates+templatesNoSys]))
-        unCorFrac = str(round((1.-corFrac**2.)**0.5, 6))
+        f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(round((corFrac)**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+        unCorFrac = str(round((1.-corFrac)**0.5, 6))
         f.write(tab([shapeSys(None, None, sys + '_' + year), 'shape'] + [shapeSys(s, t, sys, unCorFrac) for s in shapes for t in templates+templatesNoSys]))
       else:
         f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
