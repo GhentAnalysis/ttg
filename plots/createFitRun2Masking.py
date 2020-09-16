@@ -87,12 +87,8 @@ except: pass
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
 # templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
-# correlations = {'isr':0.5, 'fsr':0.75}
-correlations = {}
-
-
 maskedDist = ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']
-
+from ttg.plots.systematics import uncorFracs
 
 def writeRootFile(name, shapes, systematicVariations, year, distribution='signalRegions'):
     name = name if distribution == 'signalRegions' else (name + '_' + distribution)
@@ -101,7 +97,7 @@ def writeRootFile(name, shapes, systematicVariations, year, distribution='signal
     f = ROOT.TFile(fname, 'RECREATE')
 
     baseSelection = 'llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD-merp'
+    tag           = 'phoCBfull-niceEstimDD-sep'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
     for shape in shapes:
@@ -210,11 +206,11 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
-      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
+      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, uncorFracs=uncorFracs if args.year == 'All' else {})
       cards.append(cardName+'_'+y+'.txt')
       if masked:
         for distr in maskedDist:
-          writeCard(cardName + '_' + distr , shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
+          writeCard(cardName + '_' + distr , shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, uncorFracs=uncorFracs if args.year == 'All' else {})
     if len(years) == 1:
       if masked:
         combArgs= ['main=' + cards[0]] + [distr + '=' +cardName + '_' + distr +'_'+y+'.txt' for distr in maskedDist]
@@ -223,10 +219,21 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
       else:
         os.system('cp '+ outDir +'/' + cards[0]+' '+outDir+'/'+cardName+'.txt')
     else:
-      for i, y in enumerate(years): 
-        cards[i] = cardName+'_'+y
-      p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
-          # TODO implement channel masking with multiple years
+      if masked:
+        combArgs = ['y' + y + '_main=' +cardName + '_'+y+'.txt' for y in ['2016','2017','2018']]
+        combArgs += ['y' + y + '_' + distr + '=' +cardName + '_' + distr +'_'+y+'.txt' for distr in maskedDist for y in ['2016','2017','2018']]
+        log.info('combineCards.py '+ ' '.join(combArgs))
+        p = subprocess.Popen(['combineCards.py']+combArgs, cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+      else:
+        p = subprocess.Popen(['combineCards.py','y2016='+cards[0],'y2017='+cards[1],'y2018='+cards[2]], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+
+    # else:
+    #   for i, y in enumerate(years): 
+    #     cards[i] = cardName+'_'+y
+    #   p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+    #       # TODO implement channel masking with multiple years
+
+
     print colored('##### Run fit diagnostics for exp (stat)', 'red')
     runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir, maskedDist=maskedDist)
     print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')

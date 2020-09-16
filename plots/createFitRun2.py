@@ -86,8 +86,7 @@ except: pass
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
 # templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
-# correlations = {'isr':0.5, 'fsr':0.75}
-correlations = {}
+from ttg.plots.systematics import uncorFracs
 
 
 def writeRootFile(name, shapes, systematicVariations, year):
@@ -217,20 +216,14 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
-      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
+      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, uncorFracs=uncorFracs if args.year == 'All' else {})
       cards.append(outDir+'/'+cardName+'_'+y+'.txt')
     if len(years) == 1:
       os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')
     else:
       for i, y in enumerate(years): 
         cards[i] = cardName+'_'+y
-        # if not args.noPartial:
-        #   p = subprocess.Popen(['partialCorrelationEdit.py', cards[i] + '.txt', '--process=isr,0.5:fsr,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+'.root'], cwd=outDir, stdout=open(outDir+'/pcorLog'+y+cardName+'.txt','wb')); p.wait()
-      # p = subprocess.Popen(['combineCards.py','y2016=pCor'+cards[0] + '.txt','y2017=pCor'+cards[1] + '.txt','y2018=pCor'+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
       p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
-          
-      # p = subprocess.Popen(['partialCorrelationEdit.py', cards[i], '--process=jes_1,0.5:jes_2,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+ '.root'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
-          # 'partialCorrelationEdit.py', cards[i], '--process' + 'jes_1,0.5:jes_2,0.75', '--postfix-uncorr _' + y, '--output-txt pCor' + cards[i]+ '.txt', '--output-root pCor' + cards[i]+ '.root'
 
     print colored('##### Run fit diagnostics for exp (stat)', 'red')
     runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)
