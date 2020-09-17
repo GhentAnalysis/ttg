@@ -56,11 +56,17 @@ if not args.isChild:
   submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, jobLabel = "HN")
   exit(0)
 
-
+#
+# From now on, we are in the subjobs
+# Initialize the sample and tree
+#
 sample = getSampleFromList(sampleList, args.sample)
 tree   = sample.initTree(shortDebug=False, splitData=args.splitData)
 
 
+#
+# Helper functions
+#
 def getLorentzVector(t, index):
   vector = ROOT.TLorentzVector()
   vector.SetPtEtaPhiE(t._lPt[index], t._lEta[index], t._lPhi[index], t._lE[index])
@@ -75,6 +81,9 @@ def deltaPhi(phi1, phi2):
 def deltaR(t, l1, l2):
   return math.sqrt(deltaPhi(t._lPhi[l1], t._lPhi[l2])**2 + (t._lEta[l1]-t._lEta[l1])**2)
 
+#
+# Lepton workingpoints
+#
 def passEleMVA(ept, sceta, emva):
     mvaRaw = -0.5 * math.log((1. - emva)/(1. + emva))
     if ept < 10:
@@ -127,17 +136,25 @@ def passMuoDisplMedium(tree, i):
     isGoodGlb = (tree._lGlobalMuon[i] and tree._lCQChi2Position[i]<12. and tree._lCQTrackKink[i]<20.)
     return ((tree._lPOGLoose[i] and isGoodGlb and tree._lMuonSegComp[i]>0.303) or (tree._lPOGLoose[i] and tree._lMuonSegComp[i]>0.451))
 
-# dxy binning
+
+#
+# Custom dxy binning
+#
 dxybins = array.array('f', [0.0, 0.01, 0.011, 0.013, 0.015, 0.017, 0.019, 0.022, 0.025, 0.028, 0.032, 0.037, 0.042, 0.048, 0.055, 0.062, 0.071, 0.081, 0.092,
                             0.1, 0.12, 0.14, 0.16, 0.18, 0.2, 0.23, 0.26, 0.3, 0.34, 0.39, 0.44, 0.5, 0.57, 0.65, 0.74, 0.85, 0.96, 
                             1.1, 1.3, 1.4, 1.6, 1.9, 2.1, 2.4, 2.7, 3.1, 3.6, 4.1, 4.6, 5.3, 6])
 
-# this is bullshit, how someone thought this was a good way to code things I can't understand
+#
+# Requiring trigger
+# this is bullshit, how someone thought this was a good way to code things like this, I can't understand
 # everything is so messed up in HNL
+#
 trigmaskEle = 3 if args.year==2017 else 1
 trigmaskMuo = 3 if args.year==2016 else 1
 
-# Output file
+#
+# Output file creation
+#
 outName = sample.name 
 if args.dyExternal:     outName += '_external'
 if args.dyExternalAll:  outName += '_externalAll'
@@ -155,19 +172,25 @@ if not args.overwrite and isValidRootFile(outName):
 
 fout = ROOT.TFile(outName, 'recreate')
 
+
+#
+# The lumi weights
+#
 if not sample.isData:
   lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
 
-# Histo classes
-promptflavs = ['_promptEE', '_promptMM']
-displflavs  = ['_displEE' , '_displMM' ]
 
-# Histograms
+#
+# Definition of the histograms to be filled (for different flavour combinations, onZ/offZ, 3-leptons or 4-leptons
+#
 hists = {}
 def addHist(name, title, nbins=None, minX=None, maxX=None, bins=None):
   if bins: hists[name] = ROOT.TH1F(name , ';%s;Entries' % title, len(bins)-1, bins)
   else:    hists[name] = ROOT.TH1F(name , ';%s;Entries' % title, nbins, minX, maxX)
 
+
+promptflavs = ['_promptEE', '_promptMM']
+displflavs  = ['_displEE' , '_displMM' ]
 for promptflav in promptflavs:
   for displflav in displflavs:
     suff = promptflav+displflav
@@ -191,6 +214,10 @@ for promptflav in promptflavs:
           addHist('ooEmoop'+type+onz+suff,  '1/E-1/P', nbins=50, minX=0., maxX=0.15)
           addHist('dEtaInSeed'+type+onz+suff,  'dEtaInSeed', nbins=50, minX=-.01, maxX=.01)
 
+
+#
+# The event loop
+#
 from ttg.tools.progressBar import progressbar
 log.info('Starting event loop')
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
@@ -205,6 +232,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
       if 'DY' in args.sample and tree._zgEventType>=3: continue
       if 'ZG' in args.sample and tree._hasInternalConversion: continue
 
+    # Select at least 2 tight leptons and 1 loose/displaced
     tightIndices = []
     looseIndices = []
     for i in range(0, tree._nLight):
@@ -247,6 +275,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
       if i in looseIndices: looseIndices.remove(i)
     if len(looseIndices)<1: continue
 
+    # Select loose pair or single loose lepton
     loosePair = None
     if len(looseIndices)>1:
       for i in looseIndices:
@@ -271,7 +300,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
     suffix = promptflavs[tree._lFlavor[tightPair[0]]] + displflavs[tree._lFlavor[loosePair[0]]]
 
     ##
-    ## Remove overlap between DY and Zgamma --> this is not an overlap algorithm?????????????????????????????? Should be reviewed at some point
+    ## Historic "overlap removal" between DY and Zgamma --> this is not an overlap algorithm?????????????????????????????? Should be reviewed at some point
     ## And I need to try to correct this bullshit as there's no time to make decent tuples with overlap removal variables included
     ## It's still bullshit, do never copy this part if you have time to do things in a correct way
     ##
@@ -301,6 +330,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob)):
     def closestDeltaR(index):
       return min([deltaR(tree, index, i) for i in tightIndices])
 
+    # Fill the hists
     scl = 1 if sample.isData else lumiWeights[0]*tree._weight
     def fillVariables(suffixes, index):
       hists['photonPt'+suffixes].Fill(getExternalPhotonPt(tree, index), scl)
