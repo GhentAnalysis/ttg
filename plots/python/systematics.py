@@ -11,7 +11,7 @@ systematics = {}
 for i in ('Up', 'Down'):
   systematics['isr'+i]        = [('ISRWeight',    'ISRWeight'+i)]
   systematics['fsr'+i]        = [('FSRWeight',    'FSRWeight'+i)]
-  systematics['hdamp'+i]      = []
+  # systematics['hdamp'+i]      = []
   systematics['ue'+i]         = []
   systematics['erd'+i]        = []
   systematics['ephScale'+i]     = []
@@ -30,6 +30,27 @@ for i in ('Up', 'Down'):
   systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
   systematics['NP'+i]         = []
+
+uncorFracs = {'lSFSy' : , 
+              'lSFEl' : , 
+              'lSFMu' : , 
+              'phSF' : , 
+              'ephRes' : , 
+              'ephScal : e'
+              'pvSF' : , 
+              'bTagb' : , 
+              'bTagl' : , 
+              'isr' : , 
+              'fsr' : , 
+              'JER' : , 
+              'JEC' : , 
+              'q2' : , 
+              'trigger' : , 
+              'pu' : , 
+              'NP' : , 
+              'ue' : , 
+              'pf' : , 
+              'erd' : }
 
 #
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken

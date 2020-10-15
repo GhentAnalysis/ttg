@@ -90,7 +90,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = None, run='
 # Run fit diagnostics
 # Disable pylint "too many branches" until CMSSW has a recent pylint version which takes nested functions into account
 #
-def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR = 1, statOnly=False, alsoBOnly=False, mode='exp', run='combine'):
+def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR = 1, statOnly=False, alsoBOnly=False, mode='exp', run='combine', maskedDist=None):
     
     def getParam(filename, param):
         
@@ -165,8 +165,17 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
     elif toys:   logFile = dataCard + '_toys'
     else:        logFile = dataCard
 
-    combineCommand  = 'text2workspace.py ' + dataCard + '.txt;'
-    combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace'
+    combineCommand  = 'text2workspace.py ' + dataCard + '.txt' + (' --channel-masks' if maskedDist else '') + ';'
+    # note: blindly following combine tutorial would give --setParameters mask_msk=1, cehcking datacard --> 3 channels to be masked separtely, confirm in srFit.log
+    if maskedDist:
+      if year == 'All':
+        masks = ','.join(['mask_' + y + dist + ch + '=1' for dist in maskedDist for ch in ['_sr_ee','_sr_emu','_sr_mumu'] for y in ['y2016_', 'y2017_', 'y2018_']])
+        combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace' + ' --setParameters ' + masks
+      else:
+        masks = ','.join(['mask_' + dist + ch + '=1' for dist in maskedDist for ch in ['_sr_ee','_sr_emu','_sr_mumu']])
+        combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace' + ' --setParameters ' + masks
+    else:
+      combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace'
     print combineCommand
     
     otherCommands   = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
@@ -410,7 +419,7 @@ def goodnessOfFit(dataCard, algo='saturated', run='combine'):
 # Write the card including all systematics and shapes
 # Might need refactoring
 #
-def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine', year='2016', correlations={}): # pylint: disable=R0914,R0913,R0912
+def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine', year='2016', uncorFracs={}): # pylint: disable=R0914,R0913,R0912
   if not templatesNoSys: templatesNoSys = []
 
   def tab(entries, column='12'):
@@ -462,12 +471,12 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      corFrac = correlations.get(sys)
-      # f.write(tab([shapeSys(None, None, sys), 'shapeN'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
-      if corFrac:
-        f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(corFrac)) for s in shapes for t in templates+templatesNoSys]))
-        unCorFrac = str(round((1.-corFrac**2.)**0.5, 6))
-        f.write(tab([shapeSys(None, None, sys + '_' + year), 'shape'] + [shapeSys(s, t, sys, unCorFrac) for s in shapes for t in templates+templatesNoSys]))
+      uncorFrac = uncorFracs.get(sys)
+      if uncorFrac:
+        f.write(tab([shapeSys(None, None, sys + '_' + year), 'shape'] + [shapeSys(s, t, sys, uncorFrac) for s in shapes for t in templates+templatesNoSys]))
+        if not uncorFrac == 1:
+          corFrac = str(round((1.-uncorFrac)**0.5, 6))
+          f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(round((corFrac)**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
       else:
         f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
 
