@@ -35,11 +35,11 @@ for i in ('Up', 'Down'):
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
 #
 # NOTE temp off
-# for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
-#   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
+for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
+  systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
 # NOTE pdf temporarily off
-# for i in range(0, 100):
-#   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
+for i in range(0, 100):
+  systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 
 #
 # Compile list to systematic to show
