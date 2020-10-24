@@ -60,7 +60,7 @@ def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
   return hist
 
 from ttg.plots.replaceShape import replaceShape
-def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, shape=None, mergeBins=False, addOverflow=True):
+def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], shape=None, mergeBins=False, addOverflow=True):
     hist = histTemp.Clone()
     if norm:  normalizeBinWidth(hist, norm)
     if shape: hist = replaceShape(hist, shape)
@@ -86,7 +86,7 @@ except: pass
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
 # templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
-from ttg.plots.systematics import uncorFracs
+from ttg.plots.systematics import correlations
 
 
 def writeRootFile(name, shapes, systematicVariations, year):
@@ -96,7 +96,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
     f = ROOT.TFile(fname, 'RECREATE')
 
     baseSelection = 'llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD-merp'
+    tag           = 'phoCBfull-niceEstimDD-otravez'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
     for shape in shapes:
@@ -130,7 +130,13 @@ def writeRootFile(name, shapes, systematicVariations, year):
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
             sysUncor = sys.replace('Up', '_' + year +'Up').replace('Down', '_' + year +'Down')
+            sysCor1617 = sys.replace('Up', '_1617Up').replace('Down', '_1617Down')
+            sysCor1618 = sys.replace('Up', '_1618Up').replace('Down', '_1618Down')
+            sysCor1718 = sys.replace('Up', '_1718Up').replace('Down', '_1718Down')
             writeHist(f, shape+sysUncor, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
+            writeHist(f, shape+sysCor1617, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
+            writeHist(f, shape+sysCor1618, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
+            writeHist(f, shape+sysCor1718, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
         # Calculation of up and down envelope pdf variations
         if len(pdfVariations) > 0:
           up, down = pdfSys(pdfVariations, nominal)
@@ -198,9 +204,10 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
 
     normSys = [(t+'_norm') for t in templates[1:-1]]
     
-    allSys = {}
-    for y in years:
-      allSys[y] = shapeSys[y] + normSys
+    # allSys = {}
+    # for y in years:
+    #   allSys[y] = shapeSys[y] + normSys
+    allSys = [base + suf for base in showSysList for suf in ['', '_2016', '_2017', '_2018', '_1617', '_1618', '_1718']] + normSys
     
     print colored('##### Prepare ROOT file with histograms', 'red')
     for y in years:
@@ -208,15 +215,16 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     
     # TODO turn back on
     print colored('##### Plot shape systematic variations', 'red')
-    for y in years:
-      for shape in shapes:
-        fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
-        plotSys(fileName, shape[:2], shape[3:], templates, nameSys[y], y, args.year, args.run, comb=args.chan=='ll')
+    print colored('OFF RIGHT NOW', 'red')
+    # for y in years:
+    #   for shape in shapes:
+    #     fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
+    #     plotSys(fileName, shape[:2], shape[3:], templates, nameSys[y], y, args.year, args.run, comb=args.chan=='ll')
 
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
-      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, uncorFracs=uncorFracs if args.year == 'All' else {})
+      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
       cards.append(outDir+'/'+cardName+'_'+y+'.txt')
     if len(years) == 1:
       os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')

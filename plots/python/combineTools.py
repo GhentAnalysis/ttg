@@ -80,7 +80,7 @@ def handleCombine(dataCard, logFile, combineCommand, otherCommands = None, run='
     shutil.copy('../tools/python/diffNuisances.py', combineRelease + '/src/diffNuisances.py')
     os.system('cp $CMSSW_BASE/src/ttg/plots/data/sysMappings.json ' + combineRelease + '/src/CombineHarvester/CombineTools/scripts/sysMappings.json')
     os.chdir(os.path.join(combineRelease, 'src'))
-    if logLevel(log, 'DEBUG'): combineCommand = combineCommand.replace('combine ', 'combine -v 2 ')
+    if logLevel(log, 'DEBUG') and not combineCommand.count('-v 2'): combineCommand = combineCommand.replace('combine ', 'combine -v 2 ') #specifying verbosity twice angers combine
     os.system('(eval `scramv1 runtime -sh`; ' + combineCommand + ') &> ' + logFile + '.log')
     os.system('eval `scramv1 runtime -sh`;' + ';'.join(otherCommands) if otherCommands else '')
     os.system('mv *' + dataCard + '* ' + currentDir + '/' + run + '/')
@@ -419,7 +419,7 @@ def goodnessOfFit(dataCard, algo='saturated', run='combine'):
 # Write the card including all systematics and shapes
 # Might need refactoring
 #
-def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine', year='2016', uncorFracs={}): # pylint: disable=R0914,R0913,R0912
+def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systematics, linearSystematics, scaleShape = None, run = 'combine', year='2016', correlations={}): # pylint: disable=R0914,R0913,R0912
   if not templatesNoSys: templatesNoSys = []
 
   def tab(entries, column='12'):
@@ -471,12 +471,41 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
-      uncorFrac = uncorFracs.get(sys)
-      if uncorFrac:
-        f.write(tab([shapeSys(None, None, sys + '_' + year), 'shape'] + [shapeSys(s, t, sys, uncorFrac) for s in shapes for t in templates+templatesNoSys]))
-        if not uncorFrac == 1:
-          corFrac = str(round((1.-uncorFrac)**0.5, 6))
-          f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(round((corFrac)**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+      correl = correlations.get(sys)
+      if type(correl) is tuple:
+        shared = min(correl)
+        if shared > 0: 
+          f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(round(shared**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+          correl = [i - shared for i in correl]
+        if year == '2016':
+          uncorrel = 1.-shared-correl[0]-correl[1]
+          if uncorrel>0:
+            f.write(tab([shapeSys(None, None, sys + '_2016'), 'shape'] + [shapeSys(s, t, sys, str(round(uncorrel**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+          if correl[0]>0:
+            f.write(tab([shapeSys(None, None, sys + '_1617'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[0]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+          if correl[1]>0:
+            f.write(tab([shapeSys(None, None, sys + '_1618'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[1]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+        if year == '2017':
+          uncorrel = 1.-shared-correl[0]-correl[2]
+          if uncorrel>0:
+            f.write(tab([shapeSys(None, None, sys + '_2017'), 'shape'] + [shapeSys(s, t, sys, str(round(uncorrel**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+          if correl[0]>0:
+            f.write(tab([shapeSys(None, None, sys + '_1617'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[0]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+          if correl[2]>0:
+            f.write(tab([shapeSys(None, None, sys + '_1718'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[2]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+        if year == '2018':
+          uncorrel = 1.-shared-correl[1]-correl[2]
+          if uncorrel>0:
+            f.write(tab([shapeSys(None, None, sys + '_2016'), 'shape'] + [shapeSys(s, t, sys, str(round(uncorrel**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+          if correl[1]>0:
+            f.write(tab([shapeSys(None, None, sys + '_1618'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[1]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+          if correl[2]>0:
+            f.write(tab([shapeSys(None, None, sys + '_1718'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[2]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+      elif correl:
+        if not correl == 0:
+          f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(round(correl**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+        uncorrel = str(round((1.-correl)**0.5, 6))
+        f.write(tab([shapeSys(None, None, sys + '_' + year), 'shape'] + [shapeSys(s, t, sys, uncorrel) for s in shapes for t in templates+templatesNoSys]))
       else:
         f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys) for s in shapes for t in templates+templatesNoSys]))
 

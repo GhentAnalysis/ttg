@@ -74,7 +74,8 @@ def insertImpact(line):
 def compileTable(name):
     
     os.chdir(os.getcwd() + '/tables/')
-    command = 'pdflatex -interaction=batchmode -halt-on-error ' + name
+    # command = 'pdflatex -interaction=batchmode -halt-on-error ' + name
+    command = 'pdflatex -interaction=batchmode ' + name
     os.system(command)
     command = 'convert ' + name.replace('.tex','.pdf') + ' ' + name.replace('.tex','.png')
     os.system(command)
@@ -97,4 +98,4 @@ with open(outDir + fname, 'w') as out:
     out.write(insertPreambule(False))
     
 compileTable(fname)
-os.system('cp tables/*.{pdf,png} ' + os.path.join(plotCombineDir, args.year, inputDir))
+os.system('cp tables/*'+ ('asimov*' if asimov else '') +'.{pdf,png} ' + os.path.join(plotCombineDir, args.year, inputDir))
