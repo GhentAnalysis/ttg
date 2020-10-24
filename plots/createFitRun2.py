@@ -144,6 +144,12 @@ def writeRootFile(name, shapes, systematicVariations, year):
           writeHist(f, shape+'pdfDown', t, down, mergeBins = False)
           writeHist(f, shape+'pdf_' + year + 'Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'pdf_' + year + 'Down', t, down, mergeBins = False)
+          writeHist(f, shape+'pdf_1617Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdf_1617Down', t, down, mergeBins = False)
+          writeHist(f, shape+'pdf_1618Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdf_1618Down', t, down, mergeBins = False)
+          writeHist(f, shape+'pdf_1718Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdf_1718Down', t, down, mergeBins = False)
         # Calcualtion of up and down envelope q2 variations
         if len(q2Variations) > 0:
           up, down = q2Sys(q2Variations)
@@ -151,6 +157,12 @@ def writeRootFile(name, shapes, systematicVariations, year):
           writeHist(f, shape+'q2Down', t, down, mergeBins = False)
           writeHist(f, shape+'q2_' + year + 'Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'q2_' + year + 'Down', t, down, mergeBins = False)
+          writeHist(f, shape+'q2_1617Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2_1617Down', t, down, mergeBins = False)
+          writeHist(f, shape+'q2_1618Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2_1618Down', t, down, mergeBins = False)
+          writeHist(f, shape+'q2_1718Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2_1718Down', t, down, mergeBins = False)
     f.Close()
 
 ######################
