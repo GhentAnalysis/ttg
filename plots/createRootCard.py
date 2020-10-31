@@ -60,7 +60,7 @@ def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
   return hist
 
 from ttg.plots.replaceShape import replaceShape
-def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], shape=None, mergeBins=False, addOverflow=True):
+def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, shape=None, mergeBins=False):
     hist = histTemp.Clone()
     if norm:  normalizeBinWidth(hist, norm)
     if shape: hist = replaceShape(hist, shape)
@@ -70,12 +70,6 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
             hist.SetBinError(i, 0)
     if mergeBins:
         hist.Rebin(hist.GetNbinsX())
-    if addOverflow:
-      nbins = hist.GetNbinsX()
-      hist.SetBinContent(nbins, hist.GetBinContent(nbins) + hist.GetBinContent(nbins + 1))
-      hist.SetBinError(nbins, sqrt(hist.GetBinError(nbins)**2 + hist.GetBinError(nbins + 1)**2))
-      hist.SetBinContent(nbins+1, 0.)
-      hist.SetBinError(nbins+1, 0.)
     if not rootFile.GetDirectory(name): rootFile.mkdir(name)
     rootFile.cd(name)
     protectHist(hist).Write(template)
@@ -86,7 +80,8 @@ except: pass
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
 # templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
-from ttg.plots.systematics import correlations
+# correlations = {'isr':0.5, 'fsr':0.75}
+correlations = {}
 
 
 def writeRootFile(name, shapes, systematicVariations, year):
@@ -95,48 +90,34 @@ def writeRootFile(name, shapes, systematicVariations, year):
     print fname
     f = ROOT.TFile(fname, 'RECREATE')
 
-    baseSelection = 'llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD-otravez'
+    baseSelection = 'llg-mll40-signalRegion-offZ-llgNoZ-photonPt20'
+    tag           = 'phoCBfull-niceEstimDD-JUN'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
     for shape in shapes:
       # Write the data histograms to the combine shapes file, separate for ee, emu, mumu
-      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', '', [dataHistName[shape[3:]]]), mergeBins=False)
+      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'photon_pt', '', [dataHistName[shape[3:]]]), mergeBins=False)
       # write the MC histograms to the shapes file
       for t in templates:
-        # if t == 'nonprompt':
-        #   Selectors     = [['NP', 'nonprompt']]
-        # else:
-        #   Selectors     = [[t, '(genuine)']]
-          # the nominal ttg samples consist of 3 pt ranges, sum them
-          # Selectors[0] += ['@']
+        if t == 'nonprompt':
+          Selectors     = [['NP', 'nonprompt']]
+        else:
+          Selectors     = [[t, '(genuine)']]
         q2Variations = []
         pdfVariations = []
         for sys in [''] + systematicVariations:
-          if t == 'nonprompt':
-            Selectors     = [['NP', 'nonprompt']]
-          else:
-            Selectors     = [[t, '(genuine)']]
-          
-          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', sys, *Selectors)
+          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'photon_pt', sys, *Selectors)
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
           else:
             if 'erdDown' in sys:
-              sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
-              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', 'erdUp', *sel)
+              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'photon_pt', 'erdUp', *Selectors)
               prompt = invertVar(nominal, ErdUpprompt)
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
             sysUncor = sys.replace('Up', '_' + year +'Up').replace('Down', '_' + year +'Down')
-            sysCor1617 = sys.replace('Up', '_1617Up').replace('Down', '_1617Down')
-            sysCor1618 = sys.replace('Up', '_1618Up').replace('Down', '_1618Down')
-            sysCor1718 = sys.replace('Up', '_1718Up').replace('Down', '_1718Down')
             writeHist(f, shape+sysUncor, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
-            writeHist(f, shape+sysCor1617, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
-            writeHist(f, shape+sysCor1618, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
-            writeHist(f, shape+sysCor1718, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
         # Calculation of up and down envelope pdf variations
         if len(pdfVariations) > 0:
           up, down = pdfSys(pdfVariations, nominal)
@@ -144,12 +125,6 @@ def writeRootFile(name, shapes, systematicVariations, year):
           writeHist(f, shape+'pdfDown', t, down, mergeBins = False)
           writeHist(f, shape+'pdf_' + year + 'Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'pdf_' + year + 'Down', t, down, mergeBins = False)
-          writeHist(f, shape+'pdf_1617Up',   t, up,   mergeBins = False)
-          writeHist(f, shape+'pdf_1617Down', t, down, mergeBins = False)
-          writeHist(f, shape+'pdf_1618Up',   t, up,   mergeBins = False)
-          writeHist(f, shape+'pdf_1618Down', t, down, mergeBins = False)
-          writeHist(f, shape+'pdf_1718Up',   t, up,   mergeBins = False)
-          writeHist(f, shape+'pdf_1718Down', t, down, mergeBins = False)
         # Calcualtion of up and down envelope q2 variations
         if len(q2Variations) > 0:
           up, down = q2Sys(q2Variations)
@@ -157,12 +132,6 @@ def writeRootFile(name, shapes, systematicVariations, year):
           writeHist(f, shape+'q2Down', t, down, mergeBins = False)
           writeHist(f, shape+'q2_' + year + 'Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'q2_' + year + 'Down', t, down, mergeBins = False)
-          writeHist(f, shape+'q2_1617Up',   t, up,   mergeBins = False)
-          writeHist(f, shape+'q2_1617Down', t, down, mergeBins = False)
-          writeHist(f, shape+'q2_1618Up',   t, up,   mergeBins = False)
-          writeHist(f, shape+'q2_1618Down', t, down, mergeBins = False)
-          writeHist(f, shape+'q2_1718Up',   t, up,   mergeBins = False)
-          writeHist(f, shape+'q2_1718Down', t, down, mergeBins = False)
     f.Close()
 
 ######################
@@ -216,10 +185,9 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
 
     normSys = [(t+'_norm') for t in templates[1:-1]]
     
-    # allSys = {}
-    # for y in years:
-    #   allSys[y] = shapeSys[y] + normSys
-    allSys = [base + suf for base in showSysList for suf in ['', '_2016', '_2017', '_2018', '_1617', '_1618', '_1718']] + normSys
+    allSys = {}
+    for y in years:
+      allSys[y] = shapeSys[y] + normSys
     
     print colored('##### Prepare ROOT file with histograms', 'red')
     for y in years:
@@ -227,23 +195,30 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     
     # TODO turn back on
     print colored('##### Plot shape systematic variations', 'red')
-    print colored('OFF RIGHT NOW', 'red')
-    # for y in years:
-    #   for shape in shapes:
-    #     fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
-    #     plotSys(fileName, shape[:2], shape[3:], templates, nameSys[y], y, args.year, args.run, comb=args.chan=='ll')
+    for y in years:
+      for shape in shapes:
+        fileName = args.run + args.chan + '/' + cardName + '_' + y + '_shapes.root'
+        plotSys(fileName, shape[:2], shape[3:], templates, nameSys[y], y, args.year, args.run, comb=args.chan=='ll')
 
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
       writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
       cards.append(outDir+'/'+cardName+'_'+y+'.txt')
+      ##writeCard(cardName, shapes, templates, None, extraLines, showSysList, {}, scaleShape={'fsr': 1/sqrt(2)})
+      ##writeCard(cardName, shapes, templates, None, extraLines, showSysList + ['nonPrompt'], {}, scaleShape={'fsr': 1/sqrt(2)})
     if len(years) == 1:
       os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')
     else:
       for i, y in enumerate(years): 
         cards[i] = cardName+'_'+y
+        # if not args.noPartial:
+        #   p = subprocess.Popen(['partialCorrelationEdit.py', cards[i] + '.txt', '--process=isr,0.5:fsr,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+'.root'], cwd=outDir, stdout=open(outDir+'/pcorLog'+y+cardName+'.txt','wb')); p.wait()
+      # p = subprocess.Popen(['combineCards.py','y2016=pCor'+cards[0] + '.txt','y2017=pCor'+cards[1] + '.txt','y2018=pCor'+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
       p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+          
+      # p = subprocess.Popen(['partialCorrelationEdit.py', cards[i], '--process=jes_1,0.5:jes_2,0.75', '--postfix-uncorr=_' + y, '--output-txt=pCor' + cards[i]+ '.txt', '--output-root=pCor' + cards[i]+ '.root'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
+          # 'partialCorrelationEdit.py', cards[i], '--process' + 'jes_1,0.5:jes_2,0.75', '--postfix-uncorr _' + y, '--output-txt pCor' + cards[i]+ '.txt', '--output-root pCor' + cards[i]+ '.root'
 
     print colored('##### Run fit diagnostics for exp (stat)', 'red')
     runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)

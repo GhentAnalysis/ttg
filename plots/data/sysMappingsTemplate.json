@@ -3,11 +3,10 @@
   "fsr"           : "Final-state radiation",
   "isr"           : "Initial-state radiation",
   "erd"           : "Colour reconnection (t#bar{t}#gamma)",
-  "hdamp"         : "ME-PS matching scale (t#bar{t}#gamma)",
   "ue"            : "Underlying event (t#bar{t}#gamma)",
-  "lSFMu"         : "Muon selection efficiency (stat)",
-  "lSFEl"         : "Electron selection efficiency (stat)",
-  "lSFSy"         : "Lepton selection efficiency (syst)",
+  "lSFMu"         : "Muon selection efficiency (Stat.)",
+  "lSFEl"         : "Electron selection efficiency (Stat.)",
+  "lSFSy"         : "Lepton selection efficiency (Sys.)",
   "phSF"          : "Photon selection efficiency",
   "trigger"       : "Trigger efficiency",
   "pf"            : "Prefiring",
@@ -25,6 +24,6 @@
   "NP"            : "nonprompt background estimation",
   "nonprompt_norm"     : "Non-prompt photon normalization",
   "ZG_norm"       : "Z#gamma normalization",
-  "VVTo2L2Nu_norm"    : "Other normalization",
-  "singleTop_norm" : "Single-top normalization"
+  "VVTo2L2Nu_norm" : "X#gamma normalization",
+  "singleTop_norm" : "t#gamma normalization"
 }

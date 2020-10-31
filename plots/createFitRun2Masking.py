@@ -11,6 +11,7 @@ argParser.add_argument('--year', action='store', default='2016', help="year of d
 argParser.add_argument('--tab', action='store_true', help="produce tables")
 argParser.add_argument('--noPartial', action='store_true', help="don't apply partial correlations")
 argParser.add_argument('--masked', action='store_true', default=None, help="add masked distributions")
+argParser.add_argument('--maskSet', action='store', default='A', help="which set of distributions to add")
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -61,7 +62,7 @@ def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
   return hist
 
 from ttg.plots.replaceShape import replaceShape
-def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = None, shape=None, mergeBins=False, addOverflow=True):
+def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], shape=None, mergeBins=False, addOverflow=True):
     hist = histTemp.Clone()
     if norm:  normalizeBinWidth(hist, norm)
     if shape: hist = replaceShape(hist, shape)
@@ -87,8 +88,19 @@ except: pass
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
 # templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
-maskedDist = ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']
-from ttg.plots.systematics import uncorFracs
+# maskedDist = ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']
+
+# maskedDist = ['unfReco_jetLepDeltaR','unfReco_jetPt','unfReco_ll_absDeltaEta','unfReco_ll_cosTheta','unfReco_ll_deltaPhi','unfReco_phAbsEta','unfReco_phBJetDeltaR','unfReco_phLepDeltaR','unfReco_phPt']
+
+if args.maskSet == 'A':
+  maskedDist = ['unfReco_jetLepDeltaR','unfReco_jetPt','unfReco_ll_absDeltaEta']
+if args.maskSet == 'B':
+  maskedDist = ['unfReco_ll_cosTheta','unfReco_ll_deltaPhi','unfReco_phAbsEta']
+if args.maskSet == 'C':
+  maskedDist = ['unfReco_phBJetDeltaR','unfReco_phLepDeltaR','unfReco_phPt']
+
+
+from ttg.plots.systematics import correlations
 
 def writeRootFile(name, shapes, systematicVariations, year, distribution='signalRegions'):
     name = name if distribution == 'signalRegions' else (name + '_' + distribution)
@@ -97,7 +109,7 @@ def writeRootFile(name, shapes, systematicVariations, year, distribution='signal
     f = ROOT.TFile(fname, 'RECREATE')
 
     baseSelection = 'llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD-sep'
+    tag           = 'phoCBfull-niceEstimDD-otravez'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
     for shape in shapes:
@@ -125,7 +137,13 @@ def writeRootFile(name, shapes, systematicVariations, year, distribution='signal
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
             sysUncor = sys.replace('Up', '_' + year +'Up').replace('Down', '_' + year +'Down')
+            sysCor1617 = sys.replace('Up', '_1617Up').replace('Down', '_1617Down')
+            sysCor1618 = sys.replace('Up', '_1618Up').replace('Down', '_1618Down')
+            sysCor1718 = sys.replace('Up', '_1718Up').replace('Down', '_1718Down')
             writeHist(f, shape+sysUncor, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
+            writeHist(f, shape+sysCor1617, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
+            writeHist(f, shape+sysCor1618, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
+            writeHist(f, shape+sysCor1718, t, prompt, mergeBins = False)    # Write same variation with a year suffix, potentially needed for partial correlations
         # Calculation of up and down envelope pdf variations
         if len(pdfVariations) > 0:
           up, down = pdfSys(pdfVariations, nominal)
@@ -133,6 +151,12 @@ def writeRootFile(name, shapes, systematicVariations, year, distribution='signal
           writeHist(f, shape+'pdfDown', t, down, mergeBins = False)
           writeHist(f, shape+'pdf_' + year + 'Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'pdf_' + year + 'Down', t, down, mergeBins = False)
+          writeHist(f, shape+'pdf_1617Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdf_1617Down', t, down, mergeBins = False)
+          writeHist(f, shape+'pdf_1618Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdf_1618Down', t, down, mergeBins = False)
+          writeHist(f, shape+'pdf_1718Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'pdf_1718Down', t, down, mergeBins = False)
         # Calcualtion of up and down envelope q2 variations
         if len(q2Variations) > 0:
           up, down = q2Sys(q2Variations)
@@ -140,6 +164,12 @@ def writeRootFile(name, shapes, systematicVariations, year, distribution='signal
           writeHist(f, shape+'q2Down', t, down, mergeBins = False)
           writeHist(f, shape+'q2_' + year + 'Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'q2_' + year + 'Down', t, down, mergeBins = False)
+          writeHist(f, shape+'q2_1617Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2_1617Down', t, down, mergeBins = False)
+          writeHist(f, shape+'q2_1618Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2_1618Down', t, down, mergeBins = False)
+          writeHist(f, shape+'q2_1718Up',   t, up,   mergeBins = False)
+          writeHist(f, shape+'q2_1718Down', t, down, mergeBins = False)
     f.Close()
 
 ######################
@@ -193,9 +223,6 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
 
     normSys = [(t+'_norm') for t in templates[1:-1]]
     
-    allSys = {}
-    for y in years:
-      allSys[y] = shapeSys[y] + normSys
     print colored('##### Prepare ROOT file with histograms', 'red')
     for y in years:
       writeRootFile(cardName, shapes, nameSys[y], y)
@@ -206,11 +233,11 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
-      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, uncorFracs=uncorFracs if args.year == 'All' else {})
+      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
       cards.append(cardName+'_'+y+'.txt')
       if masked:
         for distr in maskedDist:
-          writeCard(cardName + '_' + distr , shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, uncorFracs=uncorFracs if args.year == 'All' else {})
+          writeCard(cardName + '_' + distr , shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
     if len(years) == 1:
       if masked:
         combArgs= ['main=' + cards[0]] + [distr + '=' +cardName + '_' + distr +'_'+y+'.txt' for distr in maskedDist]

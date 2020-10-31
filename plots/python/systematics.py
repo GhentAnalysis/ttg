@@ -31,26 +31,32 @@ for i in ('Up', 'Down'):
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
   systematics['NP'+i]         = []
 
-# uncorFracs = {'lSFSy' : , 
-#               'lSFEl' : , 
-#               'lSFMu' : , 
-#               'phSF' : , 
-#               'ephRes' : , 
-#               'ephScal : e'
-#               'pvSF' : , 
-#               'bTagb' : , 
-#               'bTagl' : , 
-#               'isr' : , 
-#               'fsr' : , 
-#               'JER' : , 
-#               'JEC' : , 
-#               'q2' : , 
-#               'trigger' : , 
-#               'pu' : , 
-#               'NP' : , 
-#               'ue' : , 
-#               'pf' : , 
-#               'erd' : }
+
+# not in here -> 100% correlation
+correlations = {
+              # 'lSFSy' : , 
+              'lSFEl' : 0., 
+              'lSFMu' : 0., 
+              # 'phSF' : , 
+              # 'ephRes' : , 
+              # 'ephScal : '
+              'pvSF' : 0. , 
+              'bTagb' : 0.5 , 
+              'bTagl' : 0.5 , 
+              # 'isr' : , 
+              # 'fsr' : , 
+              # 'JER' : , 
+              'JEC' : 0., 
+              # 'q2' : , 
+              'trigger' : 0, 
+              # 'pu' : 0.5 
+              # 'NP' : , 
+              # 'ue' : , 
+              # 'pf' : , 
+              # 'erd' : 
+              # 'pdf' : 
+              # 'q2' : 
+              }
 
 #
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
