@@ -82,6 +82,15 @@ def getRatioCanvas(name):
   return canvas
 
 
+def removeOut(inHist, rec, out):
+  inHist = inHist.Clone()
+  out = out.Clone()
+  out.Divide(rec)
+  for i in range(0, out.GetXaxis().GetNbins()+1):
+    inHist.SetBinContent(i, inHist.GetBinContent(i)*(1.-out.GetBinContent(i)))
+    inHist.SetBinError(i, inHist.GetBinError(i)*(1.-out.GetBinContent(i)))
+  return inHist
+
 ROOT.gStyle.SetOptStat(0)
 
 labels = {
@@ -97,15 +106,15 @@ labels = {
 # setDefault()
 
 
-distList = [('data/otra16AsrFit_fitDiagnostics_obs.root', 'unfReco_jetLepDeltaR'),
-('data/otra16AsrFit_fitDiagnostics_obs.root', 'unfReco_jetPt'),
-('data/otra16AsrFit_fitDiagnostics_obs.root', 'unfReco_ll_absDeltaEta'),
-# ('data/otra16BsrFit_fitDiagnostics_obs.root', 'unfReco_ll_cosTheta'),
-('data/otra16BsrFit_fitDiagnostics_obs.root', 'unfReco_ll_deltaPhi'),
-('data/otra16BsrFit_fitDiagnostics_obs.root', 'unfReco_phAbsEta'),
-('data/otra16CsrFit_fitDiagnostics_obs.root', 'unfReco_phBJetDeltaR'),
-('data/otra16CsrFit_fitDiagnostics_obs.root', 'unfReco_phLepDeltaR'),
-('data/otra16CsrFit_fitDiagnostics_obs.root', 'unfReco_phPt')]
+distList = [('data/otra16AsrFit_fitDiagnostics_exp.root', 'unfReco_jetLepDeltaR'),
+('data/otra16AsrFit_fitDiagnostics_exp.root', 'unfReco_jetPt'),
+('data/otra16AsrFit_fitDiagnostics_exp.root', 'unfReco_ll_absDeltaEta'),
+# ('data/otra16BsrFit_fitDiagnostics_exp.root', 'unfReco_ll_cosTheta'),
+('data/otra16BsrFit_fitDiagnostics_exp.root', 'unfReco_ll_deltaPhi'),
+('data/otra16BsrFit_fitDiagnostics_exp.root', 'unfReco_phAbsEta'),
+('data/otra16CsrFit_fitDiagnostics_exp.root', 'unfReco_phBJetDeltaR'),
+('data/otra16CsrFit_fitDiagnostics_exp.root', 'unfReco_phLepDeltaR'),
+('data/otra16CsrFit_fitDiagnostics_exp.root', 'unfReco_phPt')]
 
 
 # for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']:
@@ -133,6 +142,7 @@ for fitFile, dist in distList:
   data.Add(datamumu)
 
   outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/unfSep3/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  rec = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/unfSep3/noData/placeholderSelection/' + dist.replace('unfReco','rec_unfReco') + '.pkl','r'))[dist.replace('unfReco','rec_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   data = copyBinning(data, outMig)
   mcTot = copyBinning(mcTot, outMig)
   mcBkg = copyBinning(mcBkg, outMig)
@@ -164,9 +174,10 @@ for fitFile, dist in distList:
 
   data.Add(mcBkg, -1.)
   mcTot.Add(mcBkgNoUnc,-1.)
-  data.Add(outMig, -1.)
-  mcTot.Add(outMig,-1.)
-
+  # data.Add(outMig, -1.)
+  # mcTot.Add(outMig,-1.)
+  data = removeOut(data, rec, outMig)
+  mcTot = removeOut(mcTot, rec, outMig)
 
 
   data.SetBinContent(data.GetXaxis().GetNbins()+1, 0.)
@@ -177,7 +188,8 @@ for fitFile, dist in distList:
 
 
   dataStatOnly.Add(mcBkgNoUnc, -1.)
-  dataStatOnly.Add(outMig, -1.)
+  # dataStatOnly.Add(outMig, -1.)
+  dataStatOnly = removeOut(dataStatOnly, rec, outMig)
 
 
   unfold.SetInput(data)
@@ -216,10 +228,13 @@ for fitFile, dist in distList:
   unfolded.SetLineWidth(2)
   unfolded.SetMarkerStyle(8)
   unfolded.SetMarkerSize(1)
-  plMC = response.ProjectionY("PLMC")
+  # plMC = response.ProjectionY("PLMC")
+  plMC = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/unfSep3/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+
+  plMC.Scale(1./lumiScales[args.year])
   plMC.SetLineColor(ROOT.kRed)
   plMC.SetLineWidth(2)
-  # plMC.Draw('same')
+  plMC.Draw('same')
   unfolded.Draw('same E1 X0')
   # legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
   legend = ROOT.TLegend(0.28,0.83,0.85,0.88)
@@ -229,7 +244,7 @@ for fitFile, dist in distList:
   legend.AddEntry(unfolded,'data (' + str(lumiScalesRounded[args.year]) + '/fb)',"pe")
   # legend.AddEntry(plMC,"PL truth","l")
   legend.Draw()
-
+  # raise SystemExit(0)
 
   cunf.bottomPad.cd()
 
@@ -353,7 +368,7 @@ for fitFile, dist in distList:
   preunfRat.SetLineColor(ROOT.kBlack)
   preunfRat.SetMarkerStyle(ROOT.kFullCircle)
   systband.SetTitle('')
-  systband.GetXaxis().SetTitle(labels[dist][1])
+  systband.GetXaxis().SetTitle(labels[dist][0])
   systband.GetYaxis().SetTitle('Ratio')
   systband.GetXaxis().SetLabelSize(0.14)
   systband.GetXaxis().SetTitleSize(0.14)

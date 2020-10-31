@@ -36,6 +36,14 @@ ROOT.gStyle.SetOptStat(0)
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
+def removeOut(inHist, rec, out):
+  inHist = inHist.Clone()
+  out = out.Clone()
+  out.Divide(rec)
+  for i in range(0, out.GetXaxis().GetNbins()+1):
+    inHist.SetBinContent(i, inHist.GetBinContent(i)*(1.-out.GetBinContent(i)))
+    inHist.SetBinError(i, 0.00001 if inHist.GetBinError(i)==0 else inHist.GetBinError(i)*(1.-out.GetBinContent(i)))
+  return inHist
 
 def graphToHist(graph, template):
   hist = template.Clone(graph.GetName())
@@ -73,6 +81,7 @@ def loadYear(fitFile, year, responseVersion):
   data.Add(datamumu)
 
   outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/' + responseVersion + '/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  rec = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/' + responseVersion + '/noData/placeholderSelection/' + dist.replace('unfReco','rec_unfReco') + '.pkl','r'))[dist.replace('unfReco','rec_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   data = copyBinning(data, outMig)
   mcTot = copyBinning(mcTot, outMig)
   mcBkg = copyBinning(mcBkg, outMig)
@@ -85,11 +94,16 @@ def loadYear(fitFile, year, responseVersion):
 
   data.Add(mcBkg, -1.)
   mcTot.Add(mcBkgNoUnc,-1.)
-  data.Add(outMig, -1.)
-  mcTot.Add(outMig,-1.)
+  # data.Add(outMig, -1.)
+  # mcTot.Add(outMig,-1.)
+  data = removeOut(data, rec, outMig)
+  mcTot = removeOut(mcTot, rec, outMig)
+
 
   dataStatOnly.Add(mcBkgNoUnc, -1.)
-  dataStatOnly.Add(outMig, -1.)
+  # dataStatOnly.Add(outMig, -1.)
+  dataStatOnly = removeOut(dataStatOnly, rec, outMig)
+
 
   data.SetBinContent(data.GetXaxis().GetNbins()+1, 0.)
   data.SetBinContent(0, 0.)
@@ -184,6 +198,7 @@ def getRatioCanvas(name):
   canvas.bottomPad.SetPad(canvas.bottomPad.GetX1(), canvas.bottomPad.GetY1(), canvas.bottomPad.GetX2(), yBorder)
   return canvas
 
+
 labels = {
           'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)', 'gen p_{T}(#gamma) (GeV)'),
           'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',  'gen #DeltaR(#gamma, l)'),
@@ -266,6 +281,7 @@ for fitFile, dist in distList:
   plMC.SetLineColor(ROOT.kRed)
 
 
+  # raise SystemExit(0)
   unfold.SetInput(mcTotR2)
   unfold.DoUnfold(0.)
   unfoldedMC = unfold.GetOutput('unfoldedMC_' + dist)
@@ -314,13 +330,13 @@ for fitFile, dist in distList:
   unfoldedMC.Draw('E2')
   unfMC2.SetLineWidth(3)
   unfMC2.Draw('HIST same')
-  # plMC.Draw('same')
+  plMC.Draw('same')
   unfolded.Draw('same E1 X0')
   log.info(dist + ' integral: ' + str(unfolded.Integral()))
   legend.Draw()
 
   cunf.bottomPad.cd()
-
+  
   unfold.SetInput(dataR2StatOnly)
   unfold.DoUnfold(0.)
   unfdataR2StatOnly = unfold.GetOutput('unfoldedDataStatOnly_' + dist)
@@ -463,7 +479,7 @@ for fitFile, dist in distList:
   preunfRat.SetLineColor(ROOT.kBlack)
   preunfRat.SetMarkerStyle(ROOT.kFullCircle)
   systband.SetTitle('')
-  systband.GetXaxis().SetTitle(labels[dist][1])
+  systband.GetXaxis().SetTitle(labels[dist][0])
   systband.GetYaxis().SetTitle('Ratio')
   systband.GetXaxis().SetLabelSize(0.14)
   systband.GetXaxis().SetTitleSize(0.14)
