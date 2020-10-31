@@ -14,7 +14,7 @@ TT_Dil               t#bar{t}_(nonprompt)              fillStyle     633        
 +TT_Had
 
 $ZG
-ZG_lowMass           Z#gamma_(nonprompt)               fillStyle     598                 _zgEventType>2
+ZG_lowMass          Z#gamma_(nonprompt)               fillStyle     598                 _zgEventType>2
 
 DY_M50               Drell-Yan_(nonprompt)             fillStyle     427                  _zgEventType<3
 +DY_M10to50
@@ -71,14 +71,13 @@ VVTo2L2Nu            X#gamma_(nonprompt)                  fillStyle     kViolet
 
 -- NPestimate
 $NPMu
-DoubleMuon                 nonprompt-estimate:mumu,SF,all,noData      errorStyle    kBlack                   isMuMu
+DoubleMuon                 nonprompt-estimate:mumu,SF,all,noData     errorStyle    kBlack                   isMuMu
 +SingleMuon
 
 $NPEl
-DoubleEG                   nonprompt-estimate:ee,SF,all,noData        errorStyle    kBlack                   isEE
-+SingleElectron
+EGamma                   nonprompt-estimate:ee,SF,all,noData        errorStyle    kBlack                 isEE
 
 $NPME
-MuonEG                     nonprompt-estimate:emu,all,noData          errorStyle    kBlack                   isEMu
+MuonEG                     nonprompt-estimate:emu,all,noData         errorStyle    kBlack                  isEMu
 +SingleMuon
-+SingleElectron
++EGamma

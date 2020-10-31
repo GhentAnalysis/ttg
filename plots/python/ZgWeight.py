@@ -9,9 +9,9 @@ from ttg.tools.uncFloat import UncFloat
 from ttg.plots.plotHelpers import createSignalRegions
 import pickle
 import time
-sourceHists ={'2016': '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgestC-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/signalRegions.pkl',
-              '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCBfull-forZgest/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/signalRegions.pkl',
-              '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgest/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/signalRegions.pkl'
+sourceHists ={'2016': '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/signalRegions.pkl',
+              '2017': '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/signalRegions.pkl',
+              '2018': '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/signalRegions.pkl'
 }
 
 def sumHists(picklePath, channel, sys = ''):

@@ -30,9 +30,9 @@ log = getLogger(args.logLevel)
 # Retrieve sample list, reducedTuples need to be created for the samples listed in tuples.conf
 #
 from ttg.samples.Sample import createSampleList, getSampleFromList
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_2016.conf'),
-                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_2017.conf'),
-                              os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_2018.conf'))
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_2016.conf'),
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_2017.conf'),
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_2018.conf'))
 
 #
 # Submit subjobs:
@@ -65,6 +65,8 @@ forSys = (args.type.count('Scale') or args.type.count('Res')) and (sample.name.c
 c.egvar = ([var for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown'] if 'eph' + var in args.type] + ['Corr'])[0]
 c.muvar = ([var for var in ['ScaleUp', 'ScaleDown'] if 'mu' + var in args.type] + ['Corr'])[0]
 
+pcut = sample.name.count('PCUT')
+
 lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
 
 
@@ -91,7 +93,7 @@ outputFile.cd()
 # FIXME Update this so that we keep the skimmed size small
 
 unusedBranches = ["HLT", "Flag", "HN", "tau", "lMuon", "decay", "tau", "Up", "Down", "_closest"]
-deleteBranches = ["Scale", "Res", "pass", "met", "lElectron", "_gen", '_lhe', '_jet']
+deleteBranches = ["Scale", "Res", "pass", "met", "lElectron", "_gen", '_lhe']
 deleteBranches += ["heWeight"]
 for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
 outputTree = sample.chain.CloneTree(0)
@@ -101,8 +103,9 @@ for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
 #
 # Define new branches
 #
+
 newBranches  = ['ph/I', 'ph_pt/F', 'phJetDeltaR/F', 'phBJetDeltaR/F', 'matchedGenPh/I', 'matchedGenEle/I', 'nphotons/I']
-newBranches += ['PLph/I', 'PLph_pt/F', 'PLph_Eta/F', 'PLnphotons/I']
+newBranches += ['PLph/I', 'PLph_pt/F', 'PLph_Eta/F', 'PLnphotons/I','PLphBJetDeltaR/F', 'PLphJetDeltaR/F']
 newBranches += ['njets/I', 'j1/I', 'j2/I', 'ndbjets/I', 'dbj1/I', 'dbj2/I']
 newBranches += ['PLnjets/I', 'PLndbjets/I', 'PLj1/I', 'PLj2/I']
 newBranches += ['l1/I', 'l2/I', 'looseLeptonVeto/O', 'l1_pt/F', 'l2_pt/F']
@@ -116,20 +119,11 @@ newBranches += ['failReco/O','failFid/O']
 # newBranches += ['genWeight/F']
 newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeight/F', 'PVWeight/F']
 
-for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:
-  newBranches += ['njets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I', 'dbj1_' + sys + '/I', 'dbj2_' + sys + '/I']
-  newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
-for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
-for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-for sys in ['Up', 'Down']:                           newBranches += ['lWeightMu' + sys + '/F','lWeightEl' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
-for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
-
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
 
 newVars.egvar = c.egvar
 newVars.muvar = c.muvar
-
 
 from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR
 from ttg.unfolding.PLobjectSelection import PLselectLeptons, PLselectPhotons, PLgoodJets, PLbJets, PLmakeInvariantMasses, PLmakeDeltaR
@@ -137,15 +131,12 @@ from ttg.unfolding.PLobjectSelection import PLselectLeptons, PLselectPhotons, PL
 # Start selection
 #
 
-setIDSelection(c, args.type)
+setIDSelection(c, 'phoCB')
 
-leptonID = 'MVA' if args.type.lower().count('leptonmva') else 'POG'
 
 ##### load weight getters #####
 from ttg.reduceTuple.puReweighting import getReweightingFunction
 puReweighting     = getReweightingFunction(sample.year, 'central')
-puReweightingUp   = getReweightingFunction(sample.year, 'up')
-puReweightingDown = getReweightingFunction(sample.year, 'down')
 
 from ttg.reduceTuple.leptonTrackingEfficiency import LeptonTrackingEfficiency
 from ttg.reduceTuple.leptonSF import LeptonSF as LeptonSF
@@ -156,13 +147,14 @@ from ttg.reduceTuple.triggerEfficiency import TriggerEfficiency
 from ttg.reduceTuple.btagEfficiency import BtagEfficiency
 leptonTrackingSF = LeptonTrackingEfficiency(sample.year)
 
-leptonID = 'MVA' if args.type.lower().count('leptonmva') else 'POG'
+# leptonID = 'MVA' if args.type.lower().count('leptonmva') else 'POG'
 
-leptonSF         = LeptonSF_MVA(sample.year) if leptonID=='MVA' else LeptonSF(sample.year)
+# leptonSF         = LeptonSF_MVA(sample.year) if leptonID=='MVA' else LeptonSF(sample.year)
+leptonSF         = LeptonSF_MVA(sample.year)
 photonSF         = PhotonSF(sample.year, "MVA" if (args.type.lower().count("photonmva") or args.type.lower().count("phomvasb")) else "CB")
 pixelVetoSF      = pixelVetoSF(sample.year)
-triggerEff       = TriggerEfficiency(sample.year, id = leptonID) 
-btagSF           = BtagEfficiency(sample.year, id = leptonID)
+triggerEff       = TriggerEfficiency(sample.year, id = "MVA") 
+btagSF           = BtagEfficiency(sample.year, id = "MVA")
 
 
 
@@ -173,10 +165,24 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     log.warning("problem reading entry, skipping")
     continue
 
+
+  try:
+    newVars.lhePhPt = c._lhePt[[i for i in c._lhePdgId].index(22)]
+  except:
+    newVars.lhePhPt = 0.
+  # This needs to remove events regardless of reco and fid cuts
+  if pcut and not newVars.lhePhPt<100: continue
+
+
   newVars.ph = 99
   newVars.ph_pt = -99.
   newVars.PLph = 99
   newVars.PLph_pt = -99.
+  
+  newVars.PLphJetDeltaR = 999
+  newVars.PLphBJetDeltaR = 999
+  newVars.PLjjDeltaR = -1
+
 
 ##### PL selection and storing values #####
   fid = PLselectLeptons(c, newVars)
@@ -210,76 +216,32 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   if not reco and not fid: continue    #events failing both reco and fiducial selection are not needed
 
-##### load and save weights + systematic variations #####
-  for var, i in [('Fu', 1), ('Fd', 2), ('Ru', 3), ('RFu', 4), ('Rd', 6), ('RFd', 8)]:
-    try:    setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
-    except: setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
-  for i in range(0, 100):
-    try:    setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+9]*lumiWeights[i+9])
-    except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
-  try:
-    # corresponds to 2 - 1/2 variations, recommended see talk  
-    # https://indico.cern.ch/event/848486/contributions/3610537/attachments/1948613/3233682/TopSystematics_2019_11_20.pdf
-    newVars.ISRWeightDown = c._psWeight[6]
-    newVars.FSRWeightDown = c._psWeight[7]
-    newVars.ISRWeightUp   = c._psWeight[8]
-    newVars.FSRWeightUp   = c._psWeight[9]
-  except:
-    newVars.ISRWeightDown = 1.
-    newVars.FSRWeightDown = 1.
-    newVars.ISRWeightUp   = 1.
-    newVars.FSRWeightUp   = 1.
 
   newVars.puWeight     = puReweighting(c._nTrueInt)
-  newVars.puWeightUp   = puReweightingUp(c._nTrueInt)
-  newVars.puWeightDown = puReweightingDown(c._nTrueInt)
 
   if lepSel:
     l1, l2, l1_pt, l2_pt   = newVars.l1, newVars.l2, newVars.l1_pt, newVars.l2_pt
     newVars.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
-    newVars.lWeightMuUp    = leptonSF.getSF(c, l1, l1_pt, elSigma=0., muSigma=+1)*leptonSF.getSF(c, l2, l2_pt, elSigma=0., muSigma=+1)
-    newVars.lWeightMuDown  = leptonSF.getSF(c, l1, l1_pt, elSigma=0., muSigma=-1)*leptonSF.getSF(c, l2, l2_pt, elSigma=0., muSigma=-1)
-    newVars.lWeightElUp    = leptonSF.getSF(c, l1, l1_pt, elSigma=+1, muSigma=0.)*leptonSF.getSF(c, l2, l2_pt, elSigma=+1, muSigma=0.)
-    newVars.lWeightElDown  = leptonSF.getSF(c, l1, l1_pt, elSigma=-1, muSigma=0.)*leptonSF.getSF(c, l2, l2_pt, elSigma=-1, muSigma=0.)
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
     trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
     newVars.triggerWeight      = trigWeight
-    newVars.triggerWeightUp    = trigWeight+trigErr
-    newVars.triggerWeightDown  = trigWeight-trigErr
   else:
     newVars.lWeight        = 1.
-    newVars.lWeightMuUp    = 1.
-    newVars.lWeightMuDown  = 1.
-    newVars.lWeightElUp    = 1.
-    newVars.lWeightElDown  = 1.
     newVars.lTrackWeight   = 1.
     newVars.triggerWeight      = 1.
-    newVars.triggerWeightUp    = 1.
-    newVars.triggerWeightDown  = 1.
   if phoSel:
     ph, ph_pt = newVars.ph, newVars.ph_pt
     newVars.phWeight     = photonSF.getSF(c, ph, ph_pt) if len(c.photons) > 0 else 1
-    newVars.phWeightUp   = photonSF.getSF(c, ph, ph_pt, sigma=+1) if len(c.photons) > 0 else 1
-    newVars.phWeightDown = photonSF.getSF(c, ph, ph_pt, sigma=-1) if len(c.photons) > 0 else 1
-
     newVars.PVWeight     = pixelVetoSF.getSF(c, ph, ph_pt) if len(c.photons) > 0 else 1
-    newVars.PVWeightUp   = pixelVetoSF.getSF(c, ph, ph_pt, sigma=+1) if len(c.photons) > 0 else 1
-    newVars.PVWeightDown = pixelVetoSF.getSF(c, ph, ph_pt, sigma=-1) if len(c.photons) > 0 else 1
   else:
     newVars.phWeight     = 1.
-    newVars.phWeightUp   = 1.
-    newVars.phWeightDown = 1.
     newVars.PVWeight     = 1.
-    newVars.PVWeightUp   = 1.
-    newVars.PVWeightDown = 1.
 
   # method 1a
   if reco:
-    for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
-      setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets))
+    newVars.bTagWeight =  btagSF.getBtagSF_1a('', c, c.dbjets)
   else:
-    for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
-      setattr(newVars, 'bTagWeight' + sys, 1.)
+    newVars.bTagWeight =  1.
 
   newVars.genWeight    = c._weight*lumiWeights[0]
 

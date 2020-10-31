@@ -33,6 +33,8 @@ from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selec
 from ttg.samples.Sample import createSampleList, getSampleFromList
 
 def getBTagMCTruthEfficiencies(c, btagWP):  # pylint: disable=R0912
+  c.egvar = 'Corr'
+  c.muvar = 'Corr'
   for i in sample.eventLoop():
     c.GetEntry(i)
     if not selectLeptons(c, c, 2):       continue
@@ -82,7 +84,8 @@ for ptBin in getPtBins():
       name = str(ptBin) + str(etaBin) + f
       mceff[tuple(ptBin)][tuple(etaBin)][f] = passing[name]/total[name] if total[name] > 0 else 0
 
-pklFile = 'deepCSV_' + args.selectID + '_' + args.sample + '_' + args.year + ('DEBUG' if args.debug else '') + '.pkl'
+# pklFile = 'deepCSV_' + args.selectID + '_' + args.sample + '_' + args.year + ('DEBUG' if args.debug else '') + '.pkl'
+pklFile = 'NewdeepCSV_' + args.selectID + '_' + args.sample + '_' + args.year + ('DEBUG' if args.debug else '') + '.pkl'
 pickle.dump(mceff, file(os.path.expandvars('$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/' + pklFile), 'w'))
 log.info('Efficiencies deepCSV for ' + str(args.year) +':')
 log.info('Finished')

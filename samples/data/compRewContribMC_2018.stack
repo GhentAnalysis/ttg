@@ -14,7 +14,7 @@ TT_Dil               t#bar{t}_(nonprompt)              fillStyle     633        
 +TT_Had
 
 $ZG
-ZG_lowMass           Z#gamma_(nonprompt)               fillStyle     598                      _zgEventType>2
+ZG_lowMass          Z#gamma_(nonprompt)               fillStyle     598                      _zgEventType>2
 
 DY_M50               Drell-Yan_(nonprompt)             fillStyle     427                      _zgEventType<3
 +DY_M10to50
@@ -79,12 +79,12 @@ TTGamma_DilPCUT             nonprompt-estimate_(MC)           errorStyle    kBla
 +TTGamma_SemB
 +TTGamma_HadB
 
-TT_Dil               nonprompt-estimate_(MC)               errorStyle    kBlack                     _ttgEventType<3
+TT_Dil               nonprompt-estimate_(MC)                errorStyle    kBlack                      _ttgEventType<3
 +TT_Sem
 +TT_Had
 
 $ZG
-ZG_lowMass           nonprompt-estimate_(MC)                errorStyle    kBlack                _zgEventType>2
+ZG_lowMass          nonprompt-estimate_(MC)                 errorStyle    kBlack             _zgEventType>2
 
 DY_M50               nonprompt-estimate_(MC)              errorStyle    kBlack                 _zgEventType<3
 +DY_M10to50
@@ -98,7 +98,7 @@ ST_tW_ch             nonprompt-estimate_(MC)                errorStyle    kBlack
 +ST_tbar_ch
 
 
-VVTo2L2Nu            nonprompt-estimate_(MC)                 errorStyle    kBlack
+VVTo2L2Nu            nonprompt-estimate_(MC)                  errorStyle    kBlack
 +ZZTo4L
 +ZZTo2Q2Nu
 +ZZTo2L2Q

@@ -25,7 +25,7 @@ ROOT.TH2.SetDefaultSumw2()
 
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
 from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
-from ttg.tools.style import drawLumi, setDefault
+from ttg.tools.style import drawLumi
 from ttg.tools.helpers import plotDir, getObjFromFile
 import copy
 import pickle
@@ -54,12 +54,12 @@ def copyBinning(inputHist, template):
     hist.SetBinError(i, inputHist.GetBinError(i))
   return hist
 
-ROOT.gStyle.SetOptStat(0)
-# setDefault()
+
 
 for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']:
 # for dist in ['unfReco_phPt']:
 # for dist in ['unfReco_phEta']:
+# for dist in ['unfReco_phPt']:
   log.info('running for '+ dist)
   ########## loading ##########
   fitFile = 'data/srFit_fitDiagnostics_obs.root'
@@ -80,7 +80,7 @@ for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_d
   datamumu = graphToHist(datamumu, mcTot)
   data.Add(datamumu)
 
-  outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva8/noData/placeholderSelection/' + dist.replace('unfReco','out') + '.pkl','r'))[dist.replace('unfReco','out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva4/noData/placeholderSelection/' + dist.replace('unfReco','out') + '.pkl','r'))[dist.replace('unfReco','out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   data = copyBinning(data, outMig)
   mcTot = copyBinning(mcTot, outMig)
   mcBkg = copyBinning(mcBkg, outMig)
@@ -90,84 +90,48 @@ for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_d
   for i in range(0, mcBkgNoUnc.GetXaxis().GetNbins()+1):
     mcBkgNoUnc.SetBinError(i, 0.)
 
-  response = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva8/noData/placeholderSelection/' + dist.replace('unfReco','response') + '.pkl','r'))[dist.replace('unfReco','response')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  response = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva4/noData/placeholderSelection/' + dist.replace('unfReco','response') + '.pkl','r'))[dist.replace('unfReco','response')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   ########## UNFOLDING ##########
   ##### setup ##### 
-  # regMode = ROOT.TUnfold.kRegModeCurvature
-  # NOTE no regularization
-  regMode = ROOT.TUnfold.kRegModeNone
+  regMode = ROOT.TUnfold.kRegModeCurvature
   constraintMode = ROOT.TUnfold.kEConstraintArea
-  # mapping = ROOT.TUnfold.kHistMapOutputHoriz 
-  mapping = ROOT.TUnfold.kHistMapOutputVert 
+  mapping = ROOT.TUnfold.kHistMapOutputHoriz 
   densityFlags = ROOT.TUnfoldDensity.kDensityModeUser
   unfold = ROOT.TUnfoldDensity( response, mapping, regMode, constraintMode, densityFlags )
   logTauX = ROOT.TSpline3()
   logTauY = ROOT.TSpline3()
   lCurve  = ROOT.TGraph()
-  logTauCurvature = ROOT.TSpline3()
-
 
   ##### unfold data #####
+  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-JUN/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt.pkl'
   data.Add(mcBkg, -1.)
   mcTot.Add(mcBkgNoUnc,-1.)
   data.Add(outMig, -1.)
   mcTot.Add(outMig,-1.)
 
-  mcTot.SaveAs('mcTot.root')
-
-  data.SetBinContent(data.GetXaxis().GetNbins()+1, 0.)
+  data.SetBinContent(mcTot.GetXaxis().GetNbins()+1, 0.)
   data.SetBinContent(0, 0.)
-  mcTot.SetBinContent(mcTot.GetXaxis().GetNbins()+1, 0.)
-  mcTot.SetBinContent(0, 0.)
-
-
 
   unfold.SetInput(data)
-  spl = ROOT.TSpline3()
+  # iBest   = unfold.ScanLcurve(30,1e-04,1e-03,lCurve,logTauX,logTauY)
+  # log.info(iBest)
   unfold.DoUnfold(0.)
   unfolded = unfold.GetOutput('unfoldedData_' + dist)
+  cunf = ROOT.TCanvas(dist)
+  unfolded.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*1.3)
+  unfolded.Draw()
+  plMC = response.ProjectionX("PLMC")
+  plMC.SetLineColor(ROOT.kRed)
+  plMC.Draw('same')
 
-  # resMC = response.ProjectionX("resMC")
-  # unfold.SetInput(resMC)
-  # unfold.DoUnfold(0.)
-  # unfoldedresMC = unfold.GetOutput('unfoldedresMC_' + dist)
-  # unfoldedresMC.SetBinContent(resMC.GetXaxis().GetNbins()+1, 0.)
-  # unfoldedresMC.SetBinContent(0, 0.)
-  # unfoldedresMC.SetLineColor(ROOT.kOrange)
-  # unfoldedresMC.Draw('same')
-
+  mcTot.SetBinContent(mcTot.GetXaxis().GetNbins()+1, 0.)
+  mcTot.SetBinContent(0, 0.)
 
   unfold.SetInput(mcTot)
   unfold.DoUnfold(0.)
   unfoldedMC = unfold.GetOutput('unfoldedMC_' + dist)
-
-  cunf = ROOT.TCanvas(dist, dist, 1000,700)
-
-  unfoldedMC.SetLineWidth(3)
-  unfoldedMC.SetLineColor(ROOT.kBlue)
-  unfoldedMC.SetFillStyle(3244)
-  unfoldedMC.SetFillColor(ROOT.kBlue)
-  unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*0.2)
-  # unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*1.4)
-  unfoldedMC.Draw('E2')
-  unfMC2 = unfoldedMC.Clone()
-  unfMC2.Draw('HIST same')
-  unfMC2.SetFillColor(ROOT.kWhite)
+  unfoldedMC.SetLineColor(ROOT.kGreen)
+  unfoldedMC.Draw('same')
   unfoldedMC.SetMinimum(0.)
-  unfolded.SetLineColor(ROOT.kBlack)
-  unfolded.SetLineWidth(2)
-  unfolded.SetMarkerStyle(8)
-  unfolded.SetMarkerSize(1)
-  plMC = response.ProjectionY("PLMC")
-  plMC.SetLineColor(ROOT.kRed)
-  plMC.SetLineWidth(2)
-  plMC.Draw('same')
-  unfolded.Draw('same E1')
-  legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
-  legend.AddEntry(unfoldedMC,"Simulation","l")
-  legend.AddEntry(unfolded,"data","pe")
-  legend.AddEntry(plMC,"PL truth","l")
-  legend.Draw()
   cunf.SaveAs('unfolded/'+ dist +'.pdf')
-  cunf.SaveAs('unfolded/'+ dist +'.png')
 

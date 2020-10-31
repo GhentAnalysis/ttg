@@ -12,23 +12,24 @@ import pickle
 import time
 import ROOT
 
-sourceHists ={'2016': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+
+sourceHists ={'2016': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
                         '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-passSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
                         '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
-              '2017': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
-              '2018': ( '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
-                        '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
+              '2017': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-passSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
+              '2018': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-passSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest-noZgCorr/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaB.pkl'),
 }
 
-closurePlots = {'2016': '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-compRewContribMC-forNPclosure-noZgCorr//noData/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
-                '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017PreApr27/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
-                '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-compRewContribMC-forNPclosure/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl'
+closurePlots = {'2016': '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-compRewContribMC-forNPclosure-noZgCorr/noData/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/signalRegions.pkl',
+                '2017': '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-compRewContribMC-forNPclosure-noZgCorr/noData/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/signalRegions.pkl',
+                '2018': '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-compRewContribMC-forNPclosure-noZgCorr/noData/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/signalRegions.pkl'
 }
 
 
@@ -71,17 +72,12 @@ def getErrMap(picklePath):
   return est
 
 class npWeight:
-  def __init__(self, year, sigma, altS = '-signalRegion-'):
+  def __init__(self, year, sigma):
     self.sigma = sigma
     try:
       # for data driven estimate
 
-
-      # NOTE temporary
-      histA, histB, histC, histD = (sumHists(file.replace('-signalRegion-', altS), 'photon_pt_etaB') for file in sourceHists[year])
-
-
-      # histA, histB, histC, histD = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
+      histA, histB, histC, histD = (sumHists(file, 'photon_pt_etaB') for file in sourceHists[year])
       histC[2].Add(histC[1], -1.)
       histD[2].Add(histD[1], -1.)
       histC[2].Divide(histD[2])
@@ -99,14 +95,8 @@ class npWeight:
       assert self.mcEst
 
       # estimate of systematic uncertainty
-
-
-      # NOTE temporary
-      self.errHist = getErrMap(closurePlots[year].replace('-signalRegion-', altS))
-
-
       
-      # self.errHist = getErrMap(closurePlots[year])
+      self.errHist = getErrMap(closurePlots[year])
     except:
       self.errHist = False
       log.warning('No NP estimate source plots available, no problem if not used later')

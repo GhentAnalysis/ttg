@@ -43,9 +43,9 @@ class BtagEfficiency:
   mcEffFileDeepCSV   = {('POG','2016'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2016.pkl',
                         ('POG','2017'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2017.pkl',
                         ('POG','2018'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_TT_Dil+TT_Sem+TT_Had_2018.pkl',
-                        ('MVA','2016'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_leptonMVA-phoCB_TT_Dil+TT_Sem+TT_Had_2016.pkl',
-                        ('MVA','2017'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_leptonMVA-phoCB_TT_Dil+TT_Sem+TT_Had_2017.pkl',
-                        ('MVA','2018'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/deepCSV_leptonMVA-phoCB_TT_Dil+TT_Sem+TT_Had_2018.pkl'}
+                        ('MVA','2016'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/NewdeepCSV_phoCB_TT_Dil_2016.pkl',
+                        ('MVA','2017'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/NewdeepCSV_phoCB_TT_Dil_2017.pkl',
+                        ('MVA','2018'):'$CMSSW_BASE/src/ttg/reduceTuple/data/btagEfficiencyData/NewdeepCSV_phoCB_TT_Dil_2018.pkl'}
 
   def __init__(self, year, id, wp = ROOT.BTagEntry.OP_MEDIUM):
     # Input files
@@ -112,7 +112,7 @@ class BtagEfficiency:
 if __name__ == '__main__':
   years = ['2016', '2017', '2018']
   for year in years:
-    testClass = BtagEfficiency(year, 'POG')
+    testClass = BtagEfficiency(year, 'MVA')
     for ptBin in getPtBins():
       for etaBin in getEtaBins():
         print ptBin, etaBin, testClass.mcEffDeepCSV[tuple(ptBin)][tuple(etaBin)]

@@ -14,7 +14,7 @@ TTGamma_DilPCUT              t#bar{t}#gamma_(genuine)        fillStyle     kOran
 %+TT_Had
 
 $ZG
-ZG_lowMass           Z#gamma_(genuine)               fillStyle     598                      _zgEventType>2
+ZG_lowMass         Z#gamma_(genuine)               fillStyle     598                      _zgEventType>2
 
 %DY_M50               Drell-Yan_(genuine)             fillStyle     427                      _zgEventType<3
 %+DY_M10to50
@@ -83,7 +83,7 @@ TT_Dil               nonprompt        fillStyle     814                     _ttg
 +TT_Had
 
 $ZG
-ZG_lowMass           nonprompt        fillStyle     814                   _zgEventType>2
+ZG_lowMass          nonprompt        fillStyle     814                   _zgEventType>2
 
 DY_M50               nonprompt        fillStyle     814                     _zgEventType<3
 +DY_M10to50
@@ -141,9 +141,8 @@ DoubleMuon                 data:mumu,SF,all      errorStyle    kBlack           
 +SingleMuon
 
 $DoubleEG
-DoubleEG                   data:ee,SF,all        errorStyle    kBlack                   isEE
-+SingleElectron
+EGamma                   data:ee,SF,all        errorStyle    kBlack                   isEE
 
 MuonEG                     data:emu,all          errorStyle    kBlack                   isEMu
 +SingleMuon
-+SingleElectron
++EGamma

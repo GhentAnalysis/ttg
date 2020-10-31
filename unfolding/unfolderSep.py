@@ -55,14 +55,38 @@ def copyBinning(inputHist, template):
   return hist
 
 ROOT.gStyle.SetOptStat(0)
+
+labels = {
+          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)', 'gen p_{T}(#gamma) (GeV)'),
+          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',  'gen #DeltaR(#gamma, l)'),
+          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',      'gen #Delta#phi(ll)'),
+          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(#gamma, j)',  'gen #DeltaR(#gamma, j)'),
+          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',     'gen p_{T}(j1) (GeV)'),
+          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',    'gen |#Delta#eta(ll)|'),
+          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',  'gen #DeltaR(#gamma, b)'),
+          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',      'gen |#eta|(#gamma)')
+          }
 # setDefault()
 
-for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']:
+
+distList = [('data/otra16AsrFit_fitDiagnostics_obs.root', 'unfReco_jetLepDeltaR'),
+('data/otra16AsrFit_fitDiagnostics_obs.root', 'unfReco_jetPt'),
+('data/otra16AsrFit_fitDiagnostics_obs.root', 'unfReco_ll_absDeltaEta'),
+# ('data/otra16BsrFit_fitDiagnostics_obs.root', 'unfReco_ll_cosTheta'),
+('data/otra16BsrFit_fitDiagnostics_obs.root', 'unfReco_ll_deltaPhi'),
+('data/otra16BsrFit_fitDiagnostics_obs.root', 'unfReco_phAbsEta'),
+('data/otra16CsrFit_fitDiagnostics_obs.root', 'unfReco_phBJetDeltaR'),
+('data/otra16CsrFit_fitDiagnostics_obs.root', 'unfReco_phLepDeltaR'),
+('data/otra16CsrFit_fitDiagnostics_obs.root', 'unfReco_phPt')]
+
+
+# for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']:
 # for dist in ['unfReco_phPt']:
 # for dist in ['unfReco_phEta']:
+for fitFile, dist in distList:
   log.info('running for '+ dist)
   ########## loading ##########
-  fitFile = 'data/srFit_fitDiagnostics_obs.root'
+  # fitFile = 'data/srFit_fitDiagnostics_obs.root'
   data = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_ee/data')
   mcTot = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_ee/total')
   mcBkg = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_ee/total_background')
@@ -80,7 +104,7 @@ for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_d
   datamumu = graphToHist(datamumu, mcTot)
   data.Add(datamumu)
 
-  outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva8/noData/placeholderSelection/' + dist.replace('unfReco','out') + '.pkl','r'))[dist.replace('unfReco','out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unfSep3/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   data = copyBinning(data, outMig)
   mcTot = copyBinning(mcTot, outMig)
   mcBkg = copyBinning(mcBkg, outMig)
@@ -90,7 +114,7 @@ for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_d
   for i in range(0, mcBkgNoUnc.GetXaxis().GetNbins()+1):
     mcBkgNoUnc.SetBinError(i, 0.)
 
-  response = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva8/noData/placeholderSelection/' + dist.replace('unfReco','response') + '.pkl','r'))[dist.replace('unfReco','response')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  response = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unfSep3/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   ########## UNFOLDING ##########
   ##### setup ##### 
   # regMode = ROOT.TUnfold.kRegModeCurvature
@@ -147,8 +171,11 @@ for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_d
   unfoldedMC.SetLineColor(ROOT.kBlue)
   unfoldedMC.SetFillStyle(3244)
   unfoldedMC.SetFillColor(ROOT.kBlue)
-  unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*0.2)
-  # unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*1.4)
+  # unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*0.2)
+  unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*1.4)
+  unfoldedMC.GetXaxis().SetTitle(labels[dist][1])
+  unfoldedMC.GetYaxis().SetTitle('Events')
+  unfoldedMC.SetTitle('')
   unfoldedMC.Draw('E2')
   unfMC2 = unfoldedMC.Clone()
   unfMC2.Draw('HIST same')
@@ -161,13 +188,41 @@ for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_d
   plMC = response.ProjectionY("PLMC")
   plMC.SetLineColor(ROOT.kRed)
   plMC.SetLineWidth(2)
-  plMC.Draw('same')
+  # plMC.Draw('same')
   unfolded.Draw('same E1')
   legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
   legend.AddEntry(unfoldedMC,"Simulation","l")
   legend.AddEntry(unfolded,"data","pe")
-  legend.AddEntry(plMC,"PL truth","l")
+  # legend.AddEntry(plMC,"PL truth","l")
   legend.Draw()
   cunf.SaveAs('unfolded/'+ dist +'.pdf')
   cunf.SaveAs('unfolded/'+ dist +'.png')
 
+
+
+  cpreunf = ROOT.TCanvas(dist, dist, 1000,700)
+
+  mcTot.SetLineWidth(3)
+  mcTot.SetLineColor(ROOT.kBlue)
+  mcTot.SetFillStyle(3244)
+  mcTot.SetFillColor(ROOT.kBlue)
+  mcTot.GetYaxis().SetRangeUser(0., data.GetMaximum()*1.4)
+  mcTot.GetXaxis().SetTitle(labels[dist][0])
+  mcTot.GetYaxis().SetTitle('Events')
+  mcTot.SetTitle('')
+  mcTot.Draw('E2')
+  mcTot2 = mcTot.Clone()
+  mcTot2.Draw('HIST same')
+  mcTot2.SetFillColor(ROOT.kWhite)
+  mcTot.SetMinimum(0.)
+  data.SetLineColor(ROOT.kBlack)
+  data.SetLineWidth(2)
+  data.SetMarkerStyle(8)
+  data.SetMarkerSize(1)
+  data.Draw('same E1')
+  legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
+  legend.AddEntry(mcTot,"Simulation","l")
+  legend.AddEntry(data,"data","pe")
+  legend.Draw()
+  cpreunf.SaveAs('unfolded/preUnf_'+ dist +'.pdf')
+  cpreunf.SaveAs('unfolded/preUnf_'+ dist +'.png')

@@ -20,7 +20,7 @@ argParser.add_argument('--year',     action='store',      default=None,   help='
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')
-argParser.add_argument('--selectID', action='store',      default='phoCB', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB'])
+argParser.add_argument('--selectID', action='store',      default='phoCB', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB','base'])
 args = argParser.parse_args()
 
 
@@ -116,7 +116,8 @@ if args.corr:
     clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
     c            = clonedSample.initTree(shortDebug=args.debug)
     setIDSelection(c, args.selectID)
-
+    c.egvar = 'Corr'
+    c.muvar = 'Corr'
     # If needed, we can work out a multithreaded option, similar like below
     for i in clonedSample.eventLoop(totalJobs=cores, subJob=subJob):
       c.GetEntry(i)
@@ -173,7 +174,9 @@ else:
     clonedSample = copy.deepcopy(sample) # deep copy to avoid problems with the multithreading
     c            = clonedSample.initTree(shortDebug=args.debug)
     setIDSelection(c, args.selectID)
-
+    c.egvar = 'Corr'
+    c.muvar = 'Corr'
+    
     for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
       c.GetEntry(i)
       if not c._passTrigger_ref: continue
