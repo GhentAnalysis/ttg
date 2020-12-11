@@ -19,15 +19,17 @@ ZG_lowMass         Z#gamma_(genuine)               fillStyle     598            
 %DY_M50               Drell-Yan_(genuine)             fillStyle     427                      _zgEventType<3
 %+DY_M10to50
 
+
+
 $singleTop
-ST_tW_ch             t#gamma_(genuine)              fillStyle     797
+ST_tW_ch             Single-t+#gamma_(genuine)              fillStyle     797
 +ST_tbarW_ch
 +ST_s_ch_lep
 +ST_s_ch_had
 +ST_t_ch
 +ST_tbar_ch
 
-VVTo2L2Nu             X#gamma_(genuine)                fillStyle     kViolet
+VVTo2L2Nu             Multiboson+#gamma_(genuine)               fillStyle     kViolet
 +ZZTo4L
 +ZZTo2Q2Nu
 +ZZTo2L2Q
@@ -42,6 +44,10 @@ VVTo2L2Nu             X#gamma_(genuine)                fillStyle     kViolet
 +WWZ
 +WZZ
 +ZZZ
+
+
+$other
+WGamma              Other+#gamma_(genuine)       fillStyle    kGray
 +GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
@@ -65,7 +71,7 @@ VVTo2L2Nu             X#gamma_(genuine)                fillStyle     kViolet
 +tWnunu
 +tHq
 +tHW
-+WGamma
+
 
 
 TTGamma_DilPCUT             nonprompt        fillStyle     814                  _ttgEventType>2
@@ -96,7 +102,7 @@ ST_tW_ch             nonprompt        fillStyle     814
 +ST_t_ch
 +ST_tbar_ch
 
-VVTo2L2Nu           nonprompt        fillStyle     814
+VVTo2L2Nu             nonprompt        fillStyle     814
 +ZZTo4L
 +ZZTo2Q2Nu
 +ZZTo2L2Q
@@ -111,6 +117,10 @@ VVTo2L2Nu           nonprompt        fillStyle     814
 +WWZ
 +WZZ
 +ZZZ
+
+
+$other
+WGamma               nonprompt        fillStyle     814
 +GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
@@ -134,7 +144,6 @@ VVTo2L2Nu           nonprompt        fillStyle     814
 +tWnunu
 +tHq
 +tHW
-+WGamma
 
 -- Data
 DoubleMuon                 data:mumu,SF,all      errorStyle    kBlack                   isMuMu

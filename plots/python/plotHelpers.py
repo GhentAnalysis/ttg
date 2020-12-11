@@ -72,6 +72,17 @@ def createSignalRegionsZoom(t):
   elif t.ndbjets >= 3 and t.njets >= 3: return 7
   return -1
 
+def createSignalRegionsCap(t):
+  if t.ndbjets == 0:
+    if t.njets == 0: return 0
+    if t.njets == 1: return 1
+    if t.njets >= 2: return 2
+  elif t.ndbjets == 1:
+    if t.njets == 1: return 3
+    if t.njets >= 2: return 4
+  elif t.ndbjets >= 2: return 5
+  return -1
+
 # you can remove items from momList, but keep momRef 
 momRef = {1: 'd', 2: 'u', 3: 's', 4: 'c', 5: 'b', 6: 't', 11: 'e', 13: '#mu', 15: '#tau', 21: 'g', 24: 'W', 111: '#pi^{0}', 221: '#pi^{+/-}', 223: '#rho^{+}', 331: '#rho `', 333: '#phi', 413: 'D^{*+}', 423: 'D^{*0}', 433: 'D_{s}^{*+}', 445: '445', 513: 'B^{*0}', 523: 'B^{*+}', 533: 'B_{s}^{*0}', 543: 'B_{c}^{*+}', 2212: 'p', 4312:'4312', 4314: '4314', 4322: '4322', 4324: '4324', 4334: '4334', 5324: '5324', 20443: '20443', 100443: '#psi'}
 # momList = [1, 2, 3, 4, 5, 6, 11, 13, 15, 21, 24, 111, 221, 223, 331, 333, 413, 423, 433, 445, 513, 523, 533, 543, 2212, 4312, 4314, 4322, 4324, 4334, 5324, 20443, 100443]

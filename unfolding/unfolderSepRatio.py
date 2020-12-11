@@ -65,7 +65,7 @@ def getPad(canvas, number):
   return pad
 
 def getRatioCanvas(name):
-  xWidth, yWidth, yRatioWidth = 1000, 950, 200
+  xWidth, yWidth, yRatioWidth = 1000, 1050, 280
   yWidth           += yRatioWidth
   bottomMargin      = yWidth/float(yRatioWidth)*ROOT.gStyle.GetPadBottomMargin()
   yBorder           = yRatioWidth/float(yWidth)
@@ -97,7 +97,7 @@ labels = {
           'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)', 'gen p_{T}(#gamma) (GeV)'),
           'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',  'gen #DeltaR(#gamma, l)'),
           'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',      'gen #Delta#phi(ll)'),
-          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(#gamma, j)',  'gen #DeltaR(#gamma, j)'),
+          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',  'gen #DeltaR(l, j)'),
           'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',     'gen p_{T}(j1) (GeV)'),
           'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',    'gen |#Delta#eta(ll)|'),
           'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',  'gen #DeltaR(#gamma, b)'),
@@ -235,6 +235,14 @@ for fitFile, dist in distList:
   plMC.SetLineColor(ROOT.kRed)
   plMC.SetLineWidth(2)
   plMC.Draw('same')
+
+  difc = plMC.Clone()
+  difc.Add(unfolded, -1.)
+  l = [ difc.GetBinContent(i) for i in range(0, difc.GetXaxis().GetNbins()+1)]
+  lr = [99 if unfolded.GetBinContent(i)==0 else difc.GetBinContent(i)/unfolded.GetBinContent(i) for i in range(0, difc.GetXaxis().GetNbins()+1)]
+  log.info(l)
+  log.info(lr)
+
   unfolded.Draw('same E1 X0')
   # legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
   legend = ROOT.TLegend(0.28,0.83,0.85,0.88)
@@ -242,7 +250,7 @@ for fitFile, dist in distList:
   legend.SetNColumns(2)
   legend.AddEntry(unfoldedMC,"Simulation","l")
   legend.AddEntry(unfolded,'data (' + str(lumiScalesRounded[args.year]) + '/fb)',"pe")
-  # legend.AddEntry(plMC,"PL truth","l")
+  legend.AddEntry(plMC,"PL truth","l")
   legend.Draw()
   # raise SystemExit(0)
 

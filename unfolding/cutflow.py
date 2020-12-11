@@ -193,11 +193,13 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     else: plCounter[pli.next()]+=eventWeight
     if not c.PLmll > 20:                                              continue
     else: plCounter[pli.next()]+=eventWeight
-    if not (abs(c.PLmll-91.1876)>15 or c.PLisEMu):                    continue
-    else: plCounter[pli.next()]+=eventWeight
-    if not (abs(c.PLmllg-91.1876)>15 or c.PLisEMu):                   continue
-    else: plCounter[pli.next()]+=eventWeight
-    if not ((c.PLisEMu and c.PLnjets>0) or (c.PLndbjets>0)):          continue
+    # if not (abs(c.PLmll-91.1876)>15 or c.PLisEMu):                    continue
+    # else: plCounter[pli.next()]+=eventWeight
+    # if not (abs(c.PLmllg-91.1876)>15 or c.PLisEMu):                   continue
+    # else: plCounter[pli.next()]+=eventWeight
+    # if not ((c.PLisEMu and c.PLnjets>0) or (c.PLndbjets>0)):          continue
+    # else: plCounter[pli.next()]+=eventWeight
+    if not c.PLndbjets>0:          continue
     else: plCounter[pli.next()]+=eventWeight
 
 ##### reco selection and storing values #####
@@ -261,7 +263,9 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     else: recoCounter[reci.next()]+=eventWeight
     if not (abs(c.mllg-91.1876)>15 or c.isEMu):             continue
     else: recoCounter[reci.next()]+=eventWeight
-    if not ((c.isEMu and c.njets>0) or (c.ndbjets>0)):      continue
+    # if not ((c.isEMu and c.njets>0) or (c.ndbjets>0)):      continue
+    # else: recoCounter[reci.next()]+=eventWeight
+    if not c.ndbjets>0:                                     continue
     else: recoCounter[reci.next()]+=eventWeight
 
 

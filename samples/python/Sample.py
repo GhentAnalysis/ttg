@@ -98,7 +98,7 @@ class Sample:                                                                   
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
       self.listOfFiles = self.getListOfFiles(splitData)
-    if shortDebug: self.listOfFiles = self.listOfFiles[:3]
+    if shortDebug: self.listOfFiles = self.listOfFiles[:6]
     if not len(self.listOfFiles): log.error('No tuples to run over for ' + self.name)
     for path in self.listOfFiles:
       log.debug("Adding " + path)
@@ -171,12 +171,14 @@ def createStack(tuplesFile, styleFile, channel, replacements = None):           
       if len(stack):                                                                        # When "--", start a new stack
         allStacks.append(stack)
         stack = []
+      skip = False #reset for every new stack as well I guess
     else:
       if info[0].startswith('+'):                                                           # Add more subsamples to legend item (unless we skip the dataset)
         if not skip:
           sample = getSampleFromList(sampleList, info[0].strip('+'))
           stack[-1].addSample(sample.name, sample.productionLabel)
       else:
+        skip = False #reset for every new sample set
         selectionString = None
         try:    name, texName, style, color, selectionString = info
         except: name, texName, style, color = info

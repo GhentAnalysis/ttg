@@ -19,16 +19,16 @@ ZG_lowMass          Z#gamma_(nonprompt)               fillStyle     598         
 DY_M50               Drell-Yan_(nonprompt)             fillStyle     427                  _zgEventType<3
 +DY_M10to50
 
+
 $singleTop
-ST_tW_ch             t#gamma_(nonprompt)               fillStyle     797
+ST_tW_ch             Single-t+#gamma_(nonprompt)              fillStyle     797
 +ST_tbarW_ch
 +ST_s_ch_lep
 +ST_s_ch_had
 +ST_t_ch
 +ST_tbar_ch
 
-
-VVTo2L2Nu            X#gamma_(nonprompt)                  fillStyle     kViolet
+VVTo2L2Nu             Multiboson+#gamma_(nonprompt)               fillStyle     kViolet
 +ZZTo4L
 +ZZTo2Q2Nu
 +ZZTo2L2Q
@@ -43,6 +43,10 @@ VVTo2L2Nu            X#gamma_(nonprompt)                  fillStyle     kViolet
 +WWZ
 +WZZ
 +ZZZ
+
+
+$other
+WGamma              Other+#gamma_(nonprompt)       fillStyle    kGray
 +GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
@@ -66,7 +70,7 @@ VVTo2L2Nu            X#gamma_(nonprompt)                  fillStyle     kViolet
 +tWnunu
 +tHq
 +tHW
-+WGamma
+
 
 
 -- NPestimate
