@@ -81,6 +81,7 @@ from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
 from ttg.plots.npWeight               import npWeight
 from ttg.plots.ZgWeight               import ZgWeight
 from math import pi
+import numpy
 
 ROOT.gROOT.SetBatch(True)
 
@@ -152,6 +153,17 @@ def plphpt(tree):
   try: return c._pl_phPt[0]
   except: return -99.
 
+
+def kickUnder(under, threshold, val):
+  if val > threshold: return under - 1.
+  else:               return val
+
+def theta(eta):
+  return 2.*numpy.arctan(numpy.e**(-1* eta))
+
+def angle(theta1, theta2, phi1, phi2):
+  return ((theta1-theta2)**2. + deltaPhi(phi1,phi2)**2.)**0.5
+
 #
 # Define plots
 #
@@ -174,6 +186,7 @@ def makePlotList():
     plotList.append(Plot('nTrueInt',                   'nTrueInt',                              lambda c : c._nTrueInt,                                        (50, 0, 50)))
     plotList.append(Plot('nphoton',                    'number of photons',                     lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
     plotList.append(Plot('photon_pt',                  'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (24, 15, 135)))
+    plotList.append(Plot('photon_pt_far',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            (25, 20, 270)))
     plotList.append(Plot('photon_pt_large',            'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            [15., 30., 45., 60., 80., 120.]))
     plotList.append(Plot('photon_pt_EGM',              'p_{T}(#gamma) (GeV)',                   lambda c : c.ph_pt,                                            [20., 35., 50., 100., 200., 500., 600.]))
     plotList.append(Plot('photon_eta',                 '|#eta|(#gamma)',                        lambda c : abs(c._phEta[c.ph]),                                (15, 0, 2.5)))
@@ -182,12 +195,12 @@ def makePlotList():
     plotList.append(Plot('photon_mva_S16v1',           '#gamma-MVA S16v1',                      lambda c : c._phMvaS16v1[c.ph],                                (20, -1, 1)))
     # # plotList.append(Plot('photon_chargedIso_FP',       'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     # # plotList.append(Plot('photon_chargedIso_FP_new',   'Photon charged-hadron Iso cut (GeV)',   lambda c : chgIsoCat(c),                                       [0, 1 , 2], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), histModifications=xAxisLabels(['fail', 'pass']) ))    
-    # # plotList.append(Plot('photon_chargedIso',          'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-    # # plotList.append(Plot('photon_chargedIso_NO',       'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
-    # # plotList.append(Plot('photon_chargedIso_bins',     'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-    # # plotList.append(Plot('photon_chargedIso_bins_NO',  'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
-    # # plotList.append(Plot('photon_chargedIso_small',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-    # # plotList.append(Plot('photon_chargedIso_small_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    plotList.append(Plot('photon_chargedIso',          'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('photon_chargedIso_NO',       'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    plotList.append(Plot('photon_chargedIso_bins',     'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('photon_chargedIso_bins_NO',  'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    plotList.append(Plot('photon_chargedIso_small',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+    plotList.append(Plot('photon_chargedIso_small_NO', 'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     # # plotList.append(Plot('photon_chargedIso_wide',     'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     # # plotList.append(Plot('photon_chargedIso_wide_NO',  'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     # # plotList.append(Plot('photon_chargedIso_bins2',    'Photon charged-hadron isolation (GeV)', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
@@ -199,8 +212,8 @@ def makePlotList():
     # plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phChargedIsolation[c.ph]/c.ph_pt,                (20, 0, 2)))
     # plotList.append(Plot('photon_neutralIso',          'neutralIso(#gamma) (GeV)',              lambda c : c._phNeutralHadronIsolation[c.ph],                  (25, 0, 5)))
     # plotList.append(Plot('photon_photonIso',           'photonIso(#gamma) (GeV)',               lambda c : c._phPhotonIsolation[c.ph],                         (32, 0, 8)))
-    # plotList.append(Plot('photon_SigmaIetaIeta',       '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (20, 0, 0.04)))
-    # plotList.append(Plot('photon_SigmaIetaIeta_small', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
+    plotList.append(Plot('photon_SigmaIetaIeta',       '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (20, 0, 0.04)))
+    plotList.append(Plot('photon_SigmaIetaIeta_small', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
     # plotList.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',                lambda c : c._phHadronicOverEm[c.ph],                          (100, 0, .025)))
     # plotList.append(Plot('photon_phHadTowOverEm',      'hadronicTowerOverEm(#gamma)',           lambda c : c._phHadTowOverEm[c.ph],                            (100, 0, .025)))
     plotList.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
@@ -253,6 +266,15 @@ def makePlotList():
     plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoomAlt',       'signal region',                         lambda c : min(6, createSignalRegionsZoom(c)),                 (7, 0, 7),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b'])))
+    plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
+    plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
+    plotList.append(Plot('signalRegionsCap',           'signal region',                         lambda c : createSignalRegionsCap(c),                          (6, 0, 6),   histModifications=xAxisLabels(['0j,0b', '1j,0b', '#geq2j,0b', '1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
+
+    plotList.append(Plot('j1_pt25',                    'p_{T}(j_{1}) (GeV)',                    lambda c : c._jetSmearedPt[c.j1],                              [25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0]))
+    plotList.append(Plot('j2_pt25',                    'p_{T}(j_{2}) (GeV)',                    lambda c : c._jetSmearedPt[c.j2],                              [25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0]))
+    plotList.append(Plot('dbj1_pt25',                  'p_{T}(bj_{1}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj1],                            [25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0]))
+    plotList.append(Plot('dbj2_pt25',                  'p_{T}(bj_{2}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj2],                            [25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0]))
+
     # plotList.append(Plot('eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
     # plotList.append(Plot('genPhoton_pt',               'p_{T}(gen #gamma) (GeV)',               lambda c : c.genPhPt,                                          (10, 10, 110)))
     # plotList.append(Plot('genPhoton_eta',              '|#eta|(gen #gamma)',                    lambda c : abs(c.genPhEta),                                    (15, 0, 2.5), overflowBin=None))
@@ -274,25 +296,59 @@ def makePlotList():
 
 
 
-    dRBinRec = [ 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 4.2 ]
-    dRBinGen = [ 0.4, 1.0, 1.6, 2.2, 2.8, 3.4, 4.2 ]
 
-    etaBinRec = (15, -1.5, 1.5)
-    etaBinGen = (5, -1.5, 1.5)
+    ptBinRec = [20., 35., 50., 65., 80., 100., 120., 140., 160., 180., 200., 230., 260., 290., 320., 380.]
+    ptBinGen = [20., 35., 50., 65., 80., 120., 160., 200., 260., 320., 400.]
 
-    absEtaBinRec = (15, 0., 1.5)
-    absEtaBinGen = (5, 0., 1.5)
+    dRBinRec = [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4]
+    dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.4]
 
-    ptBinRec = (31, 20, 330)
-    ptBinGen = (11, 20, 350)
+    absEtaBinRec = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+    absEtaBinGen = [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.45]
+
+    dPhiBinRec = (16, 0., 3.2)
+    dPhiBinGen = (8, 0., 3.2)
+
+    cosBinRec = (16, -1., 1.)
+    cosBinGen = (8, -1., 1.)
+
+    # absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 3.5, 4.5]
+    absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
+    absdEtaBinGen = [0., 0.5, 1., 1.5, 2.,  2.5, 3., 4.5]
+
+    dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]
+    dRBinJetGen = [0.4, 0.8, 1.3, 1.9, 2.6, 3.4]
+
+    ptBinJetGen = [30., 60., 100., 150., 250., 400.]
+    ptBinJetRec = [30., 45., 60., 80., 100., 125., 150., 200., 250., 325., 400.]
+
 
 # NOTE unfolding related 
-    plotList.append(Plot('unfReco_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : c.ph_pt,                                         ptBinRec     ))
-    plotList.append(Plot('unfReco_phEta',           '#eta(#gamma)',                   lambda c : c._phEta[c.ph],                                  etaBinRec    ))
-    plotList.append(Plot('unfReco_phAbsEta',        '|#eta|(#gamma)',                 lambda c : abs(c._phEta[c.ph]),                             absEtaBinRec ))
-    plotList.append(Plot('unfReco_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),          dRBinRec     ))
-    plotList.append(Plot('unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                 dRBinRec     ))
+    plotList.append(Plot('unfReco_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : c.ph_pt,                                                         ptBinRec     ))
+    plotList.append(Plot('unfReco_phAbsEta',        '|#eta|(#gamma)',                 lambda c : abs(c._phEta[c.ph]),                                             absEtaBinRec ))
+    plotList.append(Plot('unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                 dRBinRec     ))
+    plotList.append(Plot('unfReco_phLep1DeltaR',    '#DeltaR(#gamma, l1)',            lambda c : c.phL1DeltaR,                                                    dRBinRec     ))
+    plotList.append(Plot('unfReco_phLep2DeltaR',    '#DeltaR(#gamma, l2)',            lambda c : c.phL2DeltaR,                                                    dRBinRec     ))
+    plotList.append(Plot('unfReco_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),                          dPhiBinRec   ))
+    plotList.append(Plot('unfReco_ll_cosTheta',     '#cos(theta(ll))',                lambda c : numpy.cos(angle(theta(c._lEta[c.l1]), theta(c._lEta[c.l2]), c._lPhi[c.l1], c._lPhi[c.l2]))   ,          cosBinRec    ))
+    plotList.append(Plot('unfReco_ll_absDeltaEta',  '|#Delta#eta(ll)|',               lambda c : abs(c._lEta[c.l1] - c._lEta[c.l2]),                              absdEtaBinRec))
+    plotList.append(Plot('unfReco_phBJetDeltaR',    '#DeltaR(#gamma, b)',             lambda c : kickUnder(0., 900., c.phBJetDeltaR),                             dRBinJetRec  ))
+    plotList.append(Plot('unfReco_jetLepDeltaR',    '#DeltaR(#gamma, j)',             lambda c : min(c.l1JetDeltaR, c.l2JetDeltaR),                               dRBinJetRec  ))
+    plotList.append(Plot('unfReco_jetPt',           'p_{T}(j1) (GeV)',                lambda c : c._jetSmearedPt[c.j1],                                           ptBinJetRec  ))
 
+
+    # l1l2 scalar pt sum should start at 25+15 =40
+    # pT(ll) could I guess go down to 0, testing
+
+    ZptBinRec = [0., 20., 35., 50., 65., 80., 100., 120., 140., 160., 180., 200., 230., 260., 290., 320., 380.]
+    ZptBinGen = [0., 20., 35., 50., 65., 80., 120., 160., 200., 260., 320., 400.]
+
+    l1l2ptBinRec = [40., 50., 65., 80., 100., 120., 140., 160., 180., 200., 230., 260., 290., 320., 380.]
+    l1l2ptBinGen = [40., 50., 65., 80., 120., 160., 200., 260., 320., 400.]
+
+
+    plotList.append(Plot('unfReco_Z_pt',            'p_{T}(ll) (GeV)',                lambda c : Zpt(c),                                            ptBinRec))
+    plotList.append(Plot('unfReco_l1l2_ptsum',      'p_{T}(l1)+p_{T}(l2) (GeV)',      lambda c : c.l1_pt+c.l2_pt,                                   ptBinRec))
 
 
 
@@ -307,8 +363,6 @@ def makePlotList():
     # plotList.append(Plot('l2_jetDeltaR_small',         '#DeltaR(l_{2}, j)',                     lambda c : c.l2JetDeltaR,                                      (50, 0, 5)))
     # plotList.append(Plot('phRawJetERatio',             'E photon / closest raw jet ',           lambda c : c._phE[c.ph] / c._jetE[closestRawJet(c)],           (50, 0, 5), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))
     # plotList.append(Plot('rawJetDeepCSV',              'deepCSV(closest raw jet)',              lambda c : c._jetDeepCsv_b[closestRawJet(c)] + c._jetDeepCsv_bb[closestRawJet(c)],     (20, 0, 1)))
-    # plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
-    # plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
     # plotList.append(Plot2D('photon_pt_vspl', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140)))
     # plotList.append(Plot2D('photon_pt_vsplx', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('x') ))
     # plotList.append(Plot2D('photon_pt_vsply', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , (12, 20, 140), 'PL p_{T}(#gamma) (GeV)', lambda c : plphpt(c) , (12, 20, 140), histModifications=normalizeAlong('y') ))
@@ -318,7 +372,8 @@ def makePlotList():
     # plotList.append(Plot2D('mll_mllg', 'm(ll) (GeV)', lambda c : c.mll , (25, 0, 500), 'm(ll#gamma) (GeV)', lambda c : c.mllg , (40, 0, 800) ))
 # 
     # plotList.append(Plot('nearestZ',   'nearestZ',   lambda c : nearestZ(c),                                       [0., 1., 2.], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV') ))    
-    # plotList.append(Plot('Z_pt',                  'p_{T}(Z) (GeV)',                   lambda c : Zpt(c),                                            (20, 10, 200)))
+    plotList.append(Plot('Z_pt',                  'p_{T}(ll) (GeV)',                   lambda c : Zpt(c),                                            (20, 10, 200)))
+    plotList.append(Plot('l1l2_ptsum',            'p_{T}(l1)+p_{T}(l2) (GeV)',         lambda c : c.l1_pt+c.l2_pt,                                   (20, 10, 300)))
     # plotList.append(Plot('ZplusPho_pt',           'p_{T}(Z) + p_{T}(pho) (GeV)',                   lambda c : Zpt(c)+c.ph_pt,                (30, 10, 300)))
     # plotList.append(Plot('phMomType',             'phMomType',                                     lambda c : c.genPhMomPdg,                 (50, -25, 25)))
     # plotList.append(Plot('phMomTypeB',            'phMomType',                                     lambda c : abs(c.genPhMomPdg),            [0,8.5,9.5,10.5,18.5,20.5,21.5,22.5,23.5,24.5,25.5], histModifications=xAxisLabels(['quark','/','lepton','/','g','pho','Z','W','/'])))
@@ -357,7 +412,7 @@ def makePlotList():
   if args.filterPlot:
     plotList[:] = [p for p in plotList if args.filterPlot in p.name]
 
-  isSR = args.tag.lower().count('phocbfull') or (args.selection.count('passChgIso') and args.selection.count('passSigmaIetaIeta'))
+  isSR = args.tag.lower().count('phocbfull') or (args.tag.count('passChgIso') and args.tag.count('passSigmaIetaIeta'))
   # any sideband selection means we can unblind
   isSideband = [args.selection.count('sidebandSigmaIetaIeta'), args.selection.count('failChgIso'), args.selection.count('onZ'), args.selection.count('llgOnZ')]
   doBlind = isSR and not any(isSideband)
@@ -421,6 +476,7 @@ for year in years:
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
+    if args.tag.lower().count('jet25'):                                             reduceType = 'phoCB-NOVjetPt25'
     origReducetype = reduceType
     reduceType = applySysToReduceType(reduceType, args.sys)
     log.info("using reduceType " + reduceType)
@@ -429,6 +485,8 @@ for year in years:
     dumpArrays = {}
     origCB = phoCBfull
     origTag = args.tag
+
+
     for sample in sum(stack, []):
 
       dumpArray = [("ph_pt", lambda c : c.ph_pt),
@@ -487,14 +545,10 @@ for year in years:
       else:
         if   c.sigmaIetaIeta1: sample.texName = sample.texName.replace('sideband1', '0.01015 < #sigma_{i#etai#eta} < 0.012')
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
-      
-      # when creating input plots for corrections corrections can obviously not be applied yet
-      altS = '-signalRegion-'
-      if NPestimate and args.selection.count('signalRegionA'): altS  = '-signalRegionA-'
-      if NPestimate and args.selection.count('signalRegionB'): altS  = '-signalRegionB-'
-      if NPestimate and args.selection.count('signalRegionAB'): altS = '-signalRegionAB-'
 
-      npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys), altS=altS)
+      # when creating input plots for corrections corrections can obviously not be applied yet
+      npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys))
+      
       if not args.noZgCorr:
         try:
           # Zg correction factors are systematic-specific unless specified otherwise
@@ -535,6 +589,8 @@ for year in years:
         if sample.isData: eventWeight = estWeight
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw
+
+        # log.info(eventWeight)
 
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]

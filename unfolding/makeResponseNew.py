@@ -33,21 +33,11 @@ from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi, deltaR
 from ttg.samples.Sample import createSampleList, getSampleFromList
 import copy
 import pickle
+from math import pi
 
 lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
-# unfVars = {'phPt': ['_ph_pt', [10, 220, 20], 'plPhPt', [30, 220, 20]]}
-# reduceType = 'UnfphoCBNewWeights'
-# reduceType = 'UnfphoCBlowClBoth'
-# reduceType = 'UnfphoCBNewWeightsDebug'
-# reduceType = 'UnfphoCBlowCl'
-# reduceType = 'UnfphoCBDoDeb'
-# reduceType = 'UnfphoCBwmd'
-reduceType = 'UnfphoCBdon'
-# reduceType = 'UnfphoCBns'
-# reduceType = 'UnfphoCBNewWeights'
-
-
-
+reduceType = 'UnfphoCBlmva'
+# reduceType = 'UnfphoCBdink'
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
@@ -59,17 +49,10 @@ if not args.isChild:
   submitJobs(__file__, ('year'), [jobs], argParser, subLog=args.tag, jobLabel = "UF")
   exit(0)
 
-# sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_' + args.year + '.conf'))
-# stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_' + args.year + '.conf'),
-#                   styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unfTTG.stack'),
-#                   # channel      = args.channel,
-#                   channel      = 'noData',
-#                   # replacements = getReplacementsForStack(args.sys, args.year)
-#                   )
-
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/testTuples_2016.conf'))
-stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/testTuples_2016.conf'),
-                  styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unfTTGdon.stack'),
+# NOTE WARNING using separate tuple files right now, but not needed, if samples get updated change this
+sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_' + args.year + '.conf'))
+stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_' + args.year + '.conf'),
+                  styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unfTTG.stack'),
                   # channel      = args.channel,
                   channel      = 'noData',
                   # replacements = getReplacementsForStack(args.sys, args.year)
@@ -77,7 +60,6 @@ stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/unfol
 
 ########## RECO SELECTION ##########
 def checkRec(c):
-  # if not c.isEMu: return False
   if c.failReco:                                          return False
   if not c._phCutBasedMedium[c.ph]:                       return False
   if abs(c._phEta[c.ph]) > 1.4442:                        return False
@@ -85,37 +67,25 @@ def checkRec(c):
   c.misIdEle,c.hadronicPhoton,c.hadronicFake,c.magicPhoton,c.mHad,c.mFake,c.unmHad,c.unmFake,c.nonPrompt = False,False,False,False,False,False,False,False,False
   if not checkMatch(c):                                   return False
   if not c.ph_pt > 20:                                    return False
-  if not (c.isEMu&&c.njets>0) or (ndbjets>0):             return False
-  # if not ((c.njets>1) or (c.njets==1 and c.ndbjets==1)):  return False
-  # NOTE singnalRegion AB it is
+  if not ((c.isEMu and c.njets>0) or (c.ndbjets>0)):             return False
   if not c.mll > 20:                                      return False
   if not (abs(c.mll-91.1876)>15 or c.isEMu):              return False
   if not (abs(c.mllg-91.1876)>15 or c.isEMu):             return False
   return True
 
-    'signalRegionAB':      '(isEMu&&njets>0)||(ndbjets>0)',
-
 
 ########## FIDUCIAL REGION ##########
 def checkFid(c):
-  # if not c.PLisEMu: return False
   if c.failFid:                                                 return False
-  # # TODO CHECK
   if abs(c._pl_phEta[c.PLph]) > 1.4442:                             return False
   if not c.PLph_pt > 20:                                            return False
-  # if not ((c.PLnjets>1) or (c.PLnjets==1 and c.PLndbjets==1)):      return False
-  # NOTE singnalRegion AB it is
-  if not (c.PLisEMu&&c.PLnjets>0) or (PLndbjets>0):                 return False
+  if not ((c.PLisEMu and c.PLnjets>0) or (c.PLndbjets>0)):                 return False
   if not c.PLmll > 20:                                              return False
   if not (abs(c.PLmll-91.1876)>15 or c.PLisEMu):                    return False
   if not (abs(c.PLmllg-91.1876)>15 or c.PLisEMu):                   return False
-  #  NOTE temp
   return True
 
-# def sameBin(valA, valB, bins):
-#   a = numpy.digitize([valA],bins)[0]
-#   b = numpy.digitize([valB],bins)[0]
-#   return valA if a == b else -99.
+
 
 ########## PREPARE PLOTS ##########
 Plot.setDefaults(stack=stack, texY = 'Events')
@@ -131,6 +101,10 @@ def ifFid(c, val, under):
   else: return under-1.
 
 
+def protectedGet(arr, ind):
+  try: return arr[ind]
+  except: return 9999.
+
 
 dRBinRec = [ 0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4, 4.2 ]
 dRBinGen = [ 0.4, 1.0, 1.6, 2.2, 2.8, 3.4, 4.2 ]
@@ -144,38 +118,76 @@ absEtaBinGen = (5, 0., 1.5)
 ptBinRec = (31, 20, 330)
 ptBinGen = (11, 20, 350)
 
+# NOTE delta phi binning was own choice, SL group didn't propose any
+dPhiBinRec = (15, 0., pi)
+dPhiBinGen = (5, 0., pi)
+
+
+
 plotListRecFid = []
 plotListRec = []
 plotListOut = []
 plotListFid = []
 mList = []
 
-mList.append(Plot2D('response_phPt',              'PL p_{T}(#gamma) (GeV)',         lambda c : c.PLph_pt ,                                              ptBinGen,               'p_{T}(#gamma) (GeV)',            lambda c : ifRec(c, c.ph_pt, 20.) ,                                         ptBinRec     ))
-mList.append(Plot2D('response_phEta',             'PL p_{T}(#gamma) (GeV)',         lambda c : c._pl_phEta[c.ph] ,                                      etaBinGen,              '#eta(#gamma)',                   lambda c : ifRec(c, lambda c : c._phEta[c.ph], -1.5) ,                      etaBinRec    ))
-mList.append(Plot2D('response_phAbsEta',          'PL p_{T}(#gamma) (GeV)',         lambda c : abs(c._pl_phEta[c.ph]) ,                                 absEtaBinGen,           '|#eta|(#gamma)',                 lambda c : ifRec(c, lambda c : abs(c._phEta[c.ph]), 0.) ,                   absEtaBinRec ))
-mList.append(Plot2D('response_ll_deltaPhi',       'PL #Delta#phi(ll)',              lambda c : deltaPhi(c._pl_lPhi[c.l1], c._pl_lPhi[c.l2]) ,           dRBinGen,               '#Delta#phi(ll)',                 lambda c : ifRec(c, deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]), 0.4) ,          dRBinRec     ))
-mList.append(Plot2D('response_phLepDeltaR',       'PL #DeltaR(#gamma, l)',          lambda c : c.PLphL1DeltaR ,                                         dRBinGen,               '#DeltaR(#gamma, l)',             lambda c : ifRec(c, c.PLphL1DeltaR, 0.4) ,                                  dRBinRec     ))
-
-mList.append(Plot2D('respNorm_phPt',              'PL p_{T}(#gamma) (GeV)',         lambda c : c.PLph_pt ,                                              ptBinGen,               'p_{T}(#gamma) (GeV)',            lambda c : ifRec(c, c.ph_pt, 20.) ,                                         ptBinRec     , histModifications=normalizeAlong('y')))
-mList.append(Plot2D('respNorm_phEta',             'PL p_{T}(#gamma) (GeV)',         lambda c : c._pl_phEta[c.ph] ,                                      etaBinGen,              '#eta(#gamma)',                   lambda c : ifRec(c, lambda c : c._phEta[c.ph], -1.5) ,                      etaBinRec    , histModifications=normalizeAlong('y')))
-mList.append(Plot2D('respNorm_phAbsEta',          'PL p_{T}(#gamma) (GeV)',         lambda c : abs(c._pl_phEta[c.ph]) ,                                 absEtaBinGen,           '|#eta|(#gamma)',                 lambda c : ifRec(c, lambda c : abs(c._phEta[c.ph]), 0.) ,                   absEtaBinRec , histModifications=normalizeAlong('y')))
-mList.append(Plot2D('respNorm_ll_deltaPhi',       'PL #Delta#phi(ll)',              lambda c : deltaPhi(c._pl_lPhi[c.l1], c._pl_lPhi[c.l2]) ,           dRBinGen,               '#Delta#phi(ll)',                 lambda c : ifRec(c, deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]), 0.4) ,          dRBinRec     , histModifications=normalizeAlong('y')))
-mList.append(Plot2D('respNorm_phLepDeltaR',       'PL #DeltaR(#gamma, l)',          lambda c : c.PLphL1DeltaR ,                                         dRBinGen,               '#DeltaR(#gamma, l)',             lambda c : ifRec(c, c.PLphL1DeltaR, 0.4) ,                                  dRBinRec     , histModifications=normalizeAlong('y')))
-
-plotListOut.append(Plot('out_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : c.ph_pt,                                         ptBinRec     ))
-plotListOut.append(Plot('out_phEta',           '#eta(#gamma)',                   lambda c : c._phEta[c.ph],                                  etaBinRec    ))
-plotListOut.append(Plot('out_phAbsEta',        '|#eta|(#gamma)',                 lambda c : abs(c._phEta[c.ph]),                             absEtaBinRec ))
-plotListOut.append(Plot('out_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),          dRBinRec     ))
-plotListOut.append(Plot('out_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                 dRBinRec     ))
-
-plotListRec.append(Plot('rec_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : c.ph_pt,                                         ptBinRec     ))
-plotListRec.append(Plot('rec_phEta',           '#eta(#gamma)',                   lambda c : c._phEta[c.ph],                                  etaBinRec    ))
-plotListRec.append(Plot('rec_phAbsEta',        '|#eta|(#gamma)',                 lambda c : abs(c._phEta[c.ph]),                             absEtaBinRec ))
-plotListRec.append(Plot('rec_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),          dRBinRec     ))
-plotListRec.append(Plot('rec_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                 dRBinRec     ))
 
 
-# NOTE WILL HAVE TO MANUALLY ADD OVERFLOW TO LAST BIN (SO IT BECOMES OVERFLOW)
+mList.append(Plot2D('response_phPt',          'p_{T}(#gamma) (GeV)',            lambda c : min(ifRec(c, c.ph_pt, 20.)                                                           , ptBinRec[-1]-0.001    )   , ptBinRec     , 'PL p_{T}(#gamma) (GeV)',         lambda c : min(c.PLph_pt                                       , ptBinGen[-1]-0.001    )  , ptBinGen                ))
+mList.append(Plot2D('response_phEta',         '#eta(#gamma)',                   lambda c : min(ifRec(c, protectedGet(c._phEta, c.ph), -1.5)                                     , etaBinRec[-1]-0.001   )   , etaBinRec    , 'PL p_{T}(#gamma) (GeV)',         lambda c : min(c._pl_phEta[c.PLph]                             , etaBinGen[-1]-0.001   )  , etaBinGen               ))
+mList.append(Plot2D('response_phAbsEta',      '|#eta|(#gamma)',                 lambda c : min(ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.)                                   , absEtaBinRec[-1]-0.001)   , absEtaBinRec , 'PL p_{T}(#gamma) (GeV)',         lambda c : min(abs(c._pl_phEta[c.PLph])                        , absEtaBinGen[-1]-0.001)  , absEtaBinGen            ))
+mList.append(Plot2D('response_ll_deltaPhi',   '#Delta#phi(ll)',                 lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4), dPhiBinRec[-1]-0.001  )   , dPhiBinRec   , 'PL #Delta#phi(ll)',              lambda c : min(deltaPhi(c._pl_lPhi[c.PLl1], c._pl_lPhi[c.PLl2]), dPhiBinGen[-1]-0.001  )  , dPhiBinGen              ))
+mList.append(Plot2D('response_phLepDeltaR',   '#DeltaR(#gamma, l)',             lambda c : min(ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4)                                    , dRBinRec[-1]-0.001    )   , dRBinRec     , 'PL #DeltaR(#gamma, l)',          lambda c : min(min(c.PLphL1DeltaR,c.PLphL2DeltaR)              , dRBinGen[-1]-0.001    )  , dRBinGen                ))
+
+mList.append(Plot2D('respNorm_phPt',          'p_{T}(#gamma) (GeV)',            lambda c : min(ifRec(c, c.ph_pt, 20.)                                                           , ptBinRec[-1]-0.001    )   , ptBinRec     , 'PL p_{T}(#gamma) (GeV)',         lambda c : min(c.PLph_pt                                       , ptBinGen[-1]-0.001    )  , ptBinGen                , histModifications=normalizeAlong('x')))
+mList.append(Plot2D('respNorm_phEta',         '#eta(#gamma)',                   lambda c : min(ifRec(c, protectedGet(c._phEta, c.ph), -1.5)                                     , etaBinRec[-1]-0.001   )   , etaBinRec    , 'PL p_{T}(#gamma) (GeV)',         lambda c : min(c._pl_phEta[c.PLph]                             , etaBinGen[-1]-0.001   )  , etaBinGen               , histModifications=normalizeAlong('x')))
+mList.append(Plot2D('respNorm_phAbsEta',      '|#eta|(#gamma)',                 lambda c : min(ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.)                                   , absEtaBinRec[-1]-0.001)   , absEtaBinRec , 'PL p_{T}(#gamma) (GeV)',         lambda c : min(abs(c._pl_phEta[c.PLph])                        , absEtaBinGen[-1]-0.001)  , absEtaBinGen            , histModifications=normalizeAlong('x')))
+mList.append(Plot2D('respNorm_ll_deltaPhi',   '#Delta#phi(ll)',                 lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4), dPhiBinRec[-1]-0.001  )   , dPhiBinRec   , 'PL #Delta#phi(ll)',              lambda c : min(deltaPhi(c._pl_lPhi[c.PLl1], c._pl_lPhi[c.PLl2]), dPhiBinGen[-1]-0.001  )  , dPhiBinGen              , histModifications=normalizeAlong('x')))
+mList.append(Plot2D('respNorm_phLepDeltaR',   '#DeltaR(#gamma, l)',             lambda c : min(ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4)                                    , dRBinRec[-1]-0.001    )   , dRBinRec     , 'PL #DeltaR(#gamma, l)',          lambda c : min(min(c.PLphL1DeltaR,c.PLphL2DeltaR)              , dRBinGen[-1]-0.001    )  , dRBinGen                , histModifications=normalizeAlong('x')))
+
+mList.append(Plot2D('response_plx_phPt',              'PL p_{T}(#gamma) (GeV)',         lambda c : min(c.PLph_pt                                       , ptBinGen[-1]-0.001    )  , ptBinGen,               'p_{T}(#gamma) (GeV)',            lambda c : min(ifRec(c, c.ph_pt, 20.)                                                           , ptBinRec[-1]-0.001    )   , ptBinRec     ))
+mList.append(Plot2D('response_plx_phEta',             'PL p_{T}(#gamma) (GeV)',         lambda c : min(c._pl_phEta[c.PLph]                             , etaBinGen[-1]-0.001   )  , etaBinGen,              '#eta(#gamma)',                   lambda c : min(ifRec(c, protectedGet(c._phEta, c.ph), -1.5)                                     , etaBinRec[-1]-0.001   )   , etaBinRec    ))
+mList.append(Plot2D('response_plx_phAbsEta',          'PL p_{T}(#gamma) (GeV)',         lambda c : min(abs(c._pl_phEta[c.PLph])                        , absEtaBinGen[-1]-0.001)  , absEtaBinGen,           '|#eta|(#gamma)',                 lambda c : min(ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.)                                   , absEtaBinRec[-1]-0.001)   , absEtaBinRec ))
+mList.append(Plot2D('response_plx_ll_deltaPhi',       'PL #Delta#phi(ll)',              lambda c : min(deltaPhi(c._pl_lPhi[c.PLl1], c._pl_lPhi[c.PLl2]), dPhiBinGen[-1]-0.001  )  , dPhiBinGen,             '#Delta#phi(ll)',                 lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4), dPhiBinRec[-1]-0.001  )   , dPhiBinRec   ))
+mList.append(Plot2D('response_plx_phLepDeltaR',       'PL #DeltaR(#gamma, l)',          lambda c : min(min(c.PLphL1DeltaR,c.PLphL2DeltaR)              , dRBinGen[-1]-0.001    )  , dRBinGen,               '#DeltaR(#gamma, l)',             lambda c : min(ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4)                                    , dRBinRec[-1]-0.001    )   , dRBinRec     ))
+
+mList.append(Plot2D('respNorm_plx_phPt',              'PL p_{T}(#gamma) (GeV)',         lambda c : min(c.PLph_pt                                       , ptBinGen[-1]-0.001    )  , ptBinGen,               'p_{T}(#gamma) (GeV)',            lambda c : min(ifRec(c, c.ph_pt, 20.)                                                           , ptBinRec[-1]-0.001    )   , ptBinRec     , histModifications=normalizeAlong('y')))
+mList.append(Plot2D('respNorm_plx_phEta',             'PL p_{T}(#gamma) (GeV)',         lambda c : min(c._pl_phEta[c.PLph]                             , etaBinGen[-1]-0.001   )  , etaBinGen,              '#eta(#gamma)',                   lambda c : min(ifRec(c, protectedGet(c._phEta, c.ph), -1.5)                                     , etaBinRec[-1]-0.001   )   , etaBinRec    , histModifications=normalizeAlong('y')))
+mList.append(Plot2D('respNorm_plx_phAbsEta',          'PL p_{T}(#gamma) (GeV)',         lambda c : min(abs(c._pl_phEta[c.PLph])                        , absEtaBinGen[-1]-0.001)  , absEtaBinGen,           '|#eta|(#gamma)',                 lambda c : min(ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.)                                   , absEtaBinRec[-1]-0.001)   , absEtaBinRec , histModifications=normalizeAlong('y')))
+mList.append(Plot2D('respNorm_plx_ll_deltaPhi',       'PL #Delta#phi(ll)',              lambda c : min(deltaPhi(c._pl_lPhi[c.PLl1], c._pl_lPhi[c.PLl2]), dPhiBinGen[-1]-0.001  )  , dPhiBinGen,             '#Delta#phi(ll)',                 lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4), dPhiBinRec[-1]-0.001  )   , dPhiBinRec   , histModifications=normalizeAlong('y')))
+mList.append(Plot2D('respNorm_plx_phLepDeltaR',       'PL #DeltaR(#gamma, l)',          lambda c : min(min(c.PLphL1DeltaR,c.PLphL2DeltaR)              , dRBinGen[-1]-0.001    )  , dRBinGen,               '#DeltaR(#gamma, l)',             lambda c : min(ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4)                                    , dRBinRec[-1]-0.001    )   , dRBinRec     , histModifications=normalizeAlong('y')))
+
+
+
+# mList.append(Plot2D('respNorm_phPt',              'PL p_{T}(#gamma) (GeV)',         lambda c : c.PLph_pt ,                                              ptBinGen,               'p_{T}(#gamma) (GeV)',            lambda c : ifRec(c, c.ph_pt, 20.) ,                                         ptBinRec     , histModifications=normalizeAlong('y')))
+# mList.append(Plot2D('respNorm_phEta',             'PL p_{T}(#gamma) (GeV)',         lambda c : c._pl_phEta[c.PLph] ,                                    etaBinGen,              '#eta(#gamma)',                   lambda c : ifRec(c, protectedGet(c._phEta, c.ph), -1.5) ,                                etaBinRec    , histModifications=normalizeAlong('y')))
+# mList.append(Plot2D('respNorm_phAbsEta',          'PL p_{T}(#gamma) (GeV)',         lambda c : abs(c._pl_phEta[c.PLph]) ,                               absEtaBinGen,           '|#eta|(#gamma)',                 lambda c : ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.) ,                              absEtaBinRec , histModifications=normalizeAlong('y')))
+# mList.append(Plot2D('respNorm_ll_deltaPhi',       'PL #Delta#phi(ll)',              lambda c : deltaPhi(c._pl_lPhi[c.PLl1], c._pl_lPhi[c.PLl2]) ,       dRBinGen,               '#Delta#phi(ll)',                 lambda c : ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4) ,          dRBinRec     , histModifications=normalizeAlong('y')))
+# mList.append(Plot2D('respNorm_phLepDeltaR',       'PL #DeltaR(#gamma, l)',          lambda c : min(c.PLphL1DeltaR,c.PLphL2DeltaR) ,                     dRBinGen,               '#DeltaR(#gamma, l)',             lambda c : ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4) ,                                    dRBinRec     , histModifications=normalizeAlong('y')))
+
+plotListOut.append(Plot('out_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : min(ifRec(c, c.ph_pt, 20.)                                                           , ptBinRec[-1]-0.001    )   , ptBinRec     ))
+plotListOut.append(Plot('out_phEta',           '#eta(#gamma)',                   lambda c : min(ifRec(c, protectedGet(c._phEta, c.ph), -1.5)                                     , etaBinRec[-1]-0.001   )   , etaBinRec    ))
+plotListOut.append(Plot('out_phAbsEta',        '|#eta|(#gamma)',                 lambda c : min(ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.)                                   , absEtaBinRec[-1]-0.001)   , absEtaBinRec ))
+plotListOut.append(Plot('out_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4), dPhiBinRec[-1]-0.001  )   , dPhiBinRec   ))
+plotListOut.append(Plot('out_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4)                                    , dRBinRec[-1]-0.001    )   , dRBinRec     ))
+
+plotListRec.append(Plot('rec_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : min(ifRec(c, c.ph_pt, 20.)                                                           , ptBinRec[-1]-0.001    )   , ptBinRec     ))
+plotListRec.append(Plot('rec_phEta',           '#eta(#gamma)',                   lambda c : min(ifRec(c, protectedGet(c._phEta, c.ph), -1.5)                                     , etaBinRec[-1]-0.001   )   , etaBinRec    ))
+plotListRec.append(Plot('rec_phAbsEta',        '|#eta|(#gamma)',                 lambda c : min(ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.)                                   , absEtaBinRec[-1]-0.001)   , absEtaBinRec ))
+plotListRec.append(Plot('rec_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4), dPhiBinRec[-1]-0.001  )   , dPhiBinRec   ))
+plotListRec.append(Plot('rec_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4)                                    , dRBinRec[-1]-0.001    )   , dRBinRec     ))
+
+plotListRecFid.append(Plot('recFid_phPt',            'p_{T}(#gamma) (GeV)',            lambda c : min(ifRec(c, c.ph_pt, 20.)                                                           , ptBinRec[-1]-0.001    )   , ptBinRec     ))
+plotListRecFid.append(Plot('recFid_phEta',           '#eta(#gamma)',                   lambda c : min(ifRec(c, protectedGet(c._phEta, c.ph), -1.5)                                     , etaBinRec[-1]-0.001   )   , etaBinRec    ))
+plotListRecFid.append(Plot('recFid_phAbsEta',        '|#eta|(#gamma)',                 lambda c : min(ifRec(c, abs(protectedGet(c._phEta,c.ph)), 0.)                                   , absEtaBinRec[-1]-0.001)   , absEtaBinRec ))
+plotListRecFid.append(Plot('recFid_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2)), 0.4), dPhiBinRec[-1]-0.001  )   , dPhiBinRec   ))
+plotListRecFid.append(Plot('recFid_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(ifRec(c, min(c.phL1DeltaR,c.phL2DeltaR), 0.4)                                    , dRBinRec[-1]-0.001    )   , dRBinRec     ))
+
+
+plotListRec.append(Plot('rec_eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
+plotListFid.append(Plot('fid_eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
+plotListOut.append(Plot('out_eventType',                  'eventType',                             lambda c : c._ttgEventType,                                    (9, 0, 9)))
+
+
 
 
 ########## EVENTLOOP ##########
@@ -273,7 +285,7 @@ for binning in binnings:
     graph.SetMinimum(0);
     graph.SetMaximum(1); 
     ROOT.gPad.Update(); 
-    canv.SaveAs('plots/' + plotName + binning[1] +'.pdf')
+    canv.SaveAs('plots/' + plotName + binning[0] +'.pdf')
 
   # Outside migration plots
   # TODO make clones
@@ -323,7 +335,7 @@ for plot in plotList:
         plot.histos.values()[0].GetYaxis().SetRange(0, plot.histos.values()[0].GetNbinsY() + 1)
     plot.saveToCache(os.path.join(plotDir, args.year, args.tag, 'noData', 'placeholderSelection'), '')
     for logY in [False, True]:
-      for option in ['SCAT', 'COLZ', 'COLZ TEXT']:
+      for option in ['SCAT', 'COLZ', 'COLZ TEXT', 'COLZ TEXTclean']:
         plot.draw(plot_directory = os.path.join(plotDir, args.year, args.tag, 'noData' + ('-log' if logY else ''), 'placeholderSelection', option),
                   logZ           = False,
                   drawOption     = option,

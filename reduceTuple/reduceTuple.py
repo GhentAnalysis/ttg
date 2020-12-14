@@ -220,17 +220,18 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   
   if sample.isData:
     if sample.name.count('DoubleMuon') and not c._passTrigger_mm:                                      continue
-    if sample.name.count('DoubleEG')   and not c._passTrigger_ee:                                      continue
+    if sample.name.count('DoubleEG')   and not c._passTrigger_ee:                                      continue  #does not exist in 2018
     if sample.name.count('MuonEG')     and not c._passTrigger_em:                                      continue
     if sample.name.count('SingleMuon'):
       if newVars.isMuMu and not (not c._passTrigger_mm and c._passTrigger_m):                          continue
       if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_m):                          continue
-    if sample.name.count('SingleElectron'):
+    if sample.name.count('SingleElectron'):  #does not exist in 2018
       if newVars.isEE   and not (not c._passTrigger_ee and c._passTrigger_e):                          continue
       if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_e and not c._passTrigger_m): continue
-    if sample.name.count('EGamma'):
+    if sample.name.count('EGamma'):   # 2018 only
       if newVars.isEE   and not (c._passTrigger_ee or c._passTrigger_e):                               continue
-      if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_e and not c._passTrigger_m): continue
+      # if newVars.isEMu  and not (not c._passTrigger_em and c._passTrigger_e and not c._passTrigger_m): continue
+      if newVars.isEMu  and not ((c._passTrigger_e or c._passTrigger_ee) and not c._passTrigger_em and not c._passTrigger_m): continue
   else:
     if newVars.isEE   and not (c._passTrigger_ee or c._passTrigger_e):                                 continue
     if newVars.isEMu  and not (c._passTrigger_em or c._passTrigger_e or c._passTrigger_m):             continue

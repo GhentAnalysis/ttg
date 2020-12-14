@@ -1,0 +1,6 @@
+-- MC
+TTGamma_Dil              t#bar{t}#gammaDil_(genuine)        fillStyle     kOrange                  _ttgEventType>2
+
+TTGamma_Sem              t#bar{t}#gammaSem_(genuine)        fillStyle     kRed                  _ttgEventType>2
+
+TTGamma_Had              t#bar{t}#gammaHad_(genuine)        fillStyle     kBlue                  _ttgEventType>2

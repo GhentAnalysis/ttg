@@ -18,7 +18,7 @@ def setIDSelection(c, reducedTupleType):
   c.doPhotonCut         = reducedTupleType.count('pho')
   c.photonCutBased      = reducedTupleType.count('phoCB')
   c.noPixelSeedVeto     = reducedTupleType.count('noPixelSeedVeto')
-  c.jetPtCut            = 40 if reducedTupleType.count('jetPt40') else 30
+  c.jetPtCut            = 25 if reducedTupleType.count('jetPt25') else 30
 
 #
 # Helper functions

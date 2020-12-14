@@ -25,274 +25,149 @@ ROOT.TH2.SetDefaultSumw2()
 
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
 from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
-from ttg.plots.cutInterpreter         import cutStringAndFunctions
-from ttg.samples.Sample               import createStack
-from ttg.tools.style import drawLumi
-from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi, deltaR
-from ttg.samples.Sample import createSampleList, getSampleFromList
+from ttg.tools.style import drawLumi, setDefault
+from ttg.tools.helpers import plotDir, getObjFromFile
 import copy
 import pickle
+import numpy
 
 lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
-# unfVars = {'phPt': ['_ph_pt', [10, 220, 20], 'plPhPt', [30, 220, 20]]}
-reduceType = 'UnfphoCBNew'
-
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 
-if not args.isChild:
-  from ttg.tools.jobSubmitter import submitJobs
-  jobs = [args.year]
-  submitJobs(__file__, ('year'), [jobs], argParser, subLog=args.tag, jobLabel = "UF")
-  exit(0)
+def graphToHist(graph, template):
+  hist = template.Clone(graph.GetName())
+  hist.Reset("ICES")
+  for i in range(1, hist.GetXaxis().GetNbins()+1):
+    hist.SetBinContent(i, graph.Eval(i-0.5))
+    hist.SetBinError(i, graph.GetErrorY(i-1))
+  return hist
 
-sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_' + args.year + '.conf'))
-stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/samples/data/NEWtuples_' + args.year + '.conf'),
-                  styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unfTTG.stack'),
-                  # channel      = args.channel,
-                  channel      = 'noData',
-                  # replacements = getReplacementsForStack(args.sys, args.year)
-                  )
+# TODO double check overflows here
+def copyBinning(inputHist, template):
+  hist = template.Clone(inputHist.GetName())
+  hist.Reset("ICES")
+  for i in range(1, inputHist.GetXaxis().GetNbins()+1):
+    hist.SetBinContent(i, inputHist.GetBinContent(i))
+    hist.SetBinError(i, inputHist.GetBinError(i))
+  return hist
 
-def sumHists(picklePath, plot):
-  hists = pickle.load(open(picklePath))[plot]
-  ttgHist = None
-  otherHist = None
-  dataHist = None
-  for name, hist in hists.iteritems():
-    if 'ttgamma' in name.lower():
-      if not ttgHist: ttgHist = hist
-      else: ttgHist.Add(hist)
-    elif 'data' in name:
-      if not dataHist: dataHist = hist
-      else: dataHist.Add(hist)
-    else:
-      if not otherHist: otherHist = hist
-      else: otherHist.Add(hist)
-  return (ttgHist, otherHist, dataHist)
+ROOT.gStyle.SetOptStat(0)
+# setDefault()
 
+for dist in ['unfReco_phPt','unfReco_phLepDeltaR','unfReco_phEta', 'unfReco_ll_deltaPhi']:
+# for dist in ['unfReco_phPt']:
+# for dist in ['unfReco_phEta']:
+  log.info('running for '+ dist)
+  ########## loading ##########
+  fitFile = 'data/srFit_fitDiagnostics_obs.root'
+  data = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_ee/data')
+  mcTot = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_ee/total')
+  mcBkg = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_ee/total_background')
+  data = graphToHist(data, mcTot)
 
+  dataemu = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_emu/data')
+  mcTot.Add(getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_emu/total'))
+  mcBkg.Add(getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_emu/total_background'))
+  dataemu = graphToHist(dataemu, mcTot)
+  data.Add(dataemu)
 
-########## RECO SELECTION ##########
-def checkRec(c):
-  if c.failReco:                                          return False
-  if not c._phCutBasedMedium[c.ph]:                       return False
-  if abs(c._phEta[c.ph]) > 1.4442:                        return False
-  c.checkMatch, c.genuine = True, True
-  c.misIdEle,c.hadronicPhoton,c.hadronicFake,c.magicPhoton,c.mHad,c.mFake,c.unmHad,c.unmFake,c.nonPrompt = False,False,False,False,False,False,False,False,False
-  if not checkMatch(c):                                   return False
-  if not c.ph_pt > 20:                                    return False
-  if not ((c.njets>1) or (c.njets==1 and c.ndbjets==1)):  return False
-  return True
+  datamumu = getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_mumu/data')
+  mcTot.Add(getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_mumu/total'))
+  mcBkg.Add(getObjFromFile(fitFile,'shapes_fit_s/' + dist + '_sr_mumu/total_background'))
+  datamumu = graphToHist(datamumu, mcTot)
+  data.Add(datamumu)
 
-
-########## FIDUCIAL REGION ##########
-def checkFid(c):
-  if c.failFid:                                                 return False
-  # TODO CHECK
-  if abs(c._pl_phEta[c.PLph]) > 1.4442:                              return False
-  if not c.PLph_pt > 20:                                        return False
-  if not ((c.PLnjets>1) or (c.PLnjets==1 and c.PLndbjets==1)):  return False
-  return True
+  outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva8/noData/placeholderSelection/' + dist.replace('unfReco','out') + '.pkl','r'))[dist.replace('unfReco','out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  data = copyBinning(data, outMig)
+  mcTot = copyBinning(mcTot, outMig)
+  mcBkg = copyBinning(mcBkg, outMig)
 
 
+  mcBkgNoUnc = mcBkg.Clone('MCBkgNoUnc')
+  for i in range(0, mcBkgNoUnc.GetXaxis().GetNbins()+1):
+    mcBkgNoUnc.SetBinError(i, 0.)
 
-########## PREPARE PLOTS ##########
-Plot.setDefaults(stack=stack, texY = 'Events')
-Plot2D.setDefaults(stack=stack)
-from ttg.plots.plotHelpers  import *
-
-def ifRec(c, val, under):
-  if c.rec: return val
-  else: return under-1.
-
-
-# TODO  normalize along code might not be a great combo with the underflow system
-plotListRecFid = []
-# keep the unfolding matrix as the first entry!
-plotListRecFid.append(Plot('RecFidnphoton',                         'number of photons',               lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
-plotListRecFid.append(Plot('RecFidnjets',                           'number of jets',                  lambda c : c.njets,                                            (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidnbjets',                          'number of bjets',                 lambda c : c.ndbjets,                                          (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidPLnphoton',                       'number of PL photons',            lambda c : c.PLnphotons,                                       (4,  -0.5, 3.5)))
-plotListRecFid.append(Plot('RecFidPLnjets',                         'number of PL jets',               lambda c : c.PLnjets,                                          (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidPLnbjets',                        'number of PL bjets',              lambda c : c.PLndbjets,                                        (9,  -0.5, 8.5)))
-plotListRecFid.append(Plot('RecFidsignalRegionsZoom',               'signal region',                   lambda c : createSignalRegionsZoom(c),                        (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
-
-plotListRec = []
-plotListRec.append(Plot('Rec_nphoton',                  'number of photons',               lambda c : c.nphotons,                                       (4,  -0.5, 3.5)))
-plotListRec.append(Plot('Rec_njets',                    'number of jets',                  lambda c : c.njets,                                          (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_nbjets',                   'number of bjets',                 lambda c : c.ndbjets,                                        (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_PLnphoton',                'number of PL photons',            lambda c : c.PLnphotons,                                     (4,  -0.5, 3.5)))
-plotListRec.append(Plot('Rec_PLnjets',                  'number of PL jets',               lambda c : c.PLnjets,                                        (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_PLnbjets',                 'number of PL bjets',              lambda c : c.PLndbjets,                                      (9,  -0.5, 8.5)))
-plotListRec.append(Plot('Rec_signalRegionsZoom',        'signal region',                   lambda c : createSignalRegionsZoom(c),                       (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
-
-plotListFid = []
-plotListFid.append(Plot('Fid_nphoton',                  'number of photons',               lambda c : c.nphotons,                                       (4,  -0.5, 3.5)))
-plotListFid.append(Plot('Fid_njets',                    'number of jets',                  lambda c : c.njets,                                          (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_nbjets',                   'number of bjets',                 lambda c : c.ndbjets,                                        (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_PLnphoton',                'number of PL photons',            lambda c : c.PLnphotons,                                     (4,  -0.5, 3.5)))
-plotListFid.append(Plot('Fid_PLnjets',                  'number of PL jets',               lambda c : c.PLnjets,                                        (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_PLnbjets',                 'number of PL bjets',              lambda c : c.PLndbjets,                                      (9,  -0.5, 8.5)))
-plotListFid.append(Plot('Fid_signalRegionsZoom',        'signal region',                   lambda c : createSignalRegionsZoom(c),                       (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
-
-plotListOut = []
-plotListOut.append(Plot('Out_nphoton',                  'number of photons',               lambda c : c.nphotons,                                       (4,  -0.5, 3.5)))
-plotListOut.append(Plot('Out_njets',                    'number of jets',                  lambda c : c.njets,                                          (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_nbjets',                   'number of bjets',                 lambda c : c.ndbjets,                                        (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_PLnphoton',                'number of PL photons',            lambda c : c.PLnphotons,                                     (4,  -0.5, 3.5)))
-plotListOut.append(Plot('Out_PLnjets',                  'number of PL jets',               lambda c : c.PLnjets,                                        (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_PLnbjets',                 'number of PL bjets',              lambda c : c.PLndbjets,                                      (9,  -0.5, 8.5)))
-plotListOut.append(Plot('Out_signalRegionsZoom',        'signal region',                   lambda c : createSignalRegionsZoom(c),                       (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
+  response = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/unflmva8/noData/placeholderSelection/' + dist.replace('unfReco','response') + '.pkl','r'))[dist.replace('unfReco','response')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  ########## UNFOLDING ##########
+  ##### setup ##### 
+  # regMode = ROOT.TUnfold.kRegModeCurvature
+  # NOTE no regularization
+  regMode = ROOT.TUnfold.kRegModeNone
+  constraintMode = ROOT.TUnfold.kEConstraintArea
+  # mapping = ROOT.TUnfold.kHistMapOutputHoriz 
+  mapping = ROOT.TUnfold.kHistMapOutputVert 
+  densityFlags = ROOT.TUnfoldDensity.kDensityModeUser
+  unfold = ROOT.TUnfoldDensity( response, mapping, regMode, constraintMode, densityFlags )
+  logTauX = ROOT.TSpline3()
+  logTauY = ROOT.TSpline3()
+  lCurve  = ROOT.TGraph()
+  logTauCurvature = ROOT.TSpline3()
 
 
-plotListRecFid.append(Plot2D('response',                      'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) , (23, 20, 135), 'PL p_{T}(#gamma) (GeV)', lambda c : c.PLph_pt , (12, 20, 140)))
-plotListRecFid.append(Plot2D('photon_pt_vsplx',               'p_{T}(#gamma) (GeV)',             lambda c : ifRec(c, c.ph_pt, 20.) , (23, 20, 135), 'PL p_{T}(#gamma) (GeV)', lambda c : c.PLph_pt , (12, 20, 140), histModifications=normalizeAlong('x') ))
+  ##### unfold data #####
+  data.Add(mcBkg, -1.)
+  mcTot.Add(mcBkgNoUnc,-1.)
+  data.Add(outMig, -1.)
+  mcTot.Add(outMig,-1.)
+
+  mcTot.SaveAs('mcTot.root')
+
+  data.SetBinContent(data.GetXaxis().GetNbins()+1, 0.)
+  data.SetBinContent(0, 0.)
+  mcTot.SetBinContent(mcTot.GetXaxis().GetNbins()+1, 0.)
+  mcTot.SetBinContent(0, 0.)
 
 
 
-########## EVENTLOOP ##########
-# TODO setIDSelection(c, args.tag) nodig?
-from ttg.plots.photonCategories import checkMatch, checkSigmaIetaIeta, checkChgIso
-lumiScale = lumiScales[args.year]
-log.info("using reduceType " + reduceType)
+  unfold.SetInput(data)
+  spl = ROOT.TSpline3()
+  unfold.DoUnfold(0.)
+  unfolded = unfold.GetOutput('unfoldedData_' + dist)
 
-for sample in sum(stack, []):
-  c = sample.initTree(reducedType = reduceType)
-  for i in sample.eventLoop():
-    c.GetEntry(i)
-
-    fid = checkFid(c)
-    c.rec = checkRec(c)
-
-
-    eventWeight = lumiScale * c.genWeight
-
-    if c.rec and fid:
-      fillPlots(plotListRecFid, sample, eventWeight)
-    if c.rec:
-      fillPlots(plotListRec, sample, eventWeight)
-    if fid:
-      fillPlots(plotListFid, sample, eventWeight)
-    if c.rec and not fid:
-      fillPlots(plotListOut, sample, eventWeight)
+  # resMC = response.ProjectionX("resMC")
+  # unfold.SetInput(resMC)
+  # unfold.DoUnfold(0.)
+  # unfoldedresMC = unfold.GetOutput('unfoldedresMC_' + dist)
+  # unfoldedresMC.SetBinContent(resMC.GetXaxis().GetNbins()+1, 0.)
+  # unfoldedresMC.SetBinContent(0, 0.)
+  # unfoldedresMC.SetLineColor(ROOT.kOrange)
+  # unfoldedresMC.Draw('same')
 
 
-########## UNFOLDING ##########
+  unfold.SetInput(mcTot)
+  unfold.DoUnfold(0.)
+  unfoldedMC = unfold.GetOutput('unfoldedMC_' + dist)
 
-# ##### setup ##### 
-# response = plotList[0].histos.values()[0]
-# regMode = ROOT.TUnfold.kRegModeCurvature
-# constraintMode = ROOT.TUnfold.kEConstraintArea
-# mapping = ROOT.TUnfold.kHistMapOutputVert
-# densityFlags = ROOT.TUnfoldDensity.kDensityModeUser
-# unfold = ROOT.TUnfoldDensity( response, mapping, regMode, constraintMode, densityFlags )
+  cunf = ROOT.TCanvas(dist, dist, 1000,700)
 
-# logTauX = ROOT.TSpline3()
-# logTauY = ROOT.TSpline3()
-# lCurve  = ROOT.TGraph()
+  unfoldedMC.SetLineWidth(3)
+  unfoldedMC.SetLineColor(ROOT.kBlue)
+  unfoldedMC.SetFillStyle(3244)
+  unfoldedMC.SetFillColor(ROOT.kBlue)
+  unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*0.2)
+  # unfoldedMC.GetYaxis().SetRangeUser(0., unfolded.GetMaximum()*1.4)
+  unfoldedMC.Draw('E2')
+  unfMC2 = unfoldedMC.Clone()
+  unfMC2.Draw('HIST same')
+  unfMC2.SetFillColor(ROOT.kWhite)
+  unfoldedMC.SetMinimum(0.)
+  unfolded.SetLineColor(ROOT.kBlack)
+  unfolded.SetLineWidth(2)
+  unfolded.SetMarkerStyle(8)
+  unfolded.SetMarkerSize(1)
+  plMC = response.ProjectionY("PLMC")
+  plMC.SetLineColor(ROOT.kRed)
+  plMC.SetLineWidth(2)
+  plMC.Draw('same')
+  unfolded.Draw('same E1')
+  legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
+  legend.AddEntry(unfoldedMC,"Simulation","l")
+  legend.AddEntry(unfolded,"data","pe")
+  legend.AddEntry(plMC,"PL truth","l")
+  legend.Draw()
+  cunf.SaveAs('unfolded/'+ dist +'.pdf')
+  cunf.SaveAs('unfolded/'+ dist +'.png')
 
-
-
-# ##### unfold MC #####  sanity check
-# recoMC = response.ProjectionX("recoMC")
-# unfold.SetInput(recoMC)
-# log.info('scan L curve')
-# iBest   = unfold.ScanLcurve(30,1e-04,1e-03,lCurve,logTauX,logTauY)
-# unfolded = unfold.GetOutput("unfolded")
-
-# responseNU = response.Clone()
-# for j in range(1, responseNU.GetYaxis().GetNbins()+1):
-#   responseNU.SetBinContent(0, j, 0.)
-
-# cunf = ROOT.TCanvas()
-# unfolded.Draw()
-# plMC = responseNU.ProjectionY("PLMC")
-# plMC.SetLineColor(ROOT.kRed)
-# plMC.Draw('same')
-# # recoMC.SetLineColor(ROOT.kOrange)
-# # recoMC.Draw('same')
-# cunf.SaveAs('unfTestMC.pdf')
-
-
-# ##### unfold data #####
-# picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-JUN/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_pt.pkl'
-# ttgHist, otherHist, dataHist = sumHists(picklePath, 'photon_pt')
-# dataHist.Add(otherHist, -1.)
-# # TODO subtract outside migration fraction
-# unfold.SetInput(dataHist)
-# iBest   = unfold.ScanLcurve(30,1e-04,1e-03,lCurve,logTauX,logTauY)
-# unfolded = unfold.GetOutput("unfoldedData")
-# cunf = ROOT.TCanvas()
-# # draw PL MC as well. don't expect a match if cuts are different though
-# plMC = responseNU.ProjectionY("PLMC")
-# plMC.SetLineColor(ROOT.kRed)
-# plMC.Draw()
-# unfolded.Draw('same')
-# cunf.SaveAs('unfTestData.pdf')
-
-
-# ##### plot MC vs data scaled to match total yeild #####
-# cunf = ROOT.TCanvas()
-# plMC = responseNU.ProjectionY("PLMC")
-# plMC.SetLineColor(ROOT.kRed)
-# plMC.Scale(unfolded.Integral()/ plMC.Integral())
-# plMC.Draw()
-# # plMC.Draw('same')
-# unfolded.Draw('same')
-# cunf.SaveAs('unfTestDataScaled.pdf')
-
-
-
-########## PLOTTING ##########
-plotList = plotListRecFid + plotListRec + plotListFid + plotListOut
-noWarnings = True
-
-##### 1D plots #####
-for plot in plotList:
-  if isinstance(plot, Plot2D): continue
-  plot.saveToCache(os.path.join(plotDir, args.year, args.tag, 'noData', 'placeholderSelection'), '')
-
-  extraArgs = {}
-  for logY in [False, True]:
-    if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.35)
-    else:                                                                                             yRange = None
-    extraTag  = '-log'    if logY else ''
-
-    err = plot.draw(
-              plot_directory    = os.path.join(plotDir, args.year, args.tag, 'noData' + extraTag, 'placeholderSelection', ''),
-              logX              = False,
-              logY              = logY,
-              sorting           = False,
-              yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-              drawObjects       = drawLumi(None, lumiScales[args.year], isOnlySim=('noData'=='noData')),
-              **extraArgs
-    )
-    extraArgs['saveGitInfo'] = False
-    if err: noWarnings = False
-
-##### 2D plots #####
-for plot in plotList:
-  for drawOUFlow in [False, True]:
-    if drawOUFlow: 
-        plot.name += '_overflow'
-        plot.histos.values()[0].GetXaxis().SetRange(0, plot.histos.values()[0].GetNbinsX() + 1)
-        plot.histos.values()[0].GetYaxis().SetRange(0, plot.histos.values()[0].GetNbinsY() + 1)
-    if not hasattr(plot, 'varY'): continue
-    plot.applyMods()
-    plot.saveToCache(os.path.join(plotDir, args.year, args.tag, 'noData', 'placeholderSelection'), '')
-    for logY in [False, True]:
-      for option in ['SCAT', 'COLZ', 'COLZ TEXT']:
-        plot.draw(plot_directory = os.path.join(plotDir, args.year, args.tag, 'noData' + ('-log' if logY else ''), 'placeholderSelection', option),
-                  logZ           = False,
-                  drawOption     = option,
-                  drawObjects    = drawLumi(None, lumiScales[args.year], isOnlySim=('noData'=='noData')))
-
-
-if noWarnings: 
-  log.info('Plots made for ' + args.year)
-  log.info('Finished')
-else:          
-  log.info('Could not produce all plots for ' + args.year)

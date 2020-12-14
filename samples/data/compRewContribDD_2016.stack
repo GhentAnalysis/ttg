@@ -1,6 +1,13 @@
-TTGamma_Dil              t#bar{t}#gamma_(nonprompt)        fillStyle     kOrange              _ttgEventType>2
-+TTGamma_Sem
-+TTGamma_Had
+-- MC
+TTGamma_DilPCUT             t#bar{t}#gamma_(nonprompt)         fillStyle     kOrange                  _ttgEventType>2
++TTGamma_SemPCUT
++TTGamma_HadPCUT
++TTGamma_DilA
++TTGamma_SemA
++TTGamma_HadA
++TTGamma_DilB
++TTGamma_SemB
++TTGamma_HadB
 
 TT_Dil               t#bar{t}_(nonprompt)              fillStyle     633                         _ttgEventType<3
 +TT_Sem
@@ -12,19 +19,19 @@ ZG_lowMass           Z#gamma_(nonprompt)               fillStyle     598        
 DY_M50               Drell-Yan_(nonprompt)             fillStyle     427                  _zgEventType<3
 +DY_M10to50
 
-ST_tW_ch             single-t_(nonprompt)              fillStyle     797
+$singleTop
+ST_tW_ch             Single-t+#gamma_(nonprompt)              fillStyle     797
 +ST_tbarW_ch
 +ST_s_ch_lep
 +ST_s_ch_had
 +ST_t_ch
 +ST_tbar_ch
 
-
-VVTo2L2Nu            other_(nonprompt)                 fillStyle     kViolet
+VVTo2L2Nu             Multiboson+#gamma_(nonprompt)               fillStyle     kViolet
 +ZZTo4L
 +ZZTo2Q2Nu
 +ZZTo2L2Q
-+WWToLNuQQ
+%+WWToLNuQQ
 +WWTo1L1Nu2Q
 +WZTo1L3Nu
 +WZTo1L1Nu2Q
@@ -35,6 +42,10 @@ VVTo2L2Nu            other_(nonprompt)                 fillStyle     kViolet
 +WWZ
 +WZZ
 +ZZZ
+
+
+$other
+WGamma              Other+#gamma_(nonprompt)       fillStyle    kGray
 +GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
@@ -58,7 +69,6 @@ VVTo2L2Nu            other_(nonprompt)                 fillStyle     kViolet
 +tWnunu
 +tHq
 +tHW
-+WGamma
 
 
 -- NPestimate

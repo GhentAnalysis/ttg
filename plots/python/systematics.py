@@ -89,8 +89,10 @@ rateParameters = {}
 rateParameters['ZG']       = 3   #we consider 70% of the Zg yield to be constrained by the correction
 # rateParameters['DY']       = 10
 rateParameters['singleTop'] = 10
-rateParameters['VVTo2L2Nu']    = 30   #other
-#
+rateParameters['VVTo2L2Nu']    = 30   #multiboson
+rateParameters['other']    = 30
+
+
 # Function to apply the systematic to the cutstring, tree branches, reduceType
 # When ':' is used in the sysVar, the first part selects a specific sample on which the sysVar should be applied
 #

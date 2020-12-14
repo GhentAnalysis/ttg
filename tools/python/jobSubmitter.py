@@ -3,6 +3,7 @@ log = getLogger()
 
 import os, time, subprocess
 from datetime import datetime
+import htcondor # in T2B install using   python -m pip install --user htcondor
 
 def system(command):
   return subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT)
@@ -35,6 +36,34 @@ def launchCream02(command, logfile, checkQueue=False, wallTime='15', queue='loca
   if not out.count('.cream02.iihe.ac.be'):
     time.sleep(10)
     launchCream02(command, logfile, wallTime=wallTime, queue=queue, cores=cores, jobLabel=jobLabel)
+
+# Cream02 running
+def launchCondor(command, logfile, checkQueue=False, wallTime='15', queue='localgrid', cores=1, jobLabel=None):
+  jobName = jobLabel + datetime.now().strftime("%d_%H%M%S.%f")[:12]
+  # TODO make condor version of this 
+  # if checkQueue: checkQueueOnCream02()
+
+  # TODO edit this to reflect condor queue
+  log.info('Launching %s on %s (%s)' % (command, queue, jobName))
+
+  params = "dir=" + os.getcwd() + ";command=" + command 
+  jobSub = htcondor.Submit({"executable": "../tools/scripts/runOnCream02.sh",
+                            "environment": params,
+                            "output": logfile,
+                            "error":  logfile,
+                            "log":    logfile})
+                            
+  schedd = htcondor.Schedd() 
+  try:    
+    cluster_id = None
+    with schedd.transaction() as txn:
+      cluster_id = jobSub.queue(txn, 1)
+  except Exception as e: 
+    cluster_id = 'failed'
+    log.info(e)
+  log.info('Job launched under ID: ' + str(cluster_id))
+  # TODO deal with failing scenario's?
+# "dir=/storage_mnt/storage/user/jroels/TTG/CMSSW_10_2_20/src/ttg/plots;command=./ttgPlots.py --selection=llg-deepbtag1p-offZ-llgNoZ-photonPt20 --tag=phoCB-passChgIso-forNPest-con --isChild --channel=all --year=2016"
 
 # Local running: limit to 8 jobs running simultaneously
 def launchLocal(command, logfile):
@@ -75,4 +104,5 @@ def submitJobs(script, subJobArgs, subJobList, argParser, dropArgs=None, subLog=
     
     if args.dryRun:     log.info('Dry-run: ' + command)
     elif args.runLocal: launchLocal(command, logfile)
-    else:               launchCream02(command, logfile, checkQueue=(i%100==0), wallTime=wallTime, queue=queue, cores=cores, jobLabel=jobLabel)
+    else:               launchCondor(command, logfile, checkQueue=(i%100==0), wallTime=wallTime, queue=queue, cores=cores, jobLabel=jobLabel)
+    # else:               launchCream02(command, logfile, checkQueue=(i%100==0), wallTime=wallTime, queue=queue, cores=cores, jobLabel=jobLabel)

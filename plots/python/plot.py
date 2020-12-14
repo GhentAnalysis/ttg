@@ -86,6 +86,7 @@ def fillPlots(plots, sample, eventWeight):
     try:
       plot.fill(sample, eventWeight)
     except Exception as e: 
+      print e
       log.debug(e)
       if toRemove: toRemove.append(plot)
       else:        toRemove = [plot]

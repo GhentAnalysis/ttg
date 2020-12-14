@@ -172,6 +172,11 @@ class Plot2D(Plot):
         drawObjects = [] Additional ROOT objects that are called by .Draw() 
         widths = {} (default) to update the widths. Values are {'y_width':500, 'x_width':500, 'y_ratio_width':200}
     '''
+    clean = False
+    if drawOption.count('clean'):
+      drawOption = drawOption.replace('clean', '')
+      clean = True
+
 
     import ttg.tools.style as style
     style.setDefault2D(drawOption.count('COLZ'))
@@ -209,6 +214,8 @@ class Plot2D(Plot):
       histo.GetYaxis().SetTitle(self.texY)
       if zRange is not None:
         histo.GetZaxis().SetRangeUser( *zRange )
+      if clean:
+        histo.GetZaxis().SetRangeUser(histo.GetMaximum()*0.0004, histo.GetMaximum()*1.03)
       style.commonStyle(histo)
       histo.Draw(drawOption+same)
       same = "same"
