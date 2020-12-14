@@ -99,6 +99,17 @@ def writeRootFile(name, shapes, systematicVariations, year):
     tag           = 'phoCBfull-niceEstimDD-otravez'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
+# unfReco_jetLepDeltaR.pkl
+# unfReco_jetPt.pkl
+# unfReco_ll_absDeltaEta.pkl
+# unfReco_ll_cosTheta.pkl
+# unfReco_ll_deltaPhi.pkl
+# unfReco_phAbsEta.pkl
+# unfReco_phBJetDeltaR.pkl
+# unfReco_phLepDeltaR.pkl
+# unfReco_phPt.pkl
+
+
     for shape in shapes:
       # Write the data histograms to the combine shapes file, separate for ee, emu, mumu
       writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegions', '', [dataHistName[shape[3:]]]), mergeBins=False)
@@ -219,8 +230,10 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     # allSys = {}
     # for y in years:
     #   allSys[y] = shapeSys[y] + normSys
-    allSys = [base + suf for base in showSysList for suf in ['', '_2016', '_2017', '_2018', '_1617', '_1618', '_1718']] + normSys
+    allSys = [base + suf for base in showSysList + ['lumi'] for suf in ['', '_2016', '_2017', '_2018', '_1617', '_1618', '_1718']] + normSys
     
+    # log.info(allSys)
+
     print colored('##### Prepare ROOT file with histograms', 'red')
     for y in years:
       writeRootFile(cardName, shapes, nameSys[y], y)
@@ -245,58 +258,61 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
         cards[i] = cardName+'_'+y
       p = subprocess.Popen(['combineCards.py','y2016='+cards[0] + '.txt','y2017='+cards[1] + '.txt','y2018='+cards[2] + '.txt'], cwd=outDir, stdout=open(outDir+'/'+cardName+'.txt','wb')); p.wait()
 
-    print colored('##### Run fit diagnostics for exp (stat)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)
-    print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
-    runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
+    # print colored('##### Run fit diagnostics for exp (stat)', 'red')
+    # runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=True, mode='exp', run=outDir)
+    # print colored('##### Run fit diagnostics for exp (stat+sys)', 'red')
+    # runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=True, statOnly=False, mode='exp', run=outDir)
 
-    if blind == False:
-      print colored('##### Run fit diagnostics for obs (stat)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
-      print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
-      runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
+    # if blind == False:
+    #   print colored('##### Run fit diagnostics for obs (stat)', 'red')
+    #   runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=True, mode='obs', run=outDir)
+    #   print colored('##### Run fit diagnostics for obs (stat+sys)', 'red')
+    #   runFitDiagnostics(cardName, year, trackParameters = [(t+'_norm') for t in templates[1:-1]]+['r'], toys=False, statOnly=False, mode='obs', run=outDir)
     
-    print colored('##### Run NLL scan', 'red')
-    rMin = 0.5
-    rMax = 1.5
-    plotNLLScan(cardName, year, 'exp', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
+    # print colored('##### Run NLL scan', 'red')
+    # rMin = 0.5
+    # rMax = 1.5
+    # plotNLLScan(cardName, year, 'exp', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
     
-    if blind == False:
-      if doRatio == True:
-        rMin = 0.5
-        rMax = 1.5
-      plotNLLScan(cardName, year, 'obs', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
+    # if blind == False:
+    #   if doRatio == True:
+    #     rMin = 0.5
+    #     rMax = 1.5
+    #   plotNLLScan(cardName, year, 'obs', trackParameters = [(t+'_norm') for t in templates[1:-1]], freezeParameters = allSys, doRatio=doRatio, rMin=rMin, rMax=rMax, run=outDir)
         
-    poi = ['r']
-    if blind == False:
-      print colored('##### Run impacts (obs)', 'red')        
-      runImpacts(cardName, year, perPage, poi=poi, doRatio=doRatio, run=outDir)
+    # poi = ['r']
+    # if blind == False:
+    #   print colored('##### Run impacts (obs)', 'red')        
+    #   runImpacts(cardName, year, perPage, poi=poi, doRatio=doRatio, run=outDir)
 
-    print colored('##### Run impacts (exp)', 'red')
-    runImpacts(cardName, year, perPage, toys=True, poi=poi, doRatio=doRatio, run=outDir)
+    # print colored('##### Run impacts (exp)', 'red')
+    # runImpacts(cardName, year, perPage, toys=True, poi=poi, doRatio=doRatio, run=outDir)
 
-    if blind == False:
-      print colored('##### Run channel compatibility (obs)', 'red')
-      runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir)
-      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='obs', addNominal=True)
+    # if blind == False:
+    #   print colored('##### Run channel compatibility (obs)', 'red')
+    #   runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir)
+    #   plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='obs', addNominal=True)
         
-    print colored('##### Run channel compatibility (exp)', 'red')
-    runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir)
-    plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='exp', addNominal=True)
+    # print colored('##### Run channel compatibility (exp)', 'red')
+    # runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir)
+    # plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='exp', addNominal=True)
     
-    if doRatio == False:
-      if blind == False:
-        print colored('##### Calculate the significance (obs)', 'red')
-        runSignificance(cardName, run=outDir)
+    # if doRatio == False:
+    #   if blind == False:
+    #     print colored('##### Calculate the significance (obs)', 'red')
+    #     runSignificance(cardName, run=outDir)
           
-      print colored('##### Calculate the significance (exp)', 'red')
-      runSignificance(cardName, expected=True, run=outDir)
+    #   print colored('##### Calculate the significance (exp)', 'red')
+    #   runSignificance(cardName, expected=True, run=outDir)
         
-    if args.tab == True:
-      print colored('##### Create tables', 'red')
-      if blind == False: 
-        os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName)
-      os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
+    # if args.tab == True:
+    #   print colored('##### Create tables', 'red')
+    #   if blind == False: 
+    #     os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName)
+    #   os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
+
+    # goodnessOfFit(cardName, run=args.run+args.chan)
+    doLinearityCheck(cardName, year, run=args.run+args.chan)
 
 doRatio = args.ratio
 fitName = 'srFit'

@@ -165,8 +165,10 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
     elif toys:   logFile = dataCard + '_toys'
     else:        logFile = dataCard
 
+    log.info(os.getcwd())
+    log.info(dataCard)
     combineCommand  = 'text2workspace.py ' + dataCard + '.txt' + (' --channel-masks' if maskedDist else '') + ';'
-    # note: blindly following combine tutorial would give --setParameters mask_msk=1, cehcking datacard --> 3 channels to be masked separtely, confirm in srFit.log
+    # note: blindly following combine tutorial would give --setParameters mask_msk=1, checking datacard --> 3 channels to be masked separtely, confirm in srFit.log
     if maskedDist:
       if year == 'All':
         masks = ','.join(['mask_' + y + dist + ch + '=1' for dist in maskedDist for ch in ['_sr_ee','_sr_emu','_sr_mumu'] for y in ['y2016_', 'y2017_', 'y2018_']])
@@ -241,38 +243,22 @@ def plotNLLScan(dataCard, year, mode = 'exp', trackParameters = None, freezePara
         units = '\'\\times 10^{-3}\''
     
     if mode == 'obs':
+      command =  'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit --robustFit=1 --seed 777 --saveWorkspace ' + currentDir + '/' + run + '/' + dataCard + '.root;'
+      command += 'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --snapshotName MultiDimFit ' + ' --name TTGFit.FreezeAll --robustFit=1 --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777 higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
+      command += currentDir + '/python/./plot1DScanTTG.py higgsCombineTTGFit.MultiDimFit.mH120.777.root --units=' + units + ' --others \'' + 'higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root' + ':FreezeAll:2\' -o scan --breakdown Syst,Stat;'
+      command += 'mv ' + combineRelease + '/src/scan.pdf ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_obs.pdf;'
+      command += 'mv ' + combineRelease + '/src/scan.png ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_obs.png;'
+      command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.MultiDimFit.mH120.777.root ' + statSysFile + ';'
+      command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root ' + statFile + ';'
 
-        # Estimate best fit signal value and perform the NLL scan
-        command = 'combine -M MultiDimFit ' + currentDir + '/' + run + '/' + dataCard + '.root --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit --robustFit=1 --seed 777 --saveWorkspace;'
-        command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.MultiDimFit.mH120.777.root ' + statSysFile + ';'
-        command += 'combine -M MultiDimFit ' + currentDir + '/' + run + '/' + dataCard + '.root --algo none --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit --robustFit=1 --seed 777;'
-        command += 'rm ' + combineRelease + '/src/higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
-        
-        # Estimate contribution to the best fit signal value by freezing the systematic uncertainties
-        command += 'combine -M MultiDimFit ' + statSysFile + ' --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit.FreezeAll --robustFit=1 --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777;'
-        command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root ' + statFile + ';'
-        
-        # Plot the best fit LH scan results
-        command += currentDir + '/python/./plot1DScanTTG.py ' + statSysFile + ' --units=' + units + ' --others \'' + statFile + ':FreezeAll:2\' -o scan --breakdown Syst,Stat;'
-        command += 'mv ' + combineRelease + '/src/scan.pdf ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_obs.pdf;'
-        command += 'mv ' + combineRelease + '/src/scan.png ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_obs.png;'
-        
     elif mode == 'exp':
-        
-        # Estimate best fit signal value and perform the NLL scan
-        command = 'combine -M MultiDimFit ' + currentDir + '/' + run + '/' + dataCard + '.root --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit --robustFit=1 --seed 777 -t -1 --expectSignal 1 --saveWorkspace;'
-        command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.MultiDimFit.mH120.777.root ' + statSysFile + ';'
-        command += 'combine -M MultiDimFit ' + currentDir + '/' + run + '/' + dataCard + '.root --algo none --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit --robustFit=1 -t -1 --expectSignal 1 --seed 777;'
-        command += 'rm ' + combineRelease + '/src/higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
-        
-        # Estimate contribution to the best fit signal value by freezing the systematic uncertainties
-        command += 'combine -M MultiDimFit ' + statSysFile + ' --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit.FreezeAll --robustFit=1 --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777 -t -1 --expectSignal 1;'
-        command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root ' + statFile + ';'
-        
-        # Plot the best fit LH scan results
-        command += currentDir + '/python/./plot1DScanTTG.py ' + statSysFile + ' --units=' + units + ' --others \'' + statFile + ':FreezeAll:2\' -o scan --breakdown Syst,Stat;'
-        command += 'mv ' + combineRelease + '/src/scan.pdf ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_exp.pdf;'
-        command += 'mv ' + combineRelease + '/src/scan.png ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_exp.png;'
+      command =  'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' -t -1 --expectSignal 1 --name TTGFit --robustFit=1 --seed 777 --saveWorkspace ' + currentDir + '/' + run + '/' + dataCard + '.root;'
+      command += 'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' -t -1 --expectSignal 1 --snapshotName MultiDimFit ' + ' --name TTGFit.FreezeAll --robustFit=1 --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777 higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
+      command += currentDir + '/python/./plot1DScanTTG.py higgsCombineTTGFit.MultiDimFit.mH120.777.root --units=' + units + ' --others \'' + 'higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root' + ':FreezeAll:2\' -o scan --breakdown Syst,Stat;'
+      command += 'mv ' + combineRelease + '/src/scan.pdf ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_exp.pdf;'
+      command += 'mv ' + combineRelease + '/src/scan.png ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_exp.png;'
+      command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.MultiDimFit.mH120.777.root ' + statSysFile + ';'
+      command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root ' + statFile + ';'
 
     handleCombine(dataCard, dataCard + '_nll_' + mode, command, run=run)
         
@@ -291,7 +277,9 @@ def extractSignalFromJSON(jsonFile):
 #
 def commandForImpactsJSON(dataCard, toys=False, toyR=1):
   extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else ''
-  command  = 'text2workspace.py ' + dataCard + '.txt -m 125;'
+  command  = 'pwd >> check.txt;'
+  command  = 'ls >> check.txt;'
+  command += 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit' + extraArg + ';'
@@ -299,14 +287,27 @@ def commandForImpactsJSON(dataCard, toys=False, toyR=1):
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json' + extraArg + ';'
   return command
 
+# not very elegant to have have very similar functions, but it works
+def commandForImpactsJSONLin(run, dataCard, toys=False, toyR=1):
+  extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else ''
+  command  = 'pwd >> check.txt;'
+  command  = 'ls >> check.txt;'
+  command += 'text2workspace.py ' + 'ttg/plots/'+ run + '/' +dataCard + '.txt -m 125;'
+  command += 'mv ' + 'ttg/plots/'+ run + '/' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
+  command += 'cd CombineHarvester/CombineTools/scripts;'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit' + extraArg + ';'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8' + extraArg + ';'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json' + extraArg + ';'
+  return command
 
 #
 # Linearity check
 #
-def doLinearityCheck(dataCard, run='combine'):
+def doLinearityCheck(dataCard, year, run='combine'):
+    log.info('Running linearity check')
     gr = ROOT.TGraphAsymmErrors()
     for i, r in enumerate([x/10. for x in xrange(1, 19)]):
-        handleCombine(dataCard, dataCard + '_linCheck', commandForImpactsJSON(dataCard, toys=True, toyR=r, run=run))
+        handleCombine(dataCard, dataCard + '_linCheck', commandForImpactsJSONLin(run, dataCard, toys=True, toyR=r), run=run)
         signalStrength = extractSignalFromJSON(os.path.join(getCombineRelease(), 'src/CombineHarvester/CombineTools/scripts/impacts.json'))
         gr.SetPoint(i, r, signalStrength[1])
         gr.SetPointError(i, 0, 0, signalStrength[1]-signalStrength[0], signalStrength[2]-signalStrength[1])
@@ -408,10 +409,11 @@ def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run=
 #
 def goodnessOfFit(dataCard, algo='saturated', run='combine'):
     command  = 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ';'
+    # command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 100' + (' --toysFreq' if algo=='saturated' else '') + ';'
     command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 1000' + (' --toysFreq' if algo=='saturated' else '') + ';'
     log.info('Running goodness of fit')
     handleCombine(dataCard, dataCard + '_gof', command, run=run)
-    with open('./' + combine + '/' + dataCard + '_gof.log') as f:
+    with open('./' + run + '/' + dataCard + '_gof.log') as f:
         for line in f:
             log.debug(line.rstrip())
 
