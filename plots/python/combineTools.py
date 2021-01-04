@@ -277,9 +277,7 @@ def extractSignalFromJSON(jsonFile):
 #
 def commandForImpactsJSON(dataCard, toys=False, toyR=1):
   extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else ''
-  command  = 'pwd >> check.txt;'
-  command  = 'ls >> check.txt;'
-  command += 'text2workspace.py ' + dataCard + '.txt -m 125;'
+  command = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit' + extraArg + ';'
@@ -290,9 +288,7 @@ def commandForImpactsJSON(dataCard, toys=False, toyR=1):
 # not very elegant to have have very similar functions, but it works
 def commandForImpactsJSONLin(run, dataCard, toys=False, toyR=1):
   extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else ''
-  command  = 'pwd >> check.txt;'
-  command  = 'ls >> check.txt;'
-  command += 'text2workspace.py ' + 'ttg/plots/'+ run + '/' +dataCard + '.txt -m 125;'
+  command = 'text2workspace.py ' + 'ttg/plots/'+ run + '/' +dataCard + '.txt -m 125;'
   command += 'mv ' + 'ttg/plots/'+ run + '/' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit' + extraArg + ';'

@@ -71,7 +71,7 @@ for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
 for i in range(0, 100):
   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 
-#
+
 # Compile list to systematic to show
 #
 showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in systematics.keys()))

@@ -24,6 +24,7 @@
   "NP"            : "nonprompt background estimation",
   "nonprompt_norm"     : "Non-prompt photon normalization",
   "ZG_norm"       : "Z#gamma normalization",
-  "VVTo2L2Nu_norm" : "X#gamma normalization",
-  "singleTop_norm" : "t#gamma normalization"
+  "VVTo2L2Nu_norm" : "Multiboson+#gamma normalization",
+  "singleTop_norm" : "Single-t+#gamma normalization",
+  "other_norm"     : "Other+#gamma normalization"
 }
