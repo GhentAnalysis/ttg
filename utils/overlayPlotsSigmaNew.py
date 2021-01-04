@@ -36,11 +36,12 @@ def sumHists(picklePath, plot):
   return (nHist, gHist, dHist)
 
 
-offZfile = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-forNPest-nonpromptErr/noData/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/photon_SigmaIetaIeta_small.pkl'
-onZfile = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-failChgIso-forNPest-nonpromptErr/noData/llg-mll40-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_SigmaIetaIeta_small.pkl'
+offZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-nonpromptErr/noData/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_SigmaIetaIeta_small.pkl'
+onZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-nonpromptErr/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_SigmaIetaIeta_small.pkl'
 offZ = sumHists(offZfile, 'photon_SigmaIetaIeta_small')[0]
 onZ = sumHists(onZfile, 'photon_SigmaIetaIeta_small')[0]
-c1 = ROOT.TCanvas('c', 'c', 1000, 800)
+c1 = ROOT.TCanvas('c', 'c', 1300, 800)
+# ROOT.gPad.SetLogy()
 offZ.Scale(1./offZ.Integral())
 onZ.Scale(1./onZ.Integral())
 offZ.SetTitle('')
@@ -48,15 +49,24 @@ offZ.SetLineColor(ROOT.kBlue)
 onZ.SetLineColor(ROOT.kRed)
 offZ.SetLineWidth(2)
 onZ.SetLineWidth(2)
-offZ.GetXaxis().SetRangeUser(0., 0.025)
-offZ.GetYaxis().SetRangeUser(0., 0.18)
+offZ.GetXaxis().SetRangeUser(0.005, 0.020)
+offZ.GetYaxis().SetRangeUser(0., 0.15)
 offZ.GetXaxis().SetTitle("#sigma_{i#etai#eta}(#gamma)")  
 offZ.GetYaxis().SetTitle("(1/N) dN")  
 legend = ROOT.TLegend(0.6,0.74,0.88,0.9)
 legend.AddEntry(offZ,"application region","L")
 legend.AddEntry(onZ,"measurement region","L")
-offZ.Draw('E ')
-onZ.Draw('E same')
+
+offZ.Draw('HIST E')
+onZ.Draw('HIST E same')
+l1 = ROOT.TLine(0.01015,0.0,0.01015,0.15)
+l1.SetLineStyle(2)
+l1.SetLineWidth(4)
+l1.Draw()
+l2 = ROOT.TLine(0.012,0.0,0.012,0.15)
+l2.SetLineStyle(2)
+l2.SetLineWidth(4)
+l2.Draw()
 legend.Draw()
 c1.SaveAs('newSigmaOnOffZsmall.png')
 

@@ -13,6 +13,8 @@ ROOT.TH1.SetDefaultSumw2()
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
+# phoCBfull-forZgest-noZgCorr/all/llg-mll20-offZ-llgOnZ-photonPt20/
+# phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgOnZ-photonPt20/
 
 offZuncorHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgest/all/llg-mll40-offZ-llgNoZ-photonPt20/',
               '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgest/all/llg-mll40-offZ-llgNoZ-photonPt20/',

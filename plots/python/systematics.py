@@ -11,12 +11,10 @@ systematics = {}
 for i in ('Up', 'Down'):
   systematics['isr'+i]        = [('ISRWeight',    'ISRWeight'+i)]
   systematics['fsr'+i]        = [('FSRWeight',    'FSRWeight'+i)]
-  # systematics['hdamp'+i]      = []
   systematics['ue'+i]         = []
   systematics['erd'+i]        = []
   systematics['ephScale'+i]     = []
   systematics['ephRes'+i]       = []
-  # systematics['muScale'+i]      = [] 
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
@@ -25,12 +23,17 @@ for i in ('Up', 'Down'):
   systematics['lSFEl'+i]      = [('lWeight',       'lWeightElStat'+i)]
   systematics['lSFMu'+i]      = [('lWeight',       'lWeightMuStat'+i)]
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
+# TODO turn on once new skim ready
+  # systematics['trigStat'+i]    = [('triggerWeight', 'triggerWeightStat'+i)]
+  # systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
+
   systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
   systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
   systematics['NP'+i]         = []
-
+  # for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+  #   systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
 
 # not in here -> 100% correlation
 correlations = {
@@ -60,11 +63,11 @@ correlations = {
 
 #
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
+# TODO switch to taking the rms for pdf
 #
-# NOTE temp off
 for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
-# NOTE pdf temporarily off
+
 for i in range(0, 100):
   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 

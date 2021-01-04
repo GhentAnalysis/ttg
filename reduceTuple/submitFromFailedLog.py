@@ -36,6 +36,7 @@ for logfile in getLogs('./log'):
   miscProblem = False
   with open(logfile) as logf:
     for line in logf:
+      if 'Finished transferring output files' in line: continue # condor uses the word Finished as well, ignore that...
       if 'SysError in <TFile::ReadBuffer>' in line: rootError = True
       if 'Error in <TChain::LoadTree>' in line:     rootError = True
       if 'Finished' in line or 'finished' in line:  finished  = True
@@ -57,7 +58,7 @@ updateGitInfo()
 
 
 # Resubmit the failed jobs
-from ttg.tools.jobSubmitter import launchLocal, launchCream02
+from ttg.tools.jobSubmitter import launchLocal, launchCream02, launchCondor
 from datetime import datetime
 for i, (command, logfile) in enumerate(jobsToSubmit):
   if args.dryRun:
@@ -66,4 +67,5 @@ for i, (command, logfile) in enumerate(jobsToSubmit):
     os.remove(logfile)
     if args.runLocal: launchLocal(command, logfile)
     else:
-      launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', jobLabel='RE', cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript
+      # launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', jobLabel='RE', cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript
+      launchCondor(command, logfile, checkQueue=(i%100==0), wallTime='168', jobLabel='RE', cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript

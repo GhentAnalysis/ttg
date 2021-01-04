@@ -13,14 +13,16 @@ ROOT.TH1.SetDefaultSumw2()
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
-uncorHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgest/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/',
-             '2017':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgest/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/',
-             '2018':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgest/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/'
+uncorHists ={'2016':  '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+             '2017':  '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+             '2018':  '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/'
 }
 
-corHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-ZgestCheck/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/',
-           '2017':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-ZgestCheck/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/',
-           '2018':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-ZgestCheck/CHAN/llg-mll40-offZ-llgOnZ-photonPt20/'
+
+
+corHists ={'2016':  '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+           '2017':  '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+           '2018':  '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/'
 }
 
 
