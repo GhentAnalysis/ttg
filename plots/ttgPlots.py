@@ -477,6 +477,7 @@ for year in years:
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
     if args.tag.count('base'):                                                      reduceType = 'base'
     if args.tag.lower().count('jet25'):                                             reduceType = 'phoCB-NOVjetPt25'
+    if args.tag.lower().count('ttgjec'):                                             reduceType = 'phoCB-jc3'
     origReducetype = reduceType
     reduceType = applySysToReduceType(reduceType, args.sys)
     log.info("using reduceType " + reduceType)

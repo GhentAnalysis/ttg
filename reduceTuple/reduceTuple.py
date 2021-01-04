@@ -106,7 +106,7 @@ outputFile.cd()
 # deleteBranches = ["Scale", "Res", "pass", "met"]
 
 unusedBranches = ["HLT", "Flag", "flag", "HN", "tau", "Ewk", "lMuon", "WOIso", "closest", "decay"]
-deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron"]
+deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron", "JECGrouped", "JECSources"]
 if not sample.isData:
   # unusedBranches += ["gen_nL", "gen_l", "gen_met"]
   # deleteBranches += ["heWeight", "gen_ph"]
@@ -133,12 +133,26 @@ if not sample.isData:
   newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'triggerWeight/F', 'phWeight/F', 'bTagWeight/F', 'PVWeight/F']
   newBranches += ['genPhDeltaR/F', 'genPhPassParentage/O', 'genPhMinDeltaR/F', 'genPhRelPt/F', 'genPhPt/F', 'genPhEta/F', 'lhePhPt/F', 'genPhMomPdg/I']
   if not forSys:
+
     for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:
       newBranches += ['njets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I', 'dbj1_' + sys + '/I', 'dbj2_' + sys + '/I']
       newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
+    for sys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+      for direc in ['Up','Down']:
+        newBranches += ['njets_' + sys + direc +  '/I', 'ndbjets_' + sys + direc + '/I', 'j1_' + sys + direc +  '/I', 'j2_' + sys + direc +  '/I', 'dbj1_' + sys + direc +  '/I', 'dbj2_' + sys + direc +  '/I']
+        newBranches += ['phJetDeltaR_' + sys + direc +  '/F', 'phBJetDeltaR_' + sys + direc +  '/F', 'l1JetDeltaR_' + sys + direc +  '/F', 'l2JetDeltaR_' + sys + direc +  '/F']
+
+
+    # for sys in ['AbsoluteMPFBias_JECSources','AbsoluteScale_JECSources','AbsoluteStat_JECSources','FlavorPhotonJet_JECSources','FlavorPureBottom_JECSources','FlavorPureCharm_JECSources','FlavorPureGluon_JECSources','FlavorPureQuark_JECSources','FlavorQCD_JECSources','FlavorZJet_JECSources','Fragmentation_JECSources','RelativeBal_JECSources','RelativeFSR_JECSources','RelativeJEREC1_JECSources','RelativeJEREC2_JECSources','RelativeJERHF_JECSources','RelativePtBB_JECSources','RelativePtEC1_JECSources','RelativePtEC2_JECSources','RelativePtHF_JECSources','RelativeSample_JECSources','RelativeStatEC_JECSources','RelativeStatFSR_JECSources','RelativeStatHF_JECSources','SinglePionECAL_JECSources','SinglePionHCAL_JECSources','SubTotalAbsolute_JECSources','SubTotalMC_JECSources','SubTotalPt_JECSources','SubTotalRelative_JECSources','SubTotalScale_JECSources','TimePtEta_JECSources','Total_JECSources','TotalNoFlavor_JECSources','TotalNoFlavorNoTime_JECSources','TotalNoTime_JECSources']:
+    for sys in ['AbsoluteMPFBias_JECSources','AbsoluteScale_JECSources','AbsoluteStat_JECSources','FlavorQCD_JECSources','Fragmentation_JECSources','PileUpDataMC_JECSources','PileUpEnvelope_JECSources','PileUpMuZero_JECSources','PileUpPtBB_JECSources','PileUpPtEC1_JECSources','PileUpPtEC2_JECSources','PileUpPtHF_JECSources','PileUpPtRef_JECSources','RelativeBal_JECSources','RelativeFSR_JECSources','RelativeJEREC1_JECSources','RelativeJEREC2_JECSources','RelativeJERHF_JECSources','RelativePtBB_JECSources','RelativePtEC1_JECSources','RelativePtEC2_JECSources','RelativePtHF_JECSources','RelativeSample_JECSources','RelativeStatEC_JECSources','RelativeStatFSR_JECSources','RelativeStatHF_JECSources','SinglePionECAL_JECSources','SinglePionHCAL_JECSources','TimePtEta_JECSources','Total_JECSources']:
+      for direc in ['Up','Down']:
+        newBranches += ['njets_' + sys + direc +  '/I', 'ndbjets_' + sys + direc + '/I', 'j1_' + sys + direc +  '/I', 'j2_' + sys + direc +  '/I', 'dbj1_' + sys + direc +  '/I', 'dbj2_' + sys + direc +  '/I']
+        newBranches += ['phJetDeltaR_' + sys + direc +  '/F', 'phBJetDeltaR_' + sys + direc +  '/F', 'l1JetDeltaR_' + sys + direc +  '/F', 'l2JetDeltaR_' + sys + direc +  '/F']
+
+
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-    for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
+    for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStat' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
     for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -237,10 +251,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     if newVars.isEMu  and not (c._passTrigger_em or c._passTrigger_e or c._passTrigger_m):             continue
     if newVars.isMuMu and not (c._passTrigger_mm or c._passTrigger_m):                                 continue
 
-  goodJets(c, newVars)
-  bJets(c, newVars)
+  goodJets(c, newVars, forSys=forSys)
+  bJets(c, newVars, forSys=forSys)
   makeInvariantMasses(c, newVars)
-  makeDeltaR(c, newVars)
+  makeDeltaR(c, newVars, forSys=forSys)
 
   if not sample.isData:
     newVars.genWeight    = c._weight*lumiWeights[0]
@@ -321,10 +335,12 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
       setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets))
 
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
-    newVars.triggerWeight      = trigWeight
-    newVars.triggerWeightUp    = trigWeight+trigErr
-    newVars.triggerWeightDown  = trigWeight-trigErr
+    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+    newVars.triggerWeight          = trigWeight
+    newVars.triggerWeightStatUp    = trigWeight+trigErrStat
+    newVars.triggerWeightStatDown  = trigWeight-trigErrStat
+    newVars.triggerWeightSystUp    = trigWeight+trigErrSyst
+    newVars.triggerWeightSystDown  = trigWeight-trigErrSyst
 
     if args.recTops:
       reconstTops(kf, c, newVars)

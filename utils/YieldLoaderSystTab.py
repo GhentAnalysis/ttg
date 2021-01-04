@@ -2,7 +2,7 @@
 import pickle
 from ttg.plots.systematics import showSysList
 
-rounding = 2
+rounding = 4
 
 def getYieldMC(hists):
   sumVal = 0.
@@ -45,13 +45,13 @@ def getOutliers(var, varHists, totDown, totUp, totalCentral):
       up   = varHists['yield' + var + 'Up'][name].Integral()
       down = round(100.*(down-central)/central, rounding)
       up   = round(100.*(up-central)/central, rounding)
-     #  if abs(up) > 2.0 * abs(totUp) or abs(down) > 2.0 * abs(totDown):
-      if abs(up) > 1.5 * abs(totUp) or abs(down) > 1.5 * abs(totDown) or 'ZG' in name:
+      if abs(up) > 2.0 * abs(totUp) or abs(down) > 2.0 * abs(totDown) or 'ZG' in name:
+      # if abs(up) > 1.5 * abs(totUp) or abs(down) > 1.5 * abs(totDown) or 'ZG' in name:
         outLiers[name] = [down, up, str(round(100.* central/totalCentral, rounding)) + '%'  ]
   return outLiers
 
 variations = showSysList
-variations.remove('q2')
+# variations.remove('q2')
 # variations.remove('pdf')
 # variations = ['NP']
 # https://homepage.iihe.ac.be/~gmestdac/ttG/2017/phoCBfull-defaultEstimDD-VR/ee//llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl
@@ -59,8 +59,12 @@ def getEffect(year):
   # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-VR/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
   # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-VR-noZgCorr/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
   # picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-defaultEstimDD-JUN/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
-  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-niceEstimDD-JUN/mumu/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
-  print picklePath.replace('/storage_mnt/storage/user/gmestdac/public_html/ttG/','')
+  # picklePath = '/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/phoCBfull-niceEstimDD/emu/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
+  # picklePath = '/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/phoCBfull-forZgestC-noZgCorr/mumu/llg-mll20-offZ-llgOnZ-photonPt20/yield.pkl'
+
+  picklePath = '/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/phoCBfull-niceEstimDD-merp/ee/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/yield.pkl'
+
+  print picklePath.replace('/storage_mnt/storage/user/jroels/public_html/ttG/','')
   varHists = pickle.load(open(picklePath))
   central = getYieldMC(varHists['yield'])
   rels ={}
@@ -90,14 +94,18 @@ def getEffect(year):
 
 varYears = {}
 outYears = {}
-for year in ['2016', '2017', '2018']:
+# for year in ['2016', '2017', '2018']:
+for year in ['2016', '2016', '2016']:
   varYears[year], outYears[year] = getEffect(year)
 print '\t' '2016' + '\t \t' + '2017' + '\t \t' + '2018'
 for sys in varYears['2016'].keys():
-  print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2017'][sys]) + '\t' + str(varYears['2018'][sys]),
-  try:
-    for name, effect in outYears['2017'][sys].iteritems():
-      print '\t' + name[:10] + '    ' + str(effect),
-  except:
-    pass
+  print sys + '\t' + str(varYears['2016'][sys]),
+  # print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2016'][sys]),
+  # print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2017'][sys]) + '\t' + str(varYears['2018'][sys]),
+  # try:
+  #   for name, effect in outYears['2016'][sys].iteritems():
+  #   # for name, effect in outYears['2017'][sys].iteritems():
+  #     print '\t' + name[:10] + '    ' + str(effect),
+  # except:
+  #   pass
   print ''
