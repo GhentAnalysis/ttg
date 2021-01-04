@@ -225,17 +225,9 @@ def goodJets(t, n, forSys=True):
   if not forSys:
     groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
     groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
-    sourceVars = ['_AbsoluteMPFBias_JECSources','_AbsoluteScale_JECSources','_AbsoluteStat_JECSources','_FlavorQCD_JECSources','_Fragmentation_JECSources','_PileUpDataMC_JECSources','_PileUpEnvelope_JECSources','_PileUpMuZero_JECSources','_PileUpPtBB_JECSources','_PileUpPtEC1_JECSources','_PileUpPtEC2_JECSources','_PileUpPtHF_JECSources','_PileUpPtRef_JECSources','_RelativeBal_JECSources','_RelativeFSR_JECSources','_RelativeJEREC1_JECSources','_RelativeJEREC2_JECSources','_RelativeJERHF_JECSources','_RelativePtBB_JECSources','_RelativePtEC1_JECSources','_RelativePtEC2_JECSources','_RelativePtHF_JECSources','_RelativeSample_JECSources','_RelativeStatEC_JECSources','_RelativeStatFSR_JECSources','_RelativeStatHF_JECSources','_SinglePionECAL_JECSources','_SinglePionHCAL_JECSources','_TimePtEta_JECSources','_Total_JECSources']
-    # sourceVars = ['_AbsoluteMPFBias_JECSources','_AbsoluteScale_JECSources','_AbsoluteStat_JECSources','_FlavorPhotonJet_JECSources','_FlavorPureBottom_JECSources','_FlavorPureCharm_JECSources','_FlavorPureGluon_JECSources','_FlavorPureQuark_JECSources','_FlavorQCD_JECSources','_FlavorZJet_JECSources','_Fragmentation_JECSources','_RelativeBal_JECSources','_RelativeFSR_JECSources','_RelativeJEREC1_JECSources','_RelativeJEREC2_JECSources','_RelativeJERHF_JECSources','_RelativePtBB_JECSources','_RelativePtEC1_JECSources','_RelativePtEC2_JECSources','_RelativePtHF_JECSources','_RelativeSample_JECSources','_RelativeStatEC_JECSources','_RelativeStatFSR_JECSources','_RelativeStatHF_JECSources','_SinglePionECAL_JECSources','_SinglePionHCAL_JECSources','_SubTotalAbsolute_JECSources','_SubTotalMC_JECSources','_SubTotalPt_JECSources','_SubTotalRelative_JECSources','_SubTotalScale_JECSources','_TimePtEta_JECSources','_Total_JECSources','_TotalNoFlavor_JECSources','_TotalNoFlavorNoTime_JECSources','_TotalNoTime_JECSources']
     for var in groupVars:
       for direc in ['Up','Down']:
         setattr(t, 'jets'+var + direc,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var+ '_JECGrouped' +direc)[i] > t.jetPtCut])
-        setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
-        setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
-        setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
-    for var in sourceVars:
-      for direc in ['Up','Down']:
-        setattr(t, 'jets'+var + direc,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var +direc)[i] > t.jetPtCut])
         setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
         setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
         setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
@@ -256,15 +248,7 @@ def bJets(t, n, forSys=True):
   if not forSys:
     groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
     groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
-    sourceVars = ['_AbsoluteMPFBias_JECSources','_AbsoluteScale_JECSources','_AbsoluteStat_JECSources','_FlavorQCD_JECSources','_Fragmentation_JECSources','_PileUpDataMC_JECSources','_PileUpEnvelope_JECSources','_PileUpMuZero_JECSources','_PileUpPtBB_JECSources','_PileUpPtEC1_JECSources','_PileUpPtEC2_JECSources','_PileUpPtHF_JECSources','_PileUpPtRef_JECSources','_RelativeBal_JECSources','_RelativeFSR_JECSources','_RelativeJEREC1_JECSources','_RelativeJEREC2_JECSources','_RelativeJERHF_JECSources','_RelativePtBB_JECSources','_RelativePtEC1_JECSources','_RelativePtEC2_JECSources','_RelativePtHF_JECSources','_RelativeSample_JECSources','_RelativeStatEC_JECSources','_RelativeStatFSR_JECSources','_RelativeStatHF_JECSources','_SinglePionECAL_JECSources','_SinglePionHCAL_JECSources','_TimePtEta_JECSources','_Total_JECSources']
-    # sourceVars = ['_AbsoluteMPFBias_JECSources','_AbsoluteScale_JECSources','_AbsoluteStat_JECSources','_FlavorPhotonJet_JECSources','_FlavorPureBottom_JECSources','_FlavorPureCharm_JECSources','_FlavorPureGluon_JECSources','_FlavorPureQuark_JECSources','_FlavorQCD_JECSources','_FlavorZJet_JECSources','_Fragmentation_JECSources','_RelativeBal_JECSources','_RelativeFSR_JECSources','_RelativeJEREC1_JECSources','_RelativeJEREC2_JECSources','_RelativeJERHF_JECSources','_RelativePtBB_JECSources','_RelativePtEC1_JECSources','_RelativePtEC2_JECSources','_RelativePtHF_JECSources','_RelativeSample_JECSources','_RelativeStatEC_JECSources','_RelativeStatFSR_JECSources','_RelativeStatHF_JECSources','_SinglePionECAL_JECSources','_SinglePionHCAL_JECSources','_SubTotalAbsolute_JECSources','_SubTotalMC_JECSources','_SubTotalPt_JECSources','_SubTotalRelative_JECSources','_SubTotalScale_JECSources','_TimePtEta_JECSources','_Total_JECSources','_TotalNoFlavor_JECSources','_TotalNoFlavorNoTime_JECSources','_TotalNoTime_JECSources']
     for var in groupVars:
-      for direc in ['Up','Down']:
-        setattr(t, 'dbjets'+var + direc,  [i for i in getattr(t, 'jets'+var+direc) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > workingPoints[t.year]])
-        setattr(n, 'ndbjets'+var + direc, len(getattr(t, 'dbjets'+var+direc)))
-        setattr(n, 'dbj1'+var + direc, getattr(t, 'dbjets'+var+direc)[0] if getattr(n, 'ndbjets'+var+direc) > 0 else -1)
-        setattr(n, 'dbj2'+var + direc, getattr(t, 'dbjets'+var+direc)[1] if getattr(n, 'ndbjets'+var+direc) > 1 else -1)
-    for var in sourceVars:
       for direc in ['Up','Down']:
         setattr(t, 'dbjets'+var + direc,  [i for i in getattr(t, 'jets'+var+direc) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > workingPoints[t.year]])
         setattr(n, 'ndbjets'+var + direc, len(getattr(t, 'dbjets'+var+direc)))
@@ -291,16 +275,8 @@ def makeDeltaR(t, n, forSys=True):
   if not forSys:
     groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
     groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
-    sourceVars = ['_AbsoluteMPFBias_JECSources','_AbsoluteScale_JECSources','_AbsoluteStat_JECSources','_FlavorQCD_JECSources','_Fragmentation_JECSources','_PileUpDataMC_JECSources','_PileUpEnvelope_JECSources','_PileUpMuZero_JECSources','_PileUpPtBB_JECSources','_PileUpPtEC1_JECSources','_PileUpPtEC2_JECSources','_PileUpPtHF_JECSources','_PileUpPtRef_JECSources','_RelativeBal_JECSources','_RelativeFSR_JECSources','_RelativeJEREC1_JECSources','_RelativeJEREC2_JECSources','_RelativeJERHF_JECSources','_RelativePtBB_JECSources','_RelativePtEC1_JECSources','_RelativePtEC2_JECSources','_RelativePtHF_JECSources','_RelativeSample_JECSources','_RelativeStatEC_JECSources','_RelativeStatFSR_JECSources','_RelativeStatHF_JECSources','_SinglePionECAL_JECSources','_SinglePionHCAL_JECSources','_TimePtEta_JECSources','_Total_JECSources']
-    # sourceVars = ['_AbsoluteMPFBias_JECSources','_AbsoluteScale_JECSources','_AbsoluteStat_JECSources','_FlavorPhotonJet_JECSources','_FlavorPureBottom_JECSources','_FlavorPureCharm_JECSources','_FlavorPureGluon_JECSources','_FlavorPureQuark_JECSources','_FlavorQCD_JECSources','_FlavorZJet_JECSources','_Fragmentation_JECSources','_RelativeBal_JECSources','_RelativeFSR_JECSources','_RelativeJEREC1_JECSources','_RelativeJEREC2_JECSources','_RelativeJERHF_JECSources','_RelativePtBB_JECSources','_RelativePtEC1_JECSources','_RelativePtEC2_JECSources','_RelativePtHF_JECSources','_RelativeSample_JECSources','_RelativeStatEC_JECSources','_RelativeStatFSR_JECSources','_RelativeStatHF_JECSources','_SinglePionECAL_JECSources','_SinglePionHCAL_JECSources','_SubTotalAbsolute_JECSources','_SubTotalMC_JECSources','_SubTotalPt_JECSources','_SubTotalRelative_JECSources','_SubTotalScale_JECSources','_TimePtEta_JECSources','_Total_JECSources','_TotalNoFlavor_JECSources','_TotalNoFlavorNoTime_JECSources','_TotalNoTime_JECSources']
     for var in groupVars:
       for direc in ['Up','Down']:
-        setattr(n, 'phJetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'jets'+var+direc)] + [999])   if len(t.photons) > 0 else -1)
-        setattr(n, 'phBJetDeltaR'+var + direc, min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'dbjets'+var+direc)] + [999]) if len(t.photons) > 0 else -1)
-        setattr(n, 'l1JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 0 else -1)
-        setattr(n, 'l2JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 1 else -1)
-        setattr(n, 'jjDeltaR'+var + direc,     min([deltaR(t._jetEta[getattr(n, 'j1'+var+direc)], t._jetEta[getattr(n, 'j2'+var+direc)], t._jetPhi[getattr(n, 'j1'+var+direc)], t._jetPhi[getattr(n, 'j2'+var+direc)])]) if getattr(n, 'njets'+var+direc) > 1 else -1) # pylint: disable=C0301
-    for var in sourceVars:
         setattr(n, 'phJetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'jets'+var+direc)] + [999])   if len(t.photons) > 0 else -1)
         setattr(n, 'phBJetDeltaR'+var + direc, min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'dbjets'+var+direc)] + [999]) if len(t.photons) > 0 else -1)
         setattr(n, 'l1JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 0 else -1)

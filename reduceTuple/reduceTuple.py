@@ -105,8 +105,8 @@ outputFile.cd()
 # deleteBranches = ["Scale", "Res", "pass", "met", "lElectron"]
 # deleteBranches = ["Scale", "Res", "pass", "met"]
 
-unusedBranches = ["HLT", "Flag", "flag", "HN", "tau", "Ewk", "lMuon", "WOIso", "closest", "decay"]
-deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron", "JECGrouped", "JECSources"]
+unusedBranches = ["HLT", "Flag", "flag", "HN", "tau", "Ewk", "lMuon", "WOIso", "closest", "decay", "JECSources"]
+deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron", "JECGrouped"]
 if not sample.isData:
   # unusedBranches += ["gen_nL", "gen_l", "gen_met"]
   # deleteBranches += ["heWeight", "gen_ph"]
@@ -141,14 +141,6 @@ if not sample.isData:
       for direc in ['Up','Down']:
         newBranches += ['njets_' + sys + direc +  '/I', 'ndbjets_' + sys + direc + '/I', 'j1_' + sys + direc +  '/I', 'j2_' + sys + direc +  '/I', 'dbj1_' + sys + direc +  '/I', 'dbj2_' + sys + direc +  '/I']
         newBranches += ['phJetDeltaR_' + sys + direc +  '/F', 'phBJetDeltaR_' + sys + direc +  '/F', 'l1JetDeltaR_' + sys + direc +  '/F', 'l2JetDeltaR_' + sys + direc +  '/F']
-
-
-    # for sys in ['AbsoluteMPFBias_JECSources','AbsoluteScale_JECSources','AbsoluteStat_JECSources','FlavorPhotonJet_JECSources','FlavorPureBottom_JECSources','FlavorPureCharm_JECSources','FlavorPureGluon_JECSources','FlavorPureQuark_JECSources','FlavorQCD_JECSources','FlavorZJet_JECSources','Fragmentation_JECSources','RelativeBal_JECSources','RelativeFSR_JECSources','RelativeJEREC1_JECSources','RelativeJEREC2_JECSources','RelativeJERHF_JECSources','RelativePtBB_JECSources','RelativePtEC1_JECSources','RelativePtEC2_JECSources','RelativePtHF_JECSources','RelativeSample_JECSources','RelativeStatEC_JECSources','RelativeStatFSR_JECSources','RelativeStatHF_JECSources','SinglePionECAL_JECSources','SinglePionHCAL_JECSources','SubTotalAbsolute_JECSources','SubTotalMC_JECSources','SubTotalPt_JECSources','SubTotalRelative_JECSources','SubTotalScale_JECSources','TimePtEta_JECSources','Total_JECSources','TotalNoFlavor_JECSources','TotalNoFlavorNoTime_JECSources','TotalNoTime_JECSources']:
-    for sys in ['AbsoluteMPFBias_JECSources','AbsoluteScale_JECSources','AbsoluteStat_JECSources','FlavorQCD_JECSources','Fragmentation_JECSources','PileUpDataMC_JECSources','PileUpEnvelope_JECSources','PileUpMuZero_JECSources','PileUpPtBB_JECSources','PileUpPtEC1_JECSources','PileUpPtEC2_JECSources','PileUpPtHF_JECSources','PileUpPtRef_JECSources','RelativeBal_JECSources','RelativeFSR_JECSources','RelativeJEREC1_JECSources','RelativeJEREC2_JECSources','RelativeJERHF_JECSources','RelativePtBB_JECSources','RelativePtEC1_JECSources','RelativePtEC2_JECSources','RelativePtHF_JECSources','RelativeSample_JECSources','RelativeStatEC_JECSources','RelativeStatFSR_JECSources','RelativeStatHF_JECSources','SinglePionECAL_JECSources','SinglePionHCAL_JECSources','TimePtEta_JECSources','Total_JECSources']:
-      for direc in ['Up','Down']:
-        newBranches += ['njets_' + sys + direc +  '/I', 'ndbjets_' + sys + direc + '/I', 'j1_' + sys + direc +  '/I', 'j2_' + sys + direc +  '/I', 'dbj1_' + sys + direc +  '/I', 'dbj2_' + sys + direc +  '/I']
-        newBranches += ['phJetDeltaR_' + sys + direc +  '/F', 'phBJetDeltaR_' + sys + direc +  '/F', 'l1JetDeltaR_' + sys + direc +  '/F', 'l2JetDeltaR_' + sys + direc +  '/F']
-
 
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']

@@ -24,8 +24,8 @@ for i in ('Up', 'Down'):
   systematics['lSFMu'+i]      = [('lWeight',       'lWeightMuStat'+i)]
   systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
 # TODO turn on once new skim ready
-  systematics['trigStat'+i]    = [('triggerWeight', 'triggerWeightStat'+i)]
-  systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
+  # systematics['trigStat'+i]    = [('triggerWeight', 'triggerWeightStat'+i)]
+  # systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
 
   systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
@@ -34,10 +34,6 @@ for i in ('Up', 'Down'):
   systematics['NP'+i]         = []
   # for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
   #   systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
-  # # for jecSource in ['AbsoluteMPFBias_JECSources','AbsoluteScale_JECSources','AbsoluteStat_JECSources','FlavorPhotonJet_JECSources','FlavorPureBottom_JECSources','FlavorPureCharm_JECSources','FlavorPureGluon_JECSources','FlavorPureQuark_JECSources','FlavorQCD_JECSources','FlavorZJet_JECSources','Fragmentation_JECSources','RelativeBal_JECSources','RelativeFSR_JECSources','RelativeJEREC1_JECSources','RelativeJEREC2_JECSources','RelativeJERHF_JECSources','RelativePtBB_JECSources','RelativePtEC1_JECSources','RelativePtEC2_JECSources','RelativePtHF_JECSources','RelativeSample_JECSources','RelativeStatEC_JECSources','RelativeStatFSR_JECSources','RelativeStatHF_JECSources','SinglePionECAL_JECSources','SinglePionHCAL_JECSources','SubTotalAbsolute_JECSources','SubTotalMC_JECSources','SubTotalPt_JECSources','SubTotalRelative_JECSources','SubTotalScale_JECSources','TimePtEta_JECSources','Total_JECSources','TotalNoFlavor_JECSources','TotalNoFlavorNoTime_JECSources','TotalNoTime_JECSources']:
-  # for jecSource in ['AbsoluteMPFBias_JECSources','AbsoluteScale_JECSources','AbsoluteStat_JECSources','FlavorQCD_JECSources','Fragmentation_JECSources','PileUpDataMC_JECSources','PileUpEnvelope_JECSources','PileUpMuZero_JECSources','PileUpPtBB_JECSources','PileUpPtEC1_JECSources','PileUpPtEC2_JECSources','PileUpPtHF_JECSources','PileUpPtRef_JECSources','RelativeBal_JECSources','RelativeFSR_JECSources','RelativeJEREC1_JECSources','RelativeJEREC2_JECSources','RelativeJERHF_JECSources','RelativePtBB_JECSources','RelativePtEC1_JECSources','RelativePtEC2_JECSources','RelativePtHF_JECSources','RelativeSample_JECSources','RelativeStatEC_JECSources','RelativeStatFSR_JECSources','RelativeStatHF_JECSources','SinglePionECAL_JECSources','SinglePionHCAL_JECSources','TimePtEta_JECSources','Total_JECSources']:
-  #   systematics[jecSource+i]        = [(v, v+'_' + jecSource +i) for v in varWithJetVariations]
-
 
 # not in here -> 100% correlation
 correlations = {
