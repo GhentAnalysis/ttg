@@ -139,3 +139,9 @@ def ChaOverN(c):
     return c._phChargedIsolation[c.ph]/c._phNeutralHadronIsolation[c.ph]
   else:
     return -0.9
+
+
+def Zpt(c):
+  first  = getLorentzVector(leptonPt(c, c.l1), c._lEta[c.l1], c._lPhi[c.l1], leptonE(c, c.l1))
+  second = getLorentzVector(leptonPt(c, c.l2), c._lEta[c.l2], c._lPhi[c.l2], leptonE(c, c.l2))
+  return (first+second).Pt()

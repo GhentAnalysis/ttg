@@ -86,9 +86,14 @@ distList = [
 varList = ['']
 # sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','JEC','JER','NP']
 sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','NP']
-# TODO no response matrix for ue, erd, ephScale,'ephRes',,'JEC','JER','NP' use nominal there automatically. some just missing  guess
+# TODO no response matrix for ue, erd, ephScale,'ephRes','NP' use nominal there automatically. some just missing  guess
+# TODO JEC and JER are there but problem
 # sysList = ['isr','fsr','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb']
 varList += [sys + direc for sys in sysList for direc in ['Down', 'Up']]
+
+varList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
+
+varList += ['pdf_' + str(i) for i in range(0, 100)]
 
 # TODO
 # NOTE
@@ -191,14 +196,14 @@ def getTotalDeviations(histDict):
 
 def getRMS(histDict):
 # WARNING this modifies the systematics histograms, be aware if you look at them later in the code
-  nominal = histDict['']
+  nominal = histDict[''].Clone()
   rms = nominal.Clone()
   rms.Reset('ICES')
 
-  for hist in histDict.values():
-    hist.Add(nominal, -1.)
-    hist.Multiply(hist)
-    rms.Add(hist)
+  for var in histDict.keys():
+    histDict[var].Add(nominal, -1.)
+    histDict[var].Multiply(histDict[var])
+    rms.Add(histDict[var])
 
   nvars = len(histDict)-1
 
@@ -209,17 +214,17 @@ def getRMS(histDict):
 def getEnv(histDict):
 # TODO test
 # WARNING this modifies the systematics histograms, be aware if you look at them later in the code
-  nominal = histDict['']
+  nominal = histDict[''].Clone()
   maxUp = nominal.Clone()
   maxUp.Reset('ICES')
   maxDown = maxUp.Clone()
 
-  for hist in histDict.values(): 
-    hist.Add(nominal, -1.)
+  for var in histDict.keys(): 
+    histDict[var].Add(nominal, -1.)
 
-  for i in range(0, hist.GetNbinsX()+1):
-    upHist.SetBinContent(  i, max([hist.GetBinContent(i) for hist in histDict.values()]))
-    downHist.SetBinContent(i, min([hist.GetBinContent(i) for hist in histDict.values()]))
+  for i in range(0, nominal.GetNbinsX()+1):
+    maxUp.SetBinContent(  i, max([hist.GetBinContent(i) for hist in histDict.values()]))
+    maxDown.SetBinContent(i, min([hist.GetBinContent(i) for hist in histDict.values()]))
 
   return maxUp, maxDown
 
@@ -240,15 +245,15 @@ for dist in distList:
 
   
   # get unfolded results for all systematic variations
-  unfoldedDict = {}
+  unfoldedDict, pdfDict, q2Dict = {}, {}, {}
   for var in varList:
-    log.info(var)
     #TODO need to generate variations for outside migration histos before trying to vary them
     outMig = outMigDict[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-    try:
+
+    try: 
       response = responseDict[dist.replace('unfReco','response_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
     except:
-      log.warning('no repsonse matrix for ' +var + ' , check if there should be')
+      log.warning('no response matrix for ' +var + ' , check if there should be')
       response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
     if rmBkgStats:
       for i in range(0, outMig.GetXaxis().GetNbins()+1):
@@ -257,7 +262,12 @@ for dist in distList:
     data, signal, backgrounds = getHistos(histDict, dist, var, rmBkgStats = rmBkgStats)
     unfolded = getUnfolded(response, data, backgrounds, outMig, signalVari = None)
     unfolded.Scale(1./lumiScales[args.year])
-    unfoldedDict[var] = unfolded
+    if var.count('pdf'): pdfDict[var] = unfolded
+    elif var.count('q2'): q2Dict[var] = unfolded
+    else: unfoldedDict[var] = unfolded
+
+    pdfDict[''] = unfoldedDict[''].Clone()
+    q2Dict[''] = unfoldedDict[''].Clone()
 
 
   # TODO get unfolded results for varied bin stats
@@ -269,6 +279,9 @@ for dist in distList:
 
   totalUp, totalDown = getTotalDeviations(unfoldedDict)
 
+  q2Up, q2Down = getEnv(q2Dict)
+  pdfrms = getRMS(pdfDict)
+  raise SystemExit(0)
 
   unfoldedMC = getUnfolded(response, signal, {}, outMig, signalVari = None)
   unfoldedMC.Scale(1./lumiScales[args.year])
@@ -277,7 +290,6 @@ for dist in distList:
   # plMC = response.ProjectionY("PLMC")
   plMC.Scale(1./lumiScales[args.year])
 
-  # raise SystemExit(0)
 
 
   unfoldedStatDict = {}

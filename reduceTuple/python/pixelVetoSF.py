@@ -10,13 +10,13 @@ from ttg.tools.uncFloat import UncFloat
 dataDir = "$CMSSW_BASE/src/ttg/reduceTuple/data/pixelVetoSF/"
 keys    = {'2016' : ("ScalingFactors_80X_Summer16.root", "Scaling_Factors_HasPix_R9 Inclusive"),
            '2017' : ("PixelSeed_ScaleFactors_2017.root", "Medium_ID"),
-           '2018' : ("HasPix_2018.root", "eleVeto_SF")}
+           '2018' : ("g2018_HasPix_2018_private.root", "scalefactor")}
 class pixelVetoSF:
   def __init__(self, year):
     self.year = year
     self.vetoHist  = getObjFromFile(os.path.expandvars(os.path.join(dataDir, keys[year][0])), keys[year][1])
     if year == '2018':
-      self.errs = getObjFromFile(os.path.expandvars(os.path.join(dataDir, "HasPix_2018.root")), "eleVeto_Unc")
+      self.errs = getObjFromFile(os.path.expandvars(os.path.join(dataDir, keys[year][0])), "uncertainty")
     assert self.vetoHist
 
   def getSF(self, tree, index, pt, sigma=0):

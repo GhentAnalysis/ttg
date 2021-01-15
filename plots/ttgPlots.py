@@ -144,11 +144,6 @@ def getLorentzVector(pt, eta, phi, e):
   # log.info("got vect")
   return vector
 
-def Zpt(tree):
-  first  = getLorentzVector(leptonPt(tree, tree.l1), tree._lEta[tree.l1], tree._lPhi[tree.l1], leptonE(tree, tree.l1))
-  second = getLorentzVector(leptonPt(tree, tree.l2), tree._lEta[tree.l2], tree._lPhi[tree.l2], leptonE(tree, tree.l2))
-  return (first+second).Pt()
-
 def plphpt(tree):
   try: return c._pl_phPt[0]
   except: return -99.
@@ -333,7 +328,7 @@ def makePlotList():
     plotList.append(Plot('unfReco_ll_cosTheta',     '#cos(theta(ll))',                lambda c : numpy.cos(angle(theta(c._lEta[c.l1]), theta(c._lEta[c.l2]), c._lPhi[c.l1], c._lPhi[c.l2]))   ,          cosBinRec    ))
     plotList.append(Plot('unfReco_ll_absDeltaEta',  '|#Delta#eta(ll)|',               lambda c : abs(c._lEta[c.l1] - c._lEta[c.l2]),                              absdEtaBinRec))
     plotList.append(Plot('unfReco_phBJetDeltaR',    '#DeltaR(#gamma, b)',             lambda c : kickUnder(0., 900., c.phBJetDeltaR),                             dRBinJetRec  ))
-    plotList.append(Plot('unfReco_jetLepDeltaR',    '#DeltaR(#gamma, j)',             lambda c : min(c.l1JetDeltaR, c.l2JetDeltaR),                               dRBinJetRec  ))
+    plotList.append(Plot('unfReco_jetLepDeltaR',    '#DeltaR(l, j)',                  lambda c : min(c.l1JetDeltaR, c.l2JetDeltaR),                               dRBinJetRec  ))
     plotList.append(Plot('unfReco_jetPt',           'p_{T}(j1) (GeV)',                lambda c : c._jetSmearedPt[c.j1],                                           ptBinJetRec  ))
 
 

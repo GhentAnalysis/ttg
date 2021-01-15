@@ -38,7 +38,7 @@ from ttg.plots.systematics import getReplacementsForStack, systematics, linearSy
 
 
 lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
-reduceType = 'UnfphoCBsys'
+reduceType = 'unfJan'
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
@@ -48,12 +48,17 @@ if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   jobs = [args.year]
   if args.sys:                   sysList = [args.sys]
-  else:                          sysList = [None] + (systematics.keys() if args.runSys else [])
+  else:                          
+    sysList = [None] + (systematics.keys() if args.runSys else [])
+    excludeSys = ['NP']
+    excludeSys = ['trigger'] # NOTE temporary
+    if sysList[0]:
+      sysList = [entry for entry in sysList if not any([entry.count(exc) for exc in excludeSys])]
+  # log.info(sysList)
   # subJobArgs, subJobList = getVariations(args, sysList)
   # sysList = [None, 'JECUp', 'JECDown', 'lSFSyUp', 'lSFSyDown']
   # sysList = [None,'lSFSyUp', 'lSFSyDown','fsrDown','fsrUp']
-  sysList = ['isrUp','isrDown','fsrUp','fsrDown','puUp','puDown','pfUp','pfDown','phSFUp','phSFDown','pvSFUp','pvSFDown','lSFSyUp','lSFSyDown','lSFElUp','lSFElDown','lSFMuUp','lSFMuDown','triggerUp','triggerDown','bTaglUp','bTaglDown','bTagbUp','bTagbDown']
-
+  # sysList = ['isrUp','isrDown','fsrUp','fsrDown','puUp','puDown','pfUp','pfDown','phSFUp','phSFDown','pvSFUp','pvSFDown','lSFSyUp','lSFSyDown','lSFElUp','lSFElDown','lSFMuUp','lSFMuDown','triggerUp','triggerDown','bTaglUp','bTaglDown','bTagbUp','bTagbDown','ephResDown', 'NPDown', 'fsrUp', 'JECUp', 'fsrDown', 'lSFElDown', 'NPUp', 'lSFElUp', 'pfUp', 'isrDown', 'bTaglUp', 'ueUp', 'erdUp', 'puDown', 'phSFUp', 'lSFSyDown', 'triggerUp', 'triggerDown', 'pvSFDown', 'lSFSyUp', 'lSFMuDown', 'puUp', 'ephScaleDown', 'JERDown', 'erdDown', 'JERUp', 'pvSFUp', 'ephScaleUp', 'bTagbUp', 'phSFDown', 'ueDown', 'ephResUp', 'bTagbDown', 'isrUp', 'bTaglDown', 'pfDown', 'lSFMuUp', 'JECDown']
 
   # log.info(sysList)
   submitJobs(__file__, ('sys'), [[s] for s in sysList], argParser, subLog= args.tag + '/' + args.year, jobLabel = "UF", wallTime="15")
@@ -162,18 +167,18 @@ ptBinJetRec = [30., 45., 60., 80., 100., 125., 150., 200., 250., 325., 400.]
 # plotList.append(Plot('unfReco_ll_cosTheta',     '#cos(theta(ll))',                lambda c : numpy.cos(angle(theta(c._lEta[c.l1]), theta(c._lEta[c.l2]), c._lPhi[c.l1], c._lPhi[c.l2]))   ,          cosBinRec    ))
 
 # for systematic variations we only want the response matrices
-if not args.sys:
-  plotListOut.append(Plot('out_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
-  plotListOut.append(Plot('out_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
-  plotListOut.append(Plot('out_unfReco_jetLepDeltaR',    '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
-  plotListOut.append(Plot('out_unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
-  plotListOut.append(Plot('out_unfReco_phLep1DeltaR',    '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c, c.phL1DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
-  plotListOut.append(Plot('out_unfReco_phLep2DeltaR',    '#DeltaR(#gamma, l2)',    lambda c : min(ifRec(c, c.phL2DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
-  plotListOut.append(Plot('out_unfReco_phBJetDeltaR',    '#DeltaR(#gamma, b)',     lambda c : min(ifRec(c, kickUnder(0., 900., c.phBJetDeltaR)                                  , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
-  plotListOut.append(Plot('out_unfReco_ll_absDeltaEta',  '|#Delta#eta(ll)|',       lambda c : min(ifRec(c, abs(protectedGet(c._lEta, c.l1) - protectedGet(c._lEta, c.l2))       , 0. ) ,absdEtaBinRec[-1]  -0.001 )   ,absdEtaBinRec))
-  plotListOut.append(Plot('out_unfReco_ll_deltaPhi',     '#Delta#phi(ll)',         lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2))   , 0. ) ,dPhiBinRec[-1]     -0.001 )   ,dPhiBinRec   ))
-  plotListOut.append(Plot('out_unfReco_phAbsEta',        '|#eta|(#gamma)',         lambda c : min(ifRec(c, abs(protectedGet(c._phEta, c.ph))                                    , 0. ) ,absEtaBinRec[-1]   -0.001 )   ,absEtaBinRec ))
+plotListOut.append(Plot('out_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
+plotListOut.append(Plot('out_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
+plotListOut.append(Plot('out_unfReco_jetLepDeltaR',    '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
+plotListOut.append(Plot('out_unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
+plotListOut.append(Plot('out_unfReco_phLep1DeltaR',    '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c, c.phL1DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
+plotListOut.append(Plot('out_unfReco_phLep2DeltaR',    '#DeltaR(#gamma, l2)',    lambda c : min(ifRec(c, c.phL2DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
+plotListOut.append(Plot('out_unfReco_phBJetDeltaR',    '#DeltaR(#gamma, b)',     lambda c : min(ifRec(c, kickUnder(0., 900., c.phBJetDeltaR)                                  , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
+plotListOut.append(Plot('out_unfReco_ll_absDeltaEta',  '|#Delta#eta(ll)|',       lambda c : min(ifRec(c, abs(protectedGet(c._lEta, c.l1) - protectedGet(c._lEta, c.l2))       , 0. ) ,absdEtaBinRec[-1]  -0.001 )   ,absdEtaBinRec))
+plotListOut.append(Plot('out_unfReco_ll_deltaPhi',     '#Delta#phi(ll)',         lambda c : min(ifRec(c, deltaPhi(protectedGet(c._lPhi, c.l1), protectedGet(c._lPhi, c.l2))   , 0. ) ,dPhiBinRec[-1]     -0.001 )   ,dPhiBinRec   ))
+plotListOut.append(Plot('out_unfReco_phAbsEta',        '|#eta|(#gamma)',         lambda c : min(ifRec(c, abs(protectedGet(c._phEta, c.ph))                                    , 0. ) ,absEtaBinRec[-1]   -0.001 )   ,absEtaBinRec ))
 
+if not args.sys:
   plotListRec.append(Plot('rec_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
   plotListRec.append(Plot('rec_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
   plotListRec.append(Plot('rec_unfReco_jetLepDeltaR',    '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
