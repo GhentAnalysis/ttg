@@ -450,6 +450,13 @@ class Plot:
         boxes.append(box)
     return boxes
 
+  def getUncBox(self, unc):
+    box = ROOT.TBox(self.xmin, 1-unc, self.xmax, 1+unc)
+    box.SetLineColor(ROOT.kBlack)
+    box.SetFillStyle(3005)
+    box.SetFillColor(ROOT.kBlack)
+    return box
+
   #
   # Get filled bins in plot
   #
@@ -500,6 +507,7 @@ class Plot:
           sorting = False,
           legend = "auto",
           drawObjects = [],
+          uncBandRatio = None,
           canvasModifications = [],
           histModifications = [],
           ratioModifications = [],
@@ -649,6 +657,8 @@ class Plot:
       else:                  nums = [histos[ratio['num']][0]]
       den = histos[ratio['den']][0]
 
+
+
       ratios = []
       for i, num in enumerate(nums):
         h_ratio = num.Clone()
@@ -690,6 +700,10 @@ class Plot:
       for o in ratio['drawObjects']:
         try:    o.Draw()
         except: log.debug( "ratio['drawObjects'] has something I can't Draw(): %r", o)
+
+      if uncBandRatio:
+        box = self.getUncBox(uncBandRatio)
+        box.Draw()
 
     try:    os.makedirs(plot_directory)
     except: pass

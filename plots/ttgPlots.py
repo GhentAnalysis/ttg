@@ -78,7 +78,13 @@ from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
 from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
-from ttg.plots.npWeight               import npWeight
+
+if args.tag.count('compRewContribMCTTBAR'):
+  from ttg.plots.npWeightTTBAR          import npWeight
+else:
+  from ttg.plots.npWeight               import npWeight
+
+
 from ttg.plots.ZgWeight               import ZgWeight
 from math import pi
 import numpy
@@ -266,8 +272,12 @@ def makePlotList():
     plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoomAlt',       'signal region',                         lambda c : min(6, createSignalRegionsZoom(c)),                 (7, 0, 7),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b'])))
-    plotList.append(Plot2D('photon_pt_eta', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 80., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.15, 0.3, 0.45, 0.60, 0.75, 0.9, 1.05, 1.2, 1.5, 1.8, 2.1, 2.5]))
+    plotList.append(Plot2D('photon_pt_etaA', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [20., 30., 45., 70., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.131, 1.5, 1.8, 2.5]))
     plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
+    plotList.append(Plot2D('photon_pt_etaC', 'p_{T}(#gamma) (GeV)', lambda c : min(c.ph_pt, 119.) , [20., 50., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.5, 1.8, 2.5]))
+
+
+
     plotList.append(Plot('signalRegionsCap',           'signal region',                         lambda c : createSignalRegionsCap(c),                          (6, 0, 6),   histModifications=xAxisLabels(['0j,0b', '1j,0b', '#geq2j,0b', '1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
 
     plotList.append(Plot('j1_pt25',                    'p_{T}(j_{1}) (GeV)',                    lambda c : c._jetSmearedPt[c.j1],                              [25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0]))
@@ -294,11 +304,8 @@ def makePlotList():
     # plotList.append(Plot('photon_relNeutralIso',       'neutralIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phNeutralHadronIsolation[c.ph]/c.ph_pt,          (20, 0, 0.2)))
     # plotList.append(Plot('photon_relPhotonIso',        'photonIso(#gamma)/p_{T}(#gamma)',       lambda c : c._phPhotonIsolation[c.ph]/c.ph_pt,                 (20, 0, 0.2)))
 
-
-
-
-    ptBinRec = [20., 35., 50., 65., 80., 100., 120., 140., 160., 180., 200., 230., 260., 290., 320., 380.]
-    ptBinGen = [20., 35., 50., 65., 80., 120., 160., 200., 260., 320., 400.]
+    ptBinRec = [20., 35., 50., 70., 100., 130., 165., 200., 250., 300.]
+    ptBinGen = [20., 35., 50., 70., 130., 200., 300.]
 
     dRBinRec = [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4]
     dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.4]
@@ -319,8 +326,21 @@ def makePlotList():
     dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]
     dRBinJetGen = [0.4, 0.8, 1.3, 1.9, 2.6, 3.4]
 
-    ptBinJetGen = [30., 60., 100., 150., 250., 400.]
-    ptBinJetRec = [30., 45., 60., 80., 100., 125., 150., 200., 250., 325., 400.]
+    ptBinJetRec = [30., 50., 70., 90., 110., 130., 150., 175., 200., 250., 300., 375., 450.]
+    ptBinJetGen = [30., 70., 110., 150., 200., 300., 450.]
+
+    # l1l2 scalar pt sum should start at 25+15 =40
+    # pT(ll) could I guess go down to 0, testing
+
+
+
+    ZptBinRec = [0., 15., 30., 45., 60., 75., 90., 110., 130., 170., 210., 310., 410.]
+    ZptBinGen = [0., 30., 60., 90., 130., 210., 410.]
+
+    l1l2ptBinRec = [40., 55., 70., 85., 100., 120., 140., 165., 190., 220., 250., 290., 330., 400., 500.]
+    l1l2ptBinGen = [40., 70., 100., 140., 190., 250., 330., 500.]
+
+
 
 
 # NOTE unfolding related 
@@ -337,18 +357,10 @@ def makePlotList():
     plotList.append(Plot('unfReco_jetPt',           'p_{T}(j1) (GeV)',                lambda c : c._jetSmearedPt[c.j1],                                           ptBinJetRec  ))
 
 
-    # l1l2 scalar pt sum should start at 25+15 =40
-    # pT(ll) could I guess go down to 0, testing
-
-    ZptBinRec = [0., 20., 35., 50., 65., 80., 100., 120., 140., 160., 180., 200., 230., 260., 290., 320., 380.]
-    ZptBinGen = [0., 20., 35., 50., 65., 80., 120., 160., 200., 260., 320., 400.]
-
-    l1l2ptBinRec = [40., 50., 65., 80., 100., 120., 140., 160., 180., 200., 230., 260., 290., 320., 380.]
-    l1l2ptBinGen = [40., 50., 65., 80., 120., 160., 200., 260., 320., 400.]
 
 
-    plotList.append(Plot('unfReco_Z_pt',            'p_{T}(ll) (GeV)',                lambda c : Zpt(c),                                            ptBinRec))
-    plotList.append(Plot('unfReco_l1l2_ptsum',      'p_{T}(l1)+p_{T}(l2) (GeV)',      lambda c : c.l1_pt+c.l2_pt,                                   ptBinRec))
+    plotList.append(Plot('unfReco_Z_pt',            'p_{T}(ll) (GeV)',                lambda c : Zpt(c),                                            ZptBinRec))
+    plotList.append(Plot('unfReco_l1l2_ptsum',      'p_{T}(l1)+p_{T}(l2) (GeV)',      lambda c : c.l1_pt+c.l2_pt,                                   l1l2ptBinRec))
 
 
 
@@ -548,7 +560,7 @@ for year in years:
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
 
       # when creating input plots for corrections corrections can obviously not be applied yet
-      npReweight = npWeight(c.year, sigma = getSigmaSyst(args.sys))
+      npReweight = npWeight(sigma = getSigmaSyst(args.sys))
       
       if not args.noZgCorr:
         try:
@@ -707,6 +719,11 @@ for year in years:
 
       if args.tag.count('norat'):
         extraArgs['ratio']   = None
+
+      if args.tag.count('forNPclosure'):
+        extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
+
+
       # NOTE TEMPORARY HARDCODE
       # extraArgs['ratio']   = {'yRange' : (0.95, 1.05), 'texY': 'data/MC'}
 
@@ -727,6 +744,7 @@ for year in years:
                     sorting           = False,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                     drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)),
+                    uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
                     # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                     **extraArgs
           )
@@ -823,6 +841,11 @@ for plot in totalPlots: # 1D plots
     if args.tag.count('compareTTGammaSys'):
       extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
+    if args.tag.count('forNPclosure'):
+      extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
+
+
+
     for norm in normalizeToMC:
       if norm: extraArgs['scaling'] = {0:1}
       for logY in [False, True]:
@@ -839,6 +862,7 @@ for plot in totalPlots: # 1D plots
                   sorting           = False,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData' or onlyMC)),
+                  uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
                   # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                   **extraArgs
         )

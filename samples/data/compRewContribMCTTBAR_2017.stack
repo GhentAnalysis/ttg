@@ -1,0 +1,9 @@
+-- MC
+TT_Dil               t#bar{t}_(nonprompt)              fillStyle     633                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+-- NPestimate
+TT_Dil               nonprompt-estimate_(MC)               errorStyle    kBlack                      _ttgEventType<3
++TT_Sem
++TT_Had
