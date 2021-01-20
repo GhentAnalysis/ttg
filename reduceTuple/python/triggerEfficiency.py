@@ -10,13 +10,9 @@ import os
 
 
 files = {
-  ('POG', '2016'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2016.root',
-  ('POG', '2017'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2017.root',
-  ('POG', '2018'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2018.root',
-  ('MVA', '2016'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_leptonMVA-phoCB__2016.root',
-  ('MVA', '2017'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_leptonMVA-phoCB__2017.root',
-  ('MVA', '2018'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_leptonMVA-phoCB__2018.root'}
-
+  ('MVA', '2016'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2016.root',
+  ('MVA', '2017'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2017.root',
+  ('MVA', '2018'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2018.root'}
 
 systDict = { 
   '2016': (0.01614, 0.00844, 0.00750, 0.00811),

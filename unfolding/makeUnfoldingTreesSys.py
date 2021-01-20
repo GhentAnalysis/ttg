@@ -124,7 +124,7 @@ if not forSys:
     newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
   for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-  for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
+  for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStat' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
   for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -267,10 +267,13 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.lWeightMuStatDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
 
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
-    newVars.triggerWeight      = trigWeight
-    newVars.triggerWeightUp    = trigWeight+trigErr
-    newVars.triggerWeightDown  = trigWeight-trigErr
+# NOTE temporary fix 
+    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+    newVars.triggerWeight          = trigWeight
+    newVars.triggerWeightStatUp    = trigWeight+trigErrStat
+    newVars.triggerWeightStatDown  = trigWeight-trigErrStat
+    newVars.triggerWeightSystUp    = trigWeight+trigErrSyst
+    newVars.triggerWeightSystDown  = trigWeight-trigErrSyst
 
   else:
     newVars.lWeight        = 1.
