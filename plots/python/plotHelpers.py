@@ -145,3 +145,8 @@ def Zpt(c):
   first  = getLorentzVector(leptonPt(c, c.l1), c._lEta[c.l1], c._lPhi[c.l1], leptonE(c, c.l1))
   second = getLorentzVector(leptonPt(c, c.l2), c._lEta[c.l2], c._lPhi[c.l2], leptonE(c, c.l2))
   return (first+second).Pt()
+
+def plZpt(c):
+  first  = getLorentzVector(c.PLl1_pt, c._pl_lEta[c.PLl1], c._pl_lPhi[c.PLl1], c._pl_lE[c.PLl1]))
+  second = getLorentzVector(c.PLl2_pt, c._pl_lEta[c.PLl2], c._pl_lPhi[c.PLl2], c._pl_lE[c.PLl2]))
+  return (first+second).Pt()
