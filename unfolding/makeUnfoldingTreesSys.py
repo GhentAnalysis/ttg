@@ -218,10 +218,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     if newVars.isMuMu and not (c._passTrigger_mm or c._passTrigger_m):                        reco = False
     if not  c._passMETFilters:                                                                reco = False
   if reco:
-    goodJets(c, newVars)
-    bJets(c, newVars)
+    goodJets(c, newVars, forSys = forSys)
+    bJets(c, newVars, forSys = forSys)
     makeInvariantMasses(c, newVars)
-    makeDeltaR(c, newVars)
+    makeDeltaR(c, newVars, forSys = forSys)
   newVars.failReco = not reco
 
   if not reco and not fid: continue    #events failing both reco and fiducial selection are not needed

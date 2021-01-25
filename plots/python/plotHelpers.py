@@ -1,6 +1,7 @@
 #! /usr/bin/env python
 
 from ttg.tools.helpers import deltaR
+import ROOT
 
 def rawLep1JetDeltaR(tree):
   return min(deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) for j in range(tree._nJets))
@@ -140,6 +141,18 @@ def ChaOverN(c):
   else:
     return -0.9
 
+def leptonPt(tree, index):
+  return tree._lPtCorr[index]
+
+def leptonE(tree, index):
+  return tree._lECorr[index]
+
+def getLorentzVector(pt, eta, phi, e):
+  vector = ROOT.TLorentzVector()
+  vector.SetPtEtaPhiE(pt, eta, phi, e)
+  # log.info("got vect")
+  return vector
+
 
 def Zpt(c):
   first  = getLorentzVector(leptonPt(c, c.l1), c._lEta[c.l1], c._lPhi[c.l1], leptonE(c, c.l1))
@@ -147,6 +160,6 @@ def Zpt(c):
   return (first+second).Pt()
 
 def plZpt(c):
-  first  = getLorentzVector(c.PLl1_pt, c._pl_lEta[c.PLl1], c._pl_lPhi[c.PLl1], c._pl_lE[c.PLl1]))
-  second = getLorentzVector(c.PLl2_pt, c._pl_lEta[c.PLl2], c._pl_lPhi[c.PLl2], c._pl_lE[c.PLl2]))
+  first  = getLorentzVector(c.PLl1_pt, c._pl_lEta[c.PLl1], c._pl_lPhi[c.PLl1], c._pl_lE[c.PLl1])
+  second = getLorentzVector(c.PLl2_pt, c._pl_lEta[c.PLl2], c._pl_lPhi[c.PLl2], c._pl_lE[c.PLl2])
   return (first+second).Pt()
