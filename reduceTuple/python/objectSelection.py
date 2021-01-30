@@ -222,21 +222,21 @@ def goodJets(t, n, forSys=True):
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
     setattr(n, 'j1'+var, getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
     setattr(n, 'j2'+var, getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)
-  if not forSys:
-    groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
-    groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
-    for var in groupVars:
-      for direc in ['Up','Down']:
-        setattr(t, 'jets'+var + direc,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var+ '_JECGrouped' +direc)[i] > t.jetPtCut])
-        setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
-        setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
-        setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
-    for var in groupYearVars:
-      for direc in ['Up','Down']:
-        setattr(t, 'jets'+var + direc,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var[:-2]+ '_'  + t.year + '_JECGrouped' +direc)[i] > t.jetPtCut])
-        setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
-        setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
-        setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
+  # if not forSys:
+  #   groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
+  #   groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
+  #   for var in groupVars:
+  #     for direc in ['Up','Down']:
+  #       setattr(t, 'jets'+var + direc,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var+ '_JECGrouped' +direc)[i] > t.jetPtCut])
+  #       setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
+  #       setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
+  #       setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
+  #   for var in groupYearVars:
+  #     for direc in ['Up','Down']:
+  #       setattr(t, 'jets'+var + direc,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var[:-2]+ '_'  + t.year + '_JECGrouped' +direc)[i] > t.jetPtCut])
+  #       setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
+  #       setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
+  #       setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
 
 def bJets(t, n, forSys=True):
   workingPoints = {'2016':0.6321, '2017':0.4941, '2018':0.4184}
@@ -245,21 +245,21 @@ def bJets(t, n, forSys=True):
     setattr(n, 'ndbjets'+var, len(getattr(t, 'dbjets'+var)))
     setattr(n, 'dbj1'+var, getattr(t, 'dbjets'+var)[0] if getattr(n, 'ndbjets'+var) > 0 else -1)
     setattr(n, 'dbj2'+var, getattr(t, 'dbjets'+var)[1] if getattr(n, 'ndbjets'+var) > 1 else -1)
-  if not forSys:
-    groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
-    groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
-    for var in groupVars:
-      for direc in ['Up','Down']:
-        setattr(t, 'dbjets'+var + direc,  [i for i in getattr(t, 'jets'+var+direc) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > workingPoints[t.year]])
-        setattr(n, 'ndbjets'+var + direc, len(getattr(t, 'dbjets'+var+direc)))
-        setattr(n, 'dbj1'+var + direc, getattr(t, 'dbjets'+var+direc)[0] if getattr(n, 'ndbjets'+var+direc) > 0 else -1)
-        setattr(n, 'dbj2'+var + direc, getattr(t, 'dbjets'+var+direc)[1] if getattr(n, 'ndbjets'+var+direc) > 1 else -1)
-    for var in groupYearVars:
-      for direc in ['Up','Down']:
-        setattr(t, 'dbjets'+var + direc,  [i for i in getattr(t, 'jets'+var+direc) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > workingPoints[t.year]])
-        setattr(n, 'ndbjets'+var + direc, len(getattr(t, 'dbjets'+var+direc)))
-        setattr(n, 'dbj1'+var + direc, getattr(t, 'dbjets'+var+direc)[0] if getattr(n, 'ndbjets'+var+direc) > 0 else -1)
-        setattr(n, 'dbj2'+var + direc, getattr(t, 'dbjets'+var+direc)[1] if getattr(n, 'ndbjets'+var+direc) > 1 else -1)
+  # if not forSys:
+  #   groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
+  #   groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
+  #   for var in groupVars:
+  #     for direc in ['Up','Down']:
+  #       setattr(t, 'dbjets'+var + direc,  [i for i in getattr(t, 'jets'+var+direc) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > workingPoints[t.year]])
+  #       setattr(n, 'ndbjets'+var + direc, len(getattr(t, 'dbjets'+var+direc)))
+  #       setattr(n, 'dbj1'+var + direc, getattr(t, 'dbjets'+var+direc)[0] if getattr(n, 'ndbjets'+var+direc) > 0 else -1)
+  #       setattr(n, 'dbj2'+var + direc, getattr(t, 'dbjets'+var+direc)[1] if getattr(n, 'ndbjets'+var+direc) > 1 else -1)
+  #   for var in groupYearVars:
+  #     for direc in ['Up','Down']:
+  #       setattr(t, 'dbjets'+var + direc,  [i for i in getattr(t, 'jets'+var+direc) if t._jetDeepCsv_b[i] + t._jetDeepCsv_bb[i] > workingPoints[t.year]])
+  #       setattr(n, 'ndbjets'+var + direc, len(getattr(t, 'dbjets'+var+direc)))
+  #       setattr(n, 'dbj1'+var + direc, getattr(t, 'dbjets'+var+direc)[0] if getattr(n, 'ndbjets'+var+direc) > 0 else -1)
+  #       setattr(n, 'dbj2'+var + direc, getattr(t, 'dbjets'+var+direc)[1] if getattr(n, 'ndbjets'+var+direc) > 1 else -1)
 #
 # delta R
 #
@@ -272,23 +272,23 @@ def makeDeltaR(t, n, forSys=True):
     setattr(n, 'l1JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 0 else -1)
     setattr(n, 'l2JetDeltaR'+var,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var)] + [999])     if len(t.leptons) > 1 else -1)
     setattr(n, 'jjDeltaR'+var,     min([deltaR(t._jetEta[getattr(n, 'j1'+var)], t._jetEta[getattr(n, 'j2'+var)], t._jetPhi[getattr(n, 'j1'+var)], t._jetPhi[getattr(n, 'j2'+var)])]) if getattr(n, 'njets'+var) > 1 else -1) # pylint: disable=C0301
-  if not forSys:
-    groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
-    groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
-    for var in groupVars:
-      for direc in ['Up','Down']:
-        setattr(n, 'phJetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'jets'+var+direc)] + [999])   if len(t.photons) > 0 else -1)
-        setattr(n, 'phBJetDeltaR'+var + direc, min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'dbjets'+var+direc)] + [999]) if len(t.photons) > 0 else -1)
-        setattr(n, 'l1JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 0 else -1)
-        setattr(n, 'l2JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 1 else -1)
-        setattr(n, 'jjDeltaR'+var + direc,     min([deltaR(t._jetEta[getattr(n, 'j1'+var+direc)], t._jetEta[getattr(n, 'j2'+var+direc)], t._jetPhi[getattr(n, 'j1'+var+direc)], t._jetPhi[getattr(n, 'j2'+var+direc)])]) if getattr(n, 'njets'+var+direc) > 1 else -1) # pylint: disable=C0301
-    for var in groupYearVars:
-      for direc in ['Up','Down']:
-        setattr(n, 'phJetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'jets'+var+direc)] + [999])   if len(t.photons) > 0 else -1)
-        setattr(n, 'phBJetDeltaR'+var + direc, min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'dbjets'+var+direc)] + [999]) if len(t.photons) > 0 else -1)
-        setattr(n, 'l1JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 0 else -1)
-        setattr(n, 'l2JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 1 else -1)
-        setattr(n, 'jjDeltaR'+var + direc,     min([deltaR(t._jetEta[getattr(n, 'j1'+var+direc)], t._jetEta[getattr(n, 'j2'+var+direc)], t._jetPhi[getattr(n, 'j1'+var+direc)], t._jetPhi[getattr(n, 'j2'+var+direc)])]) if getattr(n, 'njets'+var+direc) > 1 else -1) # pylint: disable=C0301
+  # if not forSys:
+  #   groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
+  #   groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
+  #   for var in groupVars:
+  #     for direc in ['Up','Down']:
+  #       setattr(n, 'phJetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'jets'+var+direc)] + [999])   if len(t.photons) > 0 else -1)
+  #       setattr(n, 'phBJetDeltaR'+var + direc, min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'dbjets'+var+direc)] + [999]) if len(t.photons) > 0 else -1)
+  #       setattr(n, 'l1JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 0 else -1)
+  #       setattr(n, 'l2JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 1 else -1)
+  #       setattr(n, 'jjDeltaR'+var + direc,     min([deltaR(t._jetEta[getattr(n, 'j1'+var+direc)], t._jetEta[getattr(n, 'j2'+var+direc)], t._jetPhi[getattr(n, 'j1'+var+direc)], t._jetPhi[getattr(n, 'j2'+var+direc)])]) if getattr(n, 'njets'+var+direc) > 1 else -1) # pylint: disable=C0301
+  #   for var in groupYearVars:
+  #     for direc in ['Up','Down']:
+  #       setattr(n, 'phJetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'jets'+var+direc)] + [999])   if len(t.photons) > 0 else -1)
+  #       setattr(n, 'phBJetDeltaR'+var + direc, min([deltaR(t._jetEta[j], t._phEta[n.ph], t._jetPhi[j], t._phPhi[n.ph]) for j in getattr(t, 'dbjets'+var+direc)] + [999]) if len(t.photons) > 0 else -1)
+  #       setattr(n, 'l1JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l1], t._jetPhi[j], t._lPhi[n.l1]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 0 else -1)
+  #       setattr(n, 'l2JetDeltaR'+var + direc,  min([deltaR(t._jetEta[j], t._lEta[n.l2], t._jetPhi[j], t._lPhi[n.l2]) for j in getattr(t, 'jets'+var+direc)] + [999])     if len(t.leptons) > 1 else -1)
+  #       setattr(n, 'jjDeltaR'+var + direc,     min([deltaR(t._jetEta[getattr(n, 'j1'+var+direc)], t._jetEta[getattr(n, 'j2'+var+direc)], t._jetPhi[getattr(n, 'j1'+var+direc)], t._jetPhi[getattr(n, 'j2'+var+direc)])]) if getattr(n, 'njets'+var+direc) > 1 else -1) # pylint: disable=C0301
 
 def getEta(pt, pz):
   theta = atan(pt/pz)

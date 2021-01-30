@@ -39,11 +39,20 @@ from ttg.plots.systematics import getReplacementsForStack, systematics, linearSy
 
 
 lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
-reduceType = 'unfJan'
+# reduceType = 'unfJan'
+reduceType = 'unfFB'
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
+
+#  TODO remove trigger exception when ready 
+
+
+# we just need these for fid level
+
+for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
+  systematics['q2Sc_' + i] = [('genWeight', 'weight_q2Sc_'+i)]
 
 if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs

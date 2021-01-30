@@ -7,7 +7,7 @@
 import os, argparse
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',  action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
-argParser.add_argument('--year',      action='store',      default=None,                 help='Only run for a specific year', choices=['2016', '2017', '2018'])
+argParser.add_argument('--year',      action='store',      default=None,                 help='Only run for a specific year', choices=['2016', '2017', '2018', 'RunII'])
 argParser.add_argument('--tag',       action='store',      default='unfTest2',           help='Specify type of reducedTuple')
 argParser.add_argument('--unblind',   action='store_true', default=False,  help='unblind 2017 and 2018')
 args = argParser.parse_args()
@@ -36,8 +36,8 @@ log = getLogger(args.logLevel)
 
 def getPad(canvas, number):
   pad = canvas.cd(number)
-  pad.SetLeftMargin(ROOT.gStyle.GetPadLeftMargin())
-  pad.SetRightMargin(ROOT.gStyle.GetPadRightMargin())
+  pad.SetLeftMargin(ROOT.gStyle.GetPadLeftMargin()+0.05)
+  pad.SetRightMargin(ROOT.gStyle.GetPadRightMargin()-0.05)
   pad.SetTopMargin(ROOT.gStyle.GetPadTopMargin())
   pad.SetBottomMargin(ROOT.gStyle.GetPadBottomMargin())
   return pad
@@ -62,9 +62,15 @@ def getRatioCanvas(name):
 
 #################### Settings and definitons ####################
 lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
+lumiScales['RunII'] = lumiScales['2016'] + lumiScales['2017'] + lumiScales['2018']
 lumiScalesRounded = {'2016':35.9, '2017':41.5, '2018':59.7}
+lumiScalesRounded['RunII'] = lumiScalesRounded['2016'] + lumiScalesRounded['2017'] + lumiScalesRounded['2018']
 
 lumiunc = {'2016':0.025, '2017':0.023, '2018':0.025}
+
+# TODO NOTE temporary simplification
+lumiunc['RunII'] = 0.025
+
 
 labels = {
           'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',  'gen p_{T}(#gamma) (GeV)'),
@@ -97,7 +103,11 @@ distList = [
   # 'unfReco_l1l2_ptsum'
   ]
 
-sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','JEC','JER','NP']
+# sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','JEC','JER','NP']
+
+sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','lSFSy','bTagl','bTagb','JEC','JER','NP']
+
+
 sysVaryData = ['ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','JEC','JER','NP']
 # sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','NP']
 # TODO no response matrix for ue, erd, ephScale,'ephRes','NP' use nominal there automatically. some just missing  guess
@@ -108,6 +118,8 @@ varList += [sys + direc for sys in sysList for direc in ['Down', 'Up']]
 varList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
 
 varList += ['pdf_' + str(i) for i in range(0, 100)]
+
+varList += ['pvSFUp16','lSFElUp16','lSFMuUp16','triggerUp16', 'pvSFDown16','lSFElDown16','lSFMuDown16','triggerDown16','pvSFUp17','lSFElUp17','lSFMuUp17','triggerUp17', 'pvSFDown17','lSFElDown17','lSFMuDown17','triggerDown17','pvSFUp18','lSFElUp18','lSFMuUp18','triggerUp18', 'pvSFDown18','lSFElDown18','lSFMuDown18','triggerDown18']
 
 # theoSysList = ['isr','fsr','ue','erd']
 
@@ -134,6 +146,7 @@ sysMode = ROOT.TUnfoldDensity.kSysErrModeMatrix
 
 #################### functions ####################
 def getHistos(histDict, dist, variation):
+  log.info(dist + variation) 
   data, signal, backgrounds = None, None, {}
   for process, hist in histDict[dist+variation].items():
     nbins = hist.GetXaxis().GetNbins()
@@ -266,9 +279,9 @@ def varyData(data, signalNom, signal):
 for dist in distList:
   log.info('running for '+ dist)
 
-  histDict = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
+  histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
+  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
 
   # get nominal unfolded, with the statistics split into data and MC backgrounds
   response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
@@ -367,14 +380,15 @@ for dist in distList:
 
 # NOTE THIS BLOCK LOADS THE SYSTEMATICS BAND FOR THE THEORY, VERY SIMILAR TO PREUNF CODE
 
-  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   # plMC = response.ProjectionY("PLMC")
 
 
   plMCDict, plMCpdfDict, plMCq2Dict = {}, {}, {}
 
   for var in theoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + '2016' + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plMCpdfDict[var] = plMC
     elif var.count('q2'): plMCq2Dict[var] = plMC
@@ -382,7 +396,6 @@ for dist in distList:
 
   plMCpdfDict[''] = plMCDict[''].Clone()
   plMCq2Dict[''] = plMCDict[''].Clone()
-
   pltotalUp, pltotalDown = getTotalDeviations(plMCDict)
   plpdfrms = getRMS(plMCpdfDict)
   plq2Up, plq2Down = getEnv(plMCq2Dict)
@@ -482,52 +495,14 @@ for dist in distList:
   unfoldedRat.Draw('E1 X0')
   l1 = ROOT.TLine(unfoldedRat.GetXaxis().GetXmin(),1,unfoldedRat.GetXaxis().GetXmax(),1)
   l1.Draw()
-  # unfoldedRat = unfoldedNom.Clone('ratio')
-  # unfsystBand = unfoldedRat.Clone()
-  
-  # totalUp.Divide(unfsystBand)
-  # totalDown.Divide(unfsystBand)
-
-  # for i in range(0, unfsystBand.GetXaxis().GetNbins()+1):
-  #   unfsystBand.SetBinError(i, max(totalUp.GetBinContent(i), totalDown.GetBinContent(i)))
-  #   unfsystBand.SetBinContent(i, 1.)
-
-  # unfsystBand.SetLineColor(ROOT.kBlack)
-  # unfsystBand.SetFillColor(ROOT.kBlack)
-  # unfsystBand.SetLineWidth(3)
-  # unfsystBand.SetFillStyle(3244)
-  # unfsystBand.SetMarkerSize(0)
-
-
-  # unfsystBand.GetYaxis().SetRangeUser(0.4, 1.6)
-  # unfsystBand.GetXaxis().SetTitle(labels[dist][1])
-  # unfsystBand.GetYaxis().SetTitle('Data / Theory')
-  # unfsystBand.SetTitle('')
-  # unfsystBand.GetXaxis().SetLabelSize(0.14)
-  # unfsystBand.GetXaxis().SetTitleSize(0.14)
-  # unfsystBand.GetXaxis().SetTitleOffset(1.2)
-  # unfsystBand.GetYaxis().SetTitleSize(0.11)
-  # unfsystBand.GetYaxis().SetTitleOffset(0.4)
-  # unfsystBand.GetYaxis().SetRangeUser(0.4, 1.6)
-  # unfsystBand.GetYaxis().SetNdivisions(3,5,0)
-  # unfsystBand.GetYaxis().SetLabelSize(0.1)
-  # unfsystBand.Draw('E2')
-
-
-  # unfoldedRat.Divide(plMCDict[''])
-  # unfoldedRat.SetLineColor(ROOT.kBlack)
-  # unfoldedRat.SetMarkerStyle(ROOT.kFullCircle)
-
-  # unfoldedRat.Draw('same E1 X0')
-
 
   cunf.cd()
   drawTex((ROOT.gStyle.GetPadLeftMargin(),  1-ROOT.gStyle.GetPadTopMargin()+0.04,'CMS Preliminary'), 11)
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.65,  1-ROOT.gStyle.GetPadTopMargin()+0.04,'(13 TeV)'), 11)
 
 
-  cunf.SaveAs('unfolded/'+ dist +'.pdf')
-  cunf.SaveAs('unfolded/'+ dist +'.png')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.pdf')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.png')
 
 
 
@@ -535,16 +510,21 @@ for dist in distList:
 
 #  pre-unfolding plots:
 
+  if args.year == 'RunII':
+    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist.replace('unfReco','sum_unfReco') + '.pkl','r'))
+
   dataNom, signalNom, backgroundsDict = getHistos(histDict, dist, '')
   backgroundsNom = sumDict(backgroundsDict)
   backgroundsNoUnc = backgroundsNom.Clone('')
   for i in range(0, backgroundsNoUnc.GetXaxis().GetNbins()+1):
     backgroundsNoUnc.SetBinError(i, 0.)
 
+  dataTotStat = dataNom.Clone('')
+
   dataNom.Add(backgroundsNoUnc, -1.) 
   # dataNom is now data signal with data only stat uncertainties
 
-  dataTotStat = data.Clone('')
+  # raise systemExit(0)
   dataTotStat.Add(backgroundsNom, -1.)
 
 
@@ -611,7 +591,7 @@ for dist in distList:
   dataTotUnc.GetXaxis().SetTitle(labels[dist][1])
   dataTotUnc.GetYaxis().SetTitle('Events')
   dataTotUnc.SetTitle('')
-  dataTotUnc.Draw('E')
+  dataTotUnc.Draw('E X0')
 
 
   dataNom.SetLineColor(ROOT.kBlack)
@@ -640,23 +620,6 @@ for dist in distList:
   totalUp.Divide(preUnfRat)
   totalDown.Divide(preUnfRat)
   preUnfRat.Divide(signalNom)
-  # preUnfRat.SetLineColor(ROOT.kBlack)
-  # preUnfRat.SetMarkerStyle(ROOT.kFullCircle)
-  # preUnfRat.GetYaxis().SetRangeUser(0.4, 1.6)
-
-  # preUnfRat.SetTitle('')
-  # preUnfRat.GetXaxis().SetTitle(labels[dist][1])
-  # preUnfRat.GetYaxis().SetTitle('Data / Theory')
-  # preUnfRat.GetXaxis().SetLabelSize(0.14)
-
-  # preUnfRat.GetXaxis().SetTitleSize(0.14)
-  # preUnfRat.GetXaxis().SetTitleOffset(1.2)
-  # preUnfRat.GetYaxis().SetTitleSize(0.11)
-  # preUnfRat.GetYaxis().SetTitleOffset(0.4)
-  # preUnfRat.GetYaxis().SetRangeUser(0.4, 1.6)
-  # preUnfRat.GetYaxis().SetNdivisions(3,5,0)
-  # preUnfRat.GetYaxis().SetLabelSize(0.1)
-
 
   for i in range(0, preunfsystBand.GetXaxis().GetNbins()+1):
     preunfsystBand.SetBinError(i, max(totalUp.GetBinContent(i), totalDown.GetBinContent(i)))
@@ -685,16 +648,10 @@ for dist in distList:
 
   preUnfRat.Draw('E1 X0 same')
 
-  # unfoldedRat.SetLineColor(ROOT.kBlack)
-  # unfoldedRat.SetMarkerStyle(ROOT.kFullCircle)
-
-  # unfoldedRat.Draw('same E1 X0')
-
-
   cpreunf.cd()
   drawTex((ROOT.gStyle.GetPadLeftMargin(),  1-ROOT.gStyle.GetPadTopMargin()+0.04,'CMS Preliminary'), 11)
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.65,  1-ROOT.gStyle.GetPadTopMargin()+0.04,'(13 TeV)'), 11)
 
 
-  cpreunf.SaveAs('unfolded/preUnf_'+ dist +'.pdf')
-  cpreunf.SaveAs('unfolded/preUnf_'+ dist +'.png')
+  cpreunf.SaveAs('unfolded/preUnf_'+ args.year + dist +'.pdf')
+  cpreunf.SaveAs('unfolded/preUnf_'+ args.year + dist +'.png')
