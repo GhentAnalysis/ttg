@@ -17,6 +17,12 @@ ROOT.gROOT.SetBatch(True)
 ROOT.TH1.SetDefaultSumw2()
 ROOT.TH2.SetDefaultSumw2()
 ROOT.gStyle.SetOptStat(0)
+ROOT.gStyle.SetPalette(95)
+
+ROOT.gStyle.SetPaintTextFormat("3.2f")
+ROOT.gStyle.SetPadBottomMargin(0.13)
+ROOT.gStyle.SetPadTopMargin(0.05)
+ROOT.gStyle.SetPadLeftMargin(0.06)
 
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
 from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
@@ -113,6 +119,13 @@ def stitch1D(h6, h7, h8):
     for i in range (1, nbins+1):
       stitched.SetBinContent(y*nbins + i, h.GetBinContent(i))
       stitched.SetBinError(y*nbins + i, h.GetBinError(i))
+  stitched.SetBinContent(nbins   , h6.GetBinContent(nbins  ) + h6.GetBinContent(nbins+1))
+  stitched.SetBinContent(2*nbins , h7.GetBinContent(nbins) + h7.GetBinContent(nbins+1))
+  stitched.SetBinContent(3*nbins , h8.GetBinContent(nbins) + h8.GetBinContent(nbins+1))
+  stitched.SetBinError(nbins   ,   (h6.GetBinError(nbins)**2. + h6.GetBinError(nbins+1)**2.)**0.5)
+  stitched.SetBinError(2*nbins ,   (h7.GetBinError(nbins)**2. + h7.GetBinError(nbins+1)**2.)**0.5)
+  stitched.SetBinError(3*nbins ,   (h8.GetBinError(nbins)**2. + h8.GetBinError(nbins+1)**2.)**0.5)
+  # pdb.set_trace()
   return stitched
 
 

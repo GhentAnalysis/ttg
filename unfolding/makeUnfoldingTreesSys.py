@@ -125,6 +125,7 @@ if not forSys:
   for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
   for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2Sc_' + var + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
+  for i in range(0, 100):                              newBranches += ['weight_pdfSc_' + str(i) + '/F']
   for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStat' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
   for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
@@ -239,8 +240,12 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
         setattr(newVars, 'weight_q2Sc_' + var, newVars.genWeight)
 
     for i in range(0, 100):
-      try:    setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[i+45])
-      except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
+      try:    
+        setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[i+45])
+        setattr(newVars, 'weight_pdfSc_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[0])
+      except: 
+        setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
+        setattr(newVars, 'weight_pdfSc_' + str(i), newVars.genWeight)
 
     try:
       # corresponds to 2 - 1/2 variations, recommended see talk  

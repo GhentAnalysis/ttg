@@ -9,7 +9,7 @@ argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel',  action='store',      default='INFO',               help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--year',      action='store',      default=None,                 help='Only run for a specific year', choices=['2016', '2017', '2018'])
 argParser.add_argument('--tag',       action='store',      default='unfTest2',           help='Specify type of reducedTuple')
-argParser.add_argument('--unblind',   action='store_true', default=False,  help='unblind 2017 and 2018')
+argParser.add_argument('--blind',   action='store_true', default=False,  help='blind the data, data will be replaced by total MC')
 args = argParser.parse_args()
 
 import ROOT
@@ -114,7 +114,8 @@ varList += ['pdf_' + str(i) for i in range(0, 100)]
 theoSysList = ['isr','fsr']
 theoVarList = ['']
 theoVarList += [sys + direc for sys in theoSysList for direc in ['Down', 'Up']]
-theoVarList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
+# theoVarList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
+theoVarList += ['q2Sc_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
 theoVarList += ['pdf_' + str(i) for i in range(0, 100)]
 
 
@@ -133,7 +134,7 @@ sysMode = ROOT.TUnfoldDensity.kSysErrModeMatrix
 
 
 #################### functions ####################
-def getHistos(histDict, dist, variation):
+def getHistos(histDict, dist, variation, blind=False):
   data, signal, backgrounds = None, None, {}
   for process, hist in histDict[dist+variation].items():
     nbins = hist.GetXaxis().GetNbins()
@@ -150,7 +151,14 @@ def getHistos(histDict, dist, variation):
   assert data
   assert signal
   assert backgrounds
-  return (data, signal, backgrounds)
+  if blind:
+    tot = sumDict(backgrounds)
+    for i in range(0, tot.GetXaxis().GetNbins()+1):
+      tot.SetBinError(i, 0.)
+    tot.Add(signal)
+    return (tot, signal, backgrounds)
+  else:
+    return (data, signal, backgrounds)
 
 
 def getUnfolded(response, data, backgrounds, outMig, splitStats = False):
@@ -189,7 +197,7 @@ def getUnfolded(response, data, backgrounds, outMig, splitStats = False):
 
 def getTotalDeviations(histDict):
 # WARNING this modifies the systematics histograms, be aware if you look at them later in the code
-  nominal = histDict['']
+  nominal = histDict[''].Clone()
   totalUp = nominal.Clone()
   totalUp.Reset('ICES')
   totalDown = totalUp.Clone()
@@ -255,6 +263,7 @@ def varyData(data, signalNom, signal):
   sig = signal.Clone()
   sig.Add(signalNom, -1.)
   sig.Divide(signalNom)
+  data = data.Clone()
   for i in range(0, data.GetXaxis().GetNbins()+1):
     data.SetBinContent(i, data.GetBinContent(i)*(1.+ sig.GetBinContent(i)) )
     data.SetBinError(i, data.GetBinError(i)*(1.+ sig.GetBinContent(i)) )
@@ -273,7 +282,7 @@ for dist in distList:
   # get nominal unfolded, with the statistics split into data and MC backgrounds
   response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   outMig = outMigDict[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  data, signalNom, backgroundsNom = getHistos(histDict, dist, '')
+  data, signalNom, backgroundsNom = getHistos(histDict, dist, '', blind = args.blind)
   totalNom = sumDict(backgroundsNom)
   totalNom.Add(signalNom)
 
@@ -314,7 +323,7 @@ for dist in distList:
 
   for direc in [('Down', -1.), ('Up', 1.)]:
     for bkgNorm in bkgNorms:
-      data, signal, backgrounds = getHistos(histDict, dist, '')
+      data, signal, backgrounds = getHistos(histDict, dist, '', blind = args.blind)
       response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
       outMig = outMigDict[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
 
@@ -325,12 +334,13 @@ for dist in distList:
       unfoldedDict[bkgNorm[0]+direc[0]] = unfolded
 
     # Lumi uncertainty
-    data, signal, backgrounds = getHistos(histDict, dist, '')
+    data, signal, backgrounds = getHistos(histDict, dist, '', blind = args.blind)
     response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
     outMig = outMigDict[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
 
     for bkg in backgrounds.values():
       bkg.Scale(1. + lumiunc[args.year] * direc[1])
+    outMig.Scale(1. + lumiunc[args.year] * direc[1])
     unfolded = getUnfolded(response, data, backgrounds, outMig)
     unfolded.Scale(1./lumiScales[args.year])
 
@@ -387,12 +397,16 @@ for dist in distList:
   plpdfrms = getRMS(plMCpdfDict)
   plq2Up, plq2Down = getEnv(plMCq2Dict)
 
+  raise SystemExit(0)
+
   # add q2 and pdf to pltotalUp and pltotalDown
   for i in range(1, pltotalUp.GetXaxis().GetNbins()):
     pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
     pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
 
   plMCTot = plMCDict[''].Clone()
+
+  pickle.dump(plMCTot, file('unfoldedHists/theo' + dist + args.year + '.pkl', 'w'))
 
   # raise SystemExit(0)
 
@@ -418,6 +432,8 @@ for dist in distList:
   unfoldedTotUnc.GetYaxis().SetTitle('Fiducial cross section (fb)')
   unfoldedTotUnc.SetTitle('')
   unfoldedTotUnc.Draw('E X0')
+
+  pickle.dump(unfoldedTotUnc, file('unfoldedHists/data' +  dist + args.year + '.pkl', 'w'))
 
 
   plMCTot2 = plMCTot.Clone()
@@ -535,16 +551,17 @@ for dist in distList:
 
 #  pre-unfolding plots:
 
-  dataNom, signalNom, backgroundsDict = getHistos(histDict, dist, '')
+  dataNom, signalNom, backgroundsDict = getHistos(histDict, dist, '', blind = args.blind)
   backgroundsNom = sumDict(backgroundsDict)
   backgroundsNoUnc = backgroundsNom.Clone('')
   for i in range(0, backgroundsNoUnc.GetXaxis().GetNbins()+1):
     backgroundsNoUnc.SetBinError(i, 0.)
 
+  dataTotStat = dataNom.Clone('')
+
   dataNom.Add(backgroundsNoUnc, -1.) 
   # dataNom is now data signal with data only stat uncertainties
 
-  dataTotStat = data.Clone('')
   dataTotStat.Add(backgroundsNom, -1.)
 
 
@@ -553,7 +570,7 @@ for dist in distList:
   preUnfDict[''] = dataNom.Clone()
 
   for var in varList:
-    data, signal, backgroundsDict = getHistos(histDict, dist, var)
+    data, signal, backgroundsDict = getHistos(histDict, dist, var, blind = args.blind)
     backgrounds = sumDict(backgroundsDict)
     data.Add(backgrounds, -1.)
     data = varyData(data, signalNom, signal)
@@ -561,9 +578,11 @@ for dist in distList:
     elif var.count('q2'): preUnfq2Dict[var] = data
     else: preUnfDict[var] = data
 
+
+
   for direc in [('Down', -1.), ('Up', 1.)]:
     for bkgNorm in bkgNorms:
-      data, signal, backgroundsDict = getHistos(histDict, dist, '')
+      data, signal, backgroundsDict = getHistos(histDict, dist, '', blind = args.blind)
       backgroundsDict[bkgNorm[0]].Scale(1. + bkgNorm[1]*direc[1])
       backgrounds = sumDict(backgroundsDict)
       data.Add(backgrounds, -1.)
@@ -572,7 +591,7 @@ for dist in distList:
     
     # Lumi uncertainty
 
-    data, signal, backgroundsDict = getHistos(histDict, dist, '')
+    data, signal, backgroundsDict = getHistos(histDict, dist, '', blind = args.blind)
     backgroundsDict[bkgNorm[0]].Scale(1. + bkgNorm[1]*direc[1])
     backgrounds = sumDict(backgroundsDict)
     backgrounds.Scale(1. + lumiunc[args.year] * direc[1])
@@ -581,7 +600,6 @@ for dist in distList:
     preUnfDict['lumi'+direc[0]] = data
 
   totalUp, totalDown = getTotalDeviations(preUnfDict)
-
 
   preUnfpdfDict[''] = dataNom.Clone()
   preUnfq2Dict[''] = dataNom.Clone()
@@ -611,7 +629,7 @@ for dist in distList:
   dataTotUnc.GetXaxis().SetTitle(labels[dist][1])
   dataTotUnc.GetYaxis().SetTitle('Events')
   dataTotUnc.SetTitle('')
-  dataTotUnc.Draw('E')
+  
 
 
   dataNom.SetLineColor(ROOT.kBlack)
@@ -619,14 +637,19 @@ for dist in distList:
   dataNom.SetLineWidth(1)
   dataNom.SetMarkerStyle(8)
   dataNom.SetMarkerSize(1)
-  dataNom.Draw('same E1 X0')
-  signalNom.Draw('same')
+  # dataNom.Draw('same E1 X0')
+
+  signalNom.Draw('')
+
+  dataNom.Draw('E1 X0 same')
+
+  dataTotUnc.Draw('E same')
 
   legend = ROOT.TLegend(0.28,0.84,0.85,0.88)
   legend.SetBorderSize(0)
   legend.SetNColumns(2)
-  legend.AddEntry(unfoldedMC, "Theory","l")
-  legend.AddEntry(unfolded,'data (' + str(lumiScalesRounded[args.year]) + '/fb)',"e")
+  legend.AddEntry(signalNom, "Theory","l")
+  legend.AddEntry(dataNom,'data (' + str(lumiScalesRounded[args.year]) + '/fb)',"e")
   legend.Draw()
 
 
