@@ -39,33 +39,65 @@ from ttg.plots.plotHelpers  import *
 
 
 
+# labels = {
+#           'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)', 'gen p_{T}(#gamma) (GeV)'),
+#           'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',  'gen #DeltaR(#gamma, l)'),
+#           'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',      'gen #Delta#phi(ll)'),
+#           'unfReco_jetLepDeltaR' :    ('reco #DeltaR(#gamma, j)',  'gen #DeltaR(#gamma, j)'),
+#           'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',     'gen p_{T}(j1) (GeV)'),
+#           'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',    'gen |#Delta#eta(ll)|'),
+#           'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',  'gen #DeltaR(#gamma, b)'),
+#           'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',      'gen |#eta|(#gamma)')
+#           }
+
+# plotList = ['perf_unfReco_phPt',
+# 'perf_unfReco_jetPt',
+# 'perf_unfReco_jetLepDeltaR',
+# 'perf_unfReco_phLepDeltaR',
+# 'perf_unfReco_phBJetDeltaR',
+# 'perf_unfReco_ll_absDeltaEta',
+# 'perf_unfReco_ll_deltaPhi',
+# 'perf_unfReco_phAbsEta']
+
 labels = {
-          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)', 'gen p_{T}(#gamma) (GeV)'),
-          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',  'gen #DeltaR(#gamma, l)'),
-          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',      'gen #Delta#phi(ll)'),
-          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(#gamma, j)',  'gen #DeltaR(#gamma, j)'),
-          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',     'gen p_{T}(j1) (GeV)'),
-          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',    'gen |#Delta#eta(ll)|'),
-          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',  'gen #DeltaR(#gamma, b)'),
-          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',      'gen |#eta|(#gamma)')
+          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',  'gen p_{T}(#gamma) (GeV)'),
+          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',   'gen #DeltaR(#gamma, l)'),
+          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',       'gen #Delta#phi(ll)'),
+          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',        'gen #DeltaR(l, j)'),
+          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',      'gen p_{T}(j1) (GeV)'),
+          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',     'gen |#Delta#eta(ll)|'),
+          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',   'gen #DeltaR(#gamma, b)'),
+          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',       'gen |#eta|(#gamma)'),
+          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
+          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
+          'unfReco_Z_pt' :            ('p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
+          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
           }
 
-plotList = ['perf_unfReco_phPt',
-'perf_unfReco_jetPt',
-'perf_unfReco_jetLepDeltaR',
-'perf_unfReco_phLepDeltaR',
-'perf_unfReco_phBJetDeltaR',
-'perf_unfReco_ll_absDeltaEta',
-'perf_unfReco_ll_deltaPhi',
-'perf_unfReco_phAbsEta']
+plotList = [
+  'perf_unfReco_jetLepDeltaR',
+  'perf_unfReco_jetPt',
+  'perf_unfReco_ll_absDeltaEta',
+  # 'perf_unfReco_ll_cosTheta',
+  'perf_unfReco_ll_deltaPhi',
+  'perf_unfReco_phAbsEta',
+  'perf_unfReco_phBJetDeltaR',
+  'perf_unfReco_phLepDeltaR',
+  'perf_unfReco_phPt',
+  'perf_unfReco_phLep1DeltaR',
+  'perf_unfReco_phLep2DeltaR',
+  'perf_unfReco_Z_pt',
+  'perf_unfReco_l1l2_ptsum'
+  ]
+
 
 def getBinning(a):
   return numpy.linspace(a[1],a[2],a[0]-1)
 
 for plot in plotList:
-  perf = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/unfSep3/noData/placeholderSelection/' + plot + '.pkl'))[plot]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  outMig = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/unfSep3/noData/placeholderSelection/' + plot.replace('perf', 'out') + '.pkl'))[plot.replace('perf', 'out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  totRec = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/unfSep3/noData/placeholderSelection/' + plot.replace('perf', 'rec') + '.pkl'))[plot.replace('perf', 'rec')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  perf = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfJanNew/noData/placeholderSelection/' + plot + '.pkl'))[plot]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  outMig = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfJanNew/noData/placeholderSelection/' + plot.replace('perf', 'out') + '.pkl'))[plot.replace('perf', 'out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  totRec = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfJanNew/noData/placeholderSelection/' + plot.replace('perf', 'rec') + '.pkl'))[plot.replace('perf', 'rec')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   reco   = perf.ProjectionX("reco",1, perf.GetXaxis().GetNbins()) # pl not including over/underflows, but they should be empty anyway
   pl = perf.ProjectionY("pl",0, perf.GetXaxis().GetNbins())                                       # reco underflow bins = events failing reco. Included in this sum
   pl.SetBinContent(0, 0.)
@@ -111,7 +143,7 @@ for plot in plotList:
 
   canv.SaveAs('performance/'+ plot + '_' + args.year +'.pdf')
 
-  fid = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/unfSep3/noData/placeholderSelection/' + plot.replace('perf', 'fid') + '.pkl'))[plot.replace('perf', 'fid')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  fid = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfJanNew/noData/placeholderSelection/' + plot.replace('perf', 'fid') + '.pkl'))[plot.replace('perf', 'fid')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   log.info(plot + ' efficiency: ' + str(diag.Integral()/fid.Integral()))
 
   # for histo, plotName, ymax in [(efficiency, 'eff',0.5), (purity, 'pur',1.0)]:

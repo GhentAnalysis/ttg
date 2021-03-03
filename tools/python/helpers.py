@@ -9,8 +9,8 @@ userGroup       = os.path.expandvars('$USER')[0:1]
 plotDir         = os.path.expandvars(('/afs/cern.ch/user/' + userGroup + '/$USER/www/ttG/')       if 'lxp' in socket.gethostname() else '/user/$USER/public_html/ttG/')
 plotCombineDir         = os.path.expandvars(('/afs/cern.ch/user/' + userGroup + '/$USER/www/ttG/')       if 'lxp' in socket.gethostname() else '/user/$USER/public_html/ttG/')
 # plotCombineDir  = os.path.expandvars(('/afs/cern.ch/user/' + userGroup + '/$USER/combineplots/')       if 'lxp' in socket.gethostname() else '/user/$USER/combineplots/')
-reducedTupleDir = os.path.expandvars(('/afs/cern.ch/user/' + userGroup + '/$USER/reducedTuples/') if 'lxp' in socket.gethostname() else '/user/$USER/public/reducedTuples/') 
-# reducedTupleDir = os.path.expandvars('/pnfs/iihe/cms/store/user/$USER/ttgTuples/')
+# reducedTupleDir = os.path.expandvars(('/afs/cern.ch/user/' + userGroup + '/$USER/reducedTuples/') if 'lxp' in socket.gethostname() else '/user/$USER/public/reducedTuples/') 
+reducedTupleDir = os.path.expandvars('/pnfs/iihe/cms/store/user/$USER/ttgTuples/')
 
 #
 # Check if valid ROOT file exists

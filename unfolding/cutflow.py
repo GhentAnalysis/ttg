@@ -216,8 +216,21 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     l1, l2, l1_pt, l2_pt   = c.l1, c.l2, c.l1_pt, c.l2_pt
     c.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
     c.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+
+    # trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+    
+    # NOTE temporary fix 
+    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+    # newVars.triggerWeight          = trigWeight
+    # newVars.triggerWeightUp    = trigWeight+trigErrStat
+    # newVars.triggerWeightDown  = trigWeight-trigErrStat
+    # newVars.triggerWeightStatUp    = trigWeight+trigErrStat
+    # newVars.triggerWeightStatDown  = trigWeight-trigErrStat
+    # newVars.triggerWeightSystUp    = trigWeight+trigErrSyst
+    # newVars.triggerWeightSystDown  = trigWeight-trigErrSyst
+    
     c.triggerWeight      = trigWeight
+
     eventWeight = c.genWeight*lumiScale *c.lWeight*c.lTrackWeight*c.triggerWeight*prefireWeight
     recoCounter[reci.next()]+=eventWeight
     rec = selectPhotons(c, c, 2, False)

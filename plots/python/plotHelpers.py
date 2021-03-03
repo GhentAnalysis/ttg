@@ -150,6 +150,18 @@ def ChaOverN(c):
   else:
     return -0.9
 
+def leptonPt(tree, index):
+  return tree._lPtCorr[index]
+
+def leptonE(tree, index):
+  return tree._lECorr[index]
+
+def getLorentzVector(pt, eta, phi, e):
+  vector = ROOT.TLorentzVector()
+  vector.SetPtEtaPhiE(pt, eta, phi, e)
+  # log.info("got vect")
+  return vector
+
 
 # NOTE temp
 def nearestZ(tree):

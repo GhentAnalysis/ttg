@@ -222,6 +222,8 @@ def goodJets(t, n, forSys=True):
     setattr(n, 'njets'+var, len(getattr(t, 'jets'+var)))
     setattr(n, 'j1'+var, getattr(t, 'jets'+var)[0] if getattr(n, 'njets'+var) > 0 else -1)
     setattr(n, 'j2'+var, getattr(t, 'jets'+var)[1] if getattr(n, 'njets'+var) > 1 else -1)
+    setattr(n, 'j1_pt'+var, getattr(t, '_jetSmearedPt'+var)[getattr(n, 'j1'+var)] if getattr(n, 'njets'+var) > 0 else -1)
+
   if not forSys:
     groupVars = ['_Absolute', '_BBEC1', '_EC2', '_FlavorQCD', '_HF', '_RelativeBal', '_Total']
     groupYearVars = ['_HFUC', '_AbsoluteUC', '_BBEC1UC', '_EC2UC', '_RelativeSampleUC']
@@ -231,12 +233,15 @@ def goodJets(t, n, forSys=True):
         setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
         setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
         setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
+        setattr(n, 'j1_pt'+var + direc, getattr(t, '_jetSmearedPt'+var+ '_JECGrouped' +direc)[getattr(n, 'j1'+var+direc)] if getattr(n, 'njets'+var+direc) > 0 else -1)
     for var in groupYearVars:
       for direc in ['Up','Down']:
         setattr(t, 'jets'+var + direc,  [i for i in allGoodJets if getattr(t, '_jetSmearedPt'+var[:-2]+ '_'  + t.year + '_JECGrouped' +direc)[i] > t.jetPtCut])
         setattr(n, 'njets'+var + direc, len(getattr(t, 'jets'+var+direc)))
         setattr(n, 'j1'+var + direc, getattr(t, 'jets'+var+direc)[0] if getattr(n, 'njets'+var+direc) > 0 else -1)
         setattr(n, 'j2'+var + direc, getattr(t, 'jets'+var+direc)[1] if getattr(n, 'njets'+var+direc) > 1 else -1)
+        setattr(n, 'j1_pt'+var + direc, getattr(t, '_jetSmearedPt'+var[:-2]+ '_'  + t.year + '_JECGrouped' +direc)[getattr(n, 'j1'+var+direc)] if getattr(n, 'njets'+var+direc) > 0 else -1)
+
 
 def bJets(t, n, forSys=True):
   workingPoints = {'2016':0.6321, '2017':0.4941, '2018':0.4184}
