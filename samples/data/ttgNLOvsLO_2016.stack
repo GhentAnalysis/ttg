@@ -1,0 +1,18 @@
+-- LO
+TTGamma_DilPCUT               t#bar{t}#gamma_LO_(genuine)        lineStyle    kGreen
++TTGamma_SemPCUT
++TTGamma_HadPCUT
++TTGamma_DilA
++TTGamma_SemA
++TTGamma_HadA
++TTGamma_DilB
++TTGamma_SemB
++TTGamma_HadB
+
+
+-- NLO
+ttgjets              t#bar{t}#gamma_NLO_(genuine)        lineStyle    kBlue                _ttgEventType>6
+
+TT_Dil               t#bar{t}#gamma_NLO_(genuine)            lineStyle    kBlue                   _ttgEventType<7
++TT_Sem
++TT_Had

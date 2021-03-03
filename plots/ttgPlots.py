@@ -267,9 +267,9 @@ def makePlotList():
     plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (8, 0, 8),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoomAlt',       'signal region',                         lambda c : min(6, createSignalRegionsZoom(c)),                 (7, 0, 7),   histModifications=xAxisLabels(['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b'])))
-    plotList.append(Plot2D('photon_pt_etaA', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [20., 30., 45., 70., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.131, 1.5, 1.8, 2.5]))
-    plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
-    plotList.append(Plot2D('photon_pt_etaC', 'p_{T}(#gamma) (GeV)', lambda c : min(c.ph_pt, 119.) , [20., 50., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.5, 1.8, 2.5]))
+    plotList.append(Plot2D('photon_pt_etaA', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [20., 30., 45., 70., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0., 0.435, 0.783, 1.131, 1.5, 1.8, 2.5]))
+    plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) (GeV)', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0., 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
+    plotList.append(Plot2D('photon_pt_etaC', 'p_{T}(#gamma) (GeV)', lambda c : min(c.ph_pt, 119.) , [20., 50., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0., 0.435, 0.783, 1.5, 1.8, 2.5]))
 
 
 
@@ -321,8 +321,12 @@ def makePlotList():
     dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]
     dRBinJetGen = [0.4, 0.8, 1.3, 1.9, 2.6, 3.4]
 
-    ptBinJetRec = [30., 50., 70., 90., 110., 130., 150., 175., 200., 250., 300., 375., 450.]
-    ptBinJetGen = [30., 70., 110., 150., 200., 300., 450.]
+    # ptBinJetRec = [30., 50., 70., 90., 110., 130., 150., 175., 200., 250., 300., 375., 450.]
+    # ptBinJetGen = [30., 70., 110., 150., 200., 300., 450.]
+
+    ptBinJetRec = [30., 55., 80., 110., 140., 170., 200., 250., 300., 375., 450.]
+    ptBinJetGen = [30., 80., 140., 200., 300., 450.]
+
 
     # l1l2 scalar pt sum should start at 25+15 =40
     # pT(ll) could I guess go down to 0, testing
@@ -349,7 +353,7 @@ def makePlotList():
     plotList.append(Plot('unfReco_ll_absDeltaEta',  '|#Delta#eta(ll)|',               lambda c : abs(c._lEta[c.l1] - c._lEta[c.l2]),                              absdEtaBinRec))
     plotList.append(Plot('unfReco_phBJetDeltaR',    '#DeltaR(#gamma, b)',             lambda c : kickUnder(0., 900., c.phBJetDeltaR),                             dRBinJetRec  ))
     plotList.append(Plot('unfReco_jetLepDeltaR',    '#DeltaR(l, j)',                  lambda c : min(c.l1JetDeltaR, c.l2JetDeltaR),                               dRBinJetRec  ))
-    plotList.append(Plot('unfReco_jetPt',           'p_{T}(j1) (GeV)',                lambda c : c._jetSmearedPt[c.j1],                                           ptBinJetRec  ))
+    plotList.append(Plot('unfReco_jetPt',           'p_{T}(j1) (GeV)',                lambda c : c.j1_pt,                                                         ptBinJetRec  ))
 
 
 
@@ -478,7 +482,7 @@ for year in years:
   # copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
   if not args.showSys and not copySyst:
 
-    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-SKRT'
+    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-EFB'
     # elif args.tag.count('phoCB-ZGorig') or args.tag.count('phoCBfull-ZGorig'):        reduceType = 'phoCB-ZGorig'
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
@@ -716,7 +720,7 @@ for year in years:
         extraArgs['ratio']   = None
 
       if args.tag.count('forNPclosure'):
-        extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
+        extraArgs['ratio']   = {'yRange' : (0.6, 1.4), 'num': -1, 'texY':'prediction/MC'}
 
 
       # NOTE TEMPORARY HARDCODE
@@ -837,7 +841,7 @@ for plot in totalPlots: # 1D plots
       extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
     if args.tag.count('forNPclosure'):
-      extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
+      extraArgs['ratio']   = {'yRange' : (0.6, 1.4), 'num': -1, 'texY':'prediction/MC'}
 
 
 

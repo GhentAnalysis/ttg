@@ -60,18 +60,18 @@ from ttg.plots.plotHelpers  import *
 # 'perf_unfReco_phAbsEta']
 
 labels = {
-          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',  'gen p_{T}(#gamma) (GeV)'),
-          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',   'gen #DeltaR(#gamma, l)'),
-          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',       'gen #Delta#phi(ll)'),
-          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',        'gen #DeltaR(l, j)'),
-          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',      'gen p_{T}(j1) (GeV)'),
-          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',     'gen |#Delta#eta(ll)|'),
-          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',   'gen #DeltaR(#gamma, b)'),
-          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',       'gen |#eta|(#gamma)'),
-          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
-          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
-          'unfReco_Z_pt' :            ('p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
-          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
+          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',       'gen p_{T}(#gamma) (GeV)'),
+          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',        'gen #DeltaR(#gamma, l)'),
+          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',            'gen #Delta#phi(ll)'),
+          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',             'gen #DeltaR(l, j)'),
+          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',           'gen p_{T}(j1) (GeV)'),
+          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',          'gen |#Delta#eta(ll)|'),
+          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',        'gen #DeltaR(#gamma, b)'),
+          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',            'gen |#eta|(#gamma)'),
+          'unfReco_phLep1DeltaR' :    ('reco #DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
+          'unfReco_phLep2DeltaR' :    ('reco #DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
+          'unfReco_Z_pt' :            ('reco p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
+          'unfReco_l1l2_ptsum' :      ('reco p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
           }
 
 plotList = [

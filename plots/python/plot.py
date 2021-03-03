@@ -13,7 +13,7 @@ from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
 from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
-from ttg.plots.systematics import constructQ2Sys, constructPdfSys
+from ttg.plots.systematics import constructQ2Sys, constructPdfSys, constructCRSys
 from ttg.samples.Sample import getSampleFromStack
 
 ROOT.TH1.SetDefaultSumw2()
@@ -352,6 +352,7 @@ class Plot:
 
     if 'q2'  in systematics: constructQ2Sys(allPlots, self.name, stackForSys)
     if 'pdf' in systematics: constructPdfSys(allPlots, self.name, stackForSys)
+    if 'colRec' in systematics: constructCRSys(allPlots, self.name, stackForSys)
 
     histos_summed = {}
     histos_splitted = {}
@@ -499,7 +500,7 @@ class Plot:
   #
   def draw(self, \
           yRange = "auto",
-          extensions = ["pdf", "png", "root"],
+          extensions = ["pdf", "png", "root", "C"],
           plot_directory = ".",
           logX = False, logY = True,
           ratio = None,

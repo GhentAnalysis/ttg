@@ -42,6 +42,9 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/da
 #   - data is additional splitted per run to avoid too heavy chains to be loaded
 #   - skips the isr and fsr systematic samples when tuples for scale and resolution systematics are prepared
 #
+
+forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
+
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
@@ -53,6 +56,7 @@ if not args.isChild and not args.subJob:
     if (args.type.count('Scale') or args.type.count('Res')) and sample.isData: continue
 
     if sample.isData:
+      if forSys: continue #no need to have data for systematics
       if args.splitData:          splitData = [args.splitData]
       elif sample.year == '2016': splitData = ['B', 'C', 'D', 'E', 'F', 'G', 'H']
       elif sample.year == '2017': splitData = ['B', 'C', 'D', 'E', 'F']
@@ -71,7 +75,6 @@ ROOT.gROOT.SetBatch(True)
 sample = getSampleFromList(sampleList, args.sample, args.year)
 c      = sample.initTree(shortDebug=args.debug, splitData=args.splitData)
 c.year = sample.year #access to year wherever chain is passed to function, prevents having to pass year every time
-forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
 
 
 if not sample.isData:
@@ -106,7 +109,7 @@ outputFile.cd()
 # deleteBranches = ["Scale", "Res", "pass", "met", "lElectron"]
 # deleteBranches = ["Scale", "Res", "pass", "met"]
 
-unusedBranches = ["HLT", "Flag", "flag", "HN", "tau", "Ewk", "lMuon", "WOIso", "closest", "decay", "JECSources"]
+unusedBranches = ["HLT", "Flag", "flag", "HN", "tau", "Ewk", "lMuon", "WOIso", "closest", "decay", "JECSources", 'jetPt_', 'corrMET' ]
 deleteBranches = ["Scale", "Res", "pass", "met", "POG", "lElectron", "JECGrouped"]
 if not sample.isData:
   # unusedBranches += ["gen_nL", "gen_l", "gen_met"]
@@ -145,7 +148,7 @@ if not sample.isData:
 
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-    for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStat' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
+    for sys in ['Up', 'Down']:                           newBranches += ['lWeightPSSys' + sys + '/F', 'lWeightElSyst' + sys + '/F','lWeightMuSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStatMM' + sys + '/F', 'triggerWeightStatEM' + sys + '/F', 'triggerWeightStatEE' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
     for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -307,13 +310,33 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
 
     l1, l2, l1_pt, l2_pt   = newVars.l1, newVars.l2, newVars.l1_pt, newVars.l2_pt
-    newVars.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
-    newVars.lWeightSystUp    = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=+1., elSigmaStat=0., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=+1., elSigmaStat=0., muSigmaStat=0.)
-    newVars.lWeightSystDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=-1., elSigmaStat=0., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=-1., elSigmaStat=0., muSigmaStat=0.)
-    newVars.lWeightElStatUp    = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=+1., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=+1., muSigmaStat=0.)
-    newVars.lWeightElStatDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=-1., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=-1., muSigmaStat=0.)
-    newVars.lWeightMuStatUp    = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=+1.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=+1.)
-    newVars.lWeightMuStatDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)
+    # newVars.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
+    # newVars.lWeightElSystUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst=+1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst=+1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
+    # newVars.lWeightElSystDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst=-1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst=-1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
+    # newVars.lWeightMuSystUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst=+1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst=+1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
+    # newVars.lWeightMuSystDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst=-1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst=-1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
+    # newVars.lWeightElStatUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=+1., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=+1., muSigmaStat= 0., muSigmaPSSys=0)
+    # newVars.lWeightElStatDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=-1., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=-1., muSigmaStat= 0., muSigmaPSSys=0)
+    # newVars.lWeightMuStatUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=+1., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=+1., muSigmaPSSys=0)
+    # newVars.lWeightMuStatDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=-1., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=-1., muSigmaPSSys=0)
+    # newVars.lWeightPSSysUp     = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=+1.)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=+1.)
+    # newVars.lWeightPSSysDown   = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=-1.)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=-1.)
+
+    sf1, errSyst1, errStat1, errPS1, isMu1, isEl1 = leptonSF.getSF(c, l1, l1_pt)
+    sf2, errSyst2, errStat2, errPS2, isMu2, isEl2 = leptonSF.getSF(c, l2, l2_pt)
+    newVars.lWeight        = sf1*sf2
+    newVars.lWeightElSystUp    = sf1*(1. + ( 1*errSyst1*isEl1)) * sf2*(1. +  (1*errSyst2*isEl2))
+    newVars.lWeightElSystDown  = sf1*(1. + (-1*errSyst1*isEl1)) * sf2*(1. + (-1*errSyst2*isEl2))
+    newVars.lWeightMuSystUp    = sf1*(1. +  (1*errSyst1*isMu1)) * sf2*(1. +  (1*errSyst2*isMu2))
+    newVars.lWeightMuSystDown  = sf1*(1. + (-1*errSyst1*isMu1)) * sf2*(1. + (-1*errSyst2*isMu2))
+    newVars.lWeightElStatUp    = sf1*(1. +  (1*errStat1*isEl1)) * sf2*(1. +  (1*errStat2*isEl2))
+    newVars.lWeightElStatDown  = sf1*(1. + (-1*errStat1*isEl1)) * sf2*(1. + (-1*errStat2*isEl2))
+    newVars.lWeightMuStatUp    = sf1*(1. +  (1*errStat1*isMu1)) * sf2*(1. +  (1*errStat2*isMu2))
+    newVars.lWeightMuStatDown  = sf1*(1. + (-1*errStat1*isMu1)) * sf2*(1. + (-1*errStat2*isMu2))
+    newVars.lWeightPSSysUp     = sf1*(1. +  (1*errPS1*isMu1))   * sf2*(1. +  (1*errPS2*isMu2))
+    newVars.lWeightPSSysDown   = sf1*(1. + (-1*errPS1*isMu1))   * sf2*(1. + (-1*errPS2*isMu2))
+
+
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
 
     ph, ph_pt = newVars.ph, newVars.ph_pt
@@ -329,12 +352,16 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
       setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets))
 
-    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
-    newVars.triggerWeight          = trigWeight
-    newVars.triggerWeightStatUp    = trigWeight+trigErrStat
-    newVars.triggerWeightStatDown  = trigWeight-trigErrStat
-    newVars.triggerWeightSystUp    = trigWeight+trigErrSyst
-    newVars.triggerWeightSystDown  = trigWeight-trigErrSyst
+    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1_pt, l2_pt, newVars.isMuMu, newVars.isEMu, newVars.isEE)
+    newVars.triggerWeight           = trigWeight
+    newVars.triggerWeightStatMMUp   = trigWeight + (+trigErrStat if newVars.isMuMu else 0.)
+    newVars.triggerWeightStatMMDown = trigWeight + (-trigErrStat if newVars.isMuMu else 0.)
+    newVars.triggerWeightStatEMUp   = trigWeight + (+trigErrStat if newVars.isEMu  else 0.)
+    newVars.triggerWeightStatEMDown = trigWeight + (-trigErrStat if newVars.isEMu  else 0.)
+    newVars.triggerWeightStatEEUp   = trigWeight + (+trigErrStat if newVars.isEE   else 0.)
+    newVars.triggerWeightStatEEDown = trigWeight + (-trigErrStat if newVars.isEE   else 0.)
+    newVars.triggerWeightSystUp     = trigWeight+trigErrSyst
+    newVars.triggerWeightSystDown   = trigWeight-trigErrSyst
 
     if args.recTops:
       reconstTops(kf, c, newVars)

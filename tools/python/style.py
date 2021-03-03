@@ -88,7 +88,7 @@ def getDefaultCanvas(ratio):
     bottomMargin      = yWidth/float(yRatioWidth)*ROOT.gStyle.GetPadBottomMargin()
     yBorder           = yRatioWidth/float(yWidth)
 
-  canvas = ROOT.TCanvas(str(uuid.uuid4()), "canvas", 200, 10, xWidth, yWidth)
+  canvas = ROOT.TCanvas('c' + str(uuid.uuid4()).replace('-','') , "canvas", 200, 10, xWidth, yWidth)
 
   def ttgPadStyle(pad):
     pad.SetFillColor(0)

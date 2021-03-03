@@ -5,6 +5,7 @@
 # (i.e. those not containing 'finished' or 'Finished' in their log)
 #
 import argparse, os
+from time import time
 argParser = argparse.ArgumentParser(description = "Argument parser")
 argParser.add_argument('--logLevel', action='store',      default='INFO', help='Log level for logging', nargs='?', choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG', 'TRACE'])
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='Use local resources instead of Cream02')
@@ -12,6 +13,7 @@ argParser.add_argument('--dryRun',   action='store_true', default=False,  help='
 argParser.add_argument('--select',   nargs='*', type=str, default=[],     help='Resubmit only commands containing all strings given here')
 argParser.add_argument('--tolerant', action='store_true', default=False,  help='don not consider e.g. a missing tuple file a reason for resubmit')
 argParser.add_argument('--cleanFolders',   action='store_true', default=False,  help='Remove empty folders')
+argParser.add_argument('--age',   action='store', default=999., type=float,  help='ignore logs older than x days')
 args = argParser.parse_args()
 
 from ttg.tools.logger import getLogger
@@ -19,17 +21,27 @@ log = getLogger(args.logLevel)
 
 
 # Get paths to all logs and analyze the files
+# def getLogs(logDir):
+#   for topDir, subDirs, files in os.walk(logDir):
+#     if not len(files) and not len(subDirs):
+#       if args.cleanFolders:
+#         os.rmdir(topDir)
+#     else:
+#       for f in files:
+#         yield os.path.join(topDir, f)
+
 def getLogs(logDir):
   for topDir, subDirs, files in os.walk(logDir):
-    if not len(files) and not len(subDirs):
-      if args.cleanFolders:
-        os.rmdir(topDir)
-    else:
-      for f in files:
-        yield os.path.join(topDir, f)
+    for f in files:
+      yield os.path.join(topDir, f)
+
+time_now = time()
+agesec = args.age* 60*60*24
 
 jobsToSubmit = []
 for logfile in getLogs('./log'):
+  if not logfile[-4:] == '.err': continue
+  if (time_now - os.path.getmtime(logfile)) > agesec: continue
   finished  = False
   rootError = False
   command   = None
@@ -68,4 +80,4 @@ for i, (command, logfile) in enumerate(jobsToSubmit):
     if args.runLocal: launchLocal(command, logfile)
     else:
       # launchCream02(command, logfile, checkQueue=(i%100==0), wallTime='168', jobLabel='RE', cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript
-      launchCondor(command, logfile, checkQueue=(i%100==0), wallTime='168', jobLabel='RE', cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript
+      launchCondor(command, logfile.replace('.err', '.log'), checkQueue=(i%100==0), wallTime='168', jobLabel='RE', cores=8 if logfile.count("calcTriggerEff") else 1) # TODO: ideally extract walltime, cores,... from the motherscript

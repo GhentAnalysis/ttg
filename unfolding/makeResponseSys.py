@@ -54,6 +54,9 @@ log = getLogger(args.logLevel)
 for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
   systematics['q2Sc_' + i] = [('genWeight', 'weight_q2Sc_'+i)]
 
+for i in range(0, 100):                              newBranches += [ + '/F']
+  systematics['pdfSc_' + str(i)] = [('genWeight', 'weight_pdfSc_' + str(i))]
+
 if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   jobs = [args.year]
@@ -203,8 +206,12 @@ absdEtaBinGen = [0., 0.5, 1., 1.5, 2.,  2.5, 3., 4.5]
 dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]
 dRBinJetGen = [0.4, 0.8, 1.3, 1.9, 2.6, 3.4]
 
-ptBinJetRec = [30., 50., 70., 90., 110., 130., 150., 175., 200., 250., 300., 375., 450.]
-ptBinJetGen = [30., 70., 110., 150., 200., 300., 450.]
+# ptBinJetRec = [30., 50., 70., 90., 110., 130., 150., 175., 200., 250., 300., 375., 450.]
+# ptBinJetGen = [30., 70., 110., 150., 200., 300., 450.]
+
+ptBinJetRec = [30., 55., 80., 110., 140., 170., 200., 250., 300., 375., 450.]
+ptBinJetGen = [30., 80., 140., 200., 300., 450.]
+
 
 # l1l2 scalar pt sum should start at 25+15 =40
 # pT(ll) could I guess go down to 0, testing
@@ -228,7 +235,7 @@ l1l2ptBinGen = [40., 70., 100., 140., 190., 250., 330., 500.]
 
 # for systematic variations we only want the response matrices
 plotListOut.append(Plot('out_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
-plotListOut.append(Plot('out_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
+plotListOut.append(Plot('out_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, c.j1_pt                                                              , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
 plotListOut.append(Plot('out_unfReco_jetLepDeltaR',    '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
 plotListOut.append(Plot('out_unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
 plotListOut.append(Plot('out_unfReco_phLep1DeltaR',    '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c, c.phL1DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
@@ -255,7 +262,7 @@ plotListFid.append(Plot('fid_unfReco_l1l2_ptsum',      'gen p_{T}(l1)+p_{T}(l2) 
 
 if not args.sys:
   plotListRec.append(Plot('rec_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
-  plotListRec.append(Plot('rec_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
+  plotListRec.append(Plot('rec_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, c.j1_pt                                                              , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
   plotListRec.append(Plot('rec_unfReco_jetLepDeltaR',    '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
   plotListRec.append(Plot('rec_unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
   plotListRec.append(Plot('rec_unfReco_phLep1DeltaR',    '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c, c.phL1DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
@@ -270,7 +277,7 @@ if not args.sys:
 
 
   plotListRecFid.append(Plot('recFid_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
-  plotListRecFid.append(Plot('recFid_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
+  plotListRecFid.append(Plot('recFid_unfReco_jetPt',           'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, c.j1_pt                                                              , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
   plotListRecFid.append(Plot('recFid_unfReco_jetLepDeltaR',    '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
   plotListRecFid.append(Plot('recFid_unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
   plotListRecFid.append(Plot('recFid_unfReco_phLep1DeltaR',    '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c, c.phL1DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
@@ -286,7 +293,7 @@ if not args.sys:
 
 
   mList.append(Plot2D('respNorm_unfReco_phPt',           'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     , 'gen p_{T}(#gamma) (GeV)', lambda c : min(       c.PLph_pt                                                                     ,ptBinGen[-1]       -0.001 )   ,ptBinGen     , histModifications=normalizeAlong('x')))
-  mList.append(Plot2D('respNorm_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     , histModifications=normalizeAlong('x')))
+  mList.append(Plot2D('respNorm_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, c.j1_pt                                                              , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     , histModifications=normalizeAlong('x')))
   mList.append(Plot2D('respNorm_unfReco_jetLepDeltaR',   '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  , 'gen #DeltaR(l, j)',       lambda c : min(       min(c.PLl1JetDeltaR, c.PLl2JetDeltaR)                                         ,dRBinJetGen[-1]    -0.001 )   ,dRBinJetGen  , histModifications=normalizeAlong('x')))
   mList.append(Plot2D('respNorm_unfReco_phLepDeltaR',    '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     , 'gen #DeltaR(#gamma, l)',  lambda c : min(       min(c.PLphL1DeltaR, c.PLphL2DeltaR)                                           ,dRBinGen[-1]       -0.001 )   ,dRBinGen     , histModifications=normalizeAlong('x')))
   mList.append(Plot2D('respNorm_unfReco_phLep1DeltaR',   '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c, c.phL1DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     , 'gen #DeltaR(#gamma, l1)', lambda c : min(       c.PLphL1DeltaR                                                                ,dRBinGen[-1]       -0.001 )   ,dRBinGen     , histModifications=normalizeAlong('x')))
@@ -300,7 +307,7 @@ if not args.sys:
 
 
   # mList.append(Plot2D('perfR_unfReco_phPt',           'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     , 'gen p_{T}(#gamma) (GeV)', lambda c : min(       c.PLph_pt                                                                     ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
-  # mList.append(Plot2D('perfR_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
+  # mList.append(Plot2D('perfR_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, c.j1_pt                                                               , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     ))
   # mList.append(Plot2D('perfR_unfReco_jetLepDeltaR',   '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  , 'gen #DeltaR(l, j)',       lambda c : min(       min(c.PLl1JetDeltaR, c.PLl2JetDeltaR)                                         ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  ))
   # mList.append(Plot2D('perfR_unfReco_phLepDeltaR',    '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     , 'gen #DeltaR(#gamma, l)',  lambda c : min(       min(c.PLphL1DeltaR, c.PLphL2DeltaR)                                           ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
   # mList.append(Plot2D('perfR_unfReco_phLep1DeltaR',   '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c,  c.phL1DeltaR                                                        , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     , 'gen #DeltaR(#gamma, l1)', lambda c : min(       c.PLphL1DeltaR                                                                ,dRBinRec[-1]       -0.001 )   ,dRBinRec     ))
@@ -313,7 +320,7 @@ if not args.sys:
   # mList.append(Plot2D('perfR_unfReco_l1l2_ptsum',           'p_{T}(l1)+p_{T}(l2) (GeV)',    lambda c : min(ifRec(c, c.l1_pt+c.l2_pt                                                              , 0. ) ,l1l2ptBinRec[-1]       -0.001 )   ,l1l2ptBinRec     , 'gen p_{T}(l1)+p_{T}(l2) (GeV)', lambda c : min(       c.PLl1_pt+c.PLl2_pt                                                                     ,l1l2ptBinRec[-1]       -0.001 )   ,l1l2ptBinRec     ))
 
   mList.append(Plot2D('perf_unfReco_phPt',           'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinGen[-1]       -0.001 )   ,ptBinGen     , 'gen p_{T}(#gamma) (GeV)', lambda c : min(       c.PLph_pt                                                                     ,ptBinGen[-1]       -0.001 )   ,ptBinGen     ))
-  mList.append(Plot2D('perf_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     ))
+  mList.append(Plot2D('perf_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, c.j1_pt                                                              , 0. ) ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     ))
   mList.append(Plot2D('perf_unfReco_jetLepDeltaR',   '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetGen[-1]    -0.001 )   ,dRBinJetGen  , 'gen #DeltaR(l, j)',       lambda c : min(       min(c.PLl1JetDeltaR, c.PLl2JetDeltaR)                                         ,dRBinJetGen[-1]    -0.001 )   ,dRBinJetGen  ))
   mList.append(Plot2D('perf_unfReco_phLepDeltaR',    '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinGen[-1]       -0.001 )   ,dRBinGen     , 'gen #DeltaR(#gamma, l)',  lambda c : min(       min(c.PLphL1DeltaR, c.PLphL2DeltaR)                                           ,dRBinGen[-1]       -0.001 )   ,dRBinGen     ))
   mList.append(Plot2D('perf_unfReco_phLep1DeltaR',   '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c,  c.phL1DeltaR                                                        , 0. ) ,dRBinGen[-1]       -0.001 )   ,dRBinGen     , 'gen #DeltaR(#gamma, l1)', lambda c : min(       c.PLphL1DeltaR                                                                ,dRBinGen[-1]       -0.001 )   ,dRBinGen     ))
@@ -328,7 +335,7 @@ if not args.sys:
 
 
 mList.append(Plot2D('response_unfReco_phPt',           'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     , 'gen p_{T}(#gamma) (GeV)', lambda c : min(       c.PLph_pt                                                                     ,ptBinGen[-1]       -0.001 )   ,ptBinGen     ))
-mList.append(Plot2D('response_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, protectedGet(c._jetSmearedPt, c.j1)                                  , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     ))
+mList.append(Plot2D('response_unfReco_jetPt',          'p_{T}(j1) (GeV)',        lambda c : min(ifRec(c, c.j1_pt                                                              , 0. ) ,ptBinJetRec[-1]       -0.001 )   ,ptBinJetRec     , 'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     ))
 mList.append(Plot2D('response_unfReco_jetLepDeltaR',   '#DeltaR(l, j)',          lambda c : min(ifRec(c, min(c.l1JetDeltaR, c.l2JetDeltaR)                                    , 0. ) ,dRBinJetRec[-1]    -0.001 )   ,dRBinJetRec  , 'gen #DeltaR(l, j)',       lambda c : min(       min(c.PLl1JetDeltaR, c.PLl2JetDeltaR)                                         ,dRBinJetGen[-1]    -0.001 )   ,dRBinJetGen  ))
 mList.append(Plot2D('response_unfReco_phLepDeltaR',    '#DeltaR(#gamma, l)',     lambda c : min(ifRec(c, min(c.phL1DeltaR, c.phL2DeltaR)                                      , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     , 'gen #DeltaR(#gamma, l)',  lambda c : min(       min(c.PLphL1DeltaR, c.PLphL2DeltaR)                                           ,dRBinGen[-1]       -0.001 )   ,dRBinGen     ))
 mList.append(Plot2D('response_unfReco_phLep1DeltaR',   '#DeltaR(#gamma, l1)',    lambda c : min(ifRec(c, c.phL1DeltaR                                                         , 0. ) ,dRBinRec[-1]       -0.001 )   ,dRBinRec     , 'gen #DeltaR(#gamma, l1)', lambda c : min(       c.PLphL1DeltaR                                                                ,dRBinGen[-1]       -0.001 )   ,dRBinGen     ))

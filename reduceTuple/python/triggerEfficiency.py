@@ -10,14 +10,14 @@ import os
 
 
 files = {
-  ('MVA', '2016'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2016.root',
-  ('MVA', '2017'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2017.root',
-  ('MVA', '2018'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSF_phoCB__2018.root'}
+  ('MVA', '2016'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSFAveraged_phoCB-new__2016.root',
+  ('MVA', '2017'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSFAveraged_phoCB-new__2017.root',
+  ('MVA', '2018'): '$CMSSW_BASE/src/ttg/reduceTuple/data/triggerEff/triggerSFAveraged_phoCB-new__2018.root'}
 
 systDict = { 
-  '2016': (0.01614, 0.00844, 0.00750, 0.00811),
-  '2017': (0.03083, 0.01098, 0.02113, 0.02707),
-  '2018': (0.02532, 0.00655, 0.01002, 0.00277)}
+  '2016': (0.00807  ,  0.003735  , 0.004055),
+  '2017': (0.015415 ,  0.00756   , 0.013535),
+  '2018': (0.01266  ,  0.00409   , 0.001385)}
 
 # TODO: studies to be repeated for full Run II data, including assesment of systematics
 class TriggerEfficiency:
@@ -25,12 +25,11 @@ class TriggerEfficiency:
     scaleFactorFile = files[(id, year)]
     self.mumu   = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-mumu")
     self.ee     = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-ee")
-    self.mue    = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-mue")
     self.emu    = getObjFromFile(os.path.expandvars(scaleFactorFile), "SF-emu")
 
-    self.eeSyst, self.emuSyst, self.mueSyst, self.mumuSyst = systDict[year]
+    self.eeSyst, self.emuSyst, self.mumuSyst = systDict[year]
 
-    h_ = [self.mumu, self.ee, self.mue, self.emu]
+    h_ = [self.mumu, self.ee, self.emu]
     assert False not in [bool(x) for x in h_], "Could not load trigger SF: %r"%h_
 
     self.ptMax = self.mumu.GetXaxis().GetXmax()
@@ -42,21 +41,39 @@ class TriggerEfficiency:
     statErr = map_.GetBinError(  map_.FindBin(pt1, pt2))
     return (val, statErr, sysErr)
 
-  def getSF(self, tree, l1, l2, pt1, pt2):
-    flavor1 = tree._lFlavor[l1]
-    flavor2 = tree._lFlavor[l2]
-
+  def getSF(self, tree, pt1, pt2, isMuMu, isEMu, isEE):
     if pt1 < pt2: raise ValueError ( "Sort leptons wrt pt." )
-
     # Uncertainty: based on difference between MET and JetHT, table below
-    if abs(flavor1)==abs(flavor2)==1:         return self.__getSF(self.mumu, pt1, pt2, self.mumuSyst)
-    elif abs(flavor1)==abs(flavor2)==0:       return self.__getSF(self.ee,   pt1, pt2, self.eeSyst)
-    elif abs(flavor1)==1 and abs(flavor2)==0: return self.__getSF(self.mue,  pt1, pt2, self.mueSyst)
-    elif abs(flavor1)==0 and abs(flavor2)==1: return self.__getSF(self.emu,  pt1, pt2, self.emuSyst)
-    raise ValueError( "Did not find trigger SF for pt1 %3.2f flavor %i pt2 %3.2f flavor %i"%( pt1, flavor1, pt2, flavor2 ) )
+    if   isMuMu:     return self.__getSF(self.mumu, pt1, pt2, self.mumuSyst)
+    elif isEMu:      return self.__getSF(self.emu,  pt1, pt2, self.emuSyst)
+    elif isEE:       return self.__getSF(self.ee,   pt1, pt2, self.eeSyst)
+    raise ValueError("event in none of the 3 channels")
 
 # TODO implement stat and syst split
 
+
+
+#          ee          emu        mumu
+# 2016            
+# JetHT    0.95754    0.96515     0.9761
+# MET      0.9414     0.95768     0.96799
+# average  0.94947    0.961415    0.972045
+# diff     0.00807    0.003735    0.004055
+            
+# 2017            
+# JetHT    0.96041    0.96266    0.96897
+# MET      0.92958    0.94754    0.9419
+# average  0.944995   0.9551     0.955435
+# diff     0.015415   0.00756    0.013535
+            
+# 2018            
+# JetHT    0.96601    0.96673    0.97215
+# MET      0.94069    0.95855    0.96938
+# average  0.95335    0.96264    0.970765
+# diff     0.01266    0.00409    0.001385
+
+
+#OLD
 #           ee     emu       mue       mumu
 # 2016--------------------------------------
 # JetHT  0.95754   0.97006   0.96040   0.97610

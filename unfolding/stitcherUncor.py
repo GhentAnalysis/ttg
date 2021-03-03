@@ -60,18 +60,18 @@ distList = [
   # 'unfReco_ll_cosTheta',
 
 labels = {
-          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',  'gen p_{T}(#gamma) (GeV)'),
-          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',   'gen #DeltaR(#gamma, l)'),
-          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',       'gen #Delta#phi(ll)'),
-          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',        'gen #DeltaR(l, j)'),
-          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',      'gen p_{T}(j1) (GeV)'),
-          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',     'gen |#Delta#eta(ll)|'),
-          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',   'gen #DeltaR(#gamma, b)'),
-          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',       'gen |#eta|(#gamma)'),
-          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
-          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
-          'unfReco_Z_pt' :            ('p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
-          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
+          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',       'gen p_{T}(#gamma) (GeV)'),
+          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',        'gen #DeltaR(#gamma, l)'),
+          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',            'gen #Delta#phi(ll)'),
+          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',             'gen #DeltaR(l, j)'),
+          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',           'gen p_{T}(j1) (GeV)'),
+          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',          'gen |#Delta#eta(ll)|'),
+          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',        'gen #DeltaR(#gamma, b)'),
+          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',            'gen |#eta|(#gamma)'),
+          'unfReco_phLep1DeltaR' :    ('reco #DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
+          'unfReco_phLep2DeltaR' :    ('reco #DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
+          'unfReco_Z_pt' :            ('reco p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
+          'unfReco_l1l2_ptsum' :      ('reco p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
           }
 
 
@@ -111,7 +111,7 @@ def stitch1D(h6, h7, h8):
     for i in range(1, h6.GetXaxis().GetNbins()+1):
       binning.append(y*(end-start) + h6.GetXaxis().GetBinLowEdge(i))
   binning.append(3.*end - 2.*start)
-  stitched = ROOT.TH1F(h6.GetName() + "RunII" + str(uuid.uuid4()), h6.GetName() + "RunII", len(binning)-1, numpy.array(binning))
+  stitched = ROOT.TH1F(h6.GetName() + "RunII" + 'c' + str(uuid.uuid4()).replace('-',''), h6.GetName() + "RunII", len(binning)-1, numpy.array(binning))
 
   # log.info(binning)
   for y, h in enumerate([h6, h7, h8]):
@@ -145,7 +145,7 @@ def stitch2D(h6, h7, h8):
   for i in range(1, h6.GetYaxis().GetNbins()+1):
     ybinning.append(h6.GetYaxis().GetBinLowEdge(i))
   ybinning.append(end)
-  stitched = ROOT.TH2F(h6.GetName() + "RunII" + str(uuid.uuid4()), h6.GetName() + "RunII", len(binning)-1, numpy.array(binning), len(ybinning)-1, numpy.array(ybinning))
+  stitched = ROOT.TH2F(h6.GetName() + "RunII" + 'c' + str(uuid.uuid4()).replace('-',''), h6.GetName() + "RunII", len(binning)-1, numpy.array(binning), len(ybinning)-1, numpy.array(ybinning))
 
   for y, h in enumerate([h6, h7, h8]):
     nbins = h.GetXaxis().GetNbins()
@@ -321,4 +321,4 @@ for dist in distList:
   # pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
   # pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
 
-  # TODO pickle the new dictionaries, but avaid using the year value all or so
+  # TODO pickle the new dictionaries, but avoid using the year value all or so
