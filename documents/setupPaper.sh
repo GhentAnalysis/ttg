@@ -1,4 +1,4 @@
-note=TOP-18-010
+note=TOP-21-004
 if [ ! -d "$note" ]; then
   git clone --recursive https://gitlab.cern.ch/tdr/papers/$note.git 
 fi

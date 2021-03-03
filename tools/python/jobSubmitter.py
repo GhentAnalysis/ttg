@@ -51,6 +51,7 @@ def launchCondor(command, logfile, checkQueue=False, wallTime='15', queue='local
                             "environment": params,
                             "output": logfile.replace('.log', '.out'),
                             "error":  logfile.replace('.log', '.err'),
+                            "request_cpus": str(cores),
                             "log":    logfile})
                             
   schedd = htcondor.Schedd() 
