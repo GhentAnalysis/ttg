@@ -19,17 +19,24 @@ log = getLogger(args.logLevel)
 
 
 # Get paths to all logs and analyze the files
+# def getLogs(logDir):
+#   for topDir, subDirs, files in os.walk(logDir):
+#     if not len(files) and not len(subDirs):
+#       if args.cleanFolders:
+#         os.rmdir(topDir)
+#     else:
+#       for f in files:
+#         yield os.path.join(topDir, f)
+
 def getLogs(logDir):
   for topDir, subDirs, files in os.walk(logDir):
-    if not len(files) and not len(subDirs):
-      if args.cleanFolders:
-        os.rmdir(topDir)
-    else:
-      for f in files:
-        yield os.path.join(topDir, f)
+    for f in files:
+      yield os.path.join(topDir, f)
 
 jobsToSubmit = []
 for logfile in getLogs('./log'):
+  if not logfile[-4:] == '.err': continue
+  # log.info(logfile)
   finished  = False
   rootError = False
   command   = None

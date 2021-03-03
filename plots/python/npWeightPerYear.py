@@ -11,20 +11,36 @@ log = getLogger()
 import pickle
 import time
 import ROOT
+ROOT.TH2.SetDefaultSumw2()
+ROOT.TH1.SetDefaultSumw2()
 
 
-sourceHists ={'2016': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaC.pkl'),
-              '2017': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaC.pkl'),
-              '2018': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaC.pkl',
-                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaC.pkl'),
+# sourceHists ={'2016': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl'),
+#               '2017': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl'),
+#               '2018': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl',
+#                         '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl'),
+# }
+
+sourceHists ={'2016': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-passSigmaIetaIeta-forNPest/emu/llg-mll20-photonPt20-chIso0to20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/emu/llg-mll20-photonPt20-chIso0to20/photon_pt_etaA.pkl'),
+              '2017': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-passSigmaIetaIeta-forNPest/emu/llg-mll20-photonPt20-chIso0to20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/emu/llg-mll20-photonPt20-chIso0to20/photon_pt_etaA.pkl'),
+              '2018': ( '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-passSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-passChgIso-sidebandSigmaIetaIeta-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-passSigmaIetaIeta-forNPest/emu/llg-mll20-photonPt20-chIso0to20/photon_pt_etaA.pkl',
+                        '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-failChgIso-sidebandSigmaIetaIeta-forNPest/emu/llg-mll20-photonPt20-chIso0to20/photon_pt_etaA.pkl'),
 }
 
 def sumHists(picklePath, plot):
@@ -52,7 +68,7 @@ class npWeight:
     try:
       # for data driven estimate
 
-      histA, histB, histC, histD = (sumHists(file, 'photon_pt_etaC') for file in sourceHists[year])
+      histA, histB, histC, histD = (sumHists(file, 'photon_pt_etaA') for file in sourceHists[year])
       histC[2].Add(histC[1], -1.)
       histD[2].Add(histD[1], -1.)
 
@@ -63,14 +79,22 @@ class npWeight:
 
       histC[2].Divide(histD[2])
       # genuine subtracted C/D, or data np C/D
-
+      self.CDHist = histC[2].Clone()
       # need to do this to subtract genuine in sideband
+
+      for i in range(0, histB[2].GetXaxis().GetNbins()+1):
+        for j in range(0, histB[2].GetYaxis().GetNbins()+1):
+          histB[2].SetBinError(i, j, 0.)
       dataB = histB[2].Clone()
+
+
       histB[2].Add(histB[1], -1.)
       # genuine subtracted B, or data np in B
       histB[2].Divide(dataB)
       # fraction of np in B
       histC[2].Multiply(histB[2])
+
+      
       # estimation factor C/D compensated for the fact we apply to total data, not np only
       # estimate works with any selection where nonprompt fraction is about the same. but close to 100% anywhere so ok
       self.dataEst = histC[2]
@@ -106,6 +130,16 @@ if __name__ == '__main__':
 
   for year in ['2016', '2017', '2018']:
     tester = npWeight(year, 0.)
+
+
+    c1 = ROOT.TCanvas('c', 'c', 900, 800)
+    tester.CDHist.SetTitle('')
+    tester.CDHist.GetYaxis().SetTitle('|#eta(#gamma)|')
+    tester.CDHist.GetXaxis().SetTitle('p_{T}(#gamma)')
+    tester.CDHist.Draw("COLZ TEXT E")
+    c1.SaveAs('estMaps/CoverDData' + year + '.png')
+    c1.SaveAs('estMaps/CoverDData' + year + '.pdf')
+
 
     c1 = ROOT.TCanvas('c', 'c', 900, 800)
     tester.dataEst.SetTitle('')

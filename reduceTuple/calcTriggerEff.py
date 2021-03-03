@@ -20,7 +20,7 @@ argParser.add_argument('--year',     action='store',      default=None,   help='
 argParser.add_argument('--isChild',  action='store_true', default=False,  help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--runLocal', action='store_true', default=False,  help='use local resources instead of Cream02')
 argParser.add_argument('--dryRun',   action='store_true', default=False,  help='do not launch subjobs, only show them')
-argParser.add_argument('--selectID', action='store',      default='phoCB', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB','base'])
+argParser.add_argument('--selectID', action='store',      default='phoCB', choices=['phoCB', 'phoCBfull', 'leptonMVA-phoCB','base', 'phoCB-new'])
 args = argParser.parse_args()
 
 
@@ -41,7 +41,9 @@ if not args.isChild:
   if args.year:   sampleList = [s for s in sampleList if s.year == args.year]
   jobs = []
   for sample in sampleList:
-    for select in [args.select] if args.select else ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
+    # for select in [args.select] if args.select else ['', 'ph', 'offZ', 'njet1p', 'njet2p']:
+    for select in [args.select] if args.select else ['']:
+      # NOTE limiting this
       for corr in [True, False]:
         for pu in [True, False] if sample.name not in ['MET','JetHT'] else [False]:
           jobs += [(sample.name, sample.year, select, corr, pu)]
@@ -157,7 +159,8 @@ else:
     hPass, hTotal = {}, {}
     for t in ['', '-l1cl2c', '-l1cl2e', '-l1el2c', '-l1el2e', '-l1c', '-l1e', '-l2c', '-l2e', '-etaBinning', '-integral']:
       hPass[t], hTotal[t] = {}, {}
-      for channel in ['ee', 'emu', 'mue', 'mumu']:
+      # for channel in ['ee', 'emu', 'mue', 'mumu']:
+      for channel in ['ee', 'emu', 'mumu']:
         if 'etaBinning' in t:
           binningX = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.startswith('e') else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
           binningY = numpy.array([0., .8, 1.442, 1.566, 2., 2.4]) if channel.endswith('e')   else numpy.array([0., 0.9, 1.2, 2.1, 2.4])
@@ -177,13 +180,15 @@ else:
     c.egvar = 'Corr'
     c.muvar = 'Corr'
     
+    log.info('this is subjob ' + str(subJob))
     for i in clonedSample.eventLoop(totalJobs=totalJobs, subJob=subJob):
       c.GetEntry(i)
       if not c._passTrigger_ref: continue
       if not passSelection(c): continue
 
       if c.isEE:   channel = 'ee'
-      if c.isEMu:  channel = 'emu' if c._lFlavor[c.l1] == 0 else 'mue'
+      # if c.isEMu:  channel = 'emu' if c._lFlavor[c.l1] == 0 else 'mue'
+      if c.isEMu:  channel = 'emu'
       if c.isMuMu: channel = 'mumu'
       puWeight = puReweighting(c._nTrueInt) if args.pu else 1.
 

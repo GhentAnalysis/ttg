@@ -499,7 +499,7 @@ class Plot:
   #
   def draw(self, \
           yRange = "auto",
-          extensions = ["pdf", "png", "root"],
+          extensions = ["pdf", "png", "root", "C"],
           plot_directory = ".",
           logX = False, logY = True,
           ratio = None,

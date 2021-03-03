@@ -22,14 +22,15 @@ sourceHists ={'A': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB
                     '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
                     '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl'),
 
-              'C': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTBAR-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTBAR-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTBAR-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl'),
+              'C': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl'),
 
-              'D': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTBAR-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTBAR-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTBAR-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_pt_etaA.pkl')
+              'D': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl')
 }
+
 
 def sumHists(sourceHists, plot):
   nHist = None
@@ -57,43 +58,6 @@ class npWeight:
     try:
         # for data driven estimate
       histA, histB, histC, histD = (sumHists(sourceHists[region], 'photon_pt_etaA') for region in ['A', 'B', 'C', 'D'])
-      # histC[2].Add(histC[1], -1.)
-      # histD[2].Add(histD[1], -1.)
-
-      # self.DC = histC[2].Clone()
-      # self.DD = histD[2].Clone()
-      # self.MCC = histC[0].Clone()
-      # self.MCD = histD[0].Clone()
-
-      # histC[2].Divide(histD[2])
-      # # genuine subtracted C/D, or data np C/D
-
-      # # need to do this to subtract genuine in sideband
-      # log.info(histB[2].GetBinError(1,1))
-
-
-      # for i in range(0, histB[2].GetXaxis().GetNbins()+1):
-      #   for j in range(0, histB[2].GetYaxis().GetNbins()+1):
-      #     histB[2].SetBinError(i, j, 0.)
-
-      # dataB = histB[2].Clone()
-
-
-      # log.info(dataB.GetBinError(1,1))
-
-
-      # histB[2].Add(histB[1], -1.)
-      # # genuine subtracted B, or data np in B
-      # histB[2].Divide(dataB)
-      # # fraction of np in B
-      # histC[2].Multiply(histB[2])
-
-      # log.info(histC[2].GetBinError(1,1))
-
-      # # estimation factor C/D compensated for the fact we apply to total data, not np only
-      # # estimate works with any selection where nonprompt fraction is about the same. but close to 100% anywhere so ok
-      # self.dataEst = histC[2]
-      # assert self.dataEst
 
       # for MC based estimate / closure test
       histC[0].Divide(histD[0])
@@ -112,7 +76,7 @@ class npWeight:
       else:
         sf =  self.mcEst.GetBinContent(self.mcEst.GetXaxis().FindBin(pt), self.mcEst.GetYaxis().FindBin(eta))
       # estimated 15% systematic uncertainty
-      return sf*(1.+self.sigma*0.15)
+      return sf*(1.+self.sigma* (0.30 if pt > 100. else 0.05) )
     else: return 1.
 
 if __name__ == '__main__':
@@ -136,8 +100,8 @@ if __name__ == '__main__':
   tester.mcEst.GetYaxis().SetTitle('|#eta(#gamma)|')
   tester.mcEst.GetXaxis().SetTitle('p_{T}(#gamma)')
   tester.mcEst.Draw("COLZ TEXT E")
-  c1.SaveAs('estMaps/sfMCMerged.png')
-  c1.SaveAs('estMaps/sfMCMerged.pdf')
+  c1.SaveAs('estMaps/sfTTBARMCMerged.png')
+  c1.SaveAs('estMaps/sfTTBARMCMerged.pdf')
 
   # c1 = ROOT.TCanvas('c', 'c', 900, 800)
   # tester.DC.SetTitle('')

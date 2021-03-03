@@ -26,6 +26,10 @@ special_cuts = {
     'signalRegionAB':      '(isEMu&&njets>0)||(ndbjets>0)',
     'PLsignalRegion':      '(PLnjets>1)||(PLnjets==1&&PLndbjets==1)',   # signal regions small
 
+    'signalRegionEstA':       '((njets>0)||isEMu)',
+    'signalRegionEstB':       '((njets>1)||isEMu)',
+
+
     'all':                 '(1)',
     'noData':              '(1)',
     'ee':                  'isEE',
