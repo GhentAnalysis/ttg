@@ -121,6 +121,7 @@ class Sample:                                                                   
 
   # Get iterator over entries
   def eventLoop(self, selectionString = None, totalJobs=1, subJob = 0):
+    self.chain.SetBranchStatus("_gen_daughterIndex", 0) # branch corrupted in some samples, not needed anyway
     if self.selectionString and selectionString: selectionString += "&&" + self.selectionString
     elif self.selectionString:                   selectionString  = self.selectionString
     if selectionString: entries = self.getEventList(selectionString, totalJobs, subJob)

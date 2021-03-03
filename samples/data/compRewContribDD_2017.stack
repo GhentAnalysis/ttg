@@ -22,8 +22,8 @@ DY_M50               Drell-Yan_(nonprompt)             fillStyle     427        
 $singleTop
 ST_tW_ch             Single-t+#gamma_(nonprompt)              fillStyle     797
 +ST_tbarW_ch
-+ST_s_ch_lep
-+ST_s_ch_had
++ST_s_ch_lep_t
++ST_s_ch_lep_tbar
 +ST_t_ch
 +ST_tbar_ch
 
@@ -46,7 +46,7 @@ VVTo2L2Nu             Multiboson+#gamma_(nonprompt)               fillStyle     
 
 $other
 WGamma              Other+#gamma_(nonprompt)       fillStyle    kGray
-+GluGluToH_ZZ
+%+GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau

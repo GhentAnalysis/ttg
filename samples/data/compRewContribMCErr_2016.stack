@@ -22,8 +22,7 @@ DY_M50               total_(nonprompt)             errorStyle    kBlue          
 $singleTop
 ST_tW_ch              total_(nonprompt)             errorStyle    kBlue 
 +ST_tbarW_ch
-+ST_s_ch_lep
-+ST_s_ch_had
++ST_s_ch_incl
 +ST_t_ch
 +ST_tbar_ch
 
@@ -46,7 +45,7 @@ VVTo2L2Nu              total_(nonprompt)             errorStyle    kBlue
 
 $other
 WGamma               total_(nonprompt)             errorStyle    kBlue 
-+GluGluToH_ZZ
+%+GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau
@@ -54,7 +53,7 @@ WGamma               total_(nonprompt)             errorStyle    kBlue
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
 +TTZtoLL
-+TTZtoLL_M1to10
+%+TTZtoLL_M1to10
 +TTZtoQQ
 +TTWtoLNu
 +TTWtoQQ
@@ -66,7 +65,7 @@ WGamma               total_(nonprompt)             errorStyle    kBlue
 +TTZZ
 +TTTT
 +tWll
-+tWnunu
+%+tWnunu
 +tHq
 +tHW
 
@@ -95,8 +94,7 @@ DY_M50               nonprompt-estimate_(MC)              errorStyle    kBlack  
 $singleTop
 ST_tW_ch               nonprompt-estimate_(MC)              errorStyle    kBlack
 +ST_tbarW_ch
-+ST_s_ch_lep
-+ST_s_ch_had
++ST_s_ch_incl
 +ST_t_ch
 +ST_tbar_ch
 
@@ -119,7 +117,7 @@ VVTo2L2Nu               nonprompt-estimate_(MC)              errorStyle    kBlac
 
 $other
 WGamma                nonprompt-estimate_(MC)              errorStyle    kBlack
-+GluGluToH_ZZ
+%+GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau
@@ -127,7 +125,7 @@ WGamma                nonprompt-estimate_(MC)              errorStyle    kBlack
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
 +TTZtoLL
-+TTZtoLL_M1to10
+%+TTZtoLL_M1to10
 +TTZtoQQ
 +TTWtoLNu
 +TTWtoQQ
@@ -139,6 +137,6 @@ WGamma                nonprompt-estimate_(MC)              errorStyle    kBlack
 +TTZZ
 +TTTT
 +tWll
-+tWnunu
+%+tWnunu
 +tHq
 +tHW
