@@ -121,10 +121,17 @@ newBranches += ['genWeight/F', 'lTrackWeight/F', 'lWeight/F', 'puWeight/F', 'tri
 if not forSys:
   for sys in ['JECUp', 'JECDown', 'JERUp', 'JERDown']:
     newBranches += ['njets_' + sys + '/I', 'ndbjets_' + sys +'/I', 'j1_' + sys + '/I', 'j2_' + sys + '/I', 'dbj1_' + sys + '/I', 'dbj2_' + sys + '/I']
-    newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F']
+    newBranches += ['phJetDeltaR_' + sys + '/F', 'phBJetDeltaR_' + sys + '/F', 'l1JetDeltaR_' + sys + '/F', 'l2JetDeltaR_' + sys + '/F', 'j1_pt_' + sys + '/F']
+  for sys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+    for direc in ['Up','Down']:
+      newBranches += ['njets_' + sys + direc +  '/I', 'ndbjets_' + sys + direc + '/I', 'j1_' + sys + direc +  '/I', 'j2_' + sys + direc +  '/I', 'dbj1_' + sys + direc +  '/I', 'dbj2_' + sys + direc +  '/I']
+      newBranches += ['phJetDeltaR_' + sys + direc +  '/F', 'phBJetDeltaR_' + sys + direc +  '/F', 'l1JetDeltaR_' + sys + direc +  '/F', 'l2JetDeltaR_' + sys + direc +  '/F', 'j1_pt_' + sys + direc + '/F']
+
   for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
+  for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2Sc_' + var + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-  for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeight' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
+  for i in range(0, 100):                              newBranches += ['weight_pdfSc_' + str(i) + '/F']
+  for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStat' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
   for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -218,10 +225,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     if newVars.isMuMu and not (c._passTrigger_mm or c._passTrigger_m):                        reco = False
     if not  c._passMETFilters:                                                                reco = False
   if reco:
-    goodJets(c, newVars)
-    bJets(c, newVars)
+    goodJets(c, newVars, forSys = forSys)
+    bJets(c, newVars, forSys = forSys)
     makeInvariantMasses(c, newVars)
-    makeDeltaR(c, newVars)
+    makeDeltaR(c, newVars, forSys = forSys)
   newVars.failReco = not reco
 
   if not reco and not fid: continue    #events failing both reco and fiducial selection are not needed
@@ -230,12 +237,20 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   if not forSys:
     # TTG
     for var, i in [('Fu', 15), ('Fd', 30), ('Ru', 5), ('RFu', 20), ('Rd', 10), ('RFd', 40)]:
-      try:    setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
-      except: setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
+      try:    
+        setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
+        setattr(newVars, 'weight_q2Sc_' + var, c._weight*c._lheWeight[i]*lumiWeights[0])
+      except: 
+        setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
+        setattr(newVars, 'weight_q2Sc_' + var, newVars.genWeight)
 
     for i in range(0, 100):
-      try:    setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[i+45])
-      except: setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
+      try:    
+        setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[i+45])
+        setattr(newVars, 'weight_pdfSc_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[0])
+      except: 
+        setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
+        setattr(newVars, 'weight_pdfSc_' + str(i), newVars.genWeight)
 
     try:
       # corresponds to 2 - 1/2 variations, recommended see talk  
@@ -267,10 +282,12 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.lWeightMuStatDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
 
-    trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
-    newVars.triggerWeight      = trigWeight
-    newVars.triggerWeightUp    = trigWeight+trigErr
-    newVars.triggerWeightDown  = trigWeight-trigErr
+    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+    newVars.triggerWeight          = trigWeight
+    newVars.triggerWeightStatUp    = trigWeight+trigErrStat
+    newVars.triggerWeightStatDown  = trigWeight-trigErrStat
+    newVars.triggerWeightSystUp    = trigWeight+trigErrSyst
+    newVars.triggerWeightSystDown  = trigWeight-trigErrSyst
 
   else:
     newVars.lWeight        = 1.
@@ -281,11 +298,11 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.lWeightMuStatUp    = 1.
     newVars.lWeightMuStatDown  = 1.
     newVars.lTrackWeight = 1.
-
-    newVars.triggerWeight      = 1.
-    newVars.triggerWeightUp    = 1.
-    newVars.triggerWeightDown  = 1.
-
+    newVars.triggerWeight          = 1.
+    newVars.triggerWeightStatUp    = 1.
+    newVars.triggerWeightStatDown  = 1.
+    newVars.triggerWeightSystUp    = 1.
+    newVars.triggerWeightSystDown  = 1.
 
   if phoSel:
     ph, ph_pt = newVars.ph, newVars.ph_pt

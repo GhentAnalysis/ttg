@@ -47,7 +47,7 @@ VVTo2L2Nu             All_(nonprompt)        errorStyle    kBlue
 
 $other
 WGamma              All_(nonprompt)        errorStyle    kBlue
-+GluGluToH_ZZ
+%+GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau
@@ -55,7 +55,7 @@ WGamma              All_(nonprompt)        errorStyle    kBlue
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
 +TTZtoLL
-+TTZtoLL_M1to10
+%+TTZtoLL_M1to10
 +TTZtoQQ
 +TTWtoLNu
 +TTWtoQQ
@@ -67,6 +67,6 @@ WGamma              All_(nonprompt)        errorStyle    kBlue
 +TTZZ
 +TTTT
 +tWll
-+tWnunu
+%+tWnunu
 +tHq
 +tHW

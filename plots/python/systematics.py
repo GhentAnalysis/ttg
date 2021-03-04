@@ -12,28 +12,37 @@ for i in ('Up', 'Down'):
   systematics['isr'+i]        = [('ISRWeight',    'ISRWeight'+i)]
   systematics['fsr'+i]        = [('FSRWeight',    'FSRWeight'+i)]
   systematics['ue'+i]         = []
-  systematics['erd'+i]        = []
   systematics['ephScale'+i]     = []
   systematics['ephRes'+i]       = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
   systematics['pvSF'+i]       = [('PVWeight',      'PVWeight'+i)]
-  systematics['lSFSy'+i]      = [('lWeight',       'lWeightSyst'+i)]
-  systematics['lSFEl'+i]      = [('lWeight',       'lWeightElStat'+i)]
-  systematics['lSFMu'+i]      = [('lWeight',       'lWeightMuStat'+i)]
-  systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
+  systematics['lSFElSyst'+i]      = [('lWeight',       'lWeightElSyst'+i)]
+  systematics['lSFMuSyst'+i]      = [('lWeight',       'lWeightMuSyst'+i)]
+  systematics['lSFElStat'+i]      = [('lWeight',       'lWeightElStat'+i)]
+  systematics['lSFMuStat'+i]      = [('lWeight',       'lWeightMuStat'+i)]
+
+  # systematics['lSFMuPS'+i]      = [('lWeight',       'lWeightPSSys'+i)]
+
 # TODO turn on once new skim ready
-  # systematics['trigStat'+i]    = [('triggerWeight', 'triggerWeightStat'+i)]
-  # systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
+  systematics['trigStatEE'+i]    = [('triggerWeight', 'triggerWeightStatEE'+i)]
+  systematics['trigStatEM'+i]    = [('triggerWeight', 'triggerWeightStatEM'+i)]
+  systematics['trigStatMM'+i]    = [('triggerWeight', 'triggerWeightStatMM'+i)]
+  systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
 
   systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
   systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
-  systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
   systematics['NP'+i]         = []
-  # for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
-  #   systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
+
+  for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+    systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
+
+
+  # systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
+  # systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
+  # systematics['erd'+i]        = []
 
 # not in here -> 100% correlation
 correlations = {
@@ -70,6 +79,9 @@ for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
 
 for i in range(0, 100):
   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
+
+for i in ('1', '2', '3'):
+  systematics['colRec_' + i] = []
 
 
 # Compile list to systematic to show
@@ -164,7 +176,7 @@ def getSigmaSyst(sys):
 #
 def getReplacementsForStack(sys, year):
   if sys:
-    ttgsampsw = {'erdUp':'erd', 'ueDown':'uedown', 'ueUp':'ueup'}
+    ttgsampsw = {'colRec_1':'CR1','colRec_2':'CR2','colRec_3':'erd', 'ueDown':'uedown', 'ueUp':'ueup'}
     if sys in ttgsampsw.keys():
       sw = ttgsampsw[sys]
       return {'TTGamma_DilPCUT' : 'TTGamma_Dil_' + sw, 'TTGamma_SemPCUT' : 'TTGamma_Sem_' + sw,  'TTGamma_HadPCUT' : 'TTGamma_Had',
@@ -219,3 +231,26 @@ def constructPdfSys(allPlots, plotName, stack, force=False):
       log.warning('Missing pdf variations for ' + plotName + ' ' + histName + '!')
       variations = [allPlots[plotName][histName]]
     allPlots[plotName + 'pdfUp'][histName], allPlots[plotName + 'pdfDown'][histName] = pdfSys(variations, allPlots[plotName][histName])
+
+
+#
+# Function for the color reconnection envelope using input histogram
+# there is no up/down sample for these, take max deviation and us it to produce up/down variations
+def CRSys(variations):
+  upHist, downHist = variations[0].Clone(), variations[0].Clone()
+  for i in range(0, variations[0].GetNbinsX()+2):
+    maxdev = max([abs(var.GetBinContent(i) - upHist.GetBinContent(i)) for var in variations])
+    upHist.SetBinContent(  i, upHist.GetBinContent(i) + maxdev )
+    downHist.SetBinContent(i, downHist.GetBinContent(i) - maxdev )
+  return upHist, downHist
+
+def constructCRSys(allPlots, plotName, stack, force=False):
+  allPlots[plotName + 'colRecUp'] = {}
+  allPlots[plotName + 'colRecDown'] = {}
+  for histName in [s.name+s.texName for s in stack]:
+    try:
+      variations = [allPlots[plotName + 'CRSys_' + i][histName] for i in ('1', '2', '3')]
+    except:
+      log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
+      variations = [allPlots[plotName][histName]]
+    allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations)

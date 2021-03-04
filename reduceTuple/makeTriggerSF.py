@@ -56,6 +56,7 @@ def mkTriggerSF(year):
             errLow = sqrt(effData.GetEfficiencyErrorLow(globalBin)**2+effMC.GetEfficiencyErrorLow(globalBin)**2)
             hist.SetBinError(i, j, max(errUp, errLow))
 
+
       canvas = ROOT.TCanvas(effData.GetName() + year, effData.GetName())
       canvas.cd()
       ROOT.gStyle.SetPaintTextFormat("2.5f" if 'integral' in t else "2.2f")

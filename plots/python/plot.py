@@ -13,7 +13,7 @@ from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
 from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
-from ttg.plots.systematics import constructQ2Sys, constructPdfSys
+from ttg.plots.systematics import constructQ2Sys, constructPdfSys, constructCRSys
 from ttg.samples.Sample import getSampleFromStack
 
 ROOT.TH1.SetDefaultSumw2()
@@ -352,6 +352,7 @@ class Plot:
 
     if 'q2'  in systematics: constructQ2Sys(allPlots, self.name, stackForSys)
     if 'pdf' in systematics: constructPdfSys(allPlots, self.name, stackForSys)
+    if 'colRec' in systematics: constructCRSys(allPlots, self.name, stackForSys)
 
     histos_summed = {}
     histos_splitted = {}
@@ -450,6 +451,13 @@ class Plot:
         boxes.append(box)
     return boxes
 
+  def getUncBox(self, unc):
+    box = ROOT.TBox(self.xmin, 1-unc, self.xmax, 1+unc)
+    box.SetLineColor(ROOT.kBlack)
+    box.SetFillStyle(3005)
+    box.SetFillColor(ROOT.kBlack)
+    return box
+
   #
   # Get filled bins in plot
   #
@@ -492,7 +500,7 @@ class Plot:
   #
   def draw(self, \
           yRange = "auto",
-          extensions = ["pdf", "png", "root"],
+          extensions = ["pdf", "png", "root", "C"],
           plot_directory = ".",
           logX = False, logY = True,
           ratio = None,
@@ -500,6 +508,7 @@ class Plot:
           sorting = False,
           legend = "auto",
           drawObjects = [],
+          uncBandRatio = None,
           canvasModifications = [],
           histModifications = [],
           ratioModifications = [],
@@ -649,6 +658,8 @@ class Plot:
       else:                  nums = [histos[ratio['num']][0]]
       den = histos[ratio['den']][0]
 
+
+
       ratios = []
       for i, num in enumerate(nums):
         h_ratio = num.Clone()
@@ -690,6 +701,10 @@ class Plot:
       for o in ratio['drawObjects']:
         try:    o.Draw()
         except: log.debug( "ratio['drawObjects'] has something I can't Draw(): %r", o)
+
+      if uncBandRatio:
+        box = self.getUncBox(uncBandRatio)
+        box.Draw()
 
     try:    os.makedirs(plot_directory)
     except: pass

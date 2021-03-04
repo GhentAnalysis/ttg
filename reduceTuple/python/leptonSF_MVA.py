@@ -14,70 +14,76 @@ dataDir  = "$CMSSW_BASE/src/ttg/reduceTuple/data/leptonSFData"
 
 class LeptonSF_MVA:
   def __init__(self, year): 
-    self.muSyst   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'topmva_mu_VLoose_' + year + '.root')), 'NUM_LeptonMvaVLoose_DEN_genTracks_abseta_pt_syst')
-    self.muStat   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'topmva_mu_VLoose_' + year + '.root')), 'NUM_LeptonMvaVLoose_DEN_genTracks_abseta_pt_stat')
-    self.elSyst   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'topmva_eg_VLoose_' + year + '.root')), 'EGamma_SF2D')
-    # self.elStat   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'topmva_eg_VLoose_' + year + '.root')), 'EGamma_SF2D')
+    self.elSF     = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'egammaEffi.txt_EGM2D_' + year + '.root')), 'EGamma_SF2D')
+    self.elSyst   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'egammaEffi.txt_EGM2D_' + year + '.root')), 'sys')
+    self.elStat   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'egammaEffi.txt_EGM2D_' + year + '.root')), 'stat')
+    self.muSF     = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'muonTOPLeptonMVAVLooseNoPS' + year + '.root')), 'SF')
+    self.muSyst   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'muonTOPLeptonMVAVLooseNoPS' + year + '.root')), 'SFTotSys')
+    self.muStat   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'muonTOPLeptonMVAVLooseNoPS' + year + '.root')), 'SFTotStat')
+
+    self.muPSSys   = getObjFromFile(os.path.expandvars(os.path.join(dataDir, 'muonTOPLeptonMVAVLooseNoPS' + year + '.root')), 'SFPSSys')
+    assert self.elSF
+    assert self.elSyst
+    assert self.elStat
+    assert self.muSF
     assert self.muSyst
     assert self.muStat
-    assert self.elSyst
-    # assert self.elStat
+    assert self.muPSSys
 
-# NOTE syst component is correlated between years and flavours, stat component is uncorrelated
+  # def getSF(self, tree, index, pt, elSigmaSyst=0, muSigmaSyst=0, elSigmaStat=0, muSigmaStat=0, muSigmaPSSys=0):
+  #   flavor = tree._lFlavor[index]
+  #   eta    = tree._lEta[index] if flavor == 1 else tree._lEtaSC[index]
 
-  def getSF(self, tree, index, pt, sigmaSyst=0, elSigmaStat=0, muSigmaStat=0):
+  #   if abs(flavor) == 1:
+  #     if pt >= 120.: pt = 119. # last bin is valid to infinity
+  #     elif pt <= 5.: pt = 6.
+  #     eta = abs(eta)
+  #     etaBin = self.muSF.GetXaxis().FindBin(eta)
+  #     ptBin = self.muSF.GetYaxis().FindBin(pt)
+  #     sf      = self.muSF.GetBinContent(    etaBin  ptBin)
+  #     errSyst = self.muSyst.GetBinContent(  etaBin, ptBin)
+  #     errStat = self.muStat.GetBinContent(  etaBin, ptBin)
+  #     errPS   = self.muPSSys.GetBinContent( etaBin, ptBin)
+  #     # NOTE stat and sys need to be varied sepatately, code below is wrong if varied together
+  #     return (1. + errSyst*muSigmaSyst + errStat*muSigmaStat + errPS*muSigmaPSSys)*sf
+  #   elif abs(flavor) == 0:
+  #     if pt >= 200.: pt = 199. # last bin is valid to infinity
+  #     elif pt <= 10.: pt = 11.
+  #     etaBin = self.elSF.GetXaxis().FindBin(eta)
+  #     ptBin = self.elSF.GetYaxis().FindBin(pt)
+  #     sf      = self.elSF.GetBinContent(  etaBin, ptBin)
+  #     errSyst = self.elSyst.GetBinContent(etaBin, ptBin)
+  #     errStat = self.elStat.GetBinContent(etaBin, ptBin)
+  #     # NOTE stat and sys need to be varied sepatately, code below is wrong if varied together
+  #     return (1. + errSyst*elSigmaSyst + errStat*elSigmaStat)*sf
+  #   else: 
+  #     raise Exception("Lepton SF for flavour %i not known"%flavor)
+
+  def getSF(self, tree, index, pt):
     flavor = tree._lFlavor[index]
     eta    = tree._lEta[index] if flavor == 1 else tree._lEtaSC[index]
 
     if abs(flavor) == 1:
       if pt >= 120.: pt = 119. # last bin is valid to infinity
-      elif pt <= 10.: pt = 11.
+      elif pt <= 5.: pt = 6.
       eta = abs(eta)
-      sf  = self.muSyst.GetBinContent(self.muSyst.GetXaxis().FindBin(eta), self.muSyst.GetYaxis().FindBin(pt))
-      errSyst = self.muSyst.GetBinError(self.muSyst.GetXaxis().FindBin(eta), self.muSyst.GetYaxis().FindBin(pt))
-      errStat = self.muStat.GetBinError(self.muStat.GetXaxis().FindBin(eta), self.muStat.GetYaxis().FindBin(pt))
+      etaBin = self.muSF.GetXaxis().FindBin(eta)
+      ptBin = self.muSF.GetYaxis().FindBin(pt)
+      sf      = self.muSF.GetBinContent(    etaBin, ptBin)
+      errSyst = self.muSyst.GetBinContent(  etaBin, ptBin)
+      errStat = self.muStat.GetBinContent(  etaBin, ptBin)
+      errPS   = self.muPSSys.GetBinContent( etaBin, ptBin)
       # NOTE stat and sys need to be varied sepatately, code below is wrong if varied together
-      return (1. + errSyst*sigmaSyst + errStat*muSigmaStat)*sf
+      return (sf, errSyst, errStat, errPS, 1. , 0.)
     elif abs(flavor) == 0:
-      if pt >= 500.: pt = 499. # last bin is valid to infinity
+      if pt >= 200.: pt = 199. # last bin is valid to infinity
       elif pt <= 10.: pt = 11.
-      sf  = self.elSyst.GetBinContent(self.elSyst.GetXaxis().FindBin(eta), self.elSyst.GetYaxis().FindBin(pt))
-      errSyst = self.elSyst.GetBinError(self.elSyst.GetXaxis().FindBin(eta), self.elSyst.GetYaxis().FindBin(pt))
-      # errStat = self.elStat.GetBinError(self.elStat.GetXaxis().FindBin(eta), self.elStat.GetYaxis().FindBin(pt))
-      errStat = 0.
+      etaBin = self.elSF.GetXaxis().FindBin(eta)
+      ptBin = self.elSF.GetYaxis().FindBin(pt)
+      sf      = self.elSF.GetBinContent(  etaBin, ptBin)
+      errSyst = self.elSyst.GetBinContent(etaBin, ptBin)
+      errStat = self.elStat.GetBinContent(etaBin, ptBin)
       # NOTE stat and sys need to be varied sepatately, code below is wrong if varied together
-      return (1. + errSyst*sigmaSyst + errStat*elSigmaStat)*sf
+      return (sf, errSyst, errStat, 0., 0., 1.)
     else: 
       raise Exception("Lepton SF for flavour %i not known"%flavor)
-
-
-  # def testGetSF(self, flav, pt, eta, sigmaSyst=0, elSigmaStat=0, muSigmaStat=0):
-  #   flavor = flav
-    
-  #   if abs(flavor) == 1:
-  #     if pt >= 120.: pt = 119. # last bin is valid to infinity
-  #     elif pt <= 10.: pt = 11.
-  #     eta = abs(eta)
-  #     sf  = self.muSyst.GetBinContent(self.muSyst.GetXaxis().FindBin(eta), self.muSyst.GetYaxis().FindBin(pt))
-  #     log.info(sf)
-  #     errSyst = self.muSyst.GetBinError(self.muSyst.GetXaxis().FindBin(eta), self.muSyst.GetYaxis().FindBin(pt))
-  #     log.info(errSyst)
-  #     errStat = self.muStat.GetBinError(self.muStat.GetXaxis().FindBin(eta), self.muStat.GetYaxis().FindBin(pt))
-  #     log.info(errStat)
-  #     # NOTE stat and sys need to be varied sepatately, code below is wrong if varied together
-  #     return (1. + errSyst*sigmaSyst + errStat*muSigmaStat)*sf
-  #   elif abs(flavor) == 0:
-  #     if pt >= 500.: pt = 499. # last bin is valid to infinity
-  #     elif pt <= 10.: pt = 11.
-  #     sf  = self.elSyst.GetBinContent(self.elSyst.GetXaxis().FindBin(eta), self.elSyst.GetYaxis().FindBin(pt))
-  #     log.info(sf)
-  #     errSyst = self.elSyst.GetBinError(self.elSyst.GetXaxis().FindBin(eta), self.elSyst.GetYaxis().FindBin(pt))
-  #     log.info(errSyst)
-  #     # errStat = self.elStat.GetBinError(self.elStat.GetXaxis().FindBin(eta), self.elStat.GetYaxis().FindBin(pt))
-  #     errStat = 0.
-  #     # NOTE stat and sys need to be varied sepatately, code below is wrong if varied together
-  #     return (1. + errSyst*sigmaSyst + errStat*elSigmaStat)*sf
-  #   else: 
-  #     raise Exception("Lepton SF for flavour %i not known"%flavor)
-
-

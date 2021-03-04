@@ -49,8 +49,9 @@ def launchCondor(command, logfile, checkQueue=False, wallTime='15', queue='local
   params = "dir=" + os.getcwd() + ";command=" + command 
   jobSub = htcondor.Submit({"executable": "../tools/scripts/runOnCream02.sh",
                             "environment": params,
-                            "output": logfile,
-                            "error":  logfile,
+                            "output": logfile.replace('.log', '.out'),
+                            "error":  logfile.replace('.log', '.err'),
+                            "request_cpus": str(cores),
                             "log":    logfile})
                             
   schedd = htcondor.Schedd() 
@@ -69,7 +70,7 @@ def launchCondor(command, logfile, checkQueue=False, wallTime='15', queue='local
 def launchLocal(command, logfile):
   while(int(system('ps uaxw | grep python | grep $USER |grep -c -v grep')) > 8): time.sleep(20)
   log.info('Launching ' + command + ' on local machine')
-  system(command + ' &> ' + logfile + ' &')
+  system(command + ' &> ' + logfile.replace('.log', '.err') + ' &')
 
 #
 # Job submitter for T2_BE_IIHE

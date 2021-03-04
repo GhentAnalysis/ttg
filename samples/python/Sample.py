@@ -31,7 +31,8 @@ class Sample:                                                                   
     self.splitJobs       = splitJobs
     self.isData          = (xsec == 'data')
     self.xsec            = eval(xsec) if not self.isData else None
-    self.year            = productionLabel.split('-')[0].split('_')[0]
+    self.year            = [yl for yl in ['2016', '2017', '2018'] if productionLabel.count(yl)][0]
+    # self.year            = productionLabel.split('-')[0].split('_')[0]
     self.texName         = None
     self.style           = None 
     self.listOfFiles     = None
@@ -120,6 +121,7 @@ class Sample:                                                                   
 
   # Get iterator over entries
   def eventLoop(self, selectionString = None, totalJobs=1, subJob = 0):
+    self.chain.SetBranchStatus("_gen_daughterIndex", 0) # branch corrupted in some samples, not needed anyway
     if self.selectionString and selectionString: selectionString += "&&" + self.selectionString
     elif self.selectionString:                   selectionString  = self.selectionString
     if selectionString: entries = self.getEventList(selectionString, totalJobs, subJob)

@@ -35,9 +35,8 @@ def sumHists(picklePath, plot):
       print 'warning ' + name
   return (nHist, gHist, dHist)
 
-
-offZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-nonpromptErr/noData/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/photon_SigmaIetaIeta_small.pkl'
-onZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-nonpromptErr/noData/llg-mll20-njet1p-onZ-llgNoZ-photonPt20-chIso0to10/photon_SigmaIetaIeta_small.pkl'
+onZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-onlyTTDY-SS/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_SigmaIetaIeta_small.pkl'
+offZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-onlyTTBAR-SS/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_SigmaIetaIeta_small.pkl'
 offZ = sumHists(offZfile, 'photon_SigmaIetaIeta_small')[0]
 onZ = sumHists(onZfile, 'photon_SigmaIetaIeta_small')[0]
 c1 = ROOT.TCanvas('c', 'c', 1300, 800)
@@ -53,9 +52,13 @@ offZ.GetXaxis().SetRangeUser(0.005, 0.020)
 offZ.GetYaxis().SetRangeUser(0., 0.15)
 offZ.GetXaxis().SetTitle("#sigma_{i#etai#eta}(#gamma)")  
 offZ.GetYaxis().SetTitle("(1/N) dN")  
-legend = ROOT.TLegend(0.6,0.74,0.88,0.9)
-legend.AddEntry(offZ,"application region","L")
-legend.AddEntry(onZ,"measurement region","L")
+legend = ROOT.TLegend(0.48,0.74,0.88,0.89)
+legend.SetBorderSize(0)
+# legend.AddEntry(offZ,"application region: m(ll) off-Z, pass Ch. Iso","L")
+# legend.AddEntry(onZ,"measurement region: m(ll) on-Z, fail Ch. Iso","L")
+legend.AddEntry(offZ,"application region: @@@@ update @@@@","L")
+legend.AddEntry(onZ,"measurement region: @@@@ update @@@@","L")
+
 
 offZ.Draw('HIST E')
 onZ.Draw('HIST E same')

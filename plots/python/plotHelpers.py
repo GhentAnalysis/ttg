@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 
-from ttg.tools.helpers import deltaR
+from ttg.tools.helpers import deltaR, deltaPhi
+import ROOT
+import numpy
 
 def rawLep1JetDeltaR(tree):
   return min(deltaR(tree._jetEta[j], tree._lEta[tree.l1], tree._jetPhi[j], tree._lPhi[tree.l1]) for j in range(tree._nJets))
@@ -58,19 +60,26 @@ def createSignalRegions(t):
   elif t.ndbjets >= 3 and t.njets >= 3: return 9
   return -1
 
+
+
 def createSignalRegionsZoom(t):
-  if t.ndbjets == 0:
-    if t.njets == 2: return 0
-    if t.njets >= 3: return 1
-  elif t.ndbjets == 1:
-    if t.njets == 1: return 2
+  if t.ndbjets == 1:
+    if t.njets == 1: return 0
+    if t.njets == 2: return 1
+    if t.njets >= 3: return 2
+  elif t.ndbjets == 2:
     if t.njets == 2: return 3
     if t.njets >= 3: return 4
-  elif t.ndbjets == 2:
-    if t.njets == 2: return 5
-    if t.njets >= 3: return 6
-  elif t.ndbjets >= 3 and t.njets >= 3: return 7
+  elif t.ndbjets >= 3 and t.njets >= 3: return 5
   return -1
+
+def createSignalRegionsZoomCap(t):
+  if t.ndbjets == 1:
+    if t.njets == 1: return 0
+    if t.njets >= 2: return 1
+  elif t.ndbjets >= 2: return 2
+  return -1
+
 
 def createSignalRegionsCap(t):
   if t.ndbjets == 0:
@@ -82,6 +91,7 @@ def createSignalRegionsCap(t):
     if t.njets >= 2: return 4
   elif t.ndbjets >= 2: return 5
   return -1
+
 
 # you can remove items from momList, but keep momRef 
 momRef = {1: 'd', 2: 'u', 3: 's', 4: 'c', 5: 'b', 6: 't', 11: 'e', 13: '#mu', 15: '#tau', 21: 'g', 24: 'W', 111: '#pi^{0}', 221: '#pi^{+/-}', 223: '#rho^{+}', 331: '#rho `', 333: '#phi', 413: 'D^{*+}', 423: 'D^{*0}', 433: 'D_{s}^{*+}', 445: '445', 513: 'B^{*0}', 523: 'B^{*+}', 533: 'B_{s}^{*0}', 543: 'B_{c}^{*+}', 2212: 'p', 4312:'4312', 4314: '4314', 4322: '4322', 4324: '4324', 4334: '4334', 5324: '5324', 20443: '20443', 100443: '#psi'}
@@ -139,3 +149,63 @@ def ChaOverN(c):
     return c._phChargedIsolation[c.ph]/c._phNeutralHadronIsolation[c.ph]
   else:
     return -0.9
+
+def leptonPt(tree, index):
+  return tree._lPtCorr[index]
+
+def leptonE(tree, index):
+  return tree._lECorr[index]
+
+def getLorentzVector(pt, eta, phi, e):
+  vector = ROOT.TLorentzVector()
+  vector.SetPtEtaPhiE(pt, eta, phi, e)
+  # log.info("got vect")
+  return vector
+
+
+# NOTE temp
+def nearestZ(tree):
+  distmll  = abs(91.1876 - tree.mll)
+  distmllg = abs(91.1876 - tree.mllg)
+  if distmll < distmllg:
+    return 0.
+  else:
+    return 1.
+
+# NOTE always nominal values
+def leptonPt(tree, index):
+  return tree._lPtCorr[index]
+
+def leptonE(tree, index):
+  return tree._lECorr[index]
+
+def getLorentzVector(pt, eta, phi, e):
+  vector = ROOT.TLorentzVector()
+  vector.SetPtEtaPhiE(pt, eta, phi, e)
+  # log.info("got vect")
+  return vector
+
+def plphpt(tree):
+  try: return c._pl_phPt[0]
+  except: return -99.
+
+
+def kickUnder(under, threshold, val):
+  if val > threshold: return under - 1.
+  else:               return val
+
+def theta(eta):
+  return 2.*numpy.arctan(numpy.e**(-1* eta))
+
+def angle(theta1, theta2, phi1, phi2):
+  return ((theta1-theta2)**2. + deltaPhi(phi1,phi2)**2.)**0.5
+
+def Zpt(c):
+  first  = getLorentzVector(leptonPt(c, c.l1), c._lEta[c.l1], c._lPhi[c.l1], leptonE(c, c.l1))
+  second = getLorentzVector(leptonPt(c, c.l2), c._lEta[c.l2], c._lPhi[c.l2], leptonE(c, c.l2))
+  return (first+second).Pt()
+
+def plZpt(c):
+  first  = getLorentzVector(c.PLl1_pt, c._pl_lEta[c.PLl1], c._pl_lPhi[c.PLl1], c._pl_lE[c.PLl1])
+  second = getLorentzVector(c.PLl2_pt, c._pl_lEta[c.PLl2], c._pl_lPhi[c.PLl2], c._pl_lE[c.PLl2])
+  return (first+second).Pt()

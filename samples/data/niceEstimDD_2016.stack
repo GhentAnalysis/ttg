@@ -23,8 +23,7 @@ ZG_lowMass           Z#gamma_(genuine)               fillStyle     598          
 $singleTop
 ST_tW_ch             Single-t+#gamma_(genuine)              fillStyle     797
 +ST_tbarW_ch
-+ST_s_ch_lep
-+ST_s_ch_had
++ST_s_ch_incl
 +ST_t_ch
 +ST_tbar_ch
 
@@ -47,7 +46,7 @@ VVTo2L2Nu             Multiboson+#gamma_(genuine)               fillStyle     kV
 
 $other
 WGamma              Other+#gamma_(genuine)       fillStyle    kGray
-+GluGluToH_ZZ
+%+GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau
@@ -55,7 +54,7 @@ WGamma              Other+#gamma_(genuine)       fillStyle    kGray
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
 +TTZtoLL
-+TTZtoLL_M1to10
+%+TTZtoLL_M1to10
 +TTZtoQQ
 +TTWtoLNu
 +TTWtoQQ
@@ -67,7 +66,7 @@ WGamma              Other+#gamma_(genuine)       fillStyle    kGray
 +TTZZ
 +TTTT
 +tWll
-+tWnunu
+%+tWnunu
 +tHq
 +tHW
 
