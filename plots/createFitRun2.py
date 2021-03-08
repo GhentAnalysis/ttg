@@ -76,6 +76,7 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
       hist.SetBinError(nbins, sqrt(hist.GetBinError(nbins)**2 + hist.GetBinError(nbins + 1)**2))
       hist.SetBinContent(nbins+1, 0.)
       hist.SetBinError(nbins+1, 0.)
+    
     if not rootFile.GetDirectory(name): rootFile.mkdir(name)
     rootFile.cd(name)
     protectHist(hist).Write(template)
@@ -106,7 +107,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
     # baseSelection = 'llg-mll20-njet2p-deepbtag2p-offZ-llgNoZ-photonPt20'
 
     baseSelection = 'llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD-Dec'
+    tag           = 'phoCBfull-niceEstimDD-Ya'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
 # unfReco_jetLepDeltaR.pkl
@@ -124,7 +125,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
 
     for shape in shapes:
       # Write the data histograms to the combine shapes file, separate for ee, emu, mumu
-      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegionsCap', '', [dataHistName[shape[3:]]]), mergeBins=False)
+      writeHist(f, shape, 'data_obs', getHistFromPkl((year, tag, shape[3:], baseSelection), 'unfReco_phPt', '', [dataHistName[shape[3:]]]), mergeBins=False)
       # write the MC histograms to the shapes file
       for t in templates:
         # if t == 'nonprompt':
@@ -141,14 +142,14 @@ def writeRootFile(name, shapes, systematicVariations, year):
           else:
             Selectors     = [[t, '(genuine)']]
           
-          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegionsCap', sys, *Selectors)
+          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'unfReco_phPt', sys, *Selectors)
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
           else:
             if 'erdDown' in sys:
               sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
-              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'signalRegionsCap', 'erdUp', *sel)
+              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), 'unfReco_phPt', 'erdUp', *sel)
               prompt = invertVar(nominal, ErdUpprompt)
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
@@ -323,7 +324,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
         os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName)
       os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
 
-    doLinearityCheck(cardName, year, run=args.run+args.chan)
+    # doLinearityCheck(cardName, year, run=args.run+args.chan)
     # goodnessOfFit(cardName, run=args.run+args.chan)
 
 doRatio = args.ratio

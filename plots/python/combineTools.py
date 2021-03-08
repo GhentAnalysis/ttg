@@ -406,7 +406,7 @@ def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run=
 def goodnessOfFit(dataCard, algo='saturated', run='combine'):
     command  = 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ';'
     # command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 100' + (' --toysFreq' if algo=='saturated' else '') + ';'
-    command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 1000' + (' --toysFreq' if algo=='saturated' else '') + ';'
+    command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 1000 --saveToys' + (' --toysFreq' if algo=='saturated' else '') + ';'
     log.info('Running goodness of fit')
     handleCombine(dataCard, dataCard + '_gof', command, run=run)
     with open('./' + run + '/' + dataCard + '_gof.log') as f:
