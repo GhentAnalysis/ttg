@@ -36,7 +36,7 @@ for i in ('Up', 'Down'):
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
   systematics['NP'+i]         = []
 
-  for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+  for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
 
 
@@ -236,12 +236,12 @@ def constructPdfSys(allPlots, plotName, stack, force=False):
 #
 # Function for the color reconnection envelope using input histogram
 # there is no up/down sample for these, take max deviation and us it to produce up/down variations
-def CRSys(variations):
+def CRSys(variations, nominal):
   upHist, downHist = variations[0].Clone(), variations[0].Clone()
   for i in range(0, variations[0].GetNbinsX()+2):
-    maxdev = max([abs(var.GetBinContent(i) - upHist.GetBinContent(i)) for var in variations])
-    upHist.SetBinContent(  i, upHist.GetBinContent(i) + maxdev )
-    downHist.SetBinContent(i, downHist.GetBinContent(i) - maxdev )
+    maxdev = max([abs(var.GetBinContent(i) - nominal.GetBinContent(i)) for var in variations])
+    upHist.SetBinContent(  i, nominal.GetBinContent(i) + maxdev )
+    downHist.SetBinContent(i, nominal.GetBinContent(i) - maxdev )
   return upHist, downHist
 
 def constructCRSys(allPlots, plotName, stack, force=False):
@@ -249,8 +249,8 @@ def constructCRSys(allPlots, plotName, stack, force=False):
   allPlots[plotName + 'colRecDown'] = {}
   for histName in [s.name+s.texName for s in stack]:
     try:
-      variations = [allPlots[plotName + 'CRSys_' + i][histName] for i in ('1', '2', '3')]
+      variations = [allPlots[plotName + 'colRec_' + i][histName] for i in ('1', '2', '3')]
     except:
       log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
       variations = [allPlots[plotName][histName]]
-    allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations)
+    allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])

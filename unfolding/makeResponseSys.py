@@ -17,6 +17,8 @@ argParser.add_argument('--isChild',   action='store_true', default=False,       
 argParser.add_argument('--dryRun',    action='store_true', default=False,                help='do not launch subjobs, only show them')
 argParser.add_argument('--sys',            action='store',      default='')
 argParser.add_argument('--runSys',         action='store_true', default=False)
+argParser.add_argument('--runNLO',         action='store_true', default=False)
+
 args = argParser.parse_args()
 
 import ROOT
@@ -39,11 +41,13 @@ from ttg.plots.systematics import getReplacementsForStack, systematics, linearSy
 
 
 lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
-reduceType = 'unfJan'
+reduceType = 'unfEFB'
 # reduceType = 'unfFB'
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
+
+args.tag = args.tag + ('_NLO' if args.runNLO else '')
 
 
 #  TODO remove trigger exception when ready 
@@ -51,10 +55,13 @@ log = getLogger(args.logLevel)
 
 # we just need these for fid level
 
+if args.runNLO:
+  systematics.clear()
+
 for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
   systematics['q2Sc_' + i] = [('genWeight', 'weight_q2Sc_'+i)]
 
-for i in range(0, 100):                              newBranches += [ + '/F']
+for i in range(0, 100):
   systematics['pdfSc_' + str(i)] = [('genWeight', 'weight_pdfSc_' + str(i))]
 
 if not args.isChild:
@@ -67,24 +74,19 @@ if not args.isChild:
     excludeSys = ['trigger'] # NOTE temporary
     if sysList[0]:
       sysList = [entry for entry in sysList if not any([entry.count(exc) for exc in excludeSys])]
-  # log.info(sysList)
-  # subJobArgs, subJobList = getVariations(args, sysList)
-  # sysList = [None, 'JECUp', 'JECDown', 'lSFSyUp', 'lSFSyDown']
-  # sysList = [None,'lSFSyUp', 'lSFSyDown','fsrDown','fsrUp']
-  # sysList = ['isrUp','isrDown','fsrUp','fsrDown','puUp','puDown','pfUp','pfDown','phSFUp','phSFDown','pvSFUp','pvSFDown','lSFSyUp','lSFSyDown','lSFElUp','lSFElDown','lSFMuUp','lSFMuDown','triggerUp','triggerDown','bTaglUp','bTaglDown','bTagbUp','bTagbDown','ephResDown', 'NPDown', 'fsrUp', 'JECUp', 'fsrDown', 'lSFElDown', 'NPUp', 'lSFElUp', 'pfUp', 'isrDown', 'bTaglUp', 'ueUp', 'erdUp', 'puDown', 'phSFUp', 'lSFSyDown', 'triggerUp', 'triggerDown', 'pvSFDown', 'lSFSyUp', 'lSFMuDown', 'puUp', 'ephScaleDown', 'JERDown', 'erdDown', 'JERUp', 'pvSFUp', 'ephScaleUp', 'bTagbUp', 'phSFDown', 'ueDown', 'ephResUp', 'bTagbDown', 'isrUp', 'bTaglDown', 'pfDown', 'lSFMuUp', 'JECDown']
-
-  # log.info(sysList)
   submitJobs(__file__, ('sys'), [[s] for s in sysList], argParser, subLog= args.tag + '/' + args.year, jobLabel = "UF", wallTime="15")
   exit(0)
 
 # NOTE WARNING using separate tuple files right now, but not needed, if samples get updated change this
 sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_' + args.year + '.conf'))
 stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_' + args.year + '.conf'),
-                  styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unfTTG.stack'),
+                  styleFile    = os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/ttgNLO.stack' if args.runNLO else '$CMSSW_BASE/src/ttg/unfolding/data/unfTTG.stack'),
                   # channel      = args.channel,
                   channel      = 'noData',
                   replacements = getReplacementsForStack(args.sys, args.year)
                   )
+
+
 
 ########## RECO SELECTION ##########
 def checkRec(c):
@@ -347,6 +349,12 @@ mList.append(Plot2D('response_unfReco_phAbsEta',       '|#eta|(#gamma)',        
 mList.append(Plot2D('response_unfReco_Z_pt',           'p_{T}(ll) (GeV)',    lambda c : min(protectedZpt(c                                                              , 0. ) ,ZptBinRec[-1]       -0.001 )   ,ZptBinRec     , 'gen p_{T}(ll) (GeV)', lambda c : min(       plZpt(c)                                                                     ,ZptBinGen[-1]       -0.001 )   ,ZptBinGen     ))
 mList.append(Plot2D('response_unfReco_l1l2_ptsum',           'p_{T}(l1)+p_{T}(l2) (GeV)',    lambda c : min(ifRec(c, c.l1_pt+c.l2_pt                                                              , 0. ) ,l1l2ptBinRec[-1]       -0.001 )   ,l1l2ptBinRec     , 'gen p_{T}(l1)+p_{T}(l2) (GeV)', lambda c : min(       c.PLl1_pt+c.PLl2_pt                                                                     ,l1l2ptBinGen[-1]       -0.001 )   ,l1l2ptBinGen     ))
 
+if args.runNLO: # only need fid plots for this
+  plotListRecFid = []
+  plotListRec = []
+  plotListOut = []
+  mList = []
+
 
 ########## EVENTLOOP ##########
 # TODO setIDSelection(c, args.tag) nodig?
@@ -409,43 +417,41 @@ noWarnings = True
 
 ##### 1D plots #####
 for plot in plotList:
-  if isinstance(plot, Plot2D): continue
   plot.saveToCache(os.path.join(plotDir, args.year, args.tag, 'noData', 'placeholderSelection'), args.sys)
+  if args.sys: continue
 
-  extraArgs = {}
-  for logY in [False, True]:
-    if not logY and args.tag.count('sigmaIetaIeta') and plot.name.count('photon_chargedIso_bins_NO'): yRange = (0.0001, 0.35)
-    else:                                                                                             yRange = None
-    extraTag  = '-log'    if logY else ''
+  err = False
+  if isinstance(plot, Plot2D): ##### 2D plots #####
+    plot.applyMods()
+    for drawOUFlow in [False, True]:
+      if drawOUFlow: 
+          plot.name += '_overflow'
+          plot.histos.values()[0].GetXaxis().SetRange(0, plot.histos.values()[0].GetNbinsX() + 1)
+          plot.histos.values()[0].GetYaxis().SetRange(0, plot.histos.values()[0].GetNbinsY() + 1)
+      for logZ in [False, True]:
+        for option in ['SCAT', 'COLZ', 'COLZ TEXT', 'COLZ TEXTclean', 'COLZclean']:
+          err = plot.draw(plot_directory = os.path.join(plotDir, args.year, args.tag, 'noData' + ('-log' if logZ else ''), 'placeholderSelection', option),
+                    logZ           = logZ,
+                    drawOption     = option,
+                    drawObjects    = drawLumi(None, lumiScales[args.year], isOnlySim=('noData'=='noData')))
+  else: ##### 1D plots #####
+    extraArgs = {}
+    for logY in [False, True]:
+      yRange = None
+      extraTag  = '-log'    if logY else ''
 
-    err = plot.draw(
-              plot_directory    = os.path.join(plotDir, args.year, args.tag, 'noData' + extraTag, 'placeholderSelection', ''),
-              logX              = False,
-              logY              = logY,
-              sorting           = False,
-              yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-              drawObjects       = drawLumi(None, lumiScales[args.year], isOnlySim=('noData'=='noData')),
-              **extraArgs
-    )
-    extraArgs['saveGitInfo'] = False
-    if err: noWarnings = False
+      err = plot.draw(
+                plot_directory    = os.path.join(plotDir, args.year, args.tag, 'noData' + extraTag, 'placeholderSelection', ''),
+                logX              = False,
+                logY              = logY,
+                sorting           = False,
+                yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
+                drawObjects       = drawLumi(None, lumiScales[args.year], isOnlySim=('noData'=='noData')),
+                **extraArgs
+      )
+      extraArgs['saveGitInfo'] = False
+  if err: noWarnings = False
 
-##### 2D plots #####
-for plot in plotList:
-  if not hasattr(plot, 'varY'): continue
-  plot.applyMods()
-  for drawOUFlow in [False, True]:
-    if drawOUFlow: 
-        plot.name += '_overflow'
-        plot.histos.values()[0].GetXaxis().SetRange(0, plot.histos.values()[0].GetNbinsX() + 1)
-        plot.histos.values()[0].GetYaxis().SetRange(0, plot.histos.values()[0].GetNbinsY() + 1)
-    plot.saveToCache(os.path.join(plotDir, args.year, args.tag, 'noData', 'placeholderSelection'), args.sys)
-    for logZ in [False, True]:
-      for option in ['SCAT', 'COLZ', 'COLZ TEXT', 'COLZ TEXTclean', 'COLZclean']:
-        plot.draw(plot_directory = os.path.join(plotDir, args.year, args.tag, 'noData' + ('-log' if logZ else ''), 'placeholderSelection', option),
-                  logZ           = logZ,
-                  drawOption     = option,
-                  drawObjects    = drawLumi(None, lumiScales[args.year], isOnlySim=('noData'=='noData')))
 
 
 if noWarnings: 

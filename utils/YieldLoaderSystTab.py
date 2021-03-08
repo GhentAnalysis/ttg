@@ -62,7 +62,7 @@ def getEffect(year):
   # picklePath = '/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/phoCBfull-niceEstimDD/emu/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/yield.pkl'
   # picklePath = '/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/phoCBfull-forZgestC-noZgCorr/mumu/llg-mll20-offZ-llgOnZ-photonPt20/yield.pkl'
 
-  picklePath = '/storage_mnt/storage/user/jroels/public_html/ttG/' + year + '/phoCBfull-niceEstimDD-merp/ee/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/yield.pkl'
+  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/yield.pkl'
 
   print picklePath.replace('/storage_mnt/storage/user/jroels/public_html/ttG/','')
   varHists = pickle.load(open(picklePath))
@@ -94,14 +94,12 @@ def getEffect(year):
 
 varYears = {}
 outYears = {}
-# for year in ['2016', '2017', '2018']:
-for year in ['2016', '2016', '2016']:
+for year in ['2016', '2017', '2018']:
   varYears[year], outYears[year] = getEffect(year)
-print '\t' '2016' + '\t \t' + '2017' + '\t \t' + '2018'
+print '\t \t' '2016' + '\t \t' + '2017' + '\t \t' + '2018'
 for sys in varYears['2016'].keys():
-  print sys + '\t' + str(varYears['2016'][sys]),
-  # print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2016'][sys]),
-  # print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2017'][sys]) + '\t' + str(varYears['2018'][sys]),
+  # print sys + '\t' + str(varYears['2016'][sys]),
+  print sys + '\t' + str(varYears['2016'][sys]) + '\t' + str(varYears['2017'][sys]) + '\t' + str(varYears['2018'][sys]),
   # try:
   #   for name, effect in outYears['2016'][sys].iteritems():
   #   # for name, effect in outYears['2017'][sys].iteritems():

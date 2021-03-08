@@ -39,13 +39,18 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/
 #   - each sample is splitted by the splitJobs parameter defined in tuples.conf, if a sample runs too slow raise the splitJobs parameter
 #   - data is additional splitted per run to avoid too heavy chains to be loaded
 #
+forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
   if args.year:   sampleList = [s for s in sampleList if s.year == args.year]
 
+
+
   jobs = []
   for sample in sampleList:
+    if forSys: 
+      if any([sample.name.count(sname) for sname in ['uedown', 'ueup', 'erd', 'CR1', 'CR2', 'ttgjets']]): continue
     jobs += [(sample.name, sample.year, str(i)) for i in xrange(sample.splitJobs)]
   submitJobs(__file__, ('sample', 'year', 'subJob'), jobs, argParser, subLog=args.type, jobLabel = "RT")
   exit(0)
@@ -59,7 +64,6 @@ ROOT.gROOT.SetBatch(True)
 sample = getSampleFromList(sampleList, args.sample, args.year)
 c      = sample.initTree(shortDebug=args.debug)
 c.year = sample.year #access to year wherever chain is passed to function, prevents having to pass year every time
-forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
 
 
 c.egvar = ([var for var in ['ScaleUp', 'ScaleDown', 'ResUp', 'ResDown'] if 'eph' + var in args.type] + ['Corr'])[0]
@@ -92,7 +96,7 @@ outputFile.cd()
 #
 # FIXME Update this so that we keep the skimmed size small
 
-unusedBranches = ["HLT", "Flag", "HN", "tau", "lMuon", "decay", "tau", "_closest"]
+unusedBranches = ["HLT", "Flag", "HN", "tau", "lMuon", "decay", "tau", "_closest", "JECSources", 'jetPt_', 'corrMET']
 deleteBranches = ["Scale", "Res", "pass", "met", "lElectron", "_gen", '_lhe']
 deleteBranches += ["heWeight"]
 for i in unusedBranches + deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 0)
@@ -110,7 +114,7 @@ newBranches += ['njets/I', 'j1/I', 'j2/I', 'ndbjets/I', 'dbj1/I', 'dbj2/I']
 newBranches += ['PLnjets/I', 'PLndbjets/I', 'PLj1/I', 'PLj2/I']
 newBranches += ['l1/I', 'l2/I', 'looseLeptonVeto/O', 'l1_pt/F', 'l2_pt/F']
 newBranches += ['PLl1/I', 'PLl2/I', 'PLl1_pt/F', 'PLl2_pt/F']
-newBranches += ['mll/F', 'mllg/F', 'ml1g/F', 'ml2g/F', 'phL1DeltaR/F', 'phL2DeltaR/F', 'l1JetDeltaR/F', 'l2JetDeltaR/F', 'jjDeltaR/F']
+newBranches += ['mll/F', 'mllg/F', 'ml1g/F', 'ml2g/F', 'phL1DeltaR/F', 'phL2DeltaR/F', 'l1JetDeltaR/F', 'l2JetDeltaR/F', 'jjDeltaR/F', 'j1_pt/F']
 newBranches += ['PLmll/F', 'PLmllg/F', 'PLml1g/F', 'PLml2g/F', 'PLphL1DeltaR/F', 'PLphL2DeltaR/F', 'PLl1JetDeltaR/F', 'PLl2JetDeltaR/F', 'PLjjDeltaR/F']
 newBranches += ['isEE/O', 'isMuMu/O', 'isEMu/O']
 newBranches += ['PLisEE/O', 'PLisMuMu/O', 'PLisEMu/O']
@@ -131,7 +135,7 @@ if not forSys:
   for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2Sc_' + var + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdfSc_' + str(i) + '/F']
-  for sys in ['Up', 'Down']:                           newBranches += ['lWeightSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStat' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
+  for sys in ['Up', 'Down']:                           newBranches += ['lWeightPSSys' + sys + '/F', 'lWeightElSyst' + sys + '/F','lWeightMuSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStatMM' + sys + '/F', 'triggerWeightStatEM' + sys + '/F', 'triggerWeightStatEE' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
   for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -273,36 +277,57 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
   if lepSel:
     l1, l2, l1_pt, l2_pt   = newVars.l1, newVars.l2, newVars.l1_pt, newVars.l2_pt
-    newVars.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
-    newVars.lWeightSystUp    = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=+1., elSigmaStat=0., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=+1., elSigmaStat=0., muSigmaStat=0.)
-    newVars.lWeightSystDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=-1., elSigmaStat=0., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=-1., elSigmaStat=0., muSigmaStat=0.)
-    newVars.lWeightElStatUp    = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=+1., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=+1., muSigmaStat=0.)
-    newVars.lWeightElStatDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=-1., muSigmaStat=0.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=-1., muSigmaStat=0.)
-    newVars.lWeightMuStatUp    = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=+1.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=+1.)
-    newVars.lWeightMuStatDown  = leptonSF.getSF(c, l1, l1_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)*leptonSF.getSF(c, l2, l2_pt, sigmaSyst=0., elSigmaStat=0., muSigmaStat=-1.)
+
+    sf1, errSyst1, errStat1, errPS1, isMu1, isEl1 = leptonSF.getSF(c, l1, l1_pt)
+    sf2, errSyst2, errStat2, errPS2, isMu2, isEl2 = leptonSF.getSF(c, l2, l2_pt)
+    newVars.lWeight            = sf1*sf2
+    newVars.lWeightElSystUp    = sf1*(1. + ( 1*errSyst1*isEl1)) * sf2*(1. +  (1*errSyst2*isEl2))
+    newVars.lWeightElSystDown  = sf1*(1. + (-1*errSyst1*isEl1)) * sf2*(1. + (-1*errSyst2*isEl2))
+    newVars.lWeightMuSystUp    = sf1*(1. +  (1*errSyst1*isMu1)) * sf2*(1. +  (1*errSyst2*isMu2))
+    newVars.lWeightMuSystDown  = sf1*(1. + (-1*errSyst1*isMu1)) * sf2*(1. + (-1*errSyst2*isMu2))
+    newVars.lWeightElStatUp    = sf1*(1. +  (1*errStat1*isEl1)) * sf2*(1. +  (1*errStat2*isEl2))
+    newVars.lWeightElStatDown  = sf1*(1. + (-1*errStat1*isEl1)) * sf2*(1. + (-1*errStat2*isEl2))
+    newVars.lWeightMuStatUp    = sf1*(1. +  (1*errStat1*isMu1)) * sf2*(1. +  (1*errStat2*isMu2))
+    newVars.lWeightMuStatDown  = sf1*(1. + (-1*errStat1*isMu1)) * sf2*(1. + (-1*errStat2*isMu2))
+    newVars.lWeightPSSysUp     = sf1*(1. +  (1*errPS1*isMu1))   * sf2*(1. +  (1*errPS2*isMu2))
+    newVars.lWeightPSSysDown   = sf1*(1. + (-1*errPS1*isMu1))   * sf2*(1. + (-1*errPS2*isMu2))
+
+
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
 
-    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
-    newVars.triggerWeight          = trigWeight
-    newVars.triggerWeightStatUp    = trigWeight+trigErrStat
-    newVars.triggerWeightStatDown  = trigWeight-trigErrStat
-    newVars.triggerWeightSystUp    = trigWeight+trigErrSyst
-    newVars.triggerWeightSystDown  = trigWeight-trigErrSyst
+    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1_pt, l2_pt, newVars.isMuMu, newVars.isEMu, newVars.isEE)
+    newVars.triggerWeight           = trigWeight
+    newVars.triggerWeightStatMMUp   = trigWeight + (+trigErrStat if newVars.isMuMu else 0.)
+    newVars.triggerWeightStatMMDown = trigWeight + (-trigErrStat if newVars.isMuMu else 0.)
+    newVars.triggerWeightStatEMUp   = trigWeight + (+trigErrStat if newVars.isEMu  else 0.)
+    newVars.triggerWeightStatEMDown = trigWeight + (-trigErrStat if newVars.isEMu  else 0.)
+    newVars.triggerWeightStatEEUp   = trigWeight + (+trigErrStat if newVars.isEE   else 0.)
+    newVars.triggerWeightStatEEDown = trigWeight + (-trigErrStat if newVars.isEE   else 0.)
+    newVars.triggerWeightSystUp     = trigWeight+trigErrSyst
+    newVars.triggerWeightSystDown   = trigWeight-trigErrSyst
 
   else:
-    newVars.lWeight        = 1.
-    newVars.lWeightSystUp    = 1.
-    newVars.lWeightSystDown  = 1.
+    newVars.lWeight            = 1.
+    newVars.lWeightElSystUp    = 1.
+    newVars.lWeightElSystDown  = 1.
+    newVars.lWeightMuSystUp    = 1.
+    newVars.lWeightMuSystDown  = 1.
     newVars.lWeightElStatUp    = 1.
     newVars.lWeightElStatDown  = 1.
     newVars.lWeightMuStatUp    = 1.
     newVars.lWeightMuStatDown  = 1.
+    newVars.lWeightPSSysUp     = 1.
+    newVars.lWeightPSSysDown   = 1.
     newVars.lTrackWeight = 1.
-    newVars.triggerWeight          = 1.
-    newVars.triggerWeightStatUp    = 1.
-    newVars.triggerWeightStatDown  = 1.
-    newVars.triggerWeightSystUp    = 1.
-    newVars.triggerWeightSystDown  = 1.
+    newVars.triggerWeight           = 1.
+    newVars.triggerWeightStatMMUp   = 1.
+    newVars.triggerWeightStatMMDown = 1.
+    newVars.triggerWeightStatEMUp   = 1.
+    newVars.triggerWeightStatEMDown = 1.
+    newVars.triggerWeightStatEEUp   = 1.
+    newVars.triggerWeightStatEEDown = 1.
+    newVars.triggerWeightSystUp     = 1.
+    newVars.triggerWeightSystDown   = 1.
 
   if phoSel:
     ph, ph_pt = newVars.ph, newVars.ph_pt
@@ -329,34 +354,6 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   else:
     for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
       setattr(newVars, 'bTagWeight' + sys, 1.)
-
-  newVars.genWeight    = c._weight*lumiWeights[0]
-
-  # newVars.puWeight     = puReweighting(c._nTrueInt)
-
-  # if lepSel:
-  #   l1, l2, l1_pt, l2_pt   = newVars.l1, newVars.l2, newVars.l1_pt, newVars.l2_pt
-  #   newVars.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
-  #   newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
-  #   trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
-  #   newVars.triggerWeight      = trigWeight
-  # else:
-  #   newVars.lWeight        = 1.
-  #   newVars.lTrackWeight   = 1.
-  #   newVars.triggerWeight      = 1.
-  # if phoSel:
-  #   ph, ph_pt = newVars.ph, newVars.ph_pt
-  #   newVars.phWeight     = photonSF.getSF(c, ph, ph_pt) if len(c.photons) > 0 else 1
-  #   newVars.PVWeight     = pixelVetoSF.getSF(c, ph, ph_pt) if len(c.photons) > 0 else 1
-  # else:
-  #   newVars.phWeight     = 1.
-  #   newVars.PVWeight     = 1.
-
-  # # method 1a
-  # if reco:
-  #   newVars.bTagWeight =  btagSF.getBtagSF_1a('', c, c.dbjets)
-  # else:
-  #   newVars.bTagWeight =  1.
 
   newVars.genWeight    = c._weight*lumiWeights[0]
 

@@ -14,21 +14,21 @@ import ROOT
 ROOT.TH2.SetDefaultSumw2()
 ROOT.TH1.SetDefaultSumw2()
 
-sourceHists ={'A': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTBAR-passChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTBAR-passChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTBAR-passChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl'),
+sourceHists ={'A': ('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-onlyTTBAR-passChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-onlyTTBAR-passChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-onlyTTBAR-passChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl'),
 
-              'B': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl'),
+              'B': ('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-onlyTTBAR-passChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_pt_etaA.pkl'),
 
-              'C': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl'),
+              'C': ('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-onlyTTDY-failChgIso-passSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl'),
 
-              'D': ('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
-                    '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl')
+              'D': ('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl',
+                    '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCB-onlyTTDY-failChgIso-sidebandSigmaIetaIeta-forNPest/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_pt_etaA.pkl')
 }
 
 
