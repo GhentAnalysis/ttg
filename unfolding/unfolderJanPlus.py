@@ -99,13 +99,13 @@ labels = {
           }
 
 distList = [
-  'unfReco_jetLepDeltaR',
-  'unfReco_jetPt',
-  'unfReco_ll_absDeltaEta',
-  'unfReco_ll_deltaPhi',
-  'unfReco_phAbsEta',
-  'unfReco_phBJetDeltaR',
-  'unfReco_phLepDeltaR',
+  # 'unfReco_jetLepDeltaR',
+  # 'unfReco_jetPt',
+  # 'unfReco_ll_absDeltaEta',
+  # 'unfReco_ll_deltaPhi',
+  # 'unfReco_phAbsEta',
+  # 'unfReco_phBJetDeltaR',
+  # 'unfReco_phLepDeltaR',
   'unfReco_phPt',
   'unfReco_phLep1DeltaR',
   'unfReco_phLep2DeltaR',
@@ -135,13 +135,14 @@ if args.year == 'RunII':
 
 varList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
 varList += ['pdf_' + str(i) for i in range(0, 100)]
-
+varList += ['colRec_' + str(i) for i in range(1, 4)]
 
 # theoSysList = ['isr','fsr','ue','erd']
 
-theoSysList = ['isr','fsr']
+theoSysList = ['isr','fsr', 'ue']
 theoVarList = ['']
 theoVarList += [sys + direc for sys in theoSysList for direc in ['Down', 'Up']]
+theoVarList += ['colRec_' + str(i) for i in range(1, 4)]
 
 if args.LOtheory:
   # theoVarList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
@@ -153,6 +154,7 @@ else:
   NLOtheoVarList = ['']
   NLOtheoVarList += ['q2Sc_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
   NLOtheoVarList += ['pdfSc_' + str(i) for i in range(0, 100)]
+
 
 
 bkgNorms = [('other_Other+#gamma (genuine)Other+#gamma (genuine)', 0.3),
@@ -374,7 +376,7 @@ for dist in distList:
   drawTauScan(response, data, backgroundsNom, outMig, outName = 'tauScan'+dist+args.year, title = labels[dist][0].replace('reco ', '').replace('(GeV)', ''))
 
   # get unfolded results for all systematic variations
-  unfoldedDict, pdfDict, q2Dict = {}, {}, {}
+  unfoldedDict, pdfDict, q2Dict, colRecDict = {}, {}, {}, {}
   
 
   for var in varList:
@@ -400,6 +402,7 @@ for dist in distList:
     unfolded.Scale(1./lumiScales[args.year])
     if var.count('pdf'): pdfDict[var] = unfolded
     elif var.count('q2'): q2Dict[var] = unfolded
+    elif var.count('colRec'): colRecDict[var] = unfolded
     else: unfoldedDict[var] = unfolded
 
   for direc in [('Down', -1.), ('Up', 1.)]:
@@ -433,12 +436,15 @@ for dist in distList:
 
   pdfDict[''] = unfoldedNom.Clone()
   q2Dict[''] = unfoldedNom.Clone()
+  colRecDict[''] = unfoldedNom.Clone()
   q2Up, q2Down = getEnv(q2Dict)
   pdfrms = getRMS(pdfDict)
+  colRecUp, colRecDown = getEnv(colRecDict)
   # add q2 and pdf to totalUp and totalDown
   for i in range(1, totalUp.GetXaxis().GetNbins()+1):
-    totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
-    totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
+    colRecErr = max(abs(colRecUp.GetBinContent(i)), abs(colRecDown.GetBinContent(i)))
+    totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
 
   unfoldedMC = getUnfolded(response, signal, {}, outMig)
   unfoldedMC.Scale(1./lumiScales[args.year])
@@ -463,7 +469,7 @@ for dist in distList:
   # plMC = response.ProjectionY("PLMC")
 
 
-  plMCDict, plMCpdfDict, plMCq2Dict = {}, {}, {}
+  plMCDict, plMCpdfDict, plMCq2Dict, plMCcolRecDict = {}, {}, {}, {}
 
   plNLOpdfDict, plNLOq2Dict = {}, {}
 
@@ -473,6 +479,7 @@ for dist in distList:
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plMCpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plMCq2Dict[var] = plMC.Clone()
+    elif var.count('colRec'): plMCcolRecDict[var] = plMC.Clone()
     else: plMCDict[var] = plMC
 
   for var in NLOtheoVarList:
@@ -487,7 +494,9 @@ for dist in distList:
 
   plMCpdfDict[''] = plMCDict[''].Clone()
   plMCq2Dict[''] = plMCDict[''].Clone()
+  plMCcolRecDict[''] =  plMCDict[''].Clone()
   pltotalUp, pltotalDown = getTotalDeviations(plMCDict)
+  plcolRecUp, plcolRecDown = getEnv(plMCcolRecDict)
 
   if args.LOtheory:
     plpdfrms = getRMS(plMCpdfDict)
@@ -501,11 +510,12 @@ for dist in distList:
       plq2Up.SetBinContent(i, plq2Up.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
       plq2Down.SetBinContent(i, plq2Down.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
     # TODO scale to LO sample yields
-
+  
   # add q2 and pdf to pltotalUp and pltotalDown
   for i in range(1, pltotalUp.GetXaxis().GetNbins()+1):
-    pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
-    pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
+    colRecErr = max(abs(plcolRecUp.GetBinContent(i)), abs(plcolRecDown.GetBinContent(i)))
+    pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
 
   plMCTot = plMCDict[''].Clone()
 
