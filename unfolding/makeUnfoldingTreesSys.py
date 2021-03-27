@@ -135,7 +135,7 @@ if not forSys:
   for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2Sc_' + var + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdfSc_' + str(i) + '/F']
-  for sys in ['Up', 'Down']:                           newBranches += ['lWeightPSSys' + sys + '/F', 'lWeightElSyst' + sys + '/F','lWeightMuSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStatMM' + sys + '/F', 'triggerWeightStatEM' + sys + '/F', 'triggerWeightStatEE' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
+  for sys in ['Up', 'Down']:                           newBranches += ['lWeightPSSys' + sys + '/F', 'lWeightElSyst' + sys + '/F','lWeightMuSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStatMM' + sys + '/F', 'triggerWeightStatEM' + sys + '/F', 'triggerWeightStatEE' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F', 'lTrackWeight' + sys + '/F']
   for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
@@ -177,7 +177,7 @@ pixelVetoSF      = pixelVetoSF(sample.year)
 triggerEff       = TriggerEfficiency(sample.year, id = "MVA") 
 btagSF           = BtagEfficiency(sample.year, id = "MVA")
 
-
+isNLO = sample.name.count('ttgjets')
 
 ########## START EVENT LOOP ##########
 log.info('Starting event loop')
@@ -239,22 +239,39 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
 
   if not forSys:
-    # TTG
-    for var, i in [('Fu', 15), ('Fd', 30), ('Ru', 5), ('RFu', 20), ('Rd', 10), ('RFd', 40)]:
-      try:    
-        setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
-        setattr(newVars, 'weight_q2Sc_' + var, c._weight*c._lheWeight[i]*lumiWeights[0])
-      except: 
-        setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
-        setattr(newVars, 'weight_q2Sc_' + var, newVars.genWeight)
+    if not isNLO:
+      for var, i in [('Fu', 15), ('Fd', 30), ('Ru', 5), ('RFu', 20), ('Rd', 10), ('RFd', 40)]:
+        try:    
+          setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
+          setattr(newVars, 'weight_q2Sc_' + var, c._weight*c._lheWeight[i]*lumiWeights[0])
+        except: 
+          setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
+          setattr(newVars, 'weight_q2Sc_' + var, newVars.genWeight)
 
-    for i in range(0, 100):
-      try:    
-        setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[i+45])
-        setattr(newVars, 'weight_pdfSc_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[0])
-      except: 
-        setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
-        setattr(newVars, 'weight_pdfSc_' + str(i), newVars.genWeight)
+      for i in range(0, 100):
+        try:    
+          setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[i+45])
+          setattr(newVars, 'weight_pdfSc_' + str(i), c._weight*c._lheWeight[i+45]*lumiWeights[0])
+        except: 
+          setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
+          setattr(newVars, 'weight_pdfSc_' + str(i), newVars.genWeight)
+    else: # numbering is different for NLO samples
+      for var, i in [('Fu', 1), ('Fd', 2), ('Ru', 3), ('RFu', 4), ('Rd', 6), ('RFd', 8)]:
+        try:    
+          setattr(newVars, 'weight_q2_' + var, c._weight*c._lheWeight[i]*lumiWeights[i])
+          setattr(newVars, 'weight_q2Sc_' + var, c._weight*c._lheWeight[i]*lumiWeights[0])
+        except: 
+          setattr(newVars, 'weight_q2_' + var, newVars.genWeight)
+          setattr(newVars, 'weight_q2Sc_' + var, newVars.genWeight)
+
+      for i in range(0, 100):
+        try:    
+          setattr(newVars, 'weight_pdf_' + str(i), c._weight*c._lheWeight[i+9]*lumiWeights[i+9])
+          setattr(newVars, 'weight_pdfSc_' + str(i), c._weight*c._lheWeight[i+9]*lumiWeights[0])
+        except: 
+          setattr(newVars, 'weight_pdf_' + str(i), newVars.genWeight)
+          setattr(newVars, 'weight_pdfSc_' + str(i), newVars.genWeight)
+
 
     try:
       # corresponds to 2 - 1/2 variations, recommended see talk  
@@ -294,6 +311,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
 
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
+    newVars.lTrackWeightUp   = leptonTrackingSF.getSF(c, l1, l1_pt, sigma=1) *leptonTrackingSF.getSF(c, l2, l2_pt, sigma=1)
+    newVars.lTrackWeightDown = leptonTrackingSF.getSF(c, l1, l1_pt, sigma=-1)*leptonTrackingSF.getSF(c, l2, l2_pt, sigma=-1)
 
     trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1_pt, l2_pt, newVars.isMuMu, newVars.isEMu, newVars.isEE)
     newVars.triggerWeight           = trigWeight

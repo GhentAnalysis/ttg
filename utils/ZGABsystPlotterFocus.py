@@ -40,10 +40,12 @@ labels = 2*['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b', '#geq3j,#ge
 channels = ['ee', 'mumu']
 
 
-# systs = ['NPUp','NPDown','bTaglUp','bTaglDown','bTagbUp','bTagbDown']
-# sysSets =  [['phSF','NP','lSFEl'],['trigger','ephScale','pu'],['ephRes','JEC','pf'],['fsr','lSFMu','pvSF'],['bTagb','isr','JER']]
-# sysSets =  [['phSF','NP'],['lSFEl','trigger'],['ephScale','pu'],['ephRes','JEC'],['pf','fsr'],['lSFMu','pvSF'],['bTagb','isr'],['JER','bTagl']]
-sysSets =  [['phSF'],['NP'],['lSFEl'],['trigger'],['ephScale'],['pu'],['ephRes'],['JEC'],['pf'],['fsr'],['lSFMu'],['pvSF'],['bTagb'],['isr'],['JER'],['bTagl'],['lSFSy']]
+# sysSets =  [['phSF'],['NP'],['lSFEl'],['trigger'],['ephScale'],['pu'],['ephRes'],['JEC'],['pf'],['fsr'],['lSFMu'],['pvSF'],['bTagb'],['isr'],['JER'],['bTagl'],['lSFSy']]
+# sysSets =  [['phSF'],['NP']]
+
+sysSets =  [['Absolute'],['AbsoluteUC'],['BBEC1'],['BBEC1UC'],['EC2'],['EC2UC'],['FlavorQCD'],['HF'],['HFUC'],['JER'],['NP'],['RelativeBal'],['RelativeSampleUC'],['bTagb'],['bTagl'],['ephRes'],['ephScale'],['fsr'],['isr'],['lSFElStat'],['lSFElSyst'],['lSFMuStat'],['lSFMuSyst'],['pf'],['phSF'],['pu'],['pvSF'],['trigStatEE'],['trigStatEM'],['trigStatMM'],['trigSyst'],['ue']]
+
+
 
 for sysSet in sysSets:
   systs = []
@@ -52,8 +54,8 @@ for sysSet in sysSets:
     systs.append(sys + 'Up')
 
   colors = [ROOT.kRed + 2, ROOT.kRed-4, ROOT.kBlue + 2, ROOT.kBlue-4, ROOT.kGreen + 2, ROOT.kGreen-3]
-  path = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-otravez-methoda/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
-  pathB = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-otravez/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
+  path = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-methoda/CHAN/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
+  pathB = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/CHAN/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
 
   stat = ROOT.TH1F('stat', 'stat', 12, 0, 12)
   hists = {}
@@ -63,7 +65,7 @@ for sysSet in sysSets:
 
   for c, chan in enumerate (channels):
     nominal, data = sumHists(path.replace('CHAN', chan), 'signalRegionsZoom')
-    nominalB, dataB = sumHists(path.replace('CHAN', chan), 'signalRegionsZoom')
+    nominalB, dataB = sumHists(pathB.replace('CHAN', chan), 'signalRegionsZoom')
     # for i in range(3, 10):
     #   try:
     #     stat.SetBinError(6*c + i, nominal.GetBinError(i)/nominal.GetBinContent(i))
@@ -76,13 +78,13 @@ for sysSet in sysSets:
       sysHistB, _ = sumHists(pathB.replace('CHAN', chan), 'signalRegionsZoom' + sys)
       sysHist.Divide(nominal)
       sysHistB.Divide(nominal)
-      for i in range(3, 10):
-        if sysHist.GetBinContent(i - 2) == 0:
-          hists[sys].SetBinContent(6*c + i - 2, 1.)        
+      for i in range(1, 7):
+        if sysHist.GetBinContent(i) == 0:
+          hists[sys].SetBinContent(6*c + i, 1.)        
           hists[sys + 'B'].SetBinContent(6*c + i, 1.)        
         else:
-          hists[sys].SetBinContent(6*c + i - 2, sysHist.GetBinContent(i))
-          hists[sys + 'B'].SetBinContent(6*c + i - 2, sysHistB.GetBinContent(i))
+          hists[sys].SetBinContent(6*c + i, sysHist.GetBinContent(i))
+          hists[sys + 'B'].SetBinContent(6*c + i, sysHistB.GetBinContent(i))
 
   c1 = ROOT.TCanvas('c', 'c', 1600, 700)
   for i, l in enumerate(labels):

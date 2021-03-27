@@ -33,26 +33,26 @@ def getRatioCanvas(name):
 
 
 
-offZuncorHists ={'2016': '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgestCheck-noZgCorr/all/llg-mll20-offZ-llgNoZ-photonPt20/',
-                 '2017': '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgestCheck-noZgCorr/all/llg-mll20-offZ-llgNoZ-photonPt20/',
-                 '2018': '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgestCheck-noZgCorr/all/llg-mll20-offZ-llgNoZ-photonPt20/'
+offZuncorHists ={'2016': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgestCheck-noZgCorr/all/llg-mll20-offZ-llgNoZ-photonPt20/',
+                 '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgestCheck-noZgCorr/all/llg-mll20-offZ-llgNoZ-photonPt20/',
+                 '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgestCheck-noZgCorr/all/llg-mll20-offZ-llgNoZ-photonPt20/'
 }
 
-offZcorHists ={'2016':  '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgNoZ-photonPt20/',
-               '2017': '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgNoZ-photonPt20/',
-               '2018': '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgNoZ-photonPt20/'
+offZcorHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgNoZ-photonPt20/',
+               '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgNoZ-photonPt20/',
+               '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgNoZ-photonPt20/'
 }
 
 
 
-onZuncorHists ={'2016':  '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgest-Re-noZgCorr/all/llg-mll20-offZ-llgOnZ-photonPt20/',
-              '2017': '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgest-Re-noZgCorr/all/llg-mll20-offZ-llgOnZ-photonPt20/',
-              '2018': '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgest-Re-noZgCorr/all/llg-mll20-offZ-llgOnZ-photonPt20/'
+onZuncorHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgest-noZgCorr/all/llg-mll20-offZ-llgOnZ-photonPt20/',
+              '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgest-noZgCorr/all/llg-mll20-offZ-llgOnZ-photonPt20/',
+              '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgest-noZgCorr/all/llg-mll20-offZ-llgOnZ-photonPt20/'
 }
 
-onZcorHists ={'2016':  '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgestCheck-Re/all/llg-mll20-offZ-llgOnZ-photonPt20/',
-            '2017': '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgestCheck-Re/all/llg-mll20-offZ-llgOnZ-photonPt20/',
-            '2018': '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgestCheck-Re/all/llg-mll20-offZ-llgOnZ-photonPt20/'
+onZcorHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgOnZ-photonPt20/',
+            '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgOnZ-photonPt20/',
+            '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgestCheck/all/llg-mll20-offZ-llgOnZ-photonPt20/'
 }
 
 
@@ -76,20 +76,21 @@ def sumHists(picklePath, plot = 'signalRegions'):
   return ZHist
 
 labels = {
-          'unfReco_phPt' :          'reco p_{T}(#gamma) (GeV)',     
-          'unfReco_phLepDeltaR' :   'reco #DeltaR(#gamma, l)',  
-          'unfReco_ll_deltaPhi' :   'reco #Delta#phi(ll)',            
-          'unfReco_jetLepDeltaR' :  'reco #DeltaR(l, j)',             
-          'unfReco_jetPt' :         'reco p_{T}(j1) (GeV)',          
-          'unfReco_ll_absDeltaEta' :'reco |#Delta#eta(ll)|',      
-          'unfReco_phBJetDeltaR' :  'reco #DeltaR(#gamma, b)',     
-          'unfReco_phAbsEta' :      'reco |#eta|(#gamma)',       
-          'unfReco_phLep1DeltaR' :  'reco #DeltaR(#gamma, l1)',     
-          'unfReco_phLep2DeltaR' :  'reco #DeltaR(#gamma, l2)',     
-          'unfReco_Z_pt' :          'reco p_{T}(ll) (GeV)', 
-          'unfReco_l1l2_ptsum' :    'reco p_{T}(l1)+p_{T}(l2) (GeV)',
+          'unfReco_phPt' :          'p_{T}(#gamma) (GeV)',     
+          'unfReco_phLepDeltaR' :   '#DeltaR(#gamma, l)',  
+          'unfReco_ll_deltaPhi' :   '#Delta#phi(ll)',            
+          'unfReco_jetLepDeltaR' :  '#DeltaR(l, j)',             
+          'unfReco_jetPt' :         'p_{T}(j1) (GeV)',          
+          'unfReco_ll_absDeltaEta' :'|#Delta#eta(ll)|',      
+          'unfReco_phBJetDeltaR' :  '#DeltaR(#gamma, b)',     
+          'unfReco_phAbsEta' :      '|#eta|(#gamma)',       
+          'unfReco_phLep1DeltaR' :  '#DeltaR(#gamma, l1)',     
+          'unfReco_phLep2DeltaR' :  '#DeltaR(#gamma, l2)',     
+          'unfReco_Z_pt' :          'p_{T}(ll) (GeV)', 
+          'unfReco_l1l2_ptsum' :    'p_{T}(l1)+p_{T}(l2) (GeV)',
           'signalRegionsZoom' :     'N_j / N_b',
-          'signalRegions'     :     'N_j / N_b'
+          'signalRegions'     :     'N_j / N_b',
+          'photon_pt' :          'p_{T}(#gamma) (GeV)'
           }
 
 distList = [
@@ -106,7 +107,8 @@ distList = [
   'unfReco_Z_pt',
   'unfReco_l1l2_ptsum',
   'signalRegionsZoom',
-  'signalRegions'
+  'signalRegions',
+  'photon_pt'
   ]
 
 # for plot in ['photon_pt_large', 'photon_pt', 'photon_eta_large', 'photon_eta_large', 'signalRegionsZoom']:
@@ -114,6 +116,7 @@ distList = [
 for year in ['2016', '2017', '2018']:
   for plot in distList:
     if plot == 'unfReco_jetPt':
+    # if True:
       onZcor    = sumHists(onZcorHists[year].replace('mll20', 'mll20-njet1p') + plot + '.pkl', plot)
       onZuncor  = sumHists(onZuncorHists[year].replace('mll20', 'mll20-njet1p') + plot + '.pkl', plot)
       offZcor   = sumHists(offZcorHists[year].replace('mll20', 'mll20-njet1p') + plot + '.pkl', plot)

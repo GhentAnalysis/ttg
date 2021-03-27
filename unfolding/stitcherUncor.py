@@ -99,9 +99,8 @@ labels = {
 #             ('singleTop_Single-t+#gamma (genuine)Single-t+#gamma (genuine)', 0.1)]
 
 
-noYearCor = ['pvSF','lSFEl','lSFMu','trigger']
-
-
+# noYearCor = ['pvSF','lSFEl','lSFMu','trigger']
+noYearCor = ['lSFElStat' ,'lSFMuStat' ,'pvSF' ,'trigStatEE','trigStatEM','trigStatMM','trigSyst' ,'HFUC' ,'AbsoluteUC' ,'BBEC1UC' ,'EC2UC' ,'RelativeSampleUC']
 
 def stitch1D(h6, h7, h8):
   binning = []
@@ -165,31 +164,32 @@ def stitch2D(h6, h7, h8):
 
 
 #################### main code ####################
-# TODO
-# NOTE  you can't write to jroels from gmestdac, idk bro, symlinks seem like a nice cheeky fix
 
-if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
-    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
+if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
+    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
 
-if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfcadB/noData/placeholderSelection/'):
-    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfcadB/noData/placeholderSelection/')
+if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR/noData/placeholderSelection/'):
+    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR/noData/placeholderSelection/')
+
+if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR_NLO/noData/placeholderSelection/'):
+    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR_NLO/noData/placeholderSelection/')
 
 for dist in distList:
   log.info('running for '+ dist)
-  response16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  reco16 = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-  out16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
-  fid16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+  response16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
+  reco16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+  out16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
+  fid16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
 
-  response17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  reco17 = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-  out17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
-  fid17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+  response17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
+  reco17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+  out17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
+  fid17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
 
-  response18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  reco18 = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-  out18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
-  fid18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+  response18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
+  reco18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+  out18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
+  fid18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
 
 
   responseRunII = copy.deepcopy(response16)
@@ -290,11 +290,11 @@ for dist in distList:
         fidRunII[var][proc].Add(fid18[var][proc])
 
 
-  pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
-  pickle.dump(responseRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl', 'w'))
-  pickle.dump(outRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl', 'w'))
-  pickle.dump(fidRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl', 'w'))
-  pickle.dump(recoSumRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist.replace('unfReco','sum_unfReco') + '.pkl', 'w'))
+  pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
+  pickle.dump(responseRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl', 'w'))
+  pickle.dump(outRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl', 'w'))
+  pickle.dump(fidRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl', 'w'))
+  pickle.dump(recoSumRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist.replace('unfReco','sum_unfReco') + '.pkl', 'w'))
 
 
   respStichCanv = ROOT.TCanvas('stitchedResp' + dist,'stitchedResp' + dist, 1900, 700)
@@ -317,8 +317,21 @@ for dist in distList:
   respStichCanv.SaveAs('unfolded/' + dist + 'stitchedResp.png')
   respStichCanv.SaveAs('unfolded/' + dist + 'stitchedResp.pdf')
 
-  # pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  # pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-  # pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
 
-  # TODO pickle the new dictionaries, but avoid using the year value all or so
+
+
+
+  fidNLO16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfBMAR_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+  fidNLO17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfBMAR_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+  fidNLO18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfBMAR_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+
+  fidNLORunII = copy.deepcopy(fidNLO16)
+  distFid = dist.replace('unfReco','fid_unfReco')
+
+  for var in fidNLORunII.keys():
+    for proc in fidNLORunII[var].keys():
+      fidNLORunII[var][proc].Add(fidNLO17[var][proc])
+      fidNLORunII[var][proc].Add(fidNLO18[var][proc])
+
+
+  pickle.dump(fidNLORunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfBMAR_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl', 'w'))

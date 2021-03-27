@@ -95,12 +95,12 @@ def getBinning(a):
   return numpy.linspace(a[1],a[2],a[0]-1)
 
 for plot in plotList:
-  response = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + plot + '.pkl'))[plot]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  perf = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfGB/noData/placeholderSelection/' + plot.replace('response', 'perf') + '.pkl'))[plot.replace('response', 'perf')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  fid = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + plot.replace('response', 'fid') + '.pkl'))[plot.replace('response', 'fid')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  recFid = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + plot.replace('response', 'recFid') + '.pkl'))[plot.replace('response', 'recFid')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  rec = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + plot.replace('response', 'rec') + '.pkl'))[plot.replace('response', 'rec')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  out = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + plot.replace('response', 'out') + '.pkl'))[plot.replace('response', 'out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  response = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + plot + '.pkl'))[plot]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  perf = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + plot.replace('response', 'perf') + '.pkl'))[plot.replace('response', 'perf')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  fid = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + plot.replace('response', 'fid') + '.pkl'))[plot.replace('response', 'fid')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  recFid = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + plot.replace('response', 'recFid') + '.pkl'))[plot.replace('response', 'recFid')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  rec = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + plot.replace('response', 'rec') + '.pkl'))[plot.replace('response', 'rec')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  out = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + plot.replace('response', 'out') + '.pkl'))[plot.replace('response', 'out')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
 
 
 

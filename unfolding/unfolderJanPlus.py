@@ -99,13 +99,13 @@ labels = {
           }
 
 distList = [
-  # 'unfReco_jetLepDeltaR',
-  # 'unfReco_jetPt',
-  # 'unfReco_ll_absDeltaEta',
-  # 'unfReco_ll_deltaPhi',
-  # 'unfReco_phAbsEta',
-  # 'unfReco_phBJetDeltaR',
-  # 'unfReco_phLepDeltaR',
+  'unfReco_jetLepDeltaR',
+  'unfReco_jetPt',
+  'unfReco_ll_absDeltaEta',
+  'unfReco_ll_deltaPhi',
+  'unfReco_phAbsEta',
+  'unfReco_phBJetDeltaR',
+  'unfReco_phLepDeltaR',
   'unfReco_phPt',
   'unfReco_phLep1DeltaR',
   'unfReco_phLep2DeltaR',
@@ -122,7 +122,7 @@ varList = ['']
 
 sysVaryData = ['ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst']
 
-if args.year == 'RunII': sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','lSFSy','bTagl','bTagb','JER','NP','lSFMuSyst','lSFElSyst']
+if args.year == 'RunII': sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','bTagl','bTagb','JER','NP','lSFMuSyst','lSFElSyst']
 else: sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst']
 
 varList += [sys + direc for sys in sysList for direc in ['Down', 'Up']]
@@ -143,6 +143,8 @@ theoSysList = ['isr','fsr', 'ue']
 theoVarList = ['']
 theoVarList += [sys + direc for sys in theoSysList for direc in ['Down', 'Up']]
 theoVarList += ['colRec_' + str(i) for i in range(1, 4)]
+
+NLOtheoVarList = []
 
 if args.LOtheory:
   # theoVarList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
@@ -483,7 +485,7 @@ for dist in distList:
     else: plMCDict[var] = plMC
 
   for var in NLOtheoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMARtestnlo_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plNLOpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plNLOq2Dict[var] = plMC.Clone()

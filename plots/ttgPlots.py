@@ -182,6 +182,13 @@ def makePlotList():
     plotList.append(Plot('photon_SigmaIetaIeta_small', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
     # plotList.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',                lambda c : c._phHadronicOverEm[c.ph],                          (100, 0, .025)))
     # plotList.append(Plot('photon_phHadTowOverEm',      'hadronicTowerOverEm(#gamma)',           lambda c : c._phHadTowOverEm[c.ph],                            (100, 0, .025)))
+
+
+# l1_relIso
+# l1_Mva
+# l_maxRelIso
+
+
     plotList.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
     plotList.append(Plot('phBJetDeltaR',               '#DeltaR(#gamma, b)',                    lambda c : c.phBJetDeltaR,                                     [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
     plotList.append(Plot('l1_pt',                      'p_{T}(l_{1}) (GeV)',                    lambda c : c.l1_pt,                                            (20, 25, 225)))
@@ -601,11 +608,11 @@ for year in years:
           totalPlot = addPlots(totalPlot, sortedPlots[i])
     else:
       totalPlots = copy.deepcopy(plots)
+    continue #don't draw individual years
 
   # In case of plots: could consider to treat the rateParameters similar as the linearSystematics
   # from ttg.plots.systematics import rateParameters
   # linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
-
 
   #
   # Drawing the plots
