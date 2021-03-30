@@ -87,19 +87,25 @@ showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in 
 # Defining linear systematics as "name : (sampleList, %)"
 #
 linearSystematics = {}
-linearSystematics['lumi'] = (None, 2.5)
+
+linearSystematics['ZG_norm']        = ('ZG',        3 )  #we consider 70% of the Zg yield to be constrained by the correction
+linearSystematics['singleTop_norm'] = ('singleTop', 10)
+linearSystematics['VVTo2L2Nu_norm'] = ('VVTo2L2Nu', 30)   #multiboson
+linearSystematics['other_norm']     = ('other',     30)
+
+# linearSystematics['lumi'] = (None, 2.5)
 
 #
 # Define linear systematics implemented as rate parameters
 #
 rateParameters = {}
-# rateParameters['TT_Dil']   = 5.5
-# rateParameters['ZG']       = 10
-rateParameters['ZG']       = 3   #we consider 70% of the Zg yield to be constrained by the correction
-# rateParameters['DY']       = 10
-rateParameters['singleTop'] = 10
-rateParameters['VVTo2L2Nu']    = 30   #multiboson
-rateParameters['other']    = 30
+# # rateParameters['TT_Dil']   = 5.5
+# # rateParameters['ZG']       = 10
+# rateParameters['ZG']       = 3   #we consider 70% of the Zg yield to be constrained by the correction
+# # rateParameters['DY']       = 10
+# rateParameters['singleTop'] = 10
+# rateParameters['VVTo2L2Nu']    = 30   #multiboson
+# rateParameters['other']    = 30
 
 
 # Function to apply the systematic to the cutstring, tree branches, reduceType

@@ -355,6 +355,7 @@ def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run=
         command += ' -t -1 --expectSignal 1'
 
     log.info('Running the check (stat+sys)')    
+    log.info(command)
 
     outName = dataCard + '_cc'
     if toys: outName += '_exp'
@@ -427,6 +428,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     if template not in templates: return '-'
     sample, value = info
     value = round(1+value*frac/100., 6)
+    if template == 'nonprompt': return '-' # another dirty hardcode, but it keeps things simple
     if sample:
       if template.count(sample): return value
       else:                      return '-'
@@ -439,6 +441,25 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     else:     selectTemplate, selectShape, sys   = None, None, sys
 
     if not shape and not template: return sys
+
+#   block below is more clever, but it gets complicated
+
+    if template == 'nonprompt':
+      if sys == 'NP': return val
+      else: return '-'
+    
+    if sys == 'NP' and not template == 'nonprompt': return '-'
+    
+    if shape == 'sr_ee':
+      if sys.count('lSFMu'): return '-'
+    if shape == 'sr_mumu':
+      if sys.count('lSFEl'): return '-'
+
+    if sys.count('trigStat'):
+      if shape == 'sr_emu' and not sys.count('trigStatEM'): return '-'
+      if shape == 'sr_ee' and not sys.count('trigStatEE'): return '-'
+      if shape == 'sr_mumu' and not sys.count('trigStatMM'): return '-'
+
 
     if t in templatesNoSys:                             return '-'
     elif selectShape    and selectShape    != shape:    return '-'
