@@ -1,17 +1,20 @@
 %\resizebox{1.0\linewidth}{!}{
-\begin{table}
+  \begin{table}
   \tiny
   \begin{tabular}{l|c|c|c|c}
     Uncertainty source                      & Affected processes                   & Treatment                     & Input value    & Impact on measured $t\bar{t}\gamma$        \\
     \hline
     Luminosity                                          & all                   & norm              &                & IMPACT:lumi  \\
     Pileup modeling                                     & all                   & shape             &                & IMPACT:pu  \\
-    Trigger efficiency                                  & all                   & shape             &                & IMPACT:trigger  \\
-    Muon selection efficiency (Stat.)                   & all                   & shape             &                & IMPACT:lSFMu  \\
-    Electron selection efficiency (Stat.)               & all                   & shape             &                & IMPACT:lSFEl  \\
-    Lepton selection efficiency (Sys.)                  & all                   & shape             &                & IMPACT:lSFSy  \\
+    $\mu\mu$ trigger efficiency (Stat.)                 & all                   & shape             &                & IMPACT:trigStatMM  \\
+    $e\mu$ trigger efficiency (Stat.)                   & all                   & shape             &                & IMPACT:trigStatEE  \\
+    $ee$ trigger efficiency (Stat.)                     & all                   & shape             &                & IMPACT:trigStatEM  \\
+    Trigger efficiency (Sys.)                           & all                   & shape             &                & IMPACT:trigSyst  \\
+    Muon selection efficiency (Stat.)                   & all                   & shape             &                & IMPACT:lSFMuStat  \\
+    Electron selection efficiency (Stat.)               & all                   & shape             &                & IMPACT:lSFElStat  \\
+    Muon selection efficiency (Sys.)                    & all                   & shape             &                & IMPACT:lSFMuSyst  \\
+    Electron selection efficiency (Sys.)                & all                   & shape             &                & IMPACT:lSFElSyst  \\
     Photon selection efficiency                         & all                   & shape             &                & IMPACT:phSF  \\
-    Jet energy scale                                    & all                   & shape             &                & IMPACT:JEC  \\
     Jet energy resolution                               & all                   & shape             &                & IMPACT:JER  \\
     b-tagging (light)                                   & all                   & shape             &                & IMPACT:bTagl  \\
     b-tagging (heavy)                                   & all                   & shape             &                & IMPACT:bTagb  \\
@@ -24,8 +27,19 @@
     pixel veto scalefactor                              & all                   & shape             &                & IMPACT:pvSF  \\
     PDFs                                                & all                   & shape             &                & IMPACT:pdf  \\
     nonprompt background estimation                     & nonprompt             & shape             &                & IMPACT:NP  \\
-    Colour reconnection ($t\bar{t}\gamma$)                    & $t\bar{t}\gamma$      & shape             &                & IMPACT:erd  \\
-    Underlying event ($t\bar{t}\gamma$)                      & $t\bar{t}\gamma$      & shape             &                & IMPACT:ue  \\
+    Colour reconnection ($t\bar{t}\gamma$)              & $t\bar{t}\gamma$      & shape             &                & IMPACT:colRec  \\
+    Underlying event ($t\bar{t}\gamma$)                 & $t\bar{t}\gamma$      & shape             &                & IMPACT:ue  \\
+    JEC: Absolute, correlated part                      & all                   & shape             &                & IMPACT:Absolute  \\
+    JEC: BBEC1, correlated part                         & all                   & shape             &                & IMPACT:BBEC1  \\
+    JEC: EC2, correlated part                           & all                   & shape             &                & IMPACT:EC2  \\
+    JEC: HF, correlated part                            & all                   & shape             &                & IMPACT:HF  \\
+    JEC: RelativeBal                                    & all                   & shape             &                & IMPACT:RelativeBal  \\
+    JEC: FlavorQCD                                      & all                   & shape             &                & IMPACT:FlavorQCD  \\
+    JEC: Absolute, uncorrelated part                    & all                   & shape             &                & IMPACT:AbsoluteUC  \\
+    JEC: BBEC1, uncorrelated part                       & all                   & shape             &                & IMPACT:BBEC1UC  \\
+    JEC: EC2, uncorrelated part                         & all                   & shape             &                & IMPACT:EC2UC  \\
+    JEC: HF, uncorrelated part                          & all                   & shape             &                & IMPACT:HFUC  \\
+    JEC: RelativeSample                                 & all                   & shape             &                & IMPACT:RelativeSampleUC  \\
     $Z\gamma$ normalization                             & $Z\gamma$             & rate parameter    & 3\%            & IMPACT:ZG_norm  \\
     $Single-t+\gamma$ normalization                     & $Single-t+\gamma$     & rate parameter    & 10\%           & IMPACT:singleTop_norm  \\
     $Multiboson+\gamma$ normalization                   & $Multiboson+\gamma$   & rate parameter    & 30\%           & IMPACT:VVTo2L2Nu_norm  \\
@@ -36,3 +50,8 @@
 \caption{Summary of considered nuisances and their impact on $t\bar{t}\gamma$.}}
 \end{table}
 %}
+
+
+
+
+

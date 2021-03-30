@@ -468,41 +468,21 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     for sys, info in linearSystematics.iteritems():
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
-    # implementing lumi separately
-    lumiunc = {'2016':2.5, '2017':2.3, '2018':2.5}
-    lumicorrel = (0.21, 0.29, 0.3)
 
-    if correlations:
-      shared = min(lumicorrel)
-      if shared > 0: 
-        f.write(tab(['lumi', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=shared**0.5) for s in shapes for t in templates+templatesNoSys]))
-        lumicorrel = [i - shared for i in lumicorrel]
-      if year == '2016':
-        uncorrel = 1.-shared-lumicorrel[0]-lumicorrel[1]
-        if uncorrel>0:
-          f.write(tab(['lumi_2016', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=uncorrel**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[0]>0:
-          f.write(tab(['lumi_1617', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[0]**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[1]>0:
-          f.write(tab(['lumi_1618', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[1]**0.5) for s in shapes for t in templates+templatesNoSys]))
-      if year == '2017':
-        uncorrel = 1.-shared-lumicorrel[0]-lumicorrel[2]
-        if uncorrel>0:
-          f.write(tab(['lumi_2017', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=uncorrel**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[0]>0:
-          f.write(tab(['lumi_1617', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[0]**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[2]>0:
-          f.write(tab(['lumi_1718', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[2]**0.5) for s in shapes for t in templates+templatesNoSys]))
-      if year == '2018':
-        uncorrel = 1.-shared-lumicorrel[1]-lumicorrel[2]
-        if uncorrel>0:
-          f.write(tab(['lumi_2016', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=uncorrel**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[1]>0:
-          f.write(tab(['lumi_1618', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[1]**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[2]>0:
-          f.write(tab(['lumi_1718', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[2]**0.5) for s in shapes for t in templates+templatesNoSys]))
-    else:
-      f.write(tab(['lumi', 'lnN'] + [linSys((None, lumiunc[year]), t) for s in shapes for t in templates+templatesNoSys]))
+    # implementing lumi separately
+    if year == '2016':
+      f.write(tab(['lumi_2016', 'lnN'] +   [linSys((None, 2.2), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 0.9), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1617', 'lnN'] +   [linSys((None, 0.8), t) for s in shapes for t in templates+templatesNoSys]))
+    if year == '2017':
+      f.write(tab(['lumi_2017', 'lnN'] +   [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 0.8), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1617', 'lnN'] +   [linSys((None, 0.6), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.4), t) for s in shapes for t in templates+templatesNoSys]))
+    if year == '2018':
+      f.write(tab(['lumi_2018', 'lnN'] +   [linSys((None, 1.5), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.3), t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
       correl = correlations.get(sys)
@@ -530,12 +510,12 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
         if year == '2018':
           uncorrel = 1.-shared-correl[1]-correl[2]
           if uncorrel>0:
-            f.write(tab([shapeSys(None, None, sys + '_2016'), 'shape'] + [shapeSys(s, t, sys, str(round(uncorrel**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+            f.write(tab([shapeSys(None, None, sys + '_2018'), 'shape'] + [shapeSys(s, t, sys, str(round(uncorrel**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
           if correl[1]>0:
             f.write(tab([shapeSys(None, None, sys + '_1618'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[1]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
           if correl[2]>0:
             f.write(tab([shapeSys(None, None, sys + '_1718'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[2]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
-      elif correl:
+      elif not correl == None:
         if not correl == 0:
           f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(round(correl**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
         uncorrel = str(round((1.-correl)**0.5, 6))

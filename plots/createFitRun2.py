@@ -17,7 +17,7 @@ log = getLogger(args.logLevel)
 
 from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
 from ttg.plots.combineTools import initCombineTools, writeCard, runFitDiagnostics, runSignificance, runImpacts, runCompatibility, goodnessOfFit, doLinearityCheck, plotNLLScan, plotSys, plotCC
-from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys, rateParameters
+from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys, CRSys, rateParameters
 
 import os, sys, subprocess, ROOT
 ROOT.gROOT.SetBatch(True)
@@ -61,6 +61,7 @@ def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
 
 from ttg.plots.replaceShape import replaceShape
 def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], shape=None, mergeBins=False, addOverflow=True):
+
     hist = histTemp.Clone()
     if norm:  normalizeBinWidth(hist, norm)
     if shape: hist = replaceShape(hist, shape)
@@ -76,6 +77,15 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
       hist.SetBinError(nbins, sqrt(hist.GetBinError(nbins)**2 + hist.GetBinError(nbins + 1)**2))
       hist.SetBinContent(nbins+1, 0.)
       hist.SetBinError(nbins+1, 0.)
+    
+    # hist.SetBinContent(1, 0.)
+    # hist.SetBinError(1, 0.)
+    # hist.SetBinContent(2, 0.)
+    # hist.SetBinError(2, 0.)
+    # hist.SetBinContent(3, 0.)
+    # hist.SetBinError(3, 0.)
+    # hist.SetBinContent(4, 0.)
+    # hist.SetBinError(4, 0.)
     
     if not rootFile.GetDirectory(name): rootFile.mkdir(name)
     rootFile.cd(name)
@@ -107,7 +117,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
     # baseSelection = 'llg-mll20-njet2p-deepbtag2p-offZ-llgNoZ-photonPt20'
 
     baseSelection = 'llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD-Ya'
+    tag           = 'phoCBfull-niceEstimDD'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
 # unfReco_jetLepDeltaR.pkl
@@ -136,6 +146,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
           # Selectors[0] += ['@']
         q2Variations = []
         pdfVariations = []
+        colRecVariations = []
         for sys in [''] + systematicVariations:
           if t == 'nonprompt':
             Selectors     = [['NP', 'nonprompt']]
@@ -146,6 +157,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
+          elif 'colRec' in sys: colRecVariations += [prompt]                                   # Save all colRecVariations in list
           else:
             if 'erdDown' in sys:
               sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
@@ -187,6 +199,10 @@ def writeRootFile(name, shapes, systematicVariations, year):
           writeHist(f, shape+'q2_1618Down', t, down, mergeBins = False)
           writeHist(f, shape+'q2_1718Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'q2_1718Down', t, down, mergeBins = False)
+        if len(colRecVariations) > 0:
+          up, down = CRSys(colRecVariations, nominal)
+          writeHist(f, shape+'colRecUp',   t, up,   mergeBins = False)
+          writeHist(f, shape+'colRecDown', t, down, mergeBins = False)
     f.Close()
 
 ######################
@@ -243,8 +259,9 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     # allSys = {}
     # for y in years:
     #   allSys[y] = shapeSys[y] + normSys
-    allSys = [base + suf for base in showSysList + ['lumi'] for suf in ['', '_2016', '_2017', '_2018', '_1617', '_1618', '_1718']] + normSys
-    
+    allSys = [base + suf for base in showSysList + ['lumi'] for suf in ['', '_2016', '_2017', '_2018', '_xycorr', '_1617', '_1718']] + normSys
+
+
     # log.info(allSys)
 
     print colored('##### Prepare ROOT file with histograms', 'red')

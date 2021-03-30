@@ -25,7 +25,6 @@ for i in ('Up', 'Down'):
 
   # systematics['lSFMuPS'+i]      = [('lWeight',       'lWeightPSSys'+i)]
 
-# TODO turn on once new skim ready
   systematics['trigStatEE'+i]    = [('triggerWeight', 'triggerWeightStatEE'+i)]
   systematics['trigStatEM'+i]    = [('triggerWeight', 'triggerWeightStatEM'+i)]
   systematics['trigStatMM'+i]    = [('triggerWeight', 'triggerWeightStatMM'+i)]
@@ -36,7 +35,9 @@ for i in ('Up', 'Down'):
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
   systematics['NP'+i]         = []
 
-  for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','Total','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+  for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+# UC ones are full oncorrelated, other ones 100% correlated
+
     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
 
 
@@ -46,28 +47,22 @@ for i in ('Up', 'Down'):
 
 # not in here -> 100% correlation
 correlations = {
-              # 'lSFSy' : , 
-              'lSFEl' : 0., 
-              'lSFMu' : 0., 
-              # 'phSF' : , 
-              # 'ephRes' : , 
-              # 'ephScal : '
+              # 'lSFElSyst' : correlated I guess ,
+              # 'lSFMuSyst' : correlated I guess ,
+              'lSFElStat' : 0 ,
+              'lSFMuStat' : 0 ,
               'pvSF' : 0. , 
               'bTagb' : 0.5 , 
               'bTagl' : 0.5 , 
-              # 'isr' : , 
-              # 'fsr' : , 
-              # 'JER' : , 
-              'JEC' : 0., 
-              # 'q2' : , 
-              'trigger' : 0, 
-              # 'pu' : 0.5 
-              # 'NP' : , 
-              # 'ue' : , 
-              # 'pf' : , 
-              # 'erd' : 
-              # 'pdf' : 
-              # 'q2' : 
+              'trigStatEE' : 0. ,
+              'trigStatEM' : 0. ,
+              'trigStatMM' : 0. ,
+              'trigSyst' : 0 ,
+              'HFUC' : 0.,
+              'AbsoluteUC' : 0.,
+              'BBEC1UC' : 0.,
+              'EC2UC' : 0.,
+              'RelativeSampleUC' : 0.
               }
 
 #
@@ -236,12 +231,12 @@ def constructPdfSys(allPlots, plotName, stack, force=False):
 #
 # Function for the color reconnection envelope using input histogram
 # there is no up/down sample for these, take max deviation and us it to produce up/down variations
-def CRSys(variations):
+def CRSys(variations, nominal):
   upHist, downHist = variations[0].Clone(), variations[0].Clone()
   for i in range(0, variations[0].GetNbinsX()+2):
-    maxdev = max([abs(var.GetBinContent(i) - upHist.GetBinContent(i)) for var in variations])
-    upHist.SetBinContent(  i, upHist.GetBinContent(i) + maxdev )
-    downHist.SetBinContent(i, downHist.GetBinContent(i) - maxdev )
+    maxdev = max([abs(var.GetBinContent(i) - nominal.GetBinContent(i)) for var in variations])
+    upHist.SetBinContent(  i, nominal.GetBinContent(i) + maxdev )
+    downHist.SetBinContent(i, nominal.GetBinContent(i) - maxdev )
   return upHist, downHist
 
 def constructCRSys(allPlots, plotName, stack, force=False):
@@ -249,8 +244,8 @@ def constructCRSys(allPlots, plotName, stack, force=False):
   allPlots[plotName + 'colRecDown'] = {}
   for histName in [s.name+s.texName for s in stack]:
     try:
-      variations = [allPlots[plotName + 'CRSys_' + i][histName] for i in ('1', '2', '3')]
+      variations = [allPlots[plotName + 'colRec_' + i][histName] for i in ('1', '2', '3')]
     except:
       log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
       variations = [allPlots[plotName][histName]]
-    allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations)
+    allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])
