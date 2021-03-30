@@ -35,8 +35,8 @@ def sumHists(picklePath, plot):
       print 'warning ' + name
   return (nHist, gHist, dHist)
 
-onZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-failChgIso-onlyTTDY-SS/noData/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_SigmaIetaIeta_small.pkl'
-offZfile = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCB-passChgIso-onlyTTBAR-SS/noData/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_SigmaIetaIeta_small.pkl'
+onZfile = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-failChgIso-forNPest/all/llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ/photon_SigmaIetaIeta_small.pkl'
+offZfile = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCB-passChgIso-forNPest/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/photon_SigmaIetaIeta_small.pkl'
 offZ = sumHists(offZfile, 'photon_SigmaIetaIeta_small')[0]
 onZ = sumHists(onZfile, 'photon_SigmaIetaIeta_small')[0]
 c1 = ROOT.TCanvas('c', 'c', 1300, 800)
@@ -56,8 +56,8 @@ legend = ROOT.TLegend(0.48,0.74,0.88,0.89)
 legend.SetBorderSize(0)
 # legend.AddEntry(offZ,"application region: m(ll) off-Z, pass Ch. Iso","L")
 # legend.AddEntry(onZ,"measurement region: m(ll) on-Z, fail Ch. Iso","L")
-legend.AddEntry(offZ,"application region: @@@@ update @@@@","L")
-legend.AddEntry(onZ,"measurement region: @@@@ update @@@@","L")
+legend.AddEntry(offZ,"application region: pass Ch. Iso, N_{b} #geq 1  ","L")
+legend.AddEntry(onZ,"measurement region: fail Ch. Iso, N_{j} #geq 1 (SF)  ","L")
 
 
 offZ.Draw('HIST E')

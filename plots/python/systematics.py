@@ -36,9 +36,8 @@ for i in ('Up', 'Down'):
   systematics['NP'+i]         = []
 
   for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
-# UC ones are full oncorrelated, other ones 100% correlated
-
     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
+# UC ones are full oncorrelated, other ones 100% correlated
 
 
   # systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
@@ -133,37 +132,6 @@ def getSigmaSyst(sys):
     if sys == 'NPUp': return 1.
     elif sys == 'NPDown': return -1.
   return 0.
-
-
-# #
-# # Special systematic samples for hdamp, ue, and erd
-# #
-# def getReplacementsForStack(sys, year):
-#   if not sys:
-#     return {}
-#   # no syst variation variation samples for 2016 (in miniAODv3 at least)
-#   # if not year == '2016':
-#   # if not year == '2017':
-#   # TODO if works universally just remove conditions
-#   if True:
-#     # if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
-#     #   return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
-#     # elif sys == 'erdUp' and year == '2017':
-#     #   return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd'}
-#       # TODO change when had is available again
-#       # return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
-
-#     # TODO to be built in when new samples arrive
-#     # OROFF turns off overlap removal
-#     ttgsampsw = {'erdUp':'erd', 'ueDown':'uedown', 'ueUp':'ueup'}
-#     if sys in ttgsampsw.keys():
-#       sw = ttgsampsw[sys]
-#       return {'TTGamma_Dil'  : 'TTGamma_Dil_' + sw + 'OROFF', 'TTGamma_Sem'   : 'TTGamma_Sem_' + sw + 'OROFF', 'TTGamma_Had' : 'TTGamma_HadOROFF',
-#               'TTGamma_DilA' : 'DROP',                 'TTGamma_SemA' : 'DROP',                  'TTGamma_HadA' : 'DROP',
-#               'TTGamma_DilB' : 'DROP',                 'TTGamma_SemB' : 'DROP',                  'TTGamma_HadB' : 'DROP'
-#               }
-
-#   return {}
 
 
 

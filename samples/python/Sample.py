@@ -99,7 +99,7 @@ class Sample:                                                                   
     else:
       self.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
       self.listOfFiles = self.getListOfFiles(splitData)
-    if shortDebug: self.listOfFiles = self.listOfFiles[:6]
+    if shortDebug: self.listOfFiles = self.listOfFiles[:3]
     if not len(self.listOfFiles): log.error('No tuples to run over for ' + self.name)
     for path in self.listOfFiles:
       log.debug("Adding " + path)
@@ -121,7 +121,7 @@ class Sample:                                                                   
 
   # Get iterator over entries
   def eventLoop(self, selectionString = None, totalJobs=1, subJob = 0):
-    self.chain.SetBranchStatus("_gen_daughterIndex", 0) # branch corrupted in some samples, not needed anyway
+    if not self.isData: self.chain.SetBranchStatus("_gen_daughterIndex", 0) # branch corrupted in some samples, not needed anyway
     if self.selectionString and selectionString: selectionString += "&&" + self.selectionString
     elif self.selectionString:                   selectionString  = self.selectionString
     if selectionString: entries = self.getEventList(selectionString, totalJobs, subJob)

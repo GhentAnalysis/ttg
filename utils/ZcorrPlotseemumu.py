@@ -13,16 +13,16 @@ ROOT.TH1.SetDefaultSumw2()
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 
-uncorHists ={'2016':  '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
-             '2017':  '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
-             '2018':  '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/'
+uncorHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+             '2017':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+             '2018':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/'
 }
 
 
 
-corHists ={'2016':  '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
-           '2017':  '/storage_mnt/storage/user/jroels/public_html/ttG/2017/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
-           '2018':  '/storage_mnt/storage/user/jroels/public_html/ttG/2018/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/'
+corHists ={'2016':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+           '2017':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/',
+           '2018':  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgestCheck/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/'
 }
 
 
@@ -51,7 +51,7 @@ for plot in ['signalRegions', 'signalRegionsZoom', 'njets', 'nbtag']:
         eecor.GetXaxis().SetBinLabel(i+1, l)
         eedata.GetXaxis().SetBinLabel(i+1, l)
     if plot == 'signalRegionsZoom':
-      labels = ['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b']
+      labels = ['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b']
       for i, l in enumerate(labels):
         eecor.GetXaxis().SetBinLabel(i+1, l)
         eedata.GetXaxis().SetBinLabel(i+1, l)
@@ -64,20 +64,20 @@ for plot in ['signalRegions', 'signalRegionsZoom', 'njets', 'nbtag']:
         mmcor.GetXaxis().SetBinLabel(i+1, l)
         mmdata.GetXaxis().SetBinLabel(i+1, l)
     if plot == 'signalRegionsZoom':
-      labels = ['2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b']
+      labels = ['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b']
       for i, l in enumerate(labels):
         mmcor.GetXaxis().SetBinLabel(i+1, l)
         mmdata.GetXaxis().SetBinLabel(i+1, l)
 
-    c1 = ROOT.TCanvas("c1", "c1", 1200, 800)
+    c1 = ROOT.TCanvas("c1", "c1", 900, 800)
     eecor.SetLineColor(ROOT.kBlue)
     mmcor.SetLineColor(ROOT.kRed)
-    eecor.Draw()
-    mmcor.Draw('same')
+    eecor.Draw('PE1')
+    mmcor.Draw('same PE1')
     eecor.SetTitle(" ")
     eecor.GetYaxis().SetTitle("corrected / uncorrected")
     eecor.GetXaxis().SetTitle(plot)
-    eecor.GetYaxis().SetRangeUser(0., 2.5)
+    eecor.GetYaxis().SetRangeUser(0., 2.6)
     legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
     legend.AddEntry(eecor,"ee correction","E")
     legend.AddEntry(mmcor,"mu mu correction","E")
@@ -85,20 +85,20 @@ for plot in ['signalRegions', 'signalRegionsZoom', 'njets', 'nbtag']:
     c1.SaveAs('ZGcorreevsmumu/' + year + plot + '.pdf')
     c1.SaveAs('ZGcorreevsmumu/' + year + plot + '.png')
 
-    c1 = ROOT.TCanvas("c1", "c1", 1200, 800)
-    eedata.SetLineColor(ROOT.kBlue)
-    mmdata.SetLineColor(ROOT.kRed)
-    eedata.Scale(1./eedata.Integral())
-    mmdata.Scale(1./mmdata.Integral())
-    eedata.Draw()
-    mmdata.Draw('same')
-    eedata.SetTitle(" ")
-    eedata.GetYaxis().SetTitle("(1/N) dN/dx'")
-    eedata.GetXaxis().SetTitle(plot)
-    eedata.GetYaxis().SetRangeUser(0., 0.2)
-    legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
-    legend.AddEntry(eedata,"ee data","E")
-    legend.AddEntry(mmdata,"mu mu data","E")
-    legend.Draw()
-    c1.SaveAs('ZGcorreevsmumu/data' + year + plot + '.pdf')
-    c1.SaveAs('ZGcorreevsmumu/data' + year + plot + '.png')
+    # c1 = ROOT.TCanvas("c1", "c1", 1200, 800)
+    # eedata.SetLineColor(ROOT.kBlue)
+    # mmdata.SetLineColor(ROOT.kRed)
+    # eedata.Scale(1./eedata.Integral())
+    # mmdata.Scale(1./mmdata.Integral())
+    # eedata.Draw()
+    # mmdata.Draw('same')
+    # eedata.SetTitle(" ")
+    # eedata.GetYaxis().SetTitle("(1/N) dN/dx'")
+    # eedata.GetXaxis().SetTitle(plot)
+    # eedata.GetYaxis().SetRangeUser(0., 0.2)
+    # legend = ROOT.TLegend(0.7,0.75,0.9,0.9)
+    # legend.AddEntry(eedata,"ee data","E")
+    # legend.AddEntry(mmdata,"mu mu data","E")
+    # legend.Draw()
+    # c1.SaveAs('ZGcorreevsmumu/data' + year + plot + '.pdf')
+    # c1.SaveAs('ZGcorreevsmumu/data' + year + plot + '.png')

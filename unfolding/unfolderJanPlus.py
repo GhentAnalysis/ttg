@@ -117,35 +117,46 @@ distList = [
 
 varList = ['']
 
-sysVaryData = ['ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','JEC','JER','NP']
-if args.year == 'RunII':
-  sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','lSFSy','bTagl','bTagb','JEC','JER','NP']
-  varList += ['pvSFUp16','lSFElUp16','lSFMuUp16','triggerUp16', 'pvSFDown16','lSFElDown16','lSFMuDown16','triggerDown16','pvSFUp17','lSFElUp17','lSFMuUp17','triggerUp17', 'pvSFDown17','lSFElDown17','lSFMuDown17','triggerDown17','pvSFUp18','lSFElUp18','lSFMuUp18','triggerUp18', 'pvSFDown18','lSFElDown18','lSFMuDown18','triggerDown18']
-else:
-  sysList = ['isr','fsr','ue','erd','ephScale','ephRes','pu','pf','phSF','pvSF','lSFSy','lSFEl','lSFMu','trigger','bTagl','bTagb','JEC','JER','NP']
 
+
+
+sysVaryData = ['ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst']
+
+if args.year == 'RunII': sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','bTagl','bTagb','JER','NP','lSFMuSyst','lSFElSyst']
+else: sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst']
 
 varList += [sys + direc for sys in sysList for direc in ['Down', 'Up']]
+
+if args.year == 'RunII':
+  for var in ['lSFElStat', 'lSFMuStat', 'pvSF', 'trigStatEE', 'trigStatEM', 'trigStatMM', 'trigSyst', 'HFUC', 'AbsoluteUC', 'BBEC1UC', 'EC2UC', 'RelativeSampleUC']:
+    for y in ['16', '17', '18']:
+      for direc in ['Up', 'Down']:
+        varList += [var + direc + y]
+
 varList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
 varList += ['pdf_' + str(i) for i in range(0, 100)]
-
+varList += ['colRec_' + str(i) for i in range(1, 4)]
 
 # theoSysList = ['isr','fsr','ue','erd']
 
-theoSysList = ['isr','fsr']
+theoSysList = ['isr','fsr', 'ue']
 theoVarList = ['']
 theoVarList += [sys + direc for sys in theoSysList for direc in ['Down', 'Up']]
+theoVarList += ['colRec_' + str(i) for i in range(1, 4)]
+
+NLOtheoVarList = []
 
 if args.LOtheory:
   # theoVarList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
   theoVarList += ['q2Sc_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
   # TODO switch!!!!!!!!!
-  theoVarList += ['pdf_' + str(i) for i in range(0, 100)]
-  # theoVarList += ['pdfSc_' + str(i) for i in range(0, 100)]
+  # theoVarList += ['pdf_' + str(i) for i in range(0, 100)]
+  theoVarList += ['pdfSc_' + str(i) for i in range(0, 100)]
 else:
   NLOtheoVarList = ['']
-  NLOtheoVarList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
+  NLOtheoVarList += ['q2Sc_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
   NLOtheoVarList += ['pdfSc_' + str(i) for i in range(0, 100)]
+
 
 
 bkgNorms = [('other_Other+#gamma (genuine)Other+#gamma (genuine)', 0.3),
@@ -259,7 +270,7 @@ def drawTauScan(response, data, backgrounds, outMig, outName, title):
 
 def getTotalDeviations(histDict):
 # WARNING this modifies the systematics histograms, be aware if you look at them later in the code
-  nominal = histDict[''].Clone
+  nominal = histDict[''].Clone()
   totalUp = nominal.Clone()
   totalUp.Reset('ICES')
   totalDown = totalUp.Clone()
@@ -288,6 +299,7 @@ def getRMS(histDict):
   rms.Reset('ICES')
 
   for var in histDict.keys():
+    if var == '': continue
     histDict[var].Add(nominal, -1.)
     histDict[var].Multiply(histDict[var])
     rms.Add(histDict[var])
@@ -342,12 +354,12 @@ for dist in distList:
 
 
   if args.year == 'RunII':
-    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
   else:
-    histDict = pickle.load(open('/storage_mnt/storage/user/jroels/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
 
-  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
+  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
+  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
 
   # get nominal unfolded, with the statistics split into data and MC backgrounds
   response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
@@ -366,7 +378,7 @@ for dist in distList:
   drawTauScan(response, data, backgroundsNom, outMig, outName = 'tauScan'+dist+args.year, title = labels[dist][0].replace('reco ', '').replace('(GeV)', ''))
 
   # get unfolded results for all systematic variations
-  unfoldedDict, pdfDict, q2Dict = {}, {}, {}
+  unfoldedDict, pdfDict, q2Dict, colRecDict = {}, {}, {}, {}
   
 
   for var in varList:
@@ -392,6 +404,7 @@ for dist in distList:
     unfolded.Scale(1./lumiScales[args.year])
     if var.count('pdf'): pdfDict[var] = unfolded
     elif var.count('q2'): q2Dict[var] = unfolded
+    elif var.count('colRec'): colRecDict[var] = unfolded
     else: unfoldedDict[var] = unfolded
 
   for direc in [('Down', -1.), ('Up', 1.)]:
@@ -419,17 +432,21 @@ for dist in distList:
 
     unfoldedDict['lumi'+direc[0]] = unfolded
 
+  # pdb.set_trace()
 
   totalUp, totalDown = getTotalDeviations(unfoldedDict)
 
   pdfDict[''] = unfoldedNom.Clone()
   q2Dict[''] = unfoldedNom.Clone()
+  colRecDict[''] = unfoldedNom.Clone()
   q2Up, q2Down = getEnv(q2Dict)
   pdfrms = getRMS(pdfDict)
+  colRecUp, colRecDown = getEnv(colRecDict)
   # add q2 and pdf to totalUp and totalDown
   for i in range(1, totalUp.GetXaxis().GetNbins()+1):
-    totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
-    totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
+    colRecErr = max(abs(colRecUp.GetBinContent(i)), abs(colRecDown.GetBinContent(i)))
+    totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
 
   unfoldedMC = getUnfolded(response, signal, {}, outMig)
   unfoldedMC.Scale(1./lumiScales[args.year])
@@ -450,53 +467,57 @@ for dist in distList:
 
 # NOTE THIS BLOCK LOADS THE SYSTEMATICS BAND FOR THE THEORY, VERY SIMILAR TO PREUNF CODE
 
-  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   # plMC = response.ProjectionY("PLMC")
 
 
-  plMCDict, plMCpdfDict, plMCq2Dict = {}, {}, {}
+  plMCDict, plMCpdfDict, plMCq2Dict, plMCcolRecDict = {}, {}, {}, {}
 
   plNLOpdfDict, plNLOq2Dict = {}, {}
 
   for var in theoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + '2016' + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + '2016' + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plMCpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plMCq2Dict[var] = plMC.Clone()
+    elif var.count('colRec'): plMCcolRecDict[var] = plMC.Clone()
     else: plMCDict[var] = plMC
 
   for var in NLOtheoVarList:
-    # TODO insert path to NLO plots
-    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfcadB/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plNLOpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plNLOq2Dict[var] = plMC.Clone()
     elif var == '': 
-      plNLOpdfDict[var] = plMC.Clone()
-      plNLOq2Dict[var] = plMC.Clone()
+      plNLOpdfDict[''] = plMC.Clone()
+      plNLOq2Dict[''] = plMC.Clone()
     else: log.info(var + ' not supposed to be in NLO list')
 
   plMCpdfDict[''] = plMCDict[''].Clone()
   plMCq2Dict[''] = plMCDict[''].Clone()
+  plMCcolRecDict[''] =  plMCDict[''].Clone()
   pltotalUp, pltotalDown = getTotalDeviations(plMCDict)
+  plcolRecUp, plcolRecDown = getEnv(plMCcolRecDict)
 
   if args.LOtheory:
     plpdfrms = getRMS(plMCpdfDict)
     plq2Up, plq2Down = getEnv(plMCq2Dict)
   else:
-    plpdfrms = getRMS(plMCpdfDict)
-    plq2Up, plq2Down = getEnv(plMCq2Dict)
+    plpdfrms = getRMS(plNLOpdfDict)
+    plq2Up, plq2Down = getEnv(plNLOq2Dict)
     for i in range(1, pltotalUp.GetXaxis().GetNbins()+1):
-      plpdfrms.SetBinContent(plpdfrms.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
-      plq2Up.SetBinContent(plq2Up.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
-      plq2Down.SetBinContent(plq2Down.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
+      # pdb.set_trace()
+      plpdfrms.SetBinContent(i, plpdfrms.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
+      plq2Up.SetBinContent(i, plq2Up.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
+      plq2Down.SetBinContent(i, plq2Down.GetBinContent(i) * plMCDict[''].GetBinContent(i) / plNLOpdfDict[''].GetBinContent(i))
     # TODO scale to LO sample yields
-
+  
   # add q2 and pdf to pltotalUp and pltotalDown
   for i in range(1, pltotalUp.GetXaxis().GetNbins()+1):
-    pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
-    pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
+    colRecErr = max(abs(plcolRecUp.GetBinContent(i)), abs(plcolRecDown.GetBinContent(i)))
+    pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
 
   plMCTot = plMCDict[''].Clone()
 
@@ -629,7 +650,7 @@ for dist in distList:
 #  pre-unfolding plots:
 
   # if args.year == 'RunII':
-  #   histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD-Ya/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist.replace('unfReco','sum_unfReco') + '.pkl','r'))
+  #   histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist.replace('unfReco','sum_unfReco') + '.pkl','r'))
 
   # dataNom, signalNom, backgroundsDict = getHistos(histDict, dist, '', blind = not args.unblind)
   # backgroundsNom = sumDict(backgroundsDict)

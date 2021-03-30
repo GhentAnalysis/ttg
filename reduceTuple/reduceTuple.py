@@ -148,8 +148,8 @@ if not sample.isData:
 
     for var in ['Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd']:   newBranches += ['weight_q2_' + var + '/F']
     for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
-    for sys in ['Up', 'Down']:                           newBranches += ['lWeightPSSys' + sys + '/F', 'lWeightElSyst' + sys + '/F','lWeightMuSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStatMM' + sys + '/F', 'triggerWeightStatEM' + sys + '/F', 'triggerWeightStatEE' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F']
-    for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
+    for sys in ['Up', 'Down']:                           newBranches += ['lWeightPSSys' + sys + '/F', 'lWeightElSyst' + sys + '/F','lWeightMuSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStatMM' + sys + '/F', 'triggerWeightStatEM' + sys + '/F', 'triggerWeightStatEE' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F', 'lTrackWeight' + sys + '/F']
+    for sys in ['lUp', 'lDown', 'bCOUp', 'bCODown', 'bUCUp', 'bUCDown']:         newBranches += ['bTagWeight' + sys + '/F']
 
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
@@ -213,7 +213,7 @@ if args.recTops:
   kf = getTopKinFit()
 
 
-isTTG = sample.name.count('TTG') and not sample.name.lower().count('ttgamma')
+isTTG = sample.name.count('TTGamma')
 
 log.info('Starting event loop')
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
@@ -338,6 +338,8 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
 
     newVars.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
+    newVars.lTrackWeightUp   = leptonTrackingSF.getSF(c, l1, l1_pt, sigma=1) *leptonTrackingSF.getSF(c, l2, l2_pt, sigma=1)
+    newVars.lTrackWeightDown = leptonTrackingSF.getSF(c, l1, l1_pt, sigma=-1)*leptonTrackingSF.getSF(c, l2, l2_pt, sigma=-1)
 
     ph, ph_pt = newVars.ph, newVars.ph_pt
     newVars.phWeight     = photonSF.getSF(c, ph, ph_pt) if len(c.photons) > 0 else 1
@@ -349,7 +351,7 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     newVars.PVWeightDown = pixelVetoSF.getSF(c, ph, ph_pt, sigma=-1) if len(c.photons) > 0 else 1
 
     # method 1a
-    for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
+    for sys in ['', 'lUp', 'lDown', 'bCOUp', 'bCODown', 'bUCUp', 'bUCDown']:
       setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets))
 
     trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1_pt, l2_pt, newVars.isMuMu, newVars.isEMu, newVars.isEE)

@@ -366,7 +366,14 @@ class Plot:
 
       histos_summed[sys] = None
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
-        h = allPlots[plotName][histName].Clone()
+        if sys and 'NP' in sys and 'compRewContribMC' in resultsDir:                                           # to make uncertainty bands work in closure tests. Hacky, should be illegal
+          estim, estimSys = None, None
+          for d in [d for d in allPlots[self.name] if d.count('estimate')]:                                                          
+            estim    = addHist(estim,    allPlots[self.name][d])                                                                     
+            estimSys = addHist(estimSys, allPlots[self.name+sys][d])                                                                 
+          h = applySysToOtherHist(estim, estimSys, allPlots[plotName][histName].Clone())                                             
+        else:
+          h = allPlots[plotName][histName].Clone()
         if sys and 'StatUp' in sys and sys.replace('StatUp', '') in histName:                                                          # MC statistics for plots
           for i in range(0, h.GetNbinsX()+1):
             h.SetBinContent(i, h.GetBinContent(i)+h.GetBinError(i))
@@ -500,7 +507,7 @@ class Plot:
   #
   def draw(self, \
           yRange = "auto",
-          extensions = ["pdf", "png", "root", "C"],
+          extensions = ["pdf", "png", "root"],
           plot_directory = ".",
           logX = False, logY = True,
           ratio = None,

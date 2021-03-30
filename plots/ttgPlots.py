@@ -81,7 +81,6 @@ from ttg.plots.photonCategories       import photonCategoryNumber, chgIsoCat
 
 if args.tag.count('compRewContribMCTTBAR'):
   from ttg.plots.npWeightTTBAR          import npWeight
-  # from ttg.plots.npWeightPerYearTTBAR          import npWeight
 else:
   from ttg.plots.npWeight               import npWeight
 
@@ -183,6 +182,13 @@ def makePlotList():
     plotList.append(Plot('photon_SigmaIetaIeta_small', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
     # plotList.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',                lambda c : c._phHadronicOverEm[c.ph],                          (100, 0, .025)))
     # plotList.append(Plot('photon_phHadTowOverEm',      'hadronicTowerOverEm(#gamma)',           lambda c : c._phHadTowOverEm[c.ph],                            (100, 0, .025)))
+
+
+# l1_relIso
+# l1_Mva
+# l_maxRelIso
+
+
     plotList.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
     plotList.append(Plot('phBJetDeltaR',               '#DeltaR(#gamma, b)',                    lambda c : c.phBJetDeltaR,                                     [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
     plotList.append(Plot('l1_pt',                      'p_{T}(l_{1}) (GeV)',                    lambda c : c.l1_pt,                                            (20, 25, 225)))
@@ -226,10 +232,11 @@ def makePlotList():
     plotList.append(Plot('j2_eta',                     '|#eta|(j_{2})',                         lambda c : abs(c._jetEta[c.j2]),                               (15, 0, 2.4)))
     plotList.append(Plot('j2_phi',                     '#phi(j_{2})',                           lambda c : c._jetPhi[c.j2],                                    (10, -pi, pi)))
     plotList.append(Plot('j2_deepCSV',                 'deepCSV(j_{2})',                        lambda c : c._jetDeepCsv_b[c.j2] + c._jetDeepCsv_bb[c.j2],     (20, 0, 1)))
-    plotList.append(Plot('dbj1_pt',                    'p_{T}(bj_{1}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj1],                            (30, 30, 330)))
-    plotList.append(Plot('dbj2_pt',                    'p_{T}(bj_{2}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj2],                            (30, 30, 330)))
-    plotList.append(Plot('dbj1_deepCSV',               'deepCSV(dbj_{1})',                      lambda c : c._jetDeepCsv_b[c.dbj1] + c._jetDeepCsv_bb[c.dbj1], (20, 0, 1)))
-    plotList.append(Plot('dbj2_deepCSV',               'deepCSV(dbj_{2})',                      lambda c : c._jetDeepCsv_b[c.dbj2] + c._jetDeepCsv_bb[c.dbj2], (20, 0, 1)))
+    if not args.showSys: # if we want variations of this we need to save dbj1_pt at skimming level
+      plotList.append(Plot('dbj1_pt',                    'p_{T}(bj_{1}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj1],                            (30, 30, 330)))
+      plotList.append(Plot('dbj2_pt',                    'p_{T}(bj_{2}) (GeV)',                   lambda c : c._jetSmearedPt[c.dbj2],                            (30, 30, 330)))
+      plotList.append(Plot('dbj1_deepCSV',               'deepCSV(dbj_{1})',                      lambda c : c._jetDeepCsv_b[c.dbj1] + c._jetDeepCsv_bb[c.dbj1], (20, 0, 1)))
+      plotList.append(Plot('dbj2_deepCSV',               'deepCSV(dbj_{2})',                      lambda c : c._jetDeepCsv_b[c.dbj2] + c._jetDeepCsv_bb[c.dbj2], (20, 0, 1)))
     plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (6, 0, 6),   histModifications=xAxisLabels(['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsCap',           'signal region',                         lambda c : createSignalRegionsCap(c),                          (6, 0, 6),   histModifications=xAxisLabels(['0j,0b', '1j,0b', '#geq2j,0b', '1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
@@ -526,7 +533,6 @@ for year in years:
 
       # when creating input plots for corrections corrections can obviously not be applied yet
       npReweight = npWeight(sigma = getSigmaSyst(args.sys))
-      # npReweight = npWeight(year = c.year, sigma = getSigmaSyst(args.sys))
       
       if not args.noZgCorr:
         try:
@@ -602,11 +608,11 @@ for year in years:
           totalPlot = addPlots(totalPlot, sortedPlots[i])
     else:
       totalPlots = copy.deepcopy(plots)
+    continue #don't draw individual years
 
   # In case of plots: could consider to treat the rateParameters similar as the linearSystematics
   # from ttg.plots.systematics import rateParameters
   # linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
-
 
   #
   # Drawing the plots
@@ -710,7 +716,7 @@ for year in years:
                     sorting           = False,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                     drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)),
-                    uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
+                    # uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
                     # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                     **extraArgs
           )
@@ -828,7 +834,7 @@ for plot in totalPlots: # 1D plots
                   sorting           = False,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData' or onlyMC)),
-                  uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
+                  # uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
                   # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                   **extraArgs
         )
