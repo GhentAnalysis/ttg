@@ -95,7 +95,7 @@ def getDefaultCanvas(ratio):
     pad.SetBorderMode(0)
     pad.SetFrameFillStyle(0)
     pad.SetFrameBorderMode(0)
-    pad.SetTickx(0)
+    pad.SetTickx(1)
     pad.SetTicky(1)
 
   def getPad(canvas, number):
@@ -148,10 +148,10 @@ def commonStyle(histo):
   histo.GetYaxis().SetTitleFont(43)
   histo.GetXaxis().SetLabelFont(43)
   histo.GetYaxis().SetLabelFont(43)
-  histo.GetXaxis().SetTitleSize(24)
-  histo.GetYaxis().SetTitleSize(24)
-  histo.GetXaxis().SetLabelSize(20)
-  histo.GetYaxis().SetLabelSize(20)
+  histo.GetXaxis().SetTitleSize(23)
+  histo.GetYaxis().SetTitleSize(23)
+  histo.GetXaxis().SetLabelSize(23)
+  histo.GetYaxis().SetLabelSize(23)
   histo.GetYaxis().SetTitleOffset(1.5 if ttgStyle else 2)
 
 def errorStyle(color, markerStyle = 20, markerSize = 1):
@@ -200,11 +200,12 @@ def fillStyle(color, lineColor = None):
 #
 # drawTex function
 #
-def drawTex(line, align=11, size=0.04):
+def drawTex(line, align=11, size=0.045, angle=0):
   tex = ROOT.TLatex()
   tex.SetNDC()
   tex.SetTextSize(size)
   tex.SetTextAlign(align)
+  tex.SetTextAngle(angle)
   return tex.DrawLatex(*line)
 
 
@@ -213,8 +214,8 @@ def drawTex(line, align=11, size=0.04):
 #
 def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
   lines = [
-    (11, (ROOT.gStyle.GetPadLeftMargin(),  1-ROOT.gStyle.GetPadTopMargin(), 'CMS Simulation' if isOnlySim else 'CMS Preliminary')),
-    (31, (1-ROOT.gStyle.GetPadRightMargin(), 1-ROOT.gStyle.GetPadTopMargin(), ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
+    (11, (ROOT.gStyle.GetPadLeftMargin()+0.02,  1-ROOT.gStyle.GetPadTopMargin()+0.01, 'CMS #bf{#it{Simulation}}' if isOnlySim else 'CMS #bf{#it{Preliminary}}')),
+    (31, (1-ROOT.gStyle.GetPadRightMargin()-0.02, 1-ROOT.gStyle.GetPadTopMargin()+0.01, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
   ]
   return [drawTex(l, align) for align, l in lines]
 

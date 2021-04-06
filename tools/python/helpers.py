@@ -12,6 +12,15 @@ plotCombineDir         = os.path.expandvars(('/afs/cern.ch/user/' + userGroup + 
 # reducedTupleDir = os.path.expandvars(('/afs/cern.ch/user/' + userGroup + '/$USER/reducedTuples/') if 'lxp' in socket.gethostname() else '/user/$USER/public/reducedTuples/') 
 reducedTupleDir = os.path.expandvars('/pnfs/iihe/cms/store/user/$USER/ttgTuples/')
 
+
+lumiScales = {'2016':36.33,
+              '2017':41.53,
+              '2018':59.74,
+              'RunII':137.56
+              }
+
+lumiScalesRounded = {'2016':36.3, '2017':41.5, '2018':59.7, 'RunII':137.6}
+
 #
 # Check if valid ROOT file exists
 #

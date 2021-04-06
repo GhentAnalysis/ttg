@@ -31,7 +31,7 @@ from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong,
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
 from ttg.tools.style import drawLumi
-from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi, deltaR
+from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi, deltaR, lumiScales, lumiScalesRounded
 from ttg.plots.plotHelpers  import *
 from ttg.samples.Sample import createSampleList, getSampleFromList
 import copy
@@ -40,7 +40,6 @@ from math import pi
 from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSyst
 
 
-lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
 reduceType = 'unfEFB'
 # reduceType = 'unfFB'
 

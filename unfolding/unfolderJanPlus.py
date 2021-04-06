@@ -29,7 +29,7 @@ ROOT.gStyle.SetOptStat(0)
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
 from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
 from ttg.tools.style import drawLumi, setDefault, drawTex
-from ttg.tools.helpers import plotDir, getObjFromFile
+from ttg.tools.helpers import plotDir, getObjFromFile, lumiScales, lumiScalesRounded
 import copy
 import pickle
 import numpy
@@ -72,30 +72,41 @@ def getRatioCanvas(name):
 
 
 #################### Settings and definitons ####################
-lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
-lumiScales['RunII'] = lumiScales['2016'] + lumiScales['2017'] + lumiScales['2018']
-lumiScalesRounded = {'2016':35.9, '2017':41.5, '2018':59.7}
-lumiScalesRounded['RunII'] = lumiScalesRounded['2016'] + lumiScalesRounded['2017'] + lumiScalesRounded['2018']
 
-lumiunc = {'2016':0.025, '2017':0.023, '2018':0.025}
+lumiunc = {'2016':0.012, '2017':0.023, '2018':0.025}
 
-# TODO NOTE temporary simplification
-lumiunc['RunII'] = 0.025
+lumiunc['RunII'] = 0.016 
+
+
+# labels = {
+#           'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',  'gen p_{T}(#gamma) (GeV)'),
+#           'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',   'gen #DeltaR(#gamma, l)'),
+#           'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',       'gen #Delta#phi(ll)'),
+#           'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',        'gen #DeltaR(l, j)'),
+#           'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',      'gen p_{T}(j1) (GeV)'),
+#           'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',     'gen |#Delta#eta(ll)|'),
+#           'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',   'gen #DeltaR(#gamma, b)'),
+#           'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',       'gen |#eta|(#gamma)'),
+#           'unfReco_phLep1DeltaR' :    ('reco #DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
+#           'unfReco_phLep2DeltaR' :    ('reco #DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
+#           'unfReco_Z_pt' :            ('reco p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
+#           'unfReco_l1l2_ptsum' :      ('reco p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
+#           }
 
 
 labels = {
-          'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',  'gen p_{T}(#gamma) (GeV)'),
-          'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',   'gen #DeltaR(#gamma, l)'),
-          'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',       'gen #Delta#phi(ll)'),
-          'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',        'gen #DeltaR(l, j)'),
-          'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',      'gen p_{T}(j1) (GeV)'),
-          'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',     'gen |#Delta#eta(ll)|'),
-          'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',   'gen #DeltaR(#gamma, b)'),
-          'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',       'gen |#eta|(#gamma)'),
-          'unfReco_phLep1DeltaR' :    ('reco #DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
-          'unfReco_phLep2DeltaR' :    ('reco #DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
-          'unfReco_Z_pt' :            ('reco p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
-          'unfReco_l1l2_ptsum' :      ('reco p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
+          'unfReco_phPt' :            ('p_{T}(#gamma) (GeV)',  'p_{T}(#gamma) (GeV)'),
+          'unfReco_phLepDeltaR' :     ('#DeltaR(#gamma, l)',   '#DeltaR(#gamma, l)'),
+          'unfReco_ll_deltaPhi' :     ('#Delta#phi(ll)',       '#Delta#phi(ll)'),
+          'unfReco_jetLepDeltaR' :    ('#DeltaR(l, j)',        '#DeltaR(l, j)'),
+          'unfReco_jetPt' :           ('p_{T}(j1) (GeV)',      'p_{T}(j1) (GeV)'),
+          'unfReco_ll_absDeltaEta' :  ('|#Delta#eta(ll)|',     '|#Delta#eta(ll)|'),
+          'unfReco_phBJetDeltaR' :    ('#DeltaR(#gamma, b)',   '#DeltaR(#gamma, b)'),
+          'unfReco_phAbsEta' :        ('|#eta|(#gamma)',       '|#eta|(#gamma)'),
+          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       '#DeltaR(#gamma, l1)'),
+          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       '#DeltaR(#gamma, l2)'),
+          'unfReco_Z_pt' :            ('p_{T}(ll) (GeV)',           'p_{T}(ll) (GeV)'),
+          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) (GeV)', 'p_{T}(l1)+p_{T}(l2) (GeV)')
           }
 
 distList = [
@@ -234,8 +245,8 @@ def getUnfolded(response, data, backgrounds, outMig, splitStats = False):
     for i in range(1, bkgStat.GetXaxis().GetNbins()+1):
       bkgStat.SetBinContent(i, EMatSum.GetBinContent(i, i)**0.5)
       dataStat.SetBinContent(i, EDat.GetBinContent(i, i)**0.5)
-
-    return (unfolded, dataStat, bkgStat)
+    # pdb.set_trace()
+    return (unfolded, dataStat, bkgStat, EDat)
 
 def drawTauScan(response, data, backgrounds, outMig, outName, title):
   unfold = ROOT.TUnfoldDensity( response, mapping, ROOT.TUnfold.kRegModeCurvature, constraintMode, densityFlags )
@@ -254,7 +265,7 @@ def drawTauScan(response, data, backgrounds, outMig, outName, title):
 
   result = ROOT.TSpline3()
   iBest = unfold.ScanTau(200,0.000001,0.01, result, ROOT.TUnfoldDensity.kEScanTauRhoAvg)
-  log.info(unfold.GetTau())
+  log.info("tau: " + str(unfold.GetTau()))
 
   tauCanvas = ROOT.TCanvas('c' + str(uuid.uuid4()).replace('-',''), outName, 700, 700)
   h= tauCanvas.DrawFrame(-6,0.15,-2,0.9)
@@ -267,6 +278,51 @@ def drawTauScan(response, data, backgrounds, outMig, outName, title):
   texl.Draw()
   # tauCanvas.SaveAs('tauScans/' + outName + '.pdf') #creates 2 page pdf for some reason
   tauCanvas.SaveAs('tauScans/' + outName + '.png') 
+
+
+def calcChi2(data, models):
+  data = data.Clone()
+  diff = data.Clone()
+  for model in models:
+    diff.Add(model, -1.)
+  chi2 = 0
+  for i in range( 1, diff.GetXaxis().GetNbins() + 1 ): 
+    # chi2 += (diff.GetBinContent(i)**2.) / (data.GetBinError(i)**2.)
+    chi2 += diff.GetBinContent(i)**2. / diff.GetBinContent(i)
+  # chi2 = chi2 / data.GetXaxis().GetNbins()
+  return chi2
+
+
+# def DrawEMatrix(response, data, backgrounds, outMig, outName, title):
+#   unfold = ROOT.TUnfoldDensity( response, mapping, ROOT.TUnfold.kRegModeCurvature, constraintMode, densityFlags )
+
+#   data.SetBinContent(data.GetXaxis().GetNbins()+1, 0.)
+#   data.SetBinContent(0, 0.)
+
+#   unfold.SetInput(data)
+#   for process, hist in backgrounds.items():
+#     hist.SetBinContent(hist.GetXaxis().GetNbins()+1, 0.)
+#     hist.SetBinContent(0, 0.)
+#     unfold.SubtractBackground(hist, process)
+#   outMig.SetBinContent(outMig.GetXaxis().GetNbins()+1, 0.)
+#   outMig.SetBinContent(0, 0.)
+#   unfold.SubtractBackground(outMig, 'outMig')
+
+#   result = ROOT.TSpline3()
+#   iBest = unfold.ScanTau(200,0.000001,0.01, result, ROOT.TUnfoldDensity.kEScanTauRhoAvg)
+#   log.info(unfold.GetTau())
+
+#   tauCanvas = ROOT.TCanvas('c' + str(uuid.uuid4()).replace('-',''), outName, 700, 700)
+#   h= tauCanvas.DrawFrame(-6,0.15,-2,0.9)
+#   h.SetXTitle("log(#tau)")
+#   h.SetYTitle("average correlation coefficient")
+#   h.SetTitle(title)
+#   result.Draw('LP same')
+#   texl = ROOT.TLatex(-5.5,0.8,'#tau = ' + str(round(unfold.GetTau(), 8)))
+#   texl.SetTextSize(0.035)
+#   texl.Draw()
+#   # tauCanvas.SaveAs('tauScans/' + outName + '.pdf') #creates 2 page pdf for some reason
+#   tauCanvas.SaveAs('tauScans/' + outName + '.png') 
 
 def getTotalDeviations(histDict):
 # WARNING this modifies the systematics histograms, be aware if you look at them later in the code
@@ -368,10 +424,14 @@ for dist in distList:
   totalNom = sumDict(backgroundsNom)
   totalNom.Add(signalNom)
 
-  unfoldedNom, dataStat, bkgStat = getUnfolded(response, data, backgroundsNom, outMig, splitStats = True)
+  unfoldedNom, dataStat, bkgStat, eMat = getUnfolded(response, data, backgroundsNom, outMig, splitStats = True)
+  # returns correlation matrix as well. It's the data statistics only one
+  # pdb.set_trace()
   unfoldedNom.Scale(1./lumiScales[args.year])
   dataStat.Scale(1./lumiScales[args.year])
   bkgStat.Scale(1./lumiScales[args.year])
+
+  log.info("chi2 before unfolding: " + str(calcChi2(data, backgroundsNom.values()+[signalNom]) / lumiScales[args.year] ))
 
 
   # draw tau scan  (no, we're not regularizing)
@@ -541,9 +601,12 @@ for dist in distList:
   # unfoldedTotUnc.SetFillColor(ROOT.kOrange)
   # unfoldedTotUnc.GetYaxis().SetRangeUser(0., unfoldedNom.GetMaximum()*0.2)
   unfoldedTotUnc.SetMinimum(0.)
-  unfoldedTotUnc.GetYaxis().SetRangeUser(0., unfoldedNom.GetMaximum()*1.5)
+  unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, unfoldedNom.GetMaximum()*1.5)
   unfoldedTotUnc.GetXaxis().SetTitle(labels[dist][1])
-  unfoldedTotUnc.GetYaxis().SetTitle('Fiducial cross section (fb)')
+  # unfoldedTotUnc.GetYaxis().SetTitle('Fiducial cross section (fb)')
+  unfoldedTotUnc.GetYaxis().SetTitle('')
+  unfoldedTotUnc.GetYaxis().SetTitleOffset(1.55)
+
   unfoldedTotUnc.SetTitle('')
   unfoldedTotUnc.Draw('E X0')
 
@@ -578,13 +641,15 @@ for dist in distList:
   unfoldedNom.Draw('same E1 X0')
   # unfoldedNom.Draw('same')
 
-  legend = ROOT.TLegend(0.32,0.8,0.85,0.88)
+  legend = ROOT.TLegend(0.32,0.82,0.85,0.88)
   legend.SetBorderSize(0)
   legend.SetNColumns(2)
   legend.AddEntry(plMCTot2,"Theory","l")
   # legend.AddEntry(unfoldedMC,"Unfolded MC Signal","l")
-  legend.AddEntry(unfoldedNom,'data (' + str(lumiScalesRounded[args.year]) + '/fb)',"PE")
+  legend.AddEntry(unfoldedNom,'Data',"PE")
   legend.Draw()
+
+  log.info("chi2 unfolded: " + str(calcChi2(unfoldedNom, [plMCTot])))
 
 # RATIO PAD
   cunf.bottomPad.cd()
@@ -608,18 +673,19 @@ for dist in distList:
 
   unfoldedRat.SetLineColor(ROOT.kBlack)
   unfoldedRat.SetMarkerStyle(ROOT.kFullCircle)
-  theRatBand.GetYaxis().SetRangeUser(0.4, 1.6)
+  theRatBand.GetYaxis().SetRangeUser(0.36, 1.64)
   theRatBand.GetXaxis().SetTitle(labels[dist][1])
-  theRatBand.GetYaxis().SetTitle('Pred. / Data')
+  # theRatBand.GetYaxis().SetTitle('Pred. / data')
+  theRatBand.GetYaxis().SetTitle('')
   theRatBand.SetTitle('')
-  theRatBand.GetXaxis().SetLabelSize(0.14)
-  theRatBand.GetXaxis().SetTitleSize(0.14)
+  theRatBand.GetXaxis().SetLabelSize(0.16)
+  theRatBand.GetXaxis().SetTitleSize(0.19)
   theRatBand.GetXaxis().SetTitleOffset(1.2)
-  theRatBand.GetYaxis().SetTitleSize(0.11)
-  theRatBand.GetYaxis().SetTitleOffset(0.4)
-  theRatBand.GetYaxis().SetRangeUser(0.4, 1.6)
+  theRatBand.GetYaxis().SetTitleSize(0.19)
+  theRatBand.GetYaxis().SetTitleOffset(0.3)
+  theRatBand.GetYaxis().SetRangeUser(0.38, 1.62)
   theRatBand.GetYaxis().SetNdivisions(3,5,0)
-  theRatBand.GetYaxis().SetLabelSize(0.1)
+  theRatBand.GetYaxis().SetLabelSize(0.16)
 
   theRatBand.Draw('E2')
 
@@ -636,8 +702,12 @@ for dist in distList:
   l1.Draw()
 
   cunf.cd()
-  drawTex((ROOT.gStyle.GetPadLeftMargin(),  1-ROOT.gStyle.GetPadTopMargin()+0.04,'CMS Preliminary'), 11)
-  drawTex((ROOT.gStyle.GetPadLeftMargin()+0.65,  1-ROOT.gStyle.GetPadTopMargin()+0.04,'(13 TeV)'), 11)
+  drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.04,'CMS #bf{#it{Preliminary}}'), 11)
+  drawTex((1-ROOT.gStyle.GetPadRightMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.04, ('#bf{%3.1f fb^{-1} (13 TeV)}'%lumiScalesRounded[args.year])), 31)
+
+
+  drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.58, '#bf{Fiducial cross section (fb)}'), 11, size=0.037, angle=90)
+  drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.06,'#bf{Pred. / data}'), 11, size=0.037, angle=90)
 
 
   cunf.SaveAs('unfolded/'+ args.year + dist +'.pdf')

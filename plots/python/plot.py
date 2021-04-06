@@ -283,7 +283,7 @@ class Plot:
   #
   def getLegendCoordinates(self, histos, canvas, yMax, columns, logY, legend):
     if legend == "auto":
-      targetHeight  = 0.045*sum(map(len, histos))
+      targetHeight  = 0.045*sum(map(len, histos))/ (0.8 + columns/3.)
       entriesHeight = sum(ROOT.TLatex(0, 0, h.texName).GetYsize() for h in sum(histos, []))
       entriesWidth  = max(ROOT.TLatex(0, 0, h.texName).GetXsize() for h in sum(histos, []))
       targetWidth   = min(0.65, entriesWidth*(1+ROOT.TLegend().GetMargin())*columns/entriesHeight*targetHeight)
@@ -314,7 +314,7 @@ class Plot:
   #
   def getLegend(self, legend, canvas, histos, yMax, logY):
     if len(legend) == 2: columns, legend = legend[1], legend[0]            # if legend is tuple, first argument is columns
-    else:                columns, legend = 1, legend
+    else:                columns, legend = 4, legend
 
     coordinates = self.getLegendCoordinates(histos, canvas, yMax, columns, logY, legend)
 
@@ -323,11 +323,24 @@ class Plot:
     legend.SetFillStyle(0)
     legend.SetShadowColor(ROOT.kWhite)
     legend.SetBorderSize(0)
+    sysEntry = False
     for h in sum(histos, []): 
       texLabel = h.texName
       for a, b in self.modTexLeg:
         texLabel = texLabel.replace(a, b)
+        if a == 'UNCBANDLEGEND' and texLabel.lower().count('data'):
+          #  show marker, error band, and hashed band in legend
+          h.SetLineColor(ROOT.kBlack)
+          h.SetFillStyle(3005)
+          h.SetFillColor(ROOT.kBlack)
+          h.legendStyle = 'fep'
+        if a == 'SYSUNC': sysEntry = True
       legend.AddEntry(h, texLabel, h.legendStyle)
+    if sysEntry:
+      h.SetLineColor(ROOT.kBlack)
+      h.SetFillStyle(3005)
+      h.SetFillColor(ROOT.kBlack)
+      legend.AddEntry(h, 'Syst. uncertainty', 'f')
     return legend
 
 
@@ -673,12 +686,12 @@ class Plot:
         h_ratio.Divide(den)
 
         if ratio['style']: ratio['style'](h_ratio)
-        h_ratio.GetXaxis().SetLabelSize(20)
+        h_ratio.GetXaxis().SetLabelSize(23)
 
         h_ratio.GetXaxis().SetTitle(self.texX)
         h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
-        h_ratio.GetXaxis().SetTitleOffset(3.2)
+        h_ratio.GetXaxis().SetTitleOffset(4.5)
 
         h_ratio.GetXaxis().SetTickLength( 0.03*2 )
         h_ratio.GetYaxis().SetTickLength( 0.03*2 )

@@ -27,7 +27,7 @@ ROOT.gStyle.SetPadLeftMargin(0.06)
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
 from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong
 from ttg.tools.style import drawLumi, setDefault, drawTex
-from ttg.tools.helpers import plotDir, getObjFromFile
+from ttg.tools.helpers import plotDir, getObjFromFile, lumiScales, lumiScalesRounded
 import copy
 import pickle
 import numpy
@@ -37,10 +37,9 @@ import uuid
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
-lumiScales = {'2016':35.863818448, '2017':41.529548819, '2018':59.688059536}
-lumiScalesRounded = {'2016':35.9, '2017':41.5, '2018':59.7}
 
-lumiunc = {'2016':0.025, '2017':0.023, '2018':0.025}
+lumiunc = {'2016':0.012, '2017':0.023, '2018':0.025}
+
 
 distList = [
   'unfReco_phLepDeltaR',
