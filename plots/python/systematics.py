@@ -25,7 +25,6 @@ for i in ('Up', 'Down'):
 
   # systematics['lSFMuPS'+i]      = [('lWeight',       'lWeightPSSys'+i)]
 
-# TODO turn on once new skim ready
   systematics['trigStatEE'+i]    = [('triggerWeight', 'triggerWeightStatEE'+i)]
   systematics['trigStatEM'+i]    = [('triggerWeight', 'triggerWeightStatEM'+i)]
   systematics['trigStatMM'+i]    = [('triggerWeight', 'triggerWeightStatMM'+i)]
@@ -38,6 +37,7 @@ for i in ('Up', 'Down'):
 
   for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
+# UC ones are full oncorrelated, other ones 100% correlated
 
 
   # systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
@@ -46,28 +46,22 @@ for i in ('Up', 'Down'):
 
 # not in here -> 100% correlation
 correlations = {
-              # 'lSFSy' : , 
-              'lSFEl' : 0., 
-              'lSFMu' : 0., 
-              # 'phSF' : , 
-              # 'ephRes' : , 
-              # 'ephScal : '
+              # 'lSFElSyst' : correlated I guess ,
+              # 'lSFMuSyst' : correlated I guess ,
+              'lSFElStat' : 0 ,
+              'lSFMuStat' : 0 ,
               'pvSF' : 0. , 
               'bTagb' : 0.5 , 
               'bTagl' : 0.5 , 
-              # 'isr' : , 
-              # 'fsr' : , 
-              # 'JER' : , 
-              'JEC' : 0., 
-              # 'q2' : , 
-              'trigger' : 0, 
-              # 'pu' : 0.5 
-              # 'NP' : , 
-              # 'ue' : , 
-              # 'pf' : , 
-              # 'erd' : 
-              # 'pdf' : 
-              # 'q2' : 
+              'trigStatEE' : 0. ,
+              'trigStatEM' : 0. ,
+              'trigStatMM' : 0. ,
+              'trigSyst' : 0 ,
+              'HFUC' : 0.,
+              'AbsoluteUC' : 0.,
+              'BBEC1UC' : 0.,
+              'EC2UC' : 0.,
+              'RelativeSampleUC' : 0.
               }
 
 #
@@ -93,19 +87,25 @@ showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in 
 # Defining linear systematics as "name : (sampleList, %)"
 #
 linearSystematics = {}
-linearSystematics['lumi'] = (None, 2.5)
+
+linearSystematics['ZG_norm']        = ('ZG',        3 )  #we consider 70% of the Zg yield to be constrained by the correction
+linearSystematics['singleTop_norm'] = ('singleTop', 10)
+linearSystematics['VVTo2L2Nu_norm'] = ('VVTo2L2Nu', 30)   #multiboson
+linearSystematics['other_norm']     = ('other',     30)
+
+# linearSystematics['lumi'] = (None, 2.5)
 
 #
 # Define linear systematics implemented as rate parameters
 #
 rateParameters = {}
-# rateParameters['TT_Dil']   = 5.5
-# rateParameters['ZG']       = 10
-rateParameters['ZG']       = 3   #we consider 70% of the Zg yield to be constrained by the correction
-# rateParameters['DY']       = 10
-rateParameters['singleTop'] = 10
-rateParameters['VVTo2L2Nu']    = 30   #multiboson
-rateParameters['other']    = 30
+# # rateParameters['TT_Dil']   = 5.5
+# # rateParameters['ZG']       = 10
+# rateParameters['ZG']       = 3   #we consider 70% of the Zg yield to be constrained by the correction
+# # rateParameters['DY']       = 10
+# rateParameters['singleTop'] = 10
+# rateParameters['VVTo2L2Nu']    = 30   #multiboson
+# rateParameters['other']    = 30
 
 
 # Function to apply the systematic to the cutstring, tree branches, reduceType
@@ -138,37 +138,6 @@ def getSigmaSyst(sys):
     if sys == 'NPUp': return 1.
     elif sys == 'NPDown': return -1.
   return 0.
-
-
-# #
-# # Special systematic samples for hdamp, ue, and erd
-# #
-# def getReplacementsForStack(sys, year):
-#   if not sys:
-#     return {}
-#   # no syst variation variation samples for 2016 (in miniAODv3 at least)
-#   # if not year == '2016':
-#   # if not year == '2017':
-#   # TODO if works universally just remove conditions
-#   if True:
-#     # if sys in ['ueUp', 'ueDown', 'hdampUp', 'hdampDown']:
-#     #   return {'TT_Dil' : 'TT_Dil_' + sys.lower(), 'TT_Sem' : 'TT_Sem_' + sys.lower(), 'TT_Had' : 'TT_Had_' + sys.lower()}
-#     # elif sys == 'erdUp' and year == '2017':
-#     #   return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd'}
-#       # TODO change when had is available again
-#       # return {'TT_Dil' : 'TT_Dil_erd', 'TT_Sem' : 'TT_Sem_erd', 'TT_Had' : 'TT_Had_erd'}
-
-#     # TODO to be built in when new samples arrive
-#     # OROFF turns off overlap removal
-#     ttgsampsw = {'erdUp':'erd', 'ueDown':'uedown', 'ueUp':'ueup'}
-#     if sys in ttgsampsw.keys():
-#       sw = ttgsampsw[sys]
-#       return {'TTGamma_Dil'  : 'TTGamma_Dil_' + sw + 'OROFF', 'TTGamma_Sem'   : 'TTGamma_Sem_' + sw + 'OROFF', 'TTGamma_Had' : 'TTGamma_HadOROFF',
-#               'TTGamma_DilA' : 'DROP',                 'TTGamma_SemA' : 'DROP',                  'TTGamma_HadA' : 'DROP',
-#               'TTGamma_DilB' : 'DROP',                 'TTGamma_SemB' : 'DROP',                  'TTGamma_HadB' : 'DROP'
-#               }
-
-#   return {}
 
 
 

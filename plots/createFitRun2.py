@@ -17,7 +17,7 @@ log = getLogger(args.logLevel)
 
 from ttg.plots.plot         import getHistFromPkl, normalizeBinWidth
 from ttg.plots.combineTools import initCombineTools, writeCard, runFitDiagnostics, runSignificance, runImpacts, runCompatibility, goodnessOfFit, doLinearityCheck, plotNLLScan, plotSys, plotCC
-from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys, rateParameters
+from ttg.plots.systematics  import systematics, linearSystematics, showSysList, q2Sys, pdfSys, CRSys, rateParameters
 
 import os, sys, subprocess, ROOT
 ROOT.gROOT.SetBatch(True)
@@ -61,6 +61,7 @@ def applyNonPromptSF(histTemp, nonPromptSF, sys=None):
 
 from ttg.plots.replaceShape import replaceShape
 def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], shape=None, mergeBins=False, addOverflow=True):
+
     hist = histTemp.Clone()
     if norm:  normalizeBinWidth(hist, norm)
     if shape: hist = replaceShape(hist, shape)
@@ -77,6 +78,15 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
       hist.SetBinContent(nbins+1, 0.)
       hist.SetBinError(nbins+1, 0.)
     
+    # hist.SetBinContent(1, 0.)
+    # hist.SetBinError(1, 0.)
+    # hist.SetBinContent(2, 0.)
+    # hist.SetBinError(2, 0.)
+    # hist.SetBinContent(3, 0.)
+    # hist.SetBinError(3, 0.)
+    # hist.SetBinContent(4, 0.)
+    # hist.SetBinError(4, 0.)
+    
     if not rootFile.GetDirectory(name): rootFile.mkdir(name)
     rootFile.cd(name)
     protectHist(hist).Write(template)
@@ -84,7 +94,6 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
 try: os.makedirs(args.run + args.chan)
 except: pass
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
-# templates = ['TTGamma', 'TT_Dil', 'ZG', 'DY', 'VVTo2L2Nu', 'singleTop', 'nonprompt']
 templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'other', 'nonprompt']
 from ttg.plots.systematics import correlations
 
@@ -95,33 +104,9 @@ def writeRootFile(name, shapes, systematicVariations, year):
     print fname
     f = ROOT.TFile(fname, 'RECREATE')
 
-
-# llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20
-# llg-mll20-njet1-deepbtag1-offZ-llgNoZ-photonPt20
-# llg-mll20-njet2p-deepbtag1-offZ-llgNoZ-photonPt20
-# llg-mll20-njet2p-deepbtag2p-offZ-llgNoZ-photonPt20
-# llg-mll20-njet2-deepbtag1-offZ-llgNoZ-photonPt20
-# llg-mll20-njet2-deepbtag2-offZ-llgNoZ-photonPt20
-
-
-    # baseSelection = 'llg-mll20-njet2p-deepbtag2p-offZ-llgNoZ-photonPt20'
-
     baseSelection = 'llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD-Ya'
+    tag           = 'phoCBfull-niceEstimDD'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
-
-# unfReco_jetLepDeltaR.pkl
-# unfReco_jetPt.pkl
-# unfReco_ll_absDeltaEta.pkl
-# unfReco_ll_cosTheta.pkl
-# unfReco_ll_deltaPhi.pkl
-# unfReco_phAbsEta.pkl
-# unfReco_phBJetDeltaR.pkl
-# unfReco_phLepDeltaR.pkl
-# unfReco_phPt.pkl
-
-# signalRegionsCap
-
 
     for shape in shapes:
       # Write the data histograms to the combine shapes file, separate for ee, emu, mumu
@@ -136,6 +121,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
           # Selectors[0] += ['@']
         q2Variations = []
         pdfVariations = []
+        colRecVariations = []
         for sys in [''] + systematicVariations:
           if t == 'nonprompt':
             Selectors     = [['NP', 'nonprompt']]
@@ -146,6 +132,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
+          elif 'colRec' in sys: colRecVariations += [prompt]                                   # Save all colRecVariations in list
           else:
             if 'erdDown' in sys:
               sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
@@ -153,6 +140,7 @@ def writeRootFile(name, shapes, systematicVariations, year):
               prompt = invertVar(nominal, ErdUpprompt)
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
+            if not sys: continue # there's no year correlation stuff for nominal obviously
             sysUncor = sys.replace('Up', '_' + year +'Up').replace('Down', '_' + year +'Down')
             sysCor1617 = sys.replace('Up', '_1617Up').replace('Down', '_1617Down')
             sysCor1618 = sys.replace('Up', '_1618Up').replace('Down', '_1618Down')
@@ -187,6 +175,10 @@ def writeRootFile(name, shapes, systematicVariations, year):
           writeHist(f, shape+'q2_1618Down', t, down, mergeBins = False)
           writeHist(f, shape+'q2_1718Up',   t, up,   mergeBins = False)
           writeHist(f, shape+'q2_1718Down', t, down, mergeBins = False)
+        if len(colRecVariations) > 0:
+          up, down = CRSys(colRecVariations, nominal)
+          writeHist(f, shape+'colRecUp',   t, up,   mergeBins = False)
+          writeHist(f, shape+'colRecDown', t, down, mergeBins = False)
     f.Close()
 
 ######################
@@ -199,16 +191,20 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
         years = ['2016','2017','2018']
     
     log.info(' --- Signal regions fit (' + cardName + ') --- ')
-    extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:-1]]
-    extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:-1]]
-    extraLines += ['* autoMCStats 0 1 1']
+    # extraLines  = [(t + '_norm rateParam * ' + t + '* 1')                 for t in templates[1:-1]]
+    # extraLines += [(t + '_norm param 1.0 ' + str(rateParameters[t]/100.)) for t in templates[1:-1]]
+
+    # extraLines += ['* autoMCStats 0 1 1']
     
-    if doRatio == True: # Special case in order to fit the ratio of ttGamma to ttbar [hardcoded numbers as discussed with 1l group]
-      log.info(' --- Ratio ttGamma/ttBar fit --- ')
-      extraLines += ['renormTTGamma rateParam * TTGamma* 0.338117493', 'nuisance edit freeze renormTTGamma ifexists']
-      extraLines += ['renormTTbar rateParam * TT_Dil* 1.202269886',    'nuisance edit freeze renormTTbar ifexists']
+    extraLines = ['* autoMCStats 0 1 1']
+
+
+    # if doRatio == True: # Special case in order to fit the ratio of ttGamma to ttbar [hardcoded numbers as discussed with 1l group]
+      # log.info(' --- Ratio ttGamma/ttBar fit --- ')
+      # extraLines += ['renormTTGamma rateParam * TTGamma* 0.338117493', 'nuisance edit freeze renormTTGamma ifexists']
+      # extraLines += ['renormTTbar rateParam * TT_Dil* 1.202269886',    'nuisance edit freeze renormTTbar ifexists']
       #extraLines += ['TT_Dil_norm rateParam * TT* 0.83176 [0.,2.]'] # fit ttbar xsec (TT_Dil_norm) and the ttg/ttbar ratio (r)
-      extraLines += ['TT_Dil_norm rateParam * TT* 0.83176 [0.,2.]']
+      # extraLines += ['TT_Dil_norm rateParam * TT* 0.83176 [0.,2.]']
       #extraLines += ['TT_Dil_norm rateParam * TT_Dil* 0.83176 [0.,2.]'] # fit to ttg (r) and ttbar (TT_Dil_norm) xsecs
 
     # Write shapes file and combine card using
@@ -243,8 +239,9 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     # allSys = {}
     # for y in years:
     #   allSys[y] = shapeSys[y] + normSys
-    allSys = [base + suf for base in showSysList + ['lumi'] for suf in ['', '_2016', '_2017', '_2018', '_1617', '_1618', '_1718']] + normSys
-    
+    allSys = [base + suf for base in showSysList + ['lumi'] for suf in ['', '_2016', '_2017', '_2018', '_xycorr', '_1617', '_1718']] + normSys
+
+
     # log.info(allSys)
 
     print colored('##### Prepare ROOT file with histograms', 'red')
@@ -262,7 +259,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     print colored('##### Prepare data card', 'red')
     cards = []
     for y in years:
-      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], {}, {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
+      writeCard(cardName, shapes, templates, None, extraLines, listSys[y], linearSystematics , {}, run=outDir, year=y, correlations=correlations if args.year == 'All' else {})
       cards.append(outDir+'/'+cardName+'_'+y+'.txt')
     if len(years) == 1:
       os.system('mv '+cards[0]+' '+outDir+'/'+cardName+'.txt')

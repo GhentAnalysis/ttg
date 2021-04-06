@@ -154,8 +154,8 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
                 for line in f: log.warning(line.rstrip())
 
     # Main block of runFitDiagnostics
-    extraOptions = ' --robustFit=1 --rMax=10 --cminDefaultMinimizerStrategy=2 --setRobustFitTolerance=0.001 --saveShapes --saveWithUncertainties'
-    if toys:            extraOptions += ' --expectSignal ' + str(toyR) + ' -t -1'
+    extraOptions = ' --rMax=10  --saveShapes --saveWithUncertainties' + ' --expectSignal ' + str(toyR)
+    if toys:            extraOptions += ' -t -1'
     if statOnly:        extraOptions += ' --justFit --profilingMode=none -v 2'
 ##    if statOnly:        extraOptions += ' --justFit --freezeParameters='+ ','.join(trackParameters) + ' -v 2'
     if not alsoBOnly:   extraOptions += ' --skipBOnlyFit'
@@ -178,7 +178,6 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
         combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace' + ' --setParameters ' + masks
     else:
       combineCommand += 'combine -M FitDiagnostics ' + extraOptions + ' ' + dataCard + '.root' + ' --saveWorkspace'
-    print combineCommand
     
     otherCommands   = ['python diffNuisances.py             fitDiagnostics.root &> ' + dataCard + '_nuisances.txt',
                        'python diffNuisances.py -a          fitDiagnostics.root &> ' + dataCard + '_nuisances_full.txt',
@@ -187,6 +186,9 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
                        'cp fitDiagnostics.root ' + dataCard + '_fitDiagnostics.root'] if not statOnly else []
                        
     log.info('Running FitDiagnostics' + (' (stat only)' if statOnly else ''))
+
+    print combineCommand
+    
     handleCombine(dataCard, logFile, combineCommand, otherCommands, run=run)
     currentDir = os.getcwd()
     combineRelease = getCombineRelease()
@@ -222,7 +224,8 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
 def runSignificance(dataCard, expected=False, run='combine'):
   command = 'combine -M Significance ' + dataCard + '.txt'
   logFile = dataCard + '_sig' + ('_expected' if expected else '')
-  if expected: command += ' -t -1 --expectSignal=1'
+  command += ' --expectSignal=1'
+  if expected: command += ' -t -1 '
   log.info('Running Significance')
   handleCombine(dataCard, logFile, command, run=run)
   with open('./' + run + '/' + logFile + '.log') as f:
@@ -243,8 +246,8 @@ def plotNLLScan(dataCard, year, mode = 'exp', trackParameters = None, freezePara
         units = '\'\\times 10^{-3}\''
     
     if mode == 'obs':
-      command =  'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --name TTGFit --robustFit=1 --seed 777 --saveWorkspace ' + currentDir + '/' + run + '/' + dataCard + '.root;'
-      command += 'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --snapshotName MultiDimFit ' + ' --name TTGFit.FreezeAll --robustFit=1 --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777 higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
+      command =  'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --expectSignal=1 '+  ' --name TTGFit --seed 777 --saveWorkspace ' + currentDir + '/' + run + '/' + dataCard + '.root;'
+      command += 'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' --expectSignal=1 '+  ' --snapshotName MultiDimFit ' + ' --name TTGFit.FreezeAll --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777 higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
       command += currentDir + '/python/./plot1DScanTTG.py higgsCombineTTGFit.MultiDimFit.mH120.777.root --units=' + units + ' --others \'' + 'higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root' + ':FreezeAll:2\' -o scan --breakdown Syst,Stat;'
       command += 'mv ' + combineRelease + '/src/scan.pdf ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_obs.pdf;'
       command += 'mv ' + combineRelease + '/src/scan.png ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_obs.png;'
@@ -252,8 +255,8 @@ def plotNLLScan(dataCard, year, mode = 'exp', trackParameters = None, freezePara
       command += 'mv ' + combineRelease + '/src/higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root ' + statFile + ';'
 
     elif mode == 'exp':
-      command =  'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' -t -1 --expectSignal 1 --name TTGFit --robustFit=1 --seed 777 --saveWorkspace ' + currentDir + '/' + run + '/' + dataCard + '.root;'
-      command += 'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' -t -1 --expectSignal 1 --snapshotName MultiDimFit ' + ' --name TTGFit.FreezeAll --robustFit=1 --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777 higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
+      command =  'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' -t -1 --expectSignal 1 --name TTGFit --seed 777 --saveWorkspace ' + currentDir + '/' + run + '/' + dataCard + '.root;'
+      command += 'combine -M MultiDimFit --algo grid --points 100 --rMin ' + str(rMin) + ' --rMax ' + str(rMax) + ' -t -1 --expectSignal 1 --snapshotName MultiDimFit ' + ' --name TTGFit.FreezeAll --freezeParameters=' + ','.join(freezeParameters) + ' --fastScan -v 2 --seed 777 higgsCombineTTGFit.MultiDimFit.mH120.777.root;'
       command += currentDir + '/python/./plot1DScanTTG.py higgsCombineTTGFit.MultiDimFit.mH120.777.root --units=' + units + ' --others \'' + 'higgsCombineTTGFit.FreezeAll.MultiDimFit.mH120.777.root' + ':FreezeAll:2\' -o scan --breakdown Syst,Stat;'
       command += 'mv ' + combineRelease + '/src/scan.pdf ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_exp.pdf;'
       command += 'mv ' + combineRelease + '/src/scan.png ' + os.path.join(plotCombineDir, year, run + '/') + dataCard + '_scan_exp.png;'
@@ -276,7 +279,7 @@ def extractSignalFromJSON(jsonFile):
 # Command to create impacts.json
 #
 def commandForImpactsJSON(dataCard, toys=False, toyR=1):
-  extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else ''
+  extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else (' --expectSignal=' + str(toyR))
   command = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
@@ -287,7 +290,7 @@ def commandForImpactsJSON(dataCard, toys=False, toyR=1):
 
 # not very elegant to have have very similar functions, but it works
 def commandForImpactsJSONLin(run, dataCard, toys=False, toyR=1):
-  extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else ''
+  extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else (' --expectSignal=' + str(toyR))
   command = 'text2workspace.py ' + 'ttg/plots/'+ run + '/' +dataCard + '.txt -m 125;'
   command += 'mv ' + 'ttg/plots/'+ run + '/' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
@@ -350,11 +353,13 @@ def runImpacts(dataCard, year, perPage=30, toys=False, toyR=1, poi=['r'], doRati
 def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run='combine'):
 
     combineRelease = getCombineRelease()
-    command  = 'combine -M ChannelCompatibilityCheck ' + dataCard + '.txt --saveFitResult'
+    command  = 'combine -M ChannelCompatibilityCheck ' + dataCard + '.txt --saveFitResult --rMin 0.5 --rMax 1.5'
+    command += ' --expectSignal 1 '
     if toys:
-        command += ' -t -1 --expectSignal 1'
+        command += ' -t -1 '
 
     log.info('Running the check (stat+sys)')    
+    log.info(command)
 
     outName = dataCard + '_cc'
     if toys: outName += '_exp'
@@ -427,6 +432,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     if template not in templates: return '-'
     sample, value = info
     value = round(1+value*frac/100., 6)
+    if template == 'nonprompt': return '-' # another dirty hardcode, but it keeps things simple
     if sample:
       if template.count(sample): return value
       else:                      return '-'
@@ -439,6 +445,25 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     else:     selectTemplate, selectShape, sys   = None, None, sys
 
     if not shape and not template: return sys
+
+#   block below is more clever, but it gets complicated
+
+    if template == 'nonprompt':
+      if sys == 'NP': return val
+      else: return '-'
+    
+    if sys == 'NP' and not template == 'nonprompt': return '-'
+    
+    if shape == 'sr_ee':
+      if sys.count('lSFMu'): return '-'
+    if shape == 'sr_mumu':
+      if sys.count('lSFEl'): return '-'
+
+    if sys.count('trigStat'):
+      if shape == 'sr_emu' and not sys.count('trigStatEM'): return '-'
+      if shape == 'sr_ee' and not sys.count('trigStatEE'): return '-'
+      if shape == 'sr_mumu' and not sys.count('trigStatMM'): return '-'
+
 
     if t in templatesNoSys:                             return '-'
     elif selectShape    and selectShape    != shape:    return '-'
@@ -468,41 +493,21 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     for sys, info in linearSystematics.iteritems():
       f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
-    # implementing lumi separately
-    lumiunc = {'2016':2.5, '2017':2.3, '2018':2.5}
-    lumicorrel = (0.21, 0.29, 0.3)
 
-    if correlations:
-      shared = min(lumicorrel)
-      if shared > 0: 
-        f.write(tab(['lumi', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=shared**0.5) for s in shapes for t in templates+templatesNoSys]))
-        lumicorrel = [i - shared for i in lumicorrel]
-      if year == '2016':
-        uncorrel = 1.-shared-lumicorrel[0]-lumicorrel[1]
-        if uncorrel>0:
-          f.write(tab(['lumi_2016', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=uncorrel**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[0]>0:
-          f.write(tab(['lumi_1617', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[0]**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[1]>0:
-          f.write(tab(['lumi_1618', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[1]**0.5) for s in shapes for t in templates+templatesNoSys]))
-      if year == '2017':
-        uncorrel = 1.-shared-lumicorrel[0]-lumicorrel[2]
-        if uncorrel>0:
-          f.write(tab(['lumi_2017', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=uncorrel**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[0]>0:
-          f.write(tab(['lumi_1617', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[0]**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[2]>0:
-          f.write(tab(['lumi_1718', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[2]**0.5) for s in shapes for t in templates+templatesNoSys]))
-      if year == '2018':
-        uncorrel = 1.-shared-lumicorrel[1]-lumicorrel[2]
-        if uncorrel>0:
-          f.write(tab(['lumi_2016', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=uncorrel**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[1]>0:
-          f.write(tab(['lumi_1618', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[1]**0.5) for s in shapes for t in templates+templatesNoSys]))
-        if lumicorrel[2]>0:
-          f.write(tab(['lumi_1718', 'lnN'] + [linSys((None, lumiunc[year]), t, frac=lumicorrel[2]**0.5) for s in shapes for t in templates+templatesNoSys]))
-    else:
-      f.write(tab(['lumi', 'lnN'] + [linSys((None, lumiunc[year]), t) for s in shapes for t in templates+templatesNoSys]))
+    # implementing lumi separately
+    if year == '2016':
+      f.write(tab(['lumi_2016', 'lnN'] +   [linSys((None, 2.2), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 0.9), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1617', 'lnN'] +   [linSys((None, 0.8), t) for s in shapes for t in templates+templatesNoSys]))
+    if year == '2017':
+      f.write(tab(['lumi_2017', 'lnN'] +   [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 0.8), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1617', 'lnN'] +   [linSys((None, 0.6), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.4), t) for s in shapes for t in templates+templatesNoSys]))
+    if year == '2018':
+      f.write(tab(['lumi_2018', 'lnN'] +   [linSys((None, 1.5), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.3), t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
       correl = correlations.get(sys)
@@ -530,12 +535,12 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
         if year == '2018':
           uncorrel = 1.-shared-correl[1]-correl[2]
           if uncorrel>0:
-            f.write(tab([shapeSys(None, None, sys + '_2016'), 'shape'] + [shapeSys(s, t, sys, str(round(uncorrel**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
+            f.write(tab([shapeSys(None, None, sys + '_2018'), 'shape'] + [shapeSys(s, t, sys, str(round(uncorrel**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
           if correl[1]>0:
             f.write(tab([shapeSys(None, None, sys + '_1618'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[1]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
           if correl[2]>0:
             f.write(tab([shapeSys(None, None, sys + '_1718'), 'shape'] + [shapeSys(s, t, sys, str(round(correl[2]**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
-      elif correl:
+      elif not correl == None:
         if not correl == 0:
           f.write(tab([shapeSys(None, None, sys), 'shape'] + [shapeSys(s, t, sys, str(round(correl**0.5, 6))) for s in shapes for t in templates+templatesNoSys]))
         uncorrel = str(round((1.-correl)**0.5, 6))
