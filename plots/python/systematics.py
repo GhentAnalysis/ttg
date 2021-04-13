@@ -24,6 +24,8 @@ for i in ('Up', 'Down'):
   systematics['lSFMuStat'+i]      = [('lWeight',       'lWeightMuStat'+i)]
 
   # systematics['lSFMuPS'+i]      = [('lWeight',       'lWeightPSSys'+i)]
+  
+  systematics['lTracking'+i]      = [('lTrackWeight',  'lTrackWeight'+i)]
 
   systematics['trigStatEE'+i]    = [('triggerWeight', 'triggerWeightStatEE'+i)]
   systematics['trigStatEM'+i]    = [('triggerWeight', 'triggerWeightStatEM'+i)]

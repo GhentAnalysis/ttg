@@ -16,6 +16,8 @@ args = argParser.parse_args()
 
 if args.year == '2016': args.unblind = True
 
+args.year = '2016EFB'
+
 import ROOT
 import pdb
 
@@ -73,7 +75,10 @@ def getRatioCanvas(name):
 
 #################### Settings and definitons ####################
 
-lumiunc = {'2016':0.012, '2017':0.023, '2018':0.025}
+lumiunc = {'2016EFB':0.012, '2017':0.023, '2018':0.025}
+
+lumiScales['2016EFB'] = lumiScales['2016']
+lumiScalesRounded['2016EFB'] = lumiScalesRounded['2016']
 
 lumiunc['RunII'] = 0.016 
 
@@ -712,6 +717,7 @@ for dist in distList:
 
   cunf.SaveAs('unfolded/'+ args.year + dist +'.pdf')
   cunf.SaveAs('unfolded/'+ args.year + dist +'.png')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.root')
 
 
 

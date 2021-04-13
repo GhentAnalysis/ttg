@@ -6,8 +6,8 @@ import numpy
 import ROOT
 ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
-# ROOT.gStyle.SetPadRightMargin(0.055)
-# ROOT.gStyle.SetPadLeftMargin(0.065)
+ROOT.gStyle.SetPadRightMargin(0.055)
+ROOT.gStyle.SetPadLeftMargin(0.065)
 ROOT.gStyle.SetPadBottomMargin(0.12)
 ROOT.gStyle.SetPadTopMargin(0.03)
 ROOT.gStyle.SetEndErrorSize(5)
@@ -17,13 +17,22 @@ ROOT.TH2.SetDefaultSumw2()
 
 
 sstr = [
-('N_{j}, N_{b}'      , 0.983, 0.068, 0.027),
-('p_{T}(#gamma)'     , 0.992, 0.066, 0.027),
-('|#eta(#gamma)|'    , 1.044, 0.072, 0.027),
-('#Delta(#gamma,l)'  , 0.960, 0.070, 0.027),
-('|#Delta#eta(ll)|'  , 1.022, 0.071, 0.029),
-('#Delta#phi(ll)'    , 1.031, 0.078, 0.027),
+('p_{T}(#gamma)'            , 1.022, 0.0455, 0.028),
+('N_{j}, N_{b}'             , 1.042, 0.0525, 0.0285),
+('|#eta(#gamma)|'           , 1.090, 0.057, 0.0295),
+('#Delta(#gamma,l)'         , 1.010, 0.052, 0.0275),
+('|#Delta#eta(ll)|'         , 0.985, 0.048, 0.0285),
+('#Delta#phi(ll)'           , 1.062, 0.0565, 0.029),
+('p_{T}(ll)'                , 1.053, 0.0495, 0.029),
+# ('p_{T}(l1))'      , 1.113, 0.053, 0.030),
+('#scale[0.8]{p_{T}(l1)+p_{T}(l2)}'      , 1.113, 0.053, 0.030),
+('p_{T}(j1)'                , 1.029, 0.0460, 0.028),
+('#DeltaR(l, j)'            , 1.048, 0.0495, 0.028),
+('#DeltaR(#gamma, b)'       , 1.047, 0.0555, 0.0285),
+('#DeltaR(#gamma, l1)'      , 1.026, 0.0575, 0.028),
+('#DeltaR(#gamma, l2)'      , 1.015, 0.0565, 0.0275),
 ]
+
 
 nfits = len(sstr)
 # avg = sum([item[1] for item in sstr])/nfits
@@ -38,21 +47,23 @@ for i, ss in enumerate(sstr):
   histstat.SetBinContent(i+1, ss[1])
   hist.SetBinError(i+1,   ss[2])
   histstat.SetBinError(i+1,   ss[3])
-  texl = ROOT.TLatex(i+0.3,0.75,'r=' + str(ss[1]))
+  texl = ROOT.TLatex(i+0.3,0.85,'r=' + str(ss[1]))
   texl.SetTextSize(0.03)
   labels.append(texl)
 
-c = ROOT.TCanvas("c", "c", 1000, 750)
+c = ROOT.TCanvas("c", "c", 1500, 750)
 
-hist.GetYaxis().SetRangeUser(0, 1.2)
+hist.GetYaxis().SetRangeUser(0.7, 1.25)
 hist.GetYaxis().SetTitle('Signal strength r')
 hist.GetXaxis().SetTitle('Fitted distribution')
 hist.GetXaxis().SetLabelSize(0.05)
 hist.GetXaxis().SetTitleOffset(1.45)
 hist.SetTitle('')
-hist.SetLineWidth(2)
+hist.SetLineWidth(3)
+histstat.SetLineWidth(3)
 # hist.Draw('E1 X0')
 hist.SetMarkerStyle(21)
+hist.SetMarkerSize(2)
 hist.Draw('P E1 X0')
 histstat.Draw('same E1 X0')
 band = ROOT.TBox(0., sstr[0][1]-(sstr[0][2]**2.+sstr[0][3]**2.)**0.5, nfits, sstr[0][1]+(sstr[0][2]**2.+sstr[0][3]**2.)**0.5)
@@ -61,11 +72,11 @@ bandstat = ROOT.TBox(0., sstr[0][1]-sstr[0][3], nfits, sstr[0][1]+sstr[0][3])
 bandstat.SetFillColorAlpha(ROOT.kRed, 0.25)
 band.Draw()
 bandstat.Draw()
-texStat = ROOT.TLatex(nfits+0.12,sstr[0][1]-.02,"Stat.")
+texStat = ROOT.TLatex(nfits+0.12,sstr[0][1]-0.008,"Stat.")
 texStat.SetTextSize(0.03)
 texStat.SetTextColor(ROOT.kRed)
 texStat.Draw()
-texTot = ROOT.TLatex(nfits+0.12,sstr[0][1]+sstr[0][2]-.035,"Total")
+texTot = ROOT.TLatex(nfits+0.12,sstr[0][1]+sstr[0][2]-.012,"Total")
 texTot.SetTextSize(0.03)
 texTot.SetTextColor(ROOT.kBlue)
 texTot.Draw()
