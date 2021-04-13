@@ -350,22 +350,23 @@ def runImpacts(dataCard, year, perPage=30, toys=False, toyR=1, poi=['r'], doRati
 #
 # Run channel compatibility
 #
-def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run='combine'):
+def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run='combine', group=False):
 
     combineRelease = getCombineRelease()
     command  = 'combine -M ChannelCompatibilityCheck ' + dataCard + '.txt --saveFitResult --rMin 0.5 --rMax 1.5'
     command += ' --expectSignal 1 '
+    if group: command += ' -g sr_ee -g sr_emu -g sr_mumu'
     if toys:
         command += ' -t -1 '
 
     log.info('Running the check (stat+sys)')    
     log.info(command)
 
-    outName = dataCard + '_cc'
+    outName = dataCard + '_cc' + ('_grouped' if group else '')
     if toys: outName += '_exp'
     else: outName += '_obs'
     handleCombine(dataCard, outName, command, run=run)
-    ccFile = dataCard + '_cc'
+    ccFile = dataCard + '_cc' + ('_grouped' if group else '')
     rfile = 'higgsCombineTest.ChannelCompatibilityCheck.mH120.root'
     if toys: 
         ccFile += '_exp'
@@ -386,11 +387,11 @@ def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run=
     command += ' --profilingMode=none'
 
     log.info(command)
-    outName = dataCard + '_cc'
+    outName = dataCard + '_cc' + ('_grouped' if group else '')
     if toys: outName += '_exp_statOnly'
     else: outName += '_obs_statOnly'
     handleCombine(dataCard, outName, command, run=run)
-    ccFile = dataCard + '_cc'
+    ccFile = dataCard + '_cc' + ('_grouped' if group else '')
     rfile = 'higgsCombineTest.ChannelCompatibilityCheck.mH120.root'
     if toys: 
         ccFile += '_exp_statOnly'
@@ -496,18 +497,16 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
 
     # implementing lumi separately
     if year == '2016':
-      f.write(tab(['lumi_2016', 'lnN'] +   [linSys((None, 2.2), t) for s in shapes for t in templates+templatesNoSys]))
-      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 0.9), t) for s in shapes for t in templates+templatesNoSys]))
-      f.write(tab(['lumi_1617', 'lnN'] +   [linSys((None, 0.8), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_2016', 'lnN'] +   [linSys((None, 0.9), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_3Ycorr', 'lnN'] + [linSys((None, 0.6), t) for s in shapes for t in templates+templatesNoSys]))
     if year == '2017':
       f.write(tab(['lumi_2017', 'lnN'] +   [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
-      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 0.8), t) for s in shapes for t in templates+templatesNoSys]))
-      f.write(tab(['lumi_1617', 'lnN'] +   [linSys((None, 0.6), t) for s in shapes for t in templates+templatesNoSys]))
-      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.4), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_3Ycorr', 'lnN'] + [linSys((None, 0.9), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.6), t) for s in shapes for t in templates+templatesNoSys]))
     if year == '2018':
       f.write(tab(['lumi_2018', 'lnN'] +   [linSys((None, 1.5), t) for s in shapes for t in templates+templatesNoSys]))
-      f.write(tab(['lumi_xycorr', 'lnN'] + [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
-      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.3), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_3Ycorr', 'lnN'] + [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.2), t) for s in shapes for t in templates+templatesNoSys]))
 
     for sys in systematics:
       correl = correlations.get(sys)

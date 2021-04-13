@@ -239,7 +239,7 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     # allSys = {}
     # for y in years:
     #   allSys[y] = shapeSys[y] + normSys
-    allSys = [base + suf for base in showSysList + ['lumi'] for suf in ['', '_2016', '_2017', '_2018', '_xycorr', '_1617', '_1718']] + normSys
+    allSys = [base + suf for base in showSysList + ['lumi'] for suf in ['', '_2016', '_2017', '_2018', '_3Ycorr', '_1718']] + normSys
 
 
     # log.info(allSys)
@@ -302,11 +302,22 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
       print colored('##### Run channel compatibility (obs)', 'red')
       runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir)
       plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='obs', addNominal=True)
-        
+      if year == 'All':
+        runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir, group=True)
+        plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='grouped_obs', addNominal=True)
+
+      # TODO adjust plotter so it can plot the grouped ones
+
     print colored('##### Run channel compatibility (exp)', 'red')
     runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir)
     plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='exp', addNominal=True)
+    if year == 'All':
+      runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir, group=True)
+      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='grouped_exp', addNominal=True)
+
     
+    # TODO adjust plotter so it can plot the grouped ones
+
     if doRatio == False:
       if blind == False:
         print colored('##### Calculate the significance (obs)', 'red')
