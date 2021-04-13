@@ -688,7 +688,7 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
     if addNominal:
         nBins += 1
 
-    frame = ROOT.TH2F("frame", ";Best fit of #sigma^{t#bar{t}#gamma}/#sigma^{t#bar{t}#gamma}_{SM};", 1, max(rFit.getMin(),rMin), min(rFit.getMax(),rMax), nBins, 0, nBins)
+    frame = ROOT.TH2D("frame", ";Best fit of #sigma^{t#bar{t}#gamma}/#sigma^{t#bar{t}#gamma}_{SM};", 1, max(rFit.getMin(),rMin), min(rFit.getMax(),rMax), nBins, 0, nBins)
 
     points = ROOT.TGraphAsymmErrors(nBins)
     pointsStatOnly = ROOT.TGraphAsymmErrors(nBins)

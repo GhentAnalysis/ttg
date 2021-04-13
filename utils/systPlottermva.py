@@ -50,10 +50,10 @@ for sysSet in sysSets:
   colors = [ROOT.kRed + 2, ROOT.kRed-4, ROOT.kBlue + 2, ROOT.kBlue-4, ROOT.kGreen + 2, ROOT.kGreen-3]
   path = '/storage_mnt/storage/user/gmestdac/public_html/ttG//2016/phoCBfull-niceEstimDD/all-sys/llg-mll20-signalRegion-offZ-llgNoZ-photonPt20/l2_pt.pkl'
 
-  stat = ROOT.TH1F('stat', 'stat', 20, 15, 215)
+  stat = ROOT.TH1D('stat', 'stat', 20, 15, 215)
   hists = {}
   for sys in systs:
-    hists[sys] = ROOT.TH1F(sys, sys,20, 15, 215)
+    hists[sys] = ROOT.TH1D(sys, sys,20, 15, 215)
 
   # for c, chan in enumerate (channels):
   #   nominal, data = sumHists(path.replace('CHAN', chan), 'signalRegionsZoomAlt')

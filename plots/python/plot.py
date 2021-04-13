@@ -132,7 +132,7 @@ class Plot:
     self.histos = {}
     for s in sum(self.stack, []):
       name           = self.name + (s.nameNoSys if hasattr(s, 'nameNoSys') else s.name)
-      self.histos[s] = ROOT.TH1F(name, name, *self.binning)
+      self.histos[s] = ROOT.TH1D(name, name, *self.binning)
 
 
   #

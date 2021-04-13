@@ -37,8 +37,8 @@ sstr = [
 nfits = len(sstr)
 # avg = sum([item[1] for item in sstr])/nfits
 
-hist = ROOT.TH1F('stat', 'stat', nfits, 0, nfits)
-histstat = ROOT.TH1F('stat', 'stat', nfits, 0, nfits)
+hist = ROOT.TH1D('stat', 'stat', nfits, 0, nfits)
+histstat = ROOT.TH1D('stat', 'stat', nfits, 0, nfits)
 
 labels = []
 for i, ss in enumerate(sstr):
@@ -106,11 +106,11 @@ c.SaveAs('rComparison.png')
 #   path = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-otravez-methoda/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
 #   pathB = '/storage_mnt/storage/user/jroels/public_html/ttG/2016/phoCBfull-niceEstimDD-otravez/all/llg-mll20-signalRegionAB-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
 
-#   stat = ROOT.TH1F('stat', 'stat', 12, 0, 12)
+#   stat = ROOT.TH1D('stat', 'stat', 12, 0, 12)
 #   hists = {}
 #   for sys in systs:
-#     hists[sys] = ROOT.TH1F(sys, sys, 12, 0, 12)
-#     hists[sys + 'B'] = ROOT.TH1F(sys, sys, 12, 0, 12)
+#     hists[sys] = ROOT.TH1D(sys, sys, 12, 0, 12)
+#     hists[sys + 'B'] = ROOT.TH1D(sys, sys, 12, 0, 12)
 
 #   for c, chan in enumerate (channels):
 #     nominal, data = sumHists(path.replace('CHAN', chan), 'signalRegionsZoom')

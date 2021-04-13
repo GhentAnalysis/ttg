@@ -17,7 +17,7 @@ def equalBinning():
   def equalizeBins(hists):
     nx = hists.values()[0].GetXaxis().GetNbins()
     ny = hists.values()[0].GetYaxis().GetNbins()
-    template = ROOT.TH2F('template', 'template', nx, numpy.array(range(nx+1)).astype(float), ny, numpy.array(range(ny+1)).astype(float))
+    template = ROOT.TH2D('template', 'template', nx, numpy.array(range(nx+1)).astype(float), ny, numpy.array(range(ny+1)).astype(float))
     for key in hists.keys():
       newHist = template.Clone(hists[key].GetName())
       for i in range(nx+1):
@@ -104,7 +104,7 @@ class Plot2D(Plot):
     self.histos = {}
     for s in sum(self.stack, []):
       name           = self.name + s.name
-      self.histos[s] = ROOT.TH2F(name, name, *(self.binningX+self.binningY))
+      self.histos[s] = ROOT.TH2D(name, name, *(self.binningX+self.binningY))
 
 
   def fill(self, sample, weight=1.):

@@ -128,7 +128,7 @@ def stitch1D(h6, h7, h8):
     for i in range(1, h6.GetXaxis().GetNbins()+1):
       binning.append(y*(end-start) + h6.GetXaxis().GetBinLowEdge(i))
   binning.append(3.*end - 2.*start)
-  stitched = ROOT.TH1F(h6.GetName() + "RunII", h6.GetName() + "RunII", len(binning)-1, numpy.array(binning))
+  stitched = ROOT.TH1D(h6.GetName() + "RunII", h6.GetName() + "RunII", len(binning)-1, numpy.array(binning))
 
   # log.info(binning)
   for y, h in enumerate([h6, h7, h8]):
@@ -155,7 +155,7 @@ def stitch2D(h6, h7, h8):
   for i in range(1, h6.GetYaxis().GetNbins()+1):
     ybinning.append(h6.GetYaxis().GetBinLowEdge(i))
   ybinning.append(end)
-  stitched = ROOT.TH2F(h6.GetName() + "RunII", h6.GetName() + "RunII", len(binning)-1, numpy.array(binning), len(ybinning)-1, numpy.array(ybinning))
+  stitched = ROOT.TH2D(h6.GetName() + "RunII", h6.GetName() + "RunII", len(binning)-1, numpy.array(binning), len(ybinning)-1, numpy.array(ybinning))
 
   for y, h in enumerate([h6, h7, h8]):
     nbins = h.GetXaxis().GetNbins()
