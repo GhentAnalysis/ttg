@@ -136,13 +136,14 @@ stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.
 # Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'), modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma')] if args.tag.lower().count('nice') else [])
 
 # NOTE legend entry tweaks for paper plots
-modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma'), ('data', 'Data'), ('nonprompt', 'Nonprompt #gamma')] if args.tag.lower().count('earlytest') else []
-# modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma'), ('data', 'Data')] if args.tag.lower().count('nice') else []
+# modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma'), ('data', 'Data'), ('nonprompt', 'Nonprompt #gamma')] if args.tag.lower().count('earlytest') else []
+modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma'), ('data', 'Data'), ('nonprompt', 'Nonprompt #gamma')] if args.tag.lower().count('nice') else []
 
-# modTexLeg.append(('UNCBANDLEGEND', ''))
-modTexLeg.append(('SYSUNC', ''))
+if args.tag.lower().count('nice') and args.showSys:
+  # modTexLeg.append(('UNCBANDLEGEND', ''))
+  modTexLeg.append(('SYSUNC', ''))
 
-# if args.showSys:
+# if args.showSys:'data'
   # modTexLeg.append(('UNCBANDLEGEND':''))
 
 Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'), modTexLeg = modTexLeg )
@@ -467,6 +468,7 @@ for year in years:
   if not args.showSys and not copySyst and plotsToFill:
 
     if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-EFB'
+    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-BLS'
     # elif args.tag.count('phoCB-ZGorig') or args.tag.count('phoCBfull-ZGorig'):        reduceType = 'phoCB-ZGorig'
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
@@ -555,7 +557,8 @@ for year in years:
           pass
 
       for i in sample.eventLoop(cutString):
-        c.GetEntry(i)
+        if c.GetEntry(i) < 0:
+          log.info('corrupt basket in ' + str(c.GetFile()) )
         c.ISRWeight = 1.
         c.FSRWeight = 1.
         if not sample.isData and args.sys:

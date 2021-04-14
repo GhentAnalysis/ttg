@@ -81,9 +81,9 @@ def getGraph(hist,shift):
 """
 
 # Also make histograms for pull distributions:
-hist_fit_b  = ROOT.TH1F("fit_b"   ,"B-only fit Nuisances;;%s "%title,prefit.getSize(),0,prefit.getSize())
-hist_fit_s  = ROOT.TH1F("fit_s"   ,"S+B fit Nuisances   ;;%s "%title,prefit.getSize(),0,prefit.getSize())
-hist_prefit = ROOT.TH1F("prefit_nuisancs","Prefit Nuisances    ;;%s "%title,prefit.getSize(),0,prefit.getSize())
+hist_fit_b  = ROOT.TH1D("fit_b"   ,"B-only fit Nuisances;;%s "%title,prefit.getSize(),0,prefit.getSize())
+hist_fit_s  = ROOT.TH1D("fit_s"   ,"S+B fit Nuisances   ;;%s "%title,prefit.getSize(),0,prefit.getSize())
+hist_prefit = ROOT.TH1D("prefit_nuisancs","Prefit Nuisances    ;;%s "%title,prefit.getSize(),0,prefit.getSize())
 # Store also the *asymmetric* uncertainties
 gr_fit_b    = ROOT.TGraphAsymmErrors(); gr_fit_b.SetTitle("fit_b_g")
 gr_fit_s    = ROOT.TGraphAsymmErrors(); gr_fit_s.SetTitle("fit_b_s")
@@ -303,7 +303,7 @@ if options.plotfile:
     fout = ROOT.TFile(options.plotfile,"RECREATE")
     ROOT.gROOT.SetStyle("Plain")
     ROOT.gStyle.SetOptFit(1)
-    histogram = ROOT.TH1F("pulls", "Pulls", 60, -3, 3)
+    histogram = ROOT.TH1D("pulls", "Pulls", 60, -3, 3)
     for pull in pulls:
         histogram.Fill(pull)
     canvas = ROOT.TCanvas("asdf", "asdf", 800, 800)

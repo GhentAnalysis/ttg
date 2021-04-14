@@ -57,11 +57,11 @@ for sysSet in sysSets:
   path = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-methoda/CHAN/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
   pathB = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/CHAN/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/signalRegionsZoom.pkl'
 
-  stat = ROOT.TH1F('stat', 'stat', 12, 0, 12)
+  stat = ROOT.TH1D('stat', 'stat', 12, 0, 12)
   hists = {}
   for sys in systs:
-    hists[sys] = ROOT.TH1F(sys, sys, 12, 0, 12)
-    hists[sys + 'B'] = ROOT.TH1F(sys, sys, 12, 0, 12)
+    hists[sys] = ROOT.TH1D(sys, sys, 12, 0, 12)
+    hists[sys + 'B'] = ROOT.TH1D(sys, sys, 12, 0, 12)
 
   for c, chan in enumerate (channels):
     nominal, data = sumHists(path.replace('CHAN', chan), 'signalRegionsZoom')

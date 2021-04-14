@@ -85,7 +85,7 @@ if __name__ == '__main__':
 
     print 'Create histograms'
     
-    h_disc = ROOT.TH1F('h_disc','h_disc',20,0.,30.)
+    h_disc = ROOT.TH1D('h_disc','h_disc',20,0.,30.)
     
     print 'Loop through events ('+str(nEvents)+')'
 
