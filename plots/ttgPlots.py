@@ -707,7 +707,7 @@ for year in years:
         extraArgs['ratio']   = None
 
       if args.tag.count('forNPclosure'):
-        extraArgs['ratio']   = {'yRange' : (0.6, 1.4), 'num': -1, 'texY':'prediction/MC'}
+        extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
 
 
       # NOTE TEMPORARY HARDCODE
@@ -803,7 +803,7 @@ for plot in totalPlots: # 1D plots
         linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
       extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
-      extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
+      extraArgs['resultsDir']        = os.path.join(plotDir, args.year, args.tag, args.channel, args.selection)
       # extraArgs['postFitInfo']       = year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
 
 
@@ -828,7 +828,7 @@ for plot in totalPlots: # 1D plots
       extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
     if args.tag.count('forNPclosure'):
-      extraArgs['ratio']   = {'yRange' : (0.6, 1.4), 'num': -1, 'texY':'prediction/MC'}
+      extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
 
 
 

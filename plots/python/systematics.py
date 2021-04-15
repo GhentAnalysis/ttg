@@ -9,37 +9,39 @@ varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetSmearedPt', 'dbj1',
 #
 systematics = {}
 for i in ('Up', 'Down'):
-  systematics['isr'+i]        = [('ISRWeight',    'ISRWeight'+i)]
-  systematics['fsr'+i]        = [('FSRWeight',    'FSRWeight'+i)]
-  systematics['ue'+i]         = []
-  systematics['ephScale'+i]     = []
-  systematics['ephRes'+i]       = []
-  systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
-  systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
-  systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
-  systematics['pvSF'+i]       = [('PVWeight',      'PVWeight'+i)]
-  systematics['lSFElSyst'+i]      = [('lWeight',       'lWeightElSyst'+i)]
-  systematics['lSFMuSyst'+i]      = [('lWeight',       'lWeightMuSyst'+i)]
-  systematics['lSFElStat'+i]      = [('lWeight',       'lWeightElStat'+i)]
-  systematics['lSFMuStat'+i]      = [('lWeight',       'lWeightMuStat'+i)]
+  # systematics['isr'+i]        = [('ISRWeight',    'ISRWeight'+i)]
+  # systematics['fsr'+i]        = [('FSRWeight',    'FSRWeight'+i)]
+  # systematics['ue'+i]         = []
+  # systematics['ephScale'+i]     = []
+  # systematics['ephRes'+i]       = []
+  # systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
+  # systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
+  # systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
+  # systematics['pvSF'+i]       = [('PVWeight',      'PVWeight'+i)]
+  # systematics['lSFElSyst'+i]      = [('lWeight',       'lWeightElSyst'+i)]
+  # systematics['lSFMuSyst'+i]      = [('lWeight',       'lWeightMuSyst'+i)]
+  # systematics['lSFElStat'+i]      = [('lWeight',       'lWeightElStat'+i)]
+  # systematics['lSFMuStat'+i]      = [('lWeight',       'lWeightMuStat'+i)]
 
-  # systematics['lSFMuPS'+i]      = [('lWeight',       'lWeightPSSys'+i)]
+  # # systematics['lSFMuPS'+i]      = [('lWeight',       'lWeightPSSys'+i)]
   
-  systematics['lTracking'+i]      = [('lTrackWeight',  'lTrackWeight'+i)]
+  # systematics['lTracking'+i]      = [('lTrackWeight',  'lTrackWeight'+i)]
 
-  systematics['trigStatEE'+i]    = [('triggerWeight', 'triggerWeightStatEE'+i)]
-  systematics['trigStatEM'+i]    = [('triggerWeight', 'triggerWeightStatEM'+i)]
-  systematics['trigStatMM'+i]    = [('triggerWeight', 'triggerWeightStatMM'+i)]
-  systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
+  # systematics['trigStatEE'+i]    = [('triggerWeight', 'triggerWeightStatEE'+i)]
+  # systematics['trigStatEM'+i]    = [('triggerWeight', 'triggerWeightStatEM'+i)]
+  # systematics['trigStatMM'+i]    = [('triggerWeight', 'triggerWeightStatMM'+i)]
+  # systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
 
-  systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
-  systematics['bTagb'+i]      = [('bTagWeight',    'bTagWeightb'+i)]
-  systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
-  systematics['NP'+i]         = []
+  # systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
+  systematics['bTagbUC'+i]      = [('bTagWeight',    'bTagWeightbUC'+i)]
+  systematics['bTagbCO'+i]      = [('bTagWeight',    'bTagWeightbCO'+i)]
 
-  for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
-    systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
-# UC ones are full oncorrelated, other ones 100% correlated
+  # systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
+  # systematics['NP'+i]         = []
+
+#   for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
+#     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
+# # UC ones are full oncorrelated, other ones 100% correlated
 
 
   # systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
@@ -70,14 +72,14 @@ correlations = {
 # Special case for q2 and PDF: multiple variations of which an envelope has to be taken
 # TODO switch to taking the rms for pdf
 #
-for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
-  systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
+# for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd'):
+#   systematics['q2_' + i] = [('genWeight', 'weight_q2_'+i)]
 
-for i in range(0, 100):
-  systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
+# for i in range(0, 100):
+#   systematics['pdf_' + str(i)] = [('genWeight', 'weight_pdf_'+str(i))]
 
-for i in ('1', '2', '3'):
-  systematics['colRec_' + i] = []
+# for i in ('1', '2', '3'):
+#   systematics['colRec_' + i] = []
 
 
 # Compile list to systematic to show

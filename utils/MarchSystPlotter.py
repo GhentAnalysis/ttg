@@ -31,6 +31,7 @@ def sumHists(picklePath, plot):
 
 
 rd, ru = 0.95, 1.05
+# rd, ru = 0.995, 1.005
 
 
 labels = ['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b', '#geq3j,#geq3b']
@@ -38,9 +39,9 @@ labels = ['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b', '#geq3j,#geq3
 
 
 # sysSets = [['AbsoluteUp', 'AbsoluteDown'],['AbsoluteUCUp', 'AbsoluteUCDown'],['BBEC1Up', 'BBEC1Down'],['BBEC1UCUp', 'BBEC1UCDown'],['EC2Up', 'EC2Down'],['EC2UCUp', 'EC2UCDown'],['FlavorQCDUp', 'FlavorQCDDown'],['HFUp', 'HFDown'],['HFUCUp', 'HFUCDown'],['JERUp', 'JERDown'],['NPUp', 'NPDown'],['RelativeBalUp', 'RelativeBalDown'],['RelativeSampleUCUp', 'RelativeSampleUCDown'],['bTagbUp', 'bTagbDown'],['bTaglUp', 'bTaglDown'],['ephResUp', 'ephResDown'],['ephScaleUp', 'ephScaleDown'],['fsrUp', 'fsrDown'],['isrUp', 'isrDown'],['lSFElStatUp', 'lSFElStatDown'],['lSFElSystUp', 'lSFElSystDown'],['lSFMuStatUp', 'lSFMuStatDown'],['lSFMuSystUp', 'lSFMuSystDown'],['pfUp', 'pfDown'],['phSFUp', 'phSFDown'],['puUp', 'puDown'],['pvSFUp', 'pvSFDown'],['trigStatEEUp', 'trigStatEEDown'],['trigStatEMUp', 'trigStatEMDown'],['trigStatMMUp', 'trigStatMMDown'],['trigSystUp', 'trigSystDown'],['ueUp', 'ueDown']]
-sysSets = [['bTagbUp', 'bTagbDown'],['bTaglUp', 'bTaglDown'],['ephResUp', 'ephResDown'],['ephScaleUp', 'ephScaleDown'],['fsrUp', 'fsrDown'],['isrUp', 'isrDown'],['lSFElStatUp', 'lSFElStatDown'],['lSFElSystUp', 'lSFElSystDown'],['lSFMuStatUp', 'lSFMuStatDown'],['lSFMuSystUp', 'lSFMuSystDown'],['pfUp', 'pfDown'],['phSFUp', 'phSFDown'],['puUp', 'puDown'],['pvSFUp', 'pvSFDown'],['trigStatEEUp', 'trigStatEEDown'],['trigStatEMUp', 'trigStatEMDown'],['trigStatMMUp', 'trigStatMMDown'],['trigSystUp', 'trigSystDown'],['ueUp', 'ueDown']]
-# sysSets = [['AbsoluteUp', 'AbsoluteDown'] ,['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')],['lSFElSystUp', 'lSFElSystDown'],['lSFMuSystUp', 'lSFMuSystDown']]
-# sysSets += [['pdf_' + str(i) for i in range(0, 100)]]
+# sysSets = [['bTagbUp', 'bTagbDown'],['bTaglUp', 'bTaglDown'],['ephResUp', 'ephResDown'],['ephScaleUp', 'ephScaleDown'],['fsrUp', 'fsrDown'],['isrUp', 'isrDown'],['lSFElStatUp', 'lSFElStatDown'],['lSFElSystUp', 'lSFElSystDown'],['lSFMuStatUp', 'lSFMuStatDown'],['lSFMuSystUp', 'lSFMuSystDown'],['pfUp', 'pfDown'],['phSFUp', 'phSFDown'],['puUp', 'puDown'],['pvSFUp', 'pvSFDown'],['trigStatEEUp', 'trigStatEEDown'],['trigStatEMUp', 'trigStatEMDown'],['trigStatMMUp', 'trigStatMMDown'],['trigSystUp', 'trigSystDown'],['ueUp', 'ueDown']]
+sysSets = [['AbsoluteUp', 'AbsoluteDown'] ,['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')],['lSFElSystUp', 'lSFElSystDown'],['lSFMuSystUp', 'lSFMuSystDown']]
+# sysSets = [['pdf_' + str(i) for i in range(0, 100)]]
 
 plots = ['signalRegionsZoom', 'unfReco_phPt']
 
