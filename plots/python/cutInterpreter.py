@@ -57,7 +57,7 @@ def phEta(tree, lower, upper):
   return (lower <= abs(tree._phEta[tree.ph]) < upper)
 
 continous_variables = {'mll': 'mll', 'ml1g': 'ml1g', 'photonPt': 'ph_pt', 'phJetDeltaR': 'phJetDeltaR', 'phLepDeltaR': phLepDeltaR, 'genPhMinDeltaR' : 'genPhMinDeltaR', 'phMVA': phMVA, 'chIso':chIso, 'puChargedHadronIso' : puChargedHadronIso, 'photonEta': phEta, 'PLphotonPt': 'PLph_pt', }
-discrete_variables  = {'njet': 'njets', 'btag': 'nbjets', 'deepbtag': 'ndbjets', 'nphoton': 'nphotons', 'PLnphoton': 'PLnphotons', 'PLnjet': 'PLnjets', 'PLnb': 'PLndbjets'}
+discrete_variables  = {'njet': 'njets', 'btag': 'nbjets', 'deepbtag': 'ndbjets', 'nphoton': 'nphotons', 'PLnphoton': 'PLnphotons', 'PLnjet': 'PLnjets', 'PLnb': 'PLndbjets', 'nvert': '_nVertex'}
 
 
 

@@ -33,11 +33,12 @@ for i in ('Up', 'Down'):
   # systematics['trigSyst'+i]    = [('triggerWeight', 'triggerWeightSyst'+i)]
 
   # systematics['bTagl'+i]      = [('bTagWeight',    'bTagWeightl'+i)]
-  systematics['bTagbUC'+i]      = [('bTagWeight',    'bTagWeightbUC'+i)]
-  systematics['bTagbCO'+i]      = [('bTagWeight',    'bTagWeightbCO'+i)]
+  # systematics['bTagbUC'+i]      = [('bTagWeight',    'bTagWeightbUC'+i)]
+  # systematics['bTagbCO'+i]      = [('bTagWeight',    'bTagWeightbCO'+i)]
 
   # systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
-  # systematics['NP'+i]         = []
+  systematics['NPFlat'+i]         = []
+  systematics['NPHigh'+i]         = []
 
 #   for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
 #     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
@@ -137,12 +138,17 @@ def applySysToReduceType(reduceType, sys):
     if (sys.count('Scale') or sys.count('Res')) and reduceType.count('pho'): reduceType += '-' + sys
   return reduceType
 
-def getSigmaSyst(sys):
+def getSigmaSystFlat(sys):
   if sys: 
-    if sys == 'NPUp': return 1.
-    elif sys == 'NPDown': return -1.
+    if sys == 'NPFlatUp': return 1.
+    elif sys == 'NPFlatDown': return -1.
   return 0.
 
+def getSigmaSystHigh(sys):
+  if sys: 
+    if sys == 'NPHighUp': return 1.
+    elif sys == 'NPHighDown': return -1.
+  return 0.
 
 
 # Special systematic samples for hdamp, ue, and erd

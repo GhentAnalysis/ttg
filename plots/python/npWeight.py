@@ -52,8 +52,9 @@ def sumHists(sourceHists, plot):
   return (nHist, gHist, dHist)
 
 class npWeight:
-  def __init__(self, sigma):
-    self.sigma = sigma
+  def __init__(self, sigmaFlat, sigmaHigh):
+    self.sigmaFlat = sigmaFlat
+    self.sigmaHigh = sigmaHigh
     try:
         # for data driven estimate
       histA, histB, histC, histD = (sumHists(sourceHists[region], 'photon_pt_etaA') for region in ['A', 'B', 'C', 'D'])
@@ -104,8 +105,8 @@ class npWeight:
         sf =  self.dataEst.GetBinContent(self.dataEst.GetXaxis().FindBin(pt), self.dataEst.GetYaxis().FindBin(eta))
       else:
         sf =  self.mcEst.GetBinContent(self.mcEst.GetXaxis().FindBin(pt), self.mcEst.GetYaxis().FindBin(eta))
-      # estimated 15% systematic uncertainty
-      return sf*(1.+self.sigma* (0.30 if pt > 100. else 0.05) )
+      # return sf*(1.+self.sigma* (0.30 if pt > 100. else 0.05) )
+      return sf*(1. +self.sigmaFlat* 0.05 +self.sigmaHigh* (0.50 if pt > 80. else 0.) )
     else: return 1.
 
 if __name__ == '__main__':
