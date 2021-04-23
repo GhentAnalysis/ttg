@@ -38,7 +38,6 @@ for i in ('Up', 'Down'):
   systematics['bTagbCO'+i]      = [('bTagWeight',    'bTagWeightbCO'+i)]
 
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
-  # systematics['NP'+i]         = []
   systematics['NPFlat'+i]         = []
   systematics['NPHigh'+i]         = []
 
@@ -46,10 +45,6 @@ for i in ('Up', 'Down'):
     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
 # # UC ones are full oncorrelated, other ones 100% correlated
 
-
-  # systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
-  # systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
-  # systematics['erd'+i]        = []
 
 # not in here -> 100% correlation
 correlations = {
@@ -140,12 +135,17 @@ def applySysToReduceType(reduceType, sys):
     if (sys.count('Scale') or sys.count('Res')) and reduceType.count('pho'): reduceType += '-' + sys
   return reduceType
 
-def getSigmaSyst(sys):
+def getSigmaSystFlat(sys):
   if sys: 
-    if sys == 'NPUp': return 1.
-    elif sys == 'NPDown': return -1.
+    if sys == 'NPFlatUp': return 1.
+    elif sys == 'NPFlatDown': return -1.
   return 0.
 
+def getSigmaSystHigh(sys):
+  if sys: 
+    if sys == 'NPHighUp': return 1.
+    elif sys == 'NPHighDown': return -1.
+  return 0.
 
 
 # Special systematic samples for hdamp, ue, and erd

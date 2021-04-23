@@ -41,7 +41,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSyst
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSystFlat, getSigmaSystHigh
 
 #
 # Submit subjobs
@@ -545,7 +545,7 @@ for year in years:
         elif c.sigmaIetaIeta2: sample.texName = sample.texName.replace('sideband2', '0.012 < #sigma_{i#etai#eta}')
 
       # when creating input plots for corrections corrections can obviously not be applied yet
-      npReweight = npWeight(sigma = getSigmaSyst(args.sys))
+      npReweight = npWeight(sigmaFlat = getSigmaSystFlat(args.sys), sigmaHigh = getSigmaSystHigh(args.sys))
       
       if not args.noZgCorr:
         try:

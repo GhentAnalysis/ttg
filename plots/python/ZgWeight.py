@@ -9,6 +9,7 @@ from ttg.tools.uncFloat import UncFloat
 from ttg.plots.plotHelpers import createSignalRegions
 import pickle
 import time
+import pdb
 sourceHists ={'2016': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/signalRegions.pkl',
               '2017': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/signalRegions.pkl',
               '2018': '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-forZgest-noZgCorr/CHAN/llg-mll20-offZ-llgOnZ-photonPt20/signalRegions.pkl'
@@ -42,7 +43,7 @@ class ZgWeight:
   def __init__(self, year, sys = ''):
     # in the on-Zg regions there is no DD NP estimate -> ttbar sample variations have an effect, but don't in SR. 
     # might need to rethink this when ttgamma syst samples are used. although ttgamma is negigible on-Zg
-    if any([s in sys for s in ['erd', 'hdamp', 'ue']]): sys = ''
+    if any([s in sys for s in ['erd', 'hdamp', 'ue', 'NP', 'colRec']]): sys = ''
     data, zg, otherMC = sumHists(sourceHists[year], 'ee', sys = sys)
     data.Add(otherMC, -1.)
     data.Divide(zg)
@@ -79,4 +80,5 @@ class ZgWeight:
 
 if __name__ == '__main__':
   tester = ZgWeight('2016')
-  tester.weightMap.Draw()
+  pdb.set_trace()
+  # tester.weightMap.Draw()

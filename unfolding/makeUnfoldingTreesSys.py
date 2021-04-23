@@ -136,7 +136,8 @@ if not forSys:
   for i in range(0, 100):                              newBranches += ['weight_pdf_' + str(i) + '/F']
   for i in range(0, 100):                              newBranches += ['weight_pdfSc_' + str(i) + '/F']
   for sys in ['Up', 'Down']:                           newBranches += ['lWeightPSSys' + sys + '/F', 'lWeightElSyst' + sys + '/F','lWeightMuSyst' + sys + '/F','lWeightElStat' + sys + '/F','lWeightMuStat' + sys + '/F', 'puWeight' + sys + '/F', 'triggerWeightStatMM' + sys + '/F', 'triggerWeightStatEM' + sys + '/F', 'triggerWeightStatEE' + sys + '/F', 'triggerWeightSyst' + sys + '/F', 'phWeight' + sys + '/F', 'ISRWeight' + sys + '/F', 'FSRWeight' + sys + '/F',  'PVWeight' + sys + '/F', 'lTrackWeight' + sys + '/F']
-  for sys in ['lUp', 'lDown', 'bUp', 'bDown']:         newBranches += ['bTagWeight' + sys + '/F']
+  for sys in ['lUp', 'lDown', 'bCOUp', 'bCODown', 'bUCUp', 'bUCDown']:         newBranches += ['bTagWeight' + sys + '/F']
+
 
 from ttg.tools.makeBranches import makeBranches
 newVars = makeBranches(outputTree, newBranches)
@@ -368,10 +369,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
     # method 1a
   if reco:
-    for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
+    for sys in ['', 'lUp', 'lDown', 'bCOUp', 'bCODown', 'bUCUp', 'bUCDown']:
       setattr(newVars, 'bTagWeight' + sys, btagSF.getBtagSF_1a(sys, c, c.dbjets))
   else:
-    for sys in ['', 'lUp', 'lDown', 'bUp', 'bDown']:
+    for sys in ['', 'lUp', 'lDown', 'bCOUp', 'bCODown', 'bUCUp', 'bUCDown']:
       setattr(newVars, 'bTagWeight' + sys, 1.)
 
   newVars.genWeight    = c._weight*lumiWeights[0]
