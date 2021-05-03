@@ -10,6 +10,7 @@ import root_numpy as rnp
 import matplotlib
 matplotlib.use('pdf')
 import matplotlib.pyplot as plt
+import pdb
 
 # Combine documentation:
 # http://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
@@ -279,12 +280,13 @@ def extractSignalFromJSON(jsonFile):
 # Command to create impacts.json
 #
 def commandForImpactsJSON(dataCard, toys=False, toyR=1):
-  extraArg = (' -t -1 --expectSignal=' + str(toyR)) if toys else (' --expectSignal=' + str(toyR))
+  extraArg = (' --rMin 0.9 --rMax 1.3  -t -1 --expectSignal=' + str(toyR)) if toys else (' --rMin 0.9 --rMax 1.3  --expectSignal=' + str(toyR) )
+  # extraArg = ' --robustFit=1 --rMin 0.5 --rMax 1.5 ' + (' -t -1 --expectSignal=' + str(toyR)) if toys else (' --expectSignal=' + str(toyR))
   command = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doInitialFit' + extraArg + ';'
-  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8' + extraArg + ';'
+  command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root --doFits --parallel 8 ' + extraArg + ';'
   command += './combineTool.py -M Impacts -m 125 -d ' + dataCard + '.root -o impacts.json' + extraArg + ';'
   return command
 
@@ -353,8 +355,8 @@ def runImpacts(dataCard, year, perPage=30, toys=False, toyR=1, poi=['r'], doRati
 def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run='combine', group=False):
 
     combineRelease = getCombineRelease()
-    command  = 'combine -M ChannelCompatibilityCheck ' + dataCard + '.txt --saveFitResult --rMin 0.5 --rMax 1.5'
-    command += ' --expectSignal 1 '
+    command  = 'combine -M ChannelCompatibilityCheck ' + dataCard + '.txt --saveFitResult --rMin 0.9 --rMax 1.3 '
+    command += ' --expectSignal 1 --cminDefaultMinimizerStrategy 0'
     if group: command += ' -g sr_ee -g sr_emu -g sr_mumu'
     if toys:
         command += ' -t -1 '
@@ -412,7 +414,7 @@ def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run=
 def goodnessOfFit(dataCard, algo='saturated', run='combine'):
     command  = 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ';'
     # command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 100' + (' --toysFreq' if algo=='saturated' else '') + ';'
-    command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 1000 --saveToys' + (' --toysFreq' if algo=='saturated' else '') + ';'
+    command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 400 --saveToys' + (' --toysFreq' if algo=='saturated' else '') + ' -s 22552;'
     log.info('Running goodness of fit')
     handleCombine(dataCard, dataCard + '_gof', command, run=run)
     with open('./' + run + '/' + dataCard + '_gof.log') as f:
@@ -450,10 +452,10 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
 #   block below is more clever, but it gets complicated
 
     if template == 'nonprompt':
-      if sys == 'NP': return val
+      if sys.count('NP'): return val
       else: return '-'
     
-    if sys == 'NP' and not template == 'nonprompt': return '-'
+    if sys.count('NP') and not template == 'nonprompt': return '-'
     
     if shape == 'sr_ee':
       if sys.count('lSFMu'): return '-'
@@ -798,6 +800,7 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
         errStatHigh = pointsStatOnly.GetErrorXhigh(i)
         tempValLow = errLow*errLow-errStatLow*errStatLow
         errSysLow = (tempValLow/abs(tempValLow)) * math.sqrt(abs(tempValLow))
+        # pdb.set_trace()
         errSysHigh = math.sqrt(errHigh*errHigh-errStatHigh*errStatHigh)
 
         v_Str = "%.3f" % v

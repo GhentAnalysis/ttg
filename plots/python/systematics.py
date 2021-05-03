@@ -11,7 +11,7 @@ systematics = {}
 for i in ('Up', 'Down'):
   systematics['isr'+i]        = [('ISRWeight',    'ISRWeight'+i)]
   systematics['fsr'+i]        = [('FSRWeight',    'FSRWeight'+i)]
-  systematics['ue'+i]         = []
+  # systematics['ue'+i]         = []
   systematics['ephScale'+i]     = []
   systematics['ephRes'+i]       = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
@@ -45,10 +45,6 @@ for i in ('Up', 'Down'):
 # # UC ones are full oncorrelated, other ones 100% correlated
 
 
-  # systematics['trigger'+i]    = [('triggerWeight', 'triggerWeight'+i)]
-  # systematics['JEC'+i]        = [(v, v+'_JEC'+i) for v in varWithJetVariations]
-  # systematics['erd'+i]        = []
-
 # not in here -> 100% correlation
 correlations = {
               # 'lSFElSyst' : correlated I guess ,
@@ -56,8 +52,7 @@ correlations = {
               'lSFElStat' : 0 ,
               'lSFMuStat' : 0 ,
               'pvSF' : 0. , 
-              'bTagb' : 0.5 , 
-              'bTagl' : 0.5 , 
+              'bTagbUC' : 0 , 
               'trigStatEE' : 0. ,
               'trigStatEM' : 0. ,
               'trigStatMM' : 0. ,
@@ -97,6 +92,7 @@ linearSystematics['ZG_norm']        = ('ZG',        3 )  #we consider 70% of the
 linearSystematics['singleTop_norm'] = ('singleTop', 10)
 linearSystematics['VVTo2L2Nu_norm'] = ('VVTo2L2Nu', 30)   #multiboson
 linearSystematics['other_norm']     = ('other',     30)
+linearSystematics['UE']     =         ('TTGamma',   1)
 
 # linearSystematics['lumi'] = (None, 2.5)
 
