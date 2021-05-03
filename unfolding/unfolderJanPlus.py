@@ -16,7 +16,7 @@ args = argParser.parse_args()
 
 if args.year == '2016': args.unblind = True
 
-args.year = '2016EFB'
+# args.year = '2016'
 
 import ROOT
 import pdb
@@ -75,10 +75,10 @@ def getRatioCanvas(name):
 
 #################### Settings and definitons ####################
 
-lumiunc = {'2016EFB':0.012, '2017':0.023, '2018':0.025}
+lumiunc = {'2016':0.012, '2017':0.023, '2018':0.025}
 
-lumiScales['2016EFB'] = lumiScales['2016']
-lumiScalesRounded['2016EFB'] = lumiScalesRounded['2016']
+# lumiScales['2016'] = lumiScales['2016']
+# lumiScalesRounded['2016'] = lumiScalesRounded['2016']
 
 lumiunc['RunII'] = 0.016 
 
@@ -136,10 +136,10 @@ varList = ['']
 
 
 
-sysVaryData = ['ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst']
+sysVaryData = ['ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst', 'lTracking']
 
-if args.year == 'RunII': sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','bTagl','bTagb','JER','NP','lSFMuSyst','lSFElSyst']
-else: sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst']
+if args.year == 'RunII': sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','bTagl','bTagb','JER','NP','lSFMuSyst','lSFElSyst', 'lTracking']
+else: sysList = ['isr','fsr','ue','ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagb','JER','NP','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst', 'lTracking']
 
 varList += [sys + direc for sys in sysList for direc in ['Down', 'Up']]
 
@@ -419,8 +419,8 @@ for dist in distList:
   else:
     histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
 
-  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
+  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
+  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
 
   # get nominal unfolded, with the statistics split into data and MC backgrounds
   response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
@@ -436,7 +436,7 @@ for dist in distList:
   dataStat.Scale(1./lumiScales[args.year])
   bkgStat.Scale(1./lumiScales[args.year])
 
-  log.info("chi2 before unfolding: " + str(calcChi2(data, backgroundsNom.values()+[signalNom]) / lumiScales[args.year] ))
+  # log.info("chi2 before unfolding: " + str(calcChi2(data, backgroundsNom.values()+[signalNom]) / lumiScales[args.year] ))
 
 
   # draw tau scan  (no, we're not regularizing)
@@ -532,7 +532,7 @@ for dist in distList:
 
 # NOTE THIS BLOCK LOADS THE SYSTEMATICS BAND FOR THE THEORY, VERY SIMILAR TO PREUNF CODE
 
-  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   # plMC = response.ProjectionY("PLMC")
 
 
@@ -541,8 +541,8 @@ for dist in distList:
   plNLOpdfDict, plNLOq2Dict = {}, {}
 
   for var in theoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + '2016' + '/unfBMAR/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + '2016' + '/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plMCpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plMCq2Dict[var] = plMC.Clone()
@@ -550,7 +550,7 @@ for dist in distList:
     else: plMCDict[var] = plMC
 
   for var in NLOtheoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBMAR_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBLSA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plNLOpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plNLOq2Dict[var] = plMC.Clone()
@@ -654,7 +654,7 @@ for dist in distList:
   legend.AddEntry(unfoldedNom,'Data',"PE")
   legend.Draw()
 
-  log.info("chi2 unfolded: " + str(calcChi2(unfoldedNom, [plMCTot])))
+  # log.info("chi2 unfolded: " + str(calcChi2(unfoldedNom, [plMCTot])))
 
 # RATIO PAD
   cunf.bottomPad.cd()

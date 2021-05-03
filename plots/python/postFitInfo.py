@@ -71,6 +71,10 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable
           showLogWarningOnce('Cannot apply pull for nuisance ' + i + ' to ' + name)
   for i in pullsAndConstraints:
     if 'norm' in i:                                                                                              # Then scale each MC given the pull on the rate parameter
+      # TODO fix background normalizations, now that they are lnN shaped
+      if not i.count('TTGamma'): continue
+      # TODO then remove this 
+      
       foundSampleToScale = False
       for sample, h in postHistos.iteritems():
         name = sample if isinstance(sample, str) else (sample.name + sample.texName)

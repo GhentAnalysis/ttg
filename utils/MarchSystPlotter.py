@@ -23,11 +23,11 @@ def sumHists(picklePath, plot):
     if 'data' in name:
       if not dataHist: dataHist = hist
       else: dataHist.Add(hist)
-    # elif 'ttg' in name.lower():
-    else:
+    elif 'ttg' in name.lower():
+    # else:
       if not MCHist: MCHist = hist
       else: MCHist.Add(hist)
-    # else: continue
+    else: continue
   return (MCHist, dataHist)
 
 
@@ -38,6 +38,8 @@ rd, ru = 0.92, 1.08
 
 labels = ['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b', '#geq3j,#geq3b']
 
+channellabels = ['#mu#mu', 'e#mu', 'ee']
+
 
 
 # sysSets = [['AbsoluteUp', 'AbsoluteDown'],['AbsoluteUCUp', 'AbsoluteUCDown'],['BBEC1Up', 'BBEC1Down'],['BBEC1UCUp', 'BBEC1UCDown'],['EC2Up', 'EC2Down'],['EC2UCUp', 'EC2UCDown'],['FlavorQCDUp', 'FlavorQCDDown'],['HFUp', 'HFDown'],['HFUCUp', 'HFUCDown'],['JERUp', 'JERDown'],['NPUp', 'NPDown'],['RelativeBalUp', 'RelativeBalDown'],['RelativeSampleUCUp', 'RelativeSampleUCDown'],['bTagbUp', 'bTagbDown'],['bTaglUp', 'bTaglDown'],['ephResUp', 'ephResDown'],['ephScaleUp', 'ephScaleDown'],['fsrUp', 'fsrDown'],['isrUp', 'isrDown'],['lSFElStatUp', 'lSFElStatDown'],['lSFElSystUp', 'lSFElSystDown'],['lSFMuStatUp', 'lSFMuStatDown'],['lSFMuSystUp', 'lSFMuSystDown'],['pfUp', 'pfDown'],['phSFUp', 'phSFDown'],['puUp', 'puDown'],['pvSFUp', 'pvSFDown'],['trigStatEEUp', 'trigStatEEDown'],['trigStatEMUp', 'trigStatEMDown'],['trigStatMMUp', 'trigStatMMDown'],['trigSystUp', 'trigSystDown'],['ueUp', 'ueDown']]
@@ -45,9 +47,10 @@ labels = ['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,#geq2b', '#geq3j,#geq3
 # sysSets = [['AbsoluteUp', 'AbsoluteDown'] ,['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')],['lSFElSystUp', 'lSFElSystDown'],['lSFMuSystUp', 'lSFMuSystDown']]
 # sysSets = [['ueUp', 'ueDown']]
 sysSets = [['colRec_1', 'colRec_2', 'colRec_3']]
+# sysSets = [['','colRec_1', 'colRec_2', 'colRec_3']]
 # sysSets = [['pdf_' + str(i) for i in range(0, 100)]]
 
-plots = ['signalRegionsZoom', 'unfReco_phPt']
+plots = ['signalRegionsZoom', 'unfReco_phPt', 'yield']
 
 for systs in sysSets:
   for plot in plots:
@@ -67,6 +70,9 @@ for systs in sysSets:
       for i, l in enumerate(labels):
         hists[systs[0]].GetXaxis().SetBinLabel(i+1, l)
 
+    if plot == 'yield':
+      for i, l in enumerate(channellabels):
+        hists[systs[0]].GetXaxis().SetBinLabel(i+1, l)
 
     legend = ROOT.TLegend(0.15,0.91,0.95,0.96)
     for s, sys in enumerate(systs):
@@ -83,7 +89,7 @@ for systs in sysSets:
       hists[sys].SetLineWidth(3)
       hists[sys].GetYaxis().SetRangeUser(rd, ru)
       hists[sys].SetTitle('')
-      hists[sys].Draw('SAME HIST')
+      hists[sys].Draw('SAME E1')
       legend.AddEntry(hists[sys], sys , 'L')
 
     legend.SetNColumns(6)

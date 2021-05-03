@@ -47,7 +47,7 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/da
 forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
 
 
-if args. singleJob and args.subJob and not args.isChild:
+if args.singleJob and args.subJob and not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   jobs = [(args.sample, args.year, args.subJob, args.splitData)]
   submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type, jobLabel = "RT")
