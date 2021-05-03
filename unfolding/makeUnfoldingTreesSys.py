@@ -20,6 +20,7 @@ argParser.add_argument('--debug',     action='store_true', default=False,       
 argParser.add_argument('--dryRun',    action='store_true', default=False,                help='do not launch subjobs, only show them')
 argParser.add_argument('--isChild',   action='store_true', default=False,                help='mark as subjob, will never submit subjobs by itself')
 argParser.add_argument('--overwrite', action='store_true', default=False,                help='overwrite if valid output file already exists')
+argParser.add_argument('--singleJob', action='store_true', default=False,                help='submit one single subjob, be careful with this')
 args = argParser.parse_args()
 
 
@@ -40,6 +41,14 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/
 #   - data is additional splitted per run to avoid too heavy chains to be loaded
 #
 forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
+
+
+if args. singleJob and args.subJob and not args.isChild:
+  from ttg.tools.jobSubmitter import submitJobs
+  jobs = [(args.sample, args.year, args.subJob)]
+  submitJobs(__file__, ('sample', 'year', 'subJob'), jobs, argParser, subLog=args.type, jobLabel = "RT")
+  exit(0)
+
 if not args.isChild and not args.subJob:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
@@ -380,5 +389,14 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   outputTree.Fill()
 outputTree.AutoSave()
 outputFile.Close()
+
+f = ROOT.TFile.Open(outputName)
+try:
+  for event in f.blackJackAndHookersTree:
+    continue
+except:
+  print 'produced a corrupt file, exiting'
+  exit(1)
+
 log.info('Finished')
 
