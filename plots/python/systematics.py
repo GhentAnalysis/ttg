@@ -40,6 +40,9 @@ for i in ('Up', 'Down'):
   systematics['NPFlat'+i]         = []
   systematics['NPHigh'+i]         = []
 
+  systematics['bFrag'+i]          = []
+
+
   for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
 # # UC ones are full oncorrelated, other ones 100% correlated
@@ -93,6 +96,7 @@ linearSystematics['singleTop_norm'] = ('singleTop', 10)
 linearSystematics['VVTo2L2Nu_norm'] = ('VVTo2L2Nu', 30)   #multiboson
 linearSystematics['other_norm']     = ('other',     30)
 linearSystematics['UE']     =         ('TTGamma',   1)
+linearSystematics['lumi']     =       (None, 1.2)
 
 # linearSystematics['lumi'] = (None, 2.5)
 

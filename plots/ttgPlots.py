@@ -102,6 +102,12 @@ onlyMC = args.tag.count('onlyMC')
 
 selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
 
+bFragRun = args.tag.count('fragDef')
+
+if bFragRun:
+  systematics['bFragTemplateUp']          = [('_bf_fragCP5BL',       '_bf_fragCP5BLup' )]
+  systematics['bFragTemplateDown']        = [('_bf_fragCP5BL',       '_bf_fragCP5BLdown' )]
+
 
 #
 # Create stack
@@ -461,10 +467,7 @@ for year in years:
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
-  # TODO check if still needed
-  copySyst = False
-  # copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdDown', 'isrUp', 'isrDown', 'fsrUp', 'fsrDown']
-  # copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
+  copySyst = any([args.sys == s for s in ['bFragUp', 'bFragDown']])
   if not args.showSys and not copySyst and plotsToFill:
 
     if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-EFB'
@@ -585,11 +588,22 @@ for year in years:
           zgw = ZgReweight.getWeight(c, channel = channelNumbering(c))
         else: zgw = 1.
 
+
         if sample.isData: eventWeight = estWeight
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw
 
-        # log.info(eventWeight)
+        # # NOTE for special frag runs only
+        # if not bFragRun: 
+        #   log.warning('you have the bfrag weight block turned on, fix this, exiting')
+        #   quit()
+        # else:             
+        #   try:
+        #     fragWeight = c._bf_fragCP5BL
+        #   except:
+        #     fragWeight = 1.
+        #   eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw*fragWeight
+
 
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]
@@ -605,10 +619,13 @@ for year in years:
       phoCBfull = origCB
       args.tag = origTag
   if not args.showSys and copySyst:
-    copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
-  # TODO to to be implemented
-  # if args.sys and any(x in 'args.sys' for x in ['q2','pdf']) and not args.showSys:
-  #  freezeTTGYield(plots, year, args.tag, args.channel, args.selection)
+    if args.sys == 'bFragUp': templateSys = 'bFragTemplateUp'
+    elif args.sys == 'bFragDown': templateSys = 'bFragTemplateDown'
+    else: 
+      log.warning('something wrong in copying bfrag syst, exiting')
+      quit()
+    templateSys
+    copySystPlots(plots, year, year, args.tag, args.channel, args.selection, templateSys)
 
   plots = plotsToFill + loadedPlots
 
@@ -690,6 +707,9 @@ for year in years:
 
       if args.tag.count('compareTTSys'):
         extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}'}
+
+      if args.tag.count('topmass'):
+        extraArgs['ratio']   = {'num': -1, 'texY':'var. / nom.', 'yRange' : (0.6, 1.4)}
 
       if args.tag.count('compareTTGammaSys'):
         extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}

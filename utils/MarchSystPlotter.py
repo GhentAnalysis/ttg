@@ -50,7 +50,7 @@ sysSets = [['colRec_1', 'colRec_2', 'colRec_3']]
 # sysSets = [['','colRec_1', 'colRec_2', 'colRec_3']]
 # sysSets = [['pdf_' + str(i) for i in range(0, 100)]]
 
-plots = ['signalRegionsZoom', 'unfReco_phPt', 'yield']
+plots = ['signalRegionsZoom', 'unfReco_phPt', 'yield', 'photon_pt_large']
 
 for systs in sysSets:
   for plot in plots:

@@ -1,5 +1,6 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
+import pdb
 
 
 #
@@ -434,8 +435,8 @@ class Plot:
 
       for sampleFilter, unc in linearSystematics.values():
         for i in range(summedErrors.GetNbinsX()+1):
-          if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
-          else:            uncertainty = unc/100*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
+          if sampleFilter: uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if s.name.count(sampleFilter)])
+          else:            uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
           if postFitInfo:  uncertainty = applyPostFitConstraint(sys, uncertainty, postFitInfo)
           summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
@@ -751,13 +752,18 @@ def addPlots(plotA, plotB):
 def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
   toRemove = None
   for i, plot in enumerate(plots):
+    # pdb.set_trace()
     try:
       loaded = plot.loadFromCache(os.path.join(plotDir, year, tag, channel, selection), None)
       for samp, hist in plot.histos.iteritems():
-        sourceHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, '', [samp.nameNoSys+samp.texName])
-        sourceVarHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, sys, [samp.nameNoSys+samp.texName])
-        destVarHist = applySysToOtherHist(sourceHist, sourceVarHist, hist)
-        plots[i].histos[samp] = destVarHist
+        try:
+          sourceHist = getHistFromPkl((sourceYear, 'phoCBfull-fragDef-onlyMC-norat', channel, selection), plot.name, '', [samp.nameNoSys+samp.texName])
+          sourceVarHist = getHistFromPkl((sourceYear, 'phoCBfull-fragDef-onlyMC-norat', channel, selection), plot.name, sys, [samp.nameNoSys+samp.texName])
+          destVarHist = applySysToOtherHist(sourceHist, sourceVarHist, hist)
+          plots[i].histos[samp] = destVarHist
+        except: 
+          log.info('no bfrag syst template for ' + samp.nameNoSys+samp.texName)
+          continue
       log.info('systematic variation copied for plot ' + plot.name + ' from ' + sourceYear)
     except Exception as e:
       log.debug(e)
