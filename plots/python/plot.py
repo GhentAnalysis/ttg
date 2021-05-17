@@ -424,6 +424,7 @@ class Plot:
       summedErrors = histos_summed[None].Clone()
       summedErrors.Reset()
       for sys in [s for s in histos_summed.keys() if s]:
+        # shape systematics
         sysOther = sys.replace('Up', 'Down') if 'Up' in sys else sys.replace('Down', 'Up')
         for i in range(summedErrors.GetNbinsX()+1):
           uncertainty      = histos_summed[sys].GetBinContent(i) - histos_summed[None].GetBinContent(i)
@@ -434,6 +435,7 @@ class Plot:
             summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
       for sampleFilter, unc in linearSystematics.values():
+        # linear systematics 
         for i in range(summedErrors.GetNbinsX()+1):
           if sampleFilter: uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if s.name.count(sampleFilter)])
           else:            uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
@@ -590,6 +592,7 @@ class Plot:
       _, sysHistos = self.getSysHistos(self.stack[0], resultsDir, systematics)                     # Get sys variations for each sample
       self.histos = applyPostFitScaling(self.histos, postFitInfo, sysHistos)
 
+
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
     # Apply style to histograms + normalize bin width + add overflow bin
@@ -609,6 +612,7 @@ class Plot:
 
     drawObjects += self.scaleStacks(histos, scaling)
 
+    # pdb.set_trace()
     # Calculate the systematics on the first stack
     if len(systematics) or len(linearSystematics) or addMCStat:
       histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)

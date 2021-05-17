@@ -27,6 +27,7 @@ args = argParser.parse_args()
 
 
 from ttg.tools.logger import getLogger
+import pdb
 log = getLogger(args.logLevel)
 
 if args.noZgCorr: args.tag += '-noZgCorr'
@@ -41,7 +42,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSystFlat, getSigmaSystHigh
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSystFlat, getSigmaSystHigh, correlations, showSysListRunII, addYearLumiUnc
 
 #
 # Submit subjobs
@@ -447,6 +448,7 @@ for year in years:
       for newSample in sum(stack, []):
         if sample.name == newSample.name: plot.histos[newSample] = plot.histos.pop(sample)
   
+  if args.year == 'all' and args.showSys: continue
 
   log.info('Using stackFile ' + stackFile)
   loadedPlots = []
@@ -641,9 +643,6 @@ for year in years:
       totalPlots = copy.deepcopy(plots)
     continue #don't draw individual years
 
-  # In case of plots: could consider to treat the rateParameters similar as the linearSystematics
-  # from ttg.plots.systematics import rateParameters
-  # linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
 
   #
   # Drawing the plots
@@ -681,10 +680,12 @@ for year in years:
           if args.sys.count('-'):
             showSysList = args.sys.split('-')
             linearSystematics = {}
+        # this is only to add lumi unc to total syst bands when plotting 1 year
+        if args.showSys and not args.sys and not args.year == 'all':
+          linearSystematics = addYearLumiUnc(linearSystematics, args.year)
         extraArgs['systematics']       = showSysList
         extraArgs['linearSystematics'] = linearSystematics
-        extraArgs['postFitInfo']       = (year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit')) if args.post else None
-        # log.info(extraArgs['postFitInfo'])
+        extraArgs['postFitInfo']       = (args.year + 'srFit') if args.post else None
         extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
 
 
@@ -732,9 +733,6 @@ for year in years:
       if args.tag.count('forNPclosure'):
         extraArgs['ratio']   = {'yRange' : (0.3, 1.7), 'num': -1, 'texY':'prediction/MC'}
 
-
-      # NOTE TEMPORARY HARDCODE
-      # extraArgs['ratio']   = {'yRange' : (0.95, 1.05), 'texY': 'Data / MC'}
 
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
@@ -795,6 +793,21 @@ if not args.year == 'all': exit(0)
 # NOTE doing this in a sepatate code block seems like the better option for now 
 lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018'] 
 
+
+if args.showSys and not args.sys and args.year == 'all':
+  # NOTE assuming anything mentioned in correlations is fully uncorrelated
+  showSysList = showSysListRunII
+
+log.info('Using stackFile ' + stackFile)
+if args.year == 'all' and args.showSys:
+  totalPlots = []
+  for plot in plots:
+    loaded = plot.loadFromCache(os.path.join(plotDir, args.year, args.tag, args.channel, args.selection))
+    if loaded: totalPlots.append(plot)    
+  totalPlots = [Lplot for Lplot in totalPlots if Lplot.name in [plot.name for plot in plots]]
+  log.info('Plots loaded from cache:')
+  log.info([Lplot.name for Lplot in totalPlots])
+
 noWarnings = True
 for plot in totalPlots: # 1D plots
   if isinstance(plot, Plot2D): continue
@@ -813,10 +826,12 @@ for plot in totalPlots: # 1D plots
   # set some extra arguments for the plots
   #
   if not args.sys or args.showSys:
+
+
     extraArgs = {}
     normalizeToMC = [False, True] if (args.channel != 'noData' and not onlyMC) else [False]
     if args.tag.count('onlydata'):
-      extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
+      extraArgs['resultsDir']  = os.path.join(plotDir, args.year, args.tag, args.channel, args.selection)
       extraArgs['systematics'] = ['sideBandUnc']
     elif args.showSys:
       extraArgs['addMCStat']   = True
@@ -830,7 +845,7 @@ for plot in totalPlots: # 1D plots
       extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, args.year, args.tag, args.channel, args.selection)
-      # extraArgs['postFitInfo']       = year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+      extraArgs['postFitInfo']       = (args.year + 'srFit') if args.post else None
 
 
     if args.channel != 'noData':

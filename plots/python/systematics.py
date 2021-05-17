@@ -86,6 +86,17 @@ for i in ('1', '2', '3'):
 showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in systematics.keys()))
 
 
+showSysListRunII = [i + y for i in showSysList for y in (['_2016', '_2017', '_2018'] if i in correlations.keys() else [''])]
+showSysListRunII.remove('q2')
+showSysListRunII.remove('pdf')
+showSysListRunII.append('2q')
+showSysListRunII.append('fdp')
+showSysListRunII.append('lumi_1718'  )
+showSysListRunII.append('lumi_2016'  )
+showSysListRunII.append('lumi_2017'  )
+showSysListRunII.append('lumi_2018'  )
+showSysListRunII.append('lumi_3Ycorr')
+
 #
 # Defining linear systematics as "name : (sampleList, %)"
 #
@@ -96,9 +107,27 @@ linearSystematics['singleTop_norm'] = ('singleTop', 10)
 linearSystematics['VVTo2L2Nu_norm'] = ('VVTo2L2Nu', 30)   #multiboson
 linearSystematics['other_norm']     = ('other',     30)
 linearSystematics['UE']     =         ('TTGamma',   1)
-linearSystematics['lumi']     =       (None, 1.2)
 
 # linearSystematics['lumi'] = (None, 2.5)
+
+def addYearLumiUnc(linSysDict, year):
+  if year == '2016':
+    linSysDict['lumi_2016']   = (None, 0.9)
+    linSysDict['lumi_3Ycorr'] = (None, 0.6)
+    return linSysDict
+    linSysDict['lumi_2017']   = (None, 2.)
+    linSysDict['lumi_3Ycorr'] = (None, 0.9)
+    linSysDict['lumi_1718']   = (None, 0.6)
+  elif year == '2017':
+    return linSysDict
+    linSysDict['lumi_2018']   = (None, 1.5)
+    linSysDict['lumi_3Ycorr'] = (None, 2.)
+    linSysDict['lumi_1718']   = (None, 0.2)
+  elif year == '2018':
+    return linSysDict
+
+  else: log.warning(year + ' not a valid year to add lumi uncertainties to, something is wrong')
+
 
 #
 # Define linear systematics implemented as rate parameters

@@ -26,6 +26,11 @@ def updatePullsAndConstraints(newDataCard):
     fitResults  = resultsFile.Get("fit_s").floatParsFinal()
     for r in [fitResults.at(i) for i in range(fitResults.getSize())]:
       pullsAndConstraints[mapName(r.GetName())] = (r.getVal(), r.getAsymErrorHi())
+    try: pullsAndConstraints['2q'] = pullsAndConstraints['q2']
+    except: pass
+    try: pullsAndConstraints['fdp'] = pullsAndConstraints['pdf']
+    except: pass
+
     log.info('Loaded pulls and constrains from ' + filename)
 
 #
@@ -54,10 +59,12 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable
       name = sample if isinstance(sample, str) else (sample.name + sample.texName)
       if name.count('data'): continue                                                                            # Skip data
       for i in pullsAndConstraints:
-        if any(x in i for x in ['norm', 'prop', 'NP']): continue                                          # Skip warning for these cases
+        if any(x in i for x in ['prop', 'TTGamma_norm']): continue   # Skip warning for these cases. Prop = bin statistics stuff. ttgamma normalization is done separately below
         try:
           value = pullsAndConstraints[i][0]
-          if i in linearSystematics and False:
+          if i in linearSystematics:
+            if not linearSystematics[i][0] in name: continue
+            if 'estimate' in name: continue # data driven, none of the linear systematics should apply to it
             h.Scale(1+value*linearSystematics[i][1]/100.)
           else:
             if value > 0: nuisanceHist = sysHistos[i + 'Up'][name]
@@ -71,10 +78,8 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable
           showLogWarningOnce('Cannot apply pull for nuisance ' + i + ' to ' + name)
   for i in pullsAndConstraints:
     if 'norm' in i:                                                                                              # Then scale each MC given the pull on the rate parameter
-      # TODO fix background normalizations, now that they are lnN shaped
       if not i.count('TTGamma'): continue
-      # TODO then remove this 
-      
+      # TODO background normalizations are now linear systematics, so this is for signal scaling only
       foundSampleToScale = False
       for sample, h in postHistos.iteritems():
         name = sample if isinstance(sample, str) else (sample.name + sample.texName)
@@ -85,7 +90,6 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable
           foundSampleToScale = True
       if not foundSampleToScale:
         showLogWarningOnce('Could not find where to apply post-fit scaling for ' + i)
-
   return postHistos
 
 #
@@ -93,10 +97,11 @@ def applyPostFitScaling(histos, postFitInfo, sysHistos=None):  # pylint: disable
 #
 def applyPostFitConstraint(sys, uncertainty, postFitInfo):
   updatePullsAndConstraints(postFitInfo)
+  sys = sys.split('Down')[0].split('Up')[0]
   for i in pullsAndConstraints:
-    if i in sys:
+    if i == sys:
       showLogDebugOnce('Applying constraint ' + str(pullsAndConstraints[i][1]) + ' on ' + sys + ' (taking constraint from ' + i + ')')
       return uncertainty*pullsAndConstraints[i][1]
   else:
-    if not 'Stat' in sys and postFitInfo.count('srFit'): showLogWarningOnce('Could not find constrain for ' + sys)
+    if not 'Stat' in sys: showLogWarningOnce('Could not find constrain for ' + sys)
     return uncertainty
