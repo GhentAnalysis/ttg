@@ -42,7 +42,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSystFlat, getSigmaSystHigh, correlations, showSysListRunII, addYearLumiUnc
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSystFlat, getSigmaSystHigh, correlations, showSysListRunII, addYearLumiUnc, getBWrew
 
 #
 # Submit subjobs
@@ -261,6 +261,7 @@ def makePlotList():
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (6, 0, 6),   histModifications=xAxisLabels(['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsCap',           'signal region',                         lambda c : createSignalRegionsCap(c),                          (6, 0, 6),   histModifications=xAxisLabels(['0j,0b', '1j,0b', '#geq2j,0b', '1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
     plotList.append(Plot('signalRegionsZoomCap',       'signal region',                         lambda c : createSignalRegionsZoomCap(c),                      (3, 0, 3),   histModifications=xAxisLabels(['1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
+    plotList.append(Plot('totYield',                   'total yield',                           lambda c : 0.5,                                                (1, 0, 1),   histModifications=xAxisLabels([''])))
 
 
     plotList.append(Plot2D('photon_pt_etaA', 'p_{T}(#gamma) [GeV]', lambda c : c.ph_pt , [20., 30., 45., 70., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.131, 1.5, 1.8, 2.5]))
@@ -411,6 +412,13 @@ def makePlotList():
       plotList.append(Plot('photon_mom',                 'photon mom particle',                    lambda c : momDictFunc(c),                                    (len(momList)+1, 0, len(momList)+1), histModifications=[xAxisLabels(nameList), customLabelSize(14)]))
       plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
       plotList.append(Plot('photon_pt_ATLB',             'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                           [20., 30., 40., 50., 65., 80., 100., 125., 160., 220., 300.]))
+
+    if args.extraPlots.lower().count('topmass'):
+      plotList.append(Plot('lhetop_mass',                    'm lhe top  [GeV]',                  lambda c : c.mlhetop,                                         (20, 147.5, 197.5 )))
+      plotList.append(Plot('lheatop_mass',                   'm lhe anti-top  [GeV]',             lambda c : c.mlheatop,                                        (20, 147.5, 197.5 )))
+
+
+
   # pylint: enable=C0301
 
   if args.filterPlot:
@@ -472,8 +480,9 @@ for year in years:
   copySyst = any([args.sys == s for s in ['bFragUp', 'bFragDown']])
   if not args.showSys and not copySyst and plotsToFill:
 
-    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-EFB'
-    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-BLS'
+    # if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-EFB'
+    # if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-BLS'
+    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-END'
     # elif args.tag.count('phoCB-ZGorig') or args.tag.count('phoCBfull-ZGorig'):        reduceType = 'phoCB-ZGorig'
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
@@ -595,6 +604,7 @@ for year in years:
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw
 
+
         # # NOTE for special frag runs only
         # if not bFragRun: 
         #   log.warning('you have the bfrag weight block turned on, fix this, exiting')
@@ -606,6 +616,14 @@ for year in years:
         #     fragWeight = 1.
         #   eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw*fragWeight
 
+
+# # TODO remove again, topmass testing
+        # eventWeight = eventWeight* getBWrew(c, 'down', 1.4915)  
+        # eventWeight = eventWeight* getBWrew(c, 172.5-0.4, 1.4915)  
+        # eventWeight = eventWeight* getBWrew(c, 172.5+0.4, 1.4915)  
+
+        # eventWeight = eventWeight* getBWrew(c, 172.5-0.4, 1.479381)
+        # eventWeight = eventWeight* getBWrew(c, 172.5+0.4, 1.503673)
 
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]

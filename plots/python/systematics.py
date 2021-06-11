@@ -1,5 +1,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
+import pdb
+import math
 
 varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetSmearedPt', 'dbj1', 'dbj2', 'phJetDeltaR', 'phBJetDeltaR']
 
@@ -262,3 +264,41 @@ def constructCRSys(allPlots, plotName, stack, force=False):
       log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
       variations = [allPlots[plotName][histName]]
     allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])
+
+
+
+
+def BW(E, mt, wi):
+  gamma =  (mt**2.*(mt**2. + wi**2.))**0.5
+  k = 2.*2**0.5*mt*wi*gamma / ( math.pi * (mt**2. + gamma)**0.5)
+  return k/ ( (E**2. - mt**2.)**2. + mt**2.*wi**2. )
+
+# def getBWrew(c, mvar, wi):
+#   try:
+#     mTop1 = c._lheMass[[i for i in c._lhePdgId].index(6)]
+#     rew1 = BW(mTop1, mvar, wi) / BW(mTop1, 172.5, 1.4915)
+#   except:
+#     rew1 = 1.
+#   try:
+#     mTop2 = c._lheMass[[i for i in c._lhePdgId].index(-6)]
+#     rew2 = BW(mTop2, mvar, wi) / BW(mTop2, 172.5, 1.4915)
+#   except:
+#     rew2 = 1.
+#   return rew1*rew2
+
+def getBWrew(c, mdirec, wi):
+  if mdirec == 'up': 
+    mvar = 172.5+0.4
+    reno = 1. - 0.013
+  elif mdirec == 'down': 
+    mvar = 172.5-0.4
+    reno = 1. + 0.013
+  else: raise SystemExit('invalid top mass direction')
+  try:
+    mTop1 = c._lheMass[[i for i in c._lhePdgId].index(6)]
+    rew1 = BW(mTop1, mvar, wi) / BW(mTop1, 172.5, 1.4915)
+    mTop2 = c._lheMass[[i for i in c._lhePdgId].index(-6)]
+    rew2 = BW(mTop2, mvar, wi) / BW(mTop2, 172.5, 1.4915)
+    return rew1*rew2*reno
+  except: 
+    return 1.

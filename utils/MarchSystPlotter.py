@@ -10,6 +10,7 @@ ROOT.gROOT.SetBatch(True)
 ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetPadRightMargin(0.055)
 ROOT.gStyle.SetPadLeftMargin(0.065)
+import pdb
 
 ROOT.TH1.SetDefaultSumw2()
 ROOT.TH2.SetDefaultSumw2()
@@ -32,7 +33,7 @@ def sumHists(picklePath, plot):
 
 
 # rd, ru = 0.95, 1.05
-rd, ru = 0.92, 1.08
+rd, ru = 0.9, 1.1
 # rd, ru = 0.995, 1.005
 
 
@@ -46,21 +47,31 @@ channellabels = ['#mu#mu', 'e#mu', 'ee']
 # sysSets = [['bTagbUp', 'bTagbDown'],['bTaglUp', 'bTaglDown'],['ephResUp', 'ephResDown'],['ephScaleUp', 'ephScaleDown'],['fsrUp', 'fsrDown'],['isrUp', 'isrDown'],['lSFElStatUp', 'lSFElStatDown'],['lSFElSystUp', 'lSFElSystDown'],['lSFMuStatUp', 'lSFMuStatDown'],['lSFMuSystUp', 'lSFMuSystDown'],['pfUp', 'pfDown'],['phSFUp', 'phSFDown'],['puUp', 'puDown'],['pvSFUp', 'pvSFDown'],['trigStatEEUp', 'trigStatEEDown'],['trigStatEMUp', 'trigStatEMDown'],['trigStatMMUp', 'trigStatMMDown'],['trigSystUp', 'trigSystDown'],['ueUp', 'ueDown']]
 # sysSets = [['AbsoluteUp', 'AbsoluteDown'] ,['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')],['lSFElSystUp', 'lSFElSystDown'],['lSFMuSystUp', 'lSFMuSystDown']]
 # sysSets = [['ueUp', 'ueDown']]
-sysSets = [['colRec_1', 'colRec_2', 'colRec_3']]
+sysSets = [['colRec_1', 'colRec_2', 'colRec_3'], ['ueUp', 'ueDown']]
 # sysSets = [['','colRec_1', 'colRec_2', 'colRec_3']]
 # sysSets = [['pdf_' + str(i) for i in range(0, 100)]]
 
-plots = ['signalRegionsZoom', 'unfReco_phPt', 'yield', 'photon_pt_large']
+plots = ['signalRegionsZoom', 'unfReco_phPt', 'yield', 'photon_pt_large', 'total']
 
 for systs in sysSets:
   for plot in plots:
     colors = 50*[ROOT.kRed + 2, ROOT.kRed-4, ROOT.kBlue + 2, ROOT.kBlue-4, ROOT.kGreen + 2, ROOT.kGreen-3]
-    path = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + plot + '.pkl'
+
+    totalPlot = False
+    if plot == 'total':
+      plot = 'yield'
+      totalPlot = True
+    path = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016PreJune/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + plot + '.pkl'
 
     hists = {}
     MC, data = sumHists(path, plot)
+    if totalPlot:
+      MC = MC.Rebin(3, 'rebinned')
+      data = data.Rebin(3, 'rebinned')
     for sys in systs:
       sysHist, _ = sumHists(path, plot + sys)
+      if totalPlot:
+        sysHist = sysHist.Rebin(3, 'rebinned')
       sysHist.Divide(MC)
       hists[sys] = sysHist.Clone()
 
@@ -70,7 +81,7 @@ for systs in sysSets:
       for i, l in enumerate(labels):
         hists[systs[0]].GetXaxis().SetBinLabel(i+1, l)
 
-    if plot == 'yield':
+    if plot == 'yield' and not totalPlot:
       for i, l in enumerate(channellabels):
         hists[systs[0]].GetXaxis().SetBinLabel(i+1, l)
 
@@ -104,4 +115,9 @@ for systs in sysSets:
     l1.SetLineStyle(3)  
     l1.SetLineWidth(2)
     l1.Draw()
-    c1.SaveAs('marSystPlots/' + systs[0] + plot + '.png')
+    if totalPlot:
+      c1.SaveAs('marSystPlots/' + systs[0] + 'total.png')
+    else:
+      c1.SaveAs('marSystPlots/' + systs[0] + plot + '.png')
+
+

@@ -27,27 +27,10 @@ ST_tW_ch             All_(nonprompt)        errorStyle    kBlue
 +ST_s_ch_had
 +ST_t_ch
 +ST_tbar_ch
-
-VVTo2L2Nu             All_(nonprompt)        errorStyle    kBlue
-+ZZTo4L
-+ZZTo2Q2Nu
-+ZZTo2L2Q
-%+WWToLNuQQ
-+WWTo1L1Nu2Q
-+WZTo1L3Nu
-+WZTo1L1Nu2Q
-+WZTo2L2Q
-+WZTo3LNu
-+WWTo4Q
-+WWW
-+WWZ
-+WZZ
-+ZZZ
-
++tWll
 
 $other
 WGamma              All_(nonprompt)        errorStyle    kBlue
-%+GluGluToH_ZZ
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau
@@ -55,7 +38,6 @@ WGamma              All_(nonprompt)        errorStyle    kBlue
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
 +TTZtoLL
-%+TTZtoLL_M1to10
 +TTZtoQQ
 +TTWtoLNu
 +TTWtoQQ
@@ -66,7 +48,19 @@ WGamma              All_(nonprompt)        errorStyle    kBlue
 +TTWZ
 +TTZZ
 +TTTT
-+tWll
-%+tWnunu
 +tHq
 +tHW
++VVTo2L2Nu
++ZZTo4L
++ZZTo2Q2Nu
++ZZTo2L2Q
++WWTo1L1Nu2Q
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWTo4Q
++WWW
++WWZ
++WZZ
++ZZZ

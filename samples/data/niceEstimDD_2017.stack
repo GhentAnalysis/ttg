@@ -26,27 +26,13 @@ ST_tW_ch             Single-t+#gamma_(genuine)              fillStyle     797
 +ST_s_ch_lep_tbar
 +ST_t_ch
 +ST_tbar_ch
++tWll
 
-VVTo2L2Nu             Multiboson+#gamma_(genuine)               fillStyle     kViolet
-+ZZTo4L
-+ZZTo2Q2Nu
-+ZZTo2L2Q
-%+WWToLNuQQ
-+WWTo1L1Nu2Q
-+WZTo1L3Nu
-+WZTo1L1Nu2Q
-+WZTo2L2Q
-+WZTo3LNu
-+WWTo4Q
-+WWW
-+WWZ
-+WZZ
-+ZZZ
+
 
 
 $other
-WGamma              Other+#gamma_(genuine)       fillStyle    kGray
-%+GluGluToH_ZZ
+WGamma              Other+#gamma_(genuine)       fillStyle    kViolet
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau
@@ -54,7 +40,6 @@ WGamma              Other+#gamma_(genuine)       fillStyle    kGray
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
 +TTZtoLL
-+TTZtoLL_M1to10
 +TTZtoQQ
 +TTWtoLNu
 +TTWtoQQ
@@ -65,10 +50,22 @@ WGamma              Other+#gamma_(genuine)       fillStyle    kGray
 +TTWZ
 +TTZZ
 +TTTT
-+tWll
-%+tWnunu
-%+tHq
++tHq
 +tHW
++VVTo2L2Nu
++ZZTo4L
++ZZTo2Q2Nu
++ZZTo2L2Q
++WWTo1L1Nu2Q
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWTo4Q
++WWW
++WWZ
++WZZ
++ZZZ
 
 
 $NPMu

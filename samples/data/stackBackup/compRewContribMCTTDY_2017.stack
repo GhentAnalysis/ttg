@@ -1,0 +1,15 @@
+-- MC
+TT_Dil               t#bar{t}_(nonprompt)              fillStyle     633                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+DY_M50               Drell-Yan_(nonprompt)             fillStyle     427                      _zgEventType<3
++DY_M10to50
+
+-- NPestimate
+TT_Dil               nonprompt-estimate_(MC)                errorStyle    kBlack                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+DY_M50                nonprompt-estimate_(MC)             fillStyle     427                      _zgEventType<3
++DY_M10to50

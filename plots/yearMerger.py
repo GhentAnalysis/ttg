@@ -199,7 +199,7 @@ for channel in ['ee', 'emu', 'mumu', 'all']:
         for proc in recoRunII[dist].keys():
           if proc.count('data'): continue
           factor = fac
-          if proc.count('nonprompt'): factor = 0.
+          if proc.count('nonprompt'): factor = 0.  #maybe change to "estimate", see if that checks out though
 
           for lumunc in ['lumi_1718' , 'lumi_2016' , 'lumi_2017' , 'lumi_2018' , 'lumi_3Ycorr']:
             l16 = reco16[dist][proc].Clone()
