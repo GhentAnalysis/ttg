@@ -59,11 +59,13 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
 
 
 
-folder = 'R2ZatEllModified'
+# folder = 'R2ZatEllModified'
+folder = '18ZatEllModified'
 name = 'srFit'
 nloName = 'unfBLS-r_NLO'
 
-years = ['2016','2017','2018']
+# years = ['2016','2017','2018']
+years = ['2018']
 
 for year in years:
   fname = folder + '/' + name + '_' + year + '_shapes.root'
