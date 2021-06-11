@@ -1,0 +1,16 @@
+-- Nom
+TT_Dil               t#bar{t}_(genuine)              errorStyle     kBlack
++TT_Sem
++TT_Had
+
+-- Up 
+TT_Dil_mtup               t#bar{t}_mtUp(genuine)              errorStyle     kBlue
++TT_Sem_mtup
++TT_Had_mtup
+
+-- Down
+TT_Dil_mtdown               t#bar{t}_mtDown_(genuine)              errorStyle     kRed
++TT_Sem_mtdown
++TT_Had_mtdown
+
+

@@ -37,10 +37,10 @@ from ttg.samples.Sample import createSampleList, getSampleFromList
 import copy
 import pickle
 from math import pi
-from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSyst
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList
 
 
-reduceType = 'unfEFB'
+reduceType = 'unfBLS'
 # reduceType = 'unfFB'
 
 from ttg.tools.logger import getLogger
@@ -70,7 +70,7 @@ if not args.isChild:
   else:                          
     sysList = [None] + (systematics.keys() if args.runSys else [])
     excludeSys = ['NP']
-    excludeSys = ['trigger'] # NOTE temporary
+    # excludeSys = ['trigger'] # NOTE temporary
     if sysList[0]:
       sysList = [entry for entry in sysList if not any([entry.count(exc) for exc in excludeSys])]
   submitJobs(__file__, ('sys'), [[s] for s in sysList], argParser, subLog= args.tag + '/' + args.year, jobLabel = "UF", wallTime="15")
@@ -353,6 +353,9 @@ if args.runNLO: # only need fid plots for this
   plotListRec = []
   plotListOut = []
   mList = []
+  # Need this one for EFT uncertainties
+  plotListRec.append(Plot('rec_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
+
 
 
 ########## EVENTLOOP ##########

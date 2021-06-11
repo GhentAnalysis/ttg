@@ -1,0 +1,12 @@
+-- MC
+TTGamma_DilPCUT              t#bar{t}#gammaDil_(genuine)        fillStyle     kOrange                  _ttgEventType>2
++TTGamma_DilA
++TTGamma_DilB
+
+TTGamma_SemPCUT              t#bar{t}#gammaSem_(genuine)        fillStyle     kRed                  _ttgEventType>2
++TTGamma_SemA
++TTGamma_SemB
+
+TTGamma_HadPCUT              t#bar{t}#gammaHad_(genuine)        fillStyle     kBlue                  _ttgEventType>2
++TTGamma_HadA
++TTGamma_HadB

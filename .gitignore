@@ -1,7 +1,7 @@
 __init__.py
 **/*.pyc
 **/*.swp
-**/log
+**/log*
 documents/AN*
 plots/fitPlots
 plots/combine

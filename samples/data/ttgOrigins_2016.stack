@@ -1,0 +1,16 @@
+-- MC
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_A        fillStyle     kRed                  _ttgEventType==1
+
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_Meson        fillStyle     kBlue                  _ttgEventType==2
+
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_b        fillStyle     kGreen                  _ttgEventType==3
+
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_q_from_W        fillStyle     kYellow                  _ttgEventType==4
+
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_l_From_W        fillStyle     kPink                  _ttgEventType==5
+
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_W_or_Decay        fillStyle     kCyan                  _ttgEventType==6
+
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_top        fillStyle     kOrange                  _ttgEventType==7
+
+TTGamma_Dil              t#bar{t}#gamma_(genuine)_ME        fillStyle     kViolet                  _ttgEventType==8

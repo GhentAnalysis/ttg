@@ -1,0 +1,157 @@
+-- MC
+TTGamma_DilPCUT              t#bar{t}#gamma_(genuine)        fillStyle     kOrange                  _ttgEventType>2
++TTGamma_SemPCUT
++TTGamma_HadPCUT
++TTGamma_DilA
++TTGamma_SemA
++TTGamma_HadA
++TTGamma_DilB
++TTGamma_SemB
++TTGamma_HadB
+
+%TT_Dil               t#bar{t}_(genuine)              fillStyle     633                      _ttgEventType<3
+%+TT_Sem
+%+TT_Had
+
+$ZG
+ZG_lowMass         Z#gamma_(genuine)               fillStyle     598                      _zgEventType>2
+
+%DY_M50               Drell-Yan_(genuine)             fillStyle     427                      _zgEventType<3
+%+DY_M10to50
+
+
+
+$singleTop
+ST_tW_ch             Single-t+#gamma_(genuine)              fillStyle     797
++ST_tbarW_ch
++ST_s_ch_lep_t
++ST_s_ch_lep_tbar
++ST_t_ch
++ST_tbar_ch
+
+VVTo2L2Nu             Multiboson+#gamma_(genuine)               fillStyle     kViolet
++ZZTo4L
++ZZTo2Q2Nu
++ZZTo2L2Q
+%+WWToLNuQQ
++WWTo1L1Nu2Q
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWTo4Q
++WWW
++WWZ
++WZZ
++ZZZ
+
+
+$other
+WGamma              Other+#gamma_(genuine)       fillStyle    kGray
+%+GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
++TTZtoLL
++TTZtoLL_M1to10
++TTZtoQQ
++TTWtoLNu
++TTWtoQQ
++tZq
++TTH
++TTH_bb
++TTWW
++TTWZ
++TTZZ
++TTTT
++tWll
+%+tWnunu
++tHq
++tHW
+
+
+
+TTGamma_DilPCUT             nonprompt        fillStyle     814                  _ttgEventType>2
++TTGamma_SemPCUT
++TTGamma_HadPCUT
++TTGamma_DilA
++TTGamma_SemA
++TTGamma_HadA
++TTGamma_DilB
++TTGamma_SemB
++TTGamma_HadB
+
+TT_Dil               nonprompt        fillStyle     814                     _ttgEventType<3
++TT_Sem
++TT_Had
+
+$ZG
+ZG_lowMass          nonprompt        fillStyle     814                   _zgEventType>2
+
+DY_M50               nonprompt        fillStyle     814                     _zgEventType<3
++DY_M10to50
+
+$singleTop
+ST_tW_ch             nonprompt        fillStyle     814
++ST_tbarW_ch
++ST_s_ch_lep_t
++ST_s_ch_lep_tbar
++ST_t_ch
++ST_tbar_ch
+
+VVTo2L2Nu             nonprompt        fillStyle     814
++ZZTo4L
++ZZTo2Q2Nu
++ZZTo2L2Q
+%+WWToLNuQQ
++WWTo1L1Nu2Q
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWTo4Q
++WWW
++WWZ
++WZZ
++ZZZ
+
+
+$other
+WGamma               nonprompt        fillStyle     814
+%+GluGluToH_ZZ
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
++TTZtoLL
++TTZtoLL_M1to10
++TTZtoQQ
++TTWtoLNu
++TTWtoQQ
++tZq
++TTH
++TTH_bb
++TTWW
++TTWZ
++TTZZ
++TTTT
++tWll
+%+tWnunu
++tHq
++tHW
+
+-- Data
+DoubleMuon                 data:mumu,SF,all      errorStyle    kBlack                   isMuMu
++SingleMuon
+
+$DoubleEG
+EGamma                   data:ee,SF,all        errorStyle    kBlack                   isEE
+
+MuonEG                     data:emu,all          errorStyle    kBlack                   isEMu
++SingleMuon
++EGamma

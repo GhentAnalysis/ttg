@@ -23,6 +23,7 @@ argParser.add_argument('--isChild',   action='store_true', default=False,       
 argParser.add_argument('--overwrite', action='store_true', default=False,                help='overwrite if valid output file already exists')
 argParser.add_argument('--recTops',   action='store_true', default=False,                help='reconstruct tops, save top and neutrino kinematics')
 argParser.add_argument('--singleJob', action='store_true', default=False,                help='submit one single subjob, be careful with this')
+argParser.add_argument('--onlyMC',    action='store_true', default=False,                   help='submit only MC samples for skimming')
 args = argParser.parse_args()
 
 
@@ -45,9 +46,9 @@ sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/samples/da
 #
 
 forSys = args.type.count('Scale') or args.type.count('Res')  # Tuple is created for specific sys
+noSys = ['ttgjets', 'mtup', 'mtdown','uedown', 'ueup', '_erd', '_CR1', '_CR2']
 
-
-if args. singleJob and args.subJob and not args.isChild:
+if args.singleJob and args.subJob and not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   jobs = [(args.sample, args.year, args.subJob, args.splitData)]
   submitJobs(__file__, ('sample', 'year', 'subJob', 'splitData'), jobs, argParser, subLog=args.type, jobLabel = "RT")
@@ -60,11 +61,10 @@ if not args.isChild and not args.subJob:
 
   jobs = []
   for sample in sampleList:
-    if (args.type.count('Scale') or args.type.count('Res')) and (sample.name.count('isr') or sample.name.count('fsr')): continue
-    if (args.type.count('Scale') or args.type.count('Res')) and sample.isData: continue
+    if any([sample.name.count(m) for m in noSys]) and forSys: continue
 
     if sample.isData:
-      if forSys: continue #no need to have data for systematics
+      if forSys or args.onlyMC: continue #no need to have data for systematics
       if args.splitData:          splitData = [args.splitData]
       elif sample.year == '2016': splitData = ['B', 'C', 'D', 'E', 'F', 'G', 'H']
       elif sample.year == '2017': splitData = ['B', 'C', 'D', 'E', 'F']
@@ -88,7 +88,11 @@ c.year = sample.year #access to year wherever chain is passed to function, preve
 
 if not sample.isData:
   lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
-
+  try:
+    weightsPSRenorm  = [(sample.getTotalPSWeights()[0]/totalWeight) for totalWeight in sample.getTotalPSWeights()]
+  except:
+    log.warning('cannot load psweights, isr and fsr uncertainties will not be included')
+    weightsPSRenorm = None
 
 #
 # Create new reduced tree (except if it already exists and overwrite option is not used)
@@ -129,6 +133,7 @@ outputTree = sample.chain.CloneTree(0)
 for i in deleteBranches: sample.chain.SetBranchStatus("*"+i+"*", 1)
 
 
+isTTG = sample.name.count('TTGamma')
 
 #
 # Define new branches
@@ -140,6 +145,9 @@ newBranches += ['mll/F', 'mllg/F', 'ml1g/F', 'ml2g/F', 'phL1DeltaR/F', 'phL2Delt
 newBranches += ['isEE/O', 'isMuMu/O', 'isEMu/O']
 if args.recTops:
   newBranches += ['top1Pt/F', 'top1Eta/F', 'top2Pt/F', 'top2Eta/F', 'nu1Pt/F', 'nu1Eta/F', 'nu2Pt/F', 'nu2Eta/F', 'topsReconst/O', 'liHo/F']
+
+if isTTG:
+  newBranches += ['mlhetop/F', 'mlheatop/F']
 
 
 if not sample.isData:
@@ -186,7 +194,7 @@ pcut = sample.name.count('PCUT')
 #
 # Get function calls to object selections and set selections based on the reducedTuple type
 #
-from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR, reconstTops, getTopKinFit
+from ttg.reduceTuple.objectSelection import setIDSelection, selectLeptons, selectPhotons, makeInvariantMasses, goodJets, bJets, makeDeltaR, reconstTops, getTopKinFit, storeLheTops
 setIDSelection(c, args.type)
 
 
@@ -222,7 +230,6 @@ if args.recTops:
   kf = getTopKinFit()
 
 
-isTTG = sample.name.count('TTGamma')
 
 log.info('Starting event loop')
 for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), selectionString='_lheHTIncoming<100' if sample.name.count('HT0to100') else None):
@@ -261,6 +268,9 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   bJets(c, newVars, forSys=(forSys or sample.isData))
   makeInvariantMasses(c, newVars)
   makeDeltaR(c, newVars, forSys=(forSys or sample.isData))
+
+  if isTTG:
+    storeLheTops(c, newVars)
 
   if not sample.isData:
     newVars.genWeight    = c._weight*lumiWeights[0]
@@ -301,10 +311,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
       try:
         # corresponds to 2 - 1/2 variations, recommended see talk  
         # https://indico.cern.ch/event/848486/contributions/3610537/attachments/1948613/3233682/TopSystematics_2019_11_20.pdf
-        newVars.ISRWeightDown = c._psWeight[6]
-        newVars.FSRWeightDown = c._psWeight[7]
-        newVars.ISRWeightUp   = c._psWeight[8]
-        newVars.FSRWeightUp   = c._psWeight[9]
+        newVars.ISRWeightDown = c._psWeight[6] * weightsPSRenorm[6]
+        newVars.FSRWeightDown = c._psWeight[7] * weightsPSRenorm[7]
+        newVars.ISRWeightUp   = c._psWeight[8] * weightsPSRenorm[8]
+        newVars.FSRWeightUp   = c._psWeight[9] * weightsPSRenorm[9]
       except:
         newVars.ISRWeightDown = 1.
         newVars.FSRWeightDown = 1.
@@ -319,17 +329,6 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
 
 
     l1, l2, l1_pt, l2_pt   = newVars.l1, newVars.l2, newVars.l1_pt, newVars.l2_pt
-    # newVars.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
-    # newVars.lWeightElSystUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst=+1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst=+1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
-    # newVars.lWeightElSystDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst=-1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst=-1., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
-    # newVars.lWeightMuSystUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst=+1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst=+1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
-    # newVars.lWeightMuSystDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst=-1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst=-1., elSigmaStat= 0., muSigmaStat= 0., muSigmaPSSys=0)
-    # newVars.lWeightElStatUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=+1., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=+1., muSigmaStat= 0., muSigmaPSSys=0)
-    # newVars.lWeightElStatDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=-1., muSigmaStat= 0., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat=-1., muSigmaStat= 0., muSigmaPSSys=0)
-    # newVars.lWeightMuStatUp    = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=+1., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=+1., muSigmaPSSys=0)
-    # newVars.lWeightMuStatDown  = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=-1., muSigmaPSSys=0)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=-1., muSigmaPSSys=0)
-    # newVars.lWeightPSSysUp     = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=+1.)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=+1.)
-    # newVars.lWeightPSSysDown   = leptonSF.getSF(c, l1, l1_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=-1.)*leptonSF.getSF(c, l2, l2_pt, elSigmaSyst= 0., muSigmaSyst= 0., elSigmaStat= 0., muSigmaStat=0., muSigmaPSSys=-1.)
 
     sf1, errSyst1, errStat1, errPS1, isMu1, isEl1 = leptonSF.getSF(c, l1, l1_pt)
     sf2, errSyst2, errStat2, errPS2, isMu2, isEl2 = leptonSF.getSF(c, l2, l2_pt)

@@ -3,13 +3,12 @@ import pickle
 
 picklePaths = [
   # '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull/all/llg-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20/yield.pkl',
-  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-reweight/all/llg-mll40-signalRegion-offZ-llgNoZ-photonPt20/signalRegions.pkl',
+  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/all//llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/yield.pkl',
               ]
-sumKeys = ['data']
+sumKeys = ['data', 'TTGamma']
 antiSumKeys = ['data']
 
 rounding = 2
-
 
 # # channel (or bin) yield printing
 # # filter = 'TTGamma'
@@ -33,31 +32,32 @@ rounding = 2
 
 # yield printing
 
-variations = ['','erdUp','erdDown']
+# variations = ['','erdUp','erdDown']
+variations = ['']
 # variations = ['','isrUp','fsrUp','ueUp','hdampUp','erdUp','eScaleUp','eResUp','phScaleUp','phResUp','puUp','phSFUp','lSFUp','triggerUp','bTaglUp','bTagbUp','JECUp','JERUp','isrDown','fsrDown','ueDown','hdampDown','erdDown','eScaleDown','eResDown','phScaleDown','phResDown','puDown','phSFDown','lSFDown','triggerDown','bTaglDown','bTagbDown','JECDown','JERDown']
 
 for var in variations:
   for picklePath in picklePaths:
-    hists = pickle.load(open(picklePath))['signalRegions' + var]
+    hists = pickle.load(open(picklePath))['yield' + var]
     print '---------------------------------------------------------'
     print 'variation:' + var
     print picklePath.replace('/storage_mnt/storage/user/gmestdac/public_html/ttG/','')
     print '---------------------------------------------------------'
 
-    # for name, hist in hists.iteritems():
-      # print name + ': ' + str(round(hist.Integral(), rounding))
+    for name, hist in hists.iteritems():
+      print name + ': ' + str(round(hist.Integral(), rounding))
 
-    # for key in sumKeys:
-    #   print '---------------------------------------------------------'
-    #   sumVal = 0.
-    #   sumSamples = []
-    #   print 'sum of samples containing string ' + key
-    #   for name, hist in hists.iteritems():
-    #     if key in name: 
-    #       sumVal += hist.Integral()
-    #       sumSamples.append(name)
-    #   # print 'samples in sum: ' + '+'.join(sumSamples)
-    #   print 'summed yield: ' + str(round(sumVal, rounding))
+    for key in sumKeys:
+      print '---------------------------------------------------------'
+      sumVal = 0.
+      sumSamples = []
+      print 'sum of samples containing string ' + key
+      for name, hist in hists.iteritems():
+        if key in name: 
+          sumVal += hist.Integral()
+          sumSamples.append(name)
+      print 'samples in sum: ' + '+'.join(sumSamples)
+      print 'summed yield: ' + str(round(sumVal, rounding))
 
     for key in antiSumKeys:
       print '------------------------------------------'
@@ -66,9 +66,9 @@ for var in variations:
       print 'sum of samples NOT containing string ' + key
       for name, hist in hists.iteritems():
         if key not in name: 
-          # sumVal += hist.Integral()
-          sumVal += hist.GetBinContent(9)
+          sumVal += hist.Integral()
+          # sumVal += hist.GetBinContent(9)
           sumSamples.append(name)
-      # print 'samples in sum: ' + '+'.join(sumSamples)
+      print 'samples in sum: ' + '+'.join(sumSamples)
       print 'summed yield: ' + str(round(sumVal, rounding))
 

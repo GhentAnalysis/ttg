@@ -301,6 +301,16 @@ def getEta(pt, pz):
   return -logar(tan(theta/2))
 
 
+def storeLheTops(t, n):
+  try:
+    n.mlhetop = t._lheMass[[i for i in t._lhePdgId].index(6)]
+  except:
+    n.mlhetop = -99.
+  try:
+    n.mlheatop = t._lheMass[[i for i in t._lhePdgId].index(-6)]
+  except:
+    n.mlheatop = -99.
+
 def getTopKinFit():
   from ttg.TopKinFit.kfit import *
   kf = kfit()

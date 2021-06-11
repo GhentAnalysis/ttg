@@ -1,0 +1,21 @@
+-- MC
+TTGamma_DilPCUT              t#bar{t}#gamma_(genuine)        fillStyle     kOrange                  _ttgEventType>2
++TTGamma_SemPCUT
++TTGamma_HadPCUT
++TTGamma_DilA
++TTGamma_SemA
++TTGamma_HadA
++TTGamma_DilB
++TTGamma_SemB
++TTGamma_HadB
+
+$ZG
+ZG_lowMass           Z#gamma_(genuine)               fillStyle     598                      _zgEventType>2
+
+$singleTop
+ST_tW_ch             Single-t+#gamma_(genuine)              fillStyle     797
++ST_tbarW_ch
++ST_s_ch_incl
++ST_t_ch
++ST_tbar_ch
++tWll

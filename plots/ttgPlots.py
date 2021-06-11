@@ -27,6 +27,7 @@ args = argParser.parse_args()
 
 
 from ttg.tools.logger import getLogger
+import pdb
 log = getLogger(args.logLevel)
 
 if args.noZgCorr: args.tag += '-noZgCorr'
@@ -41,7 +42,7 @@ if args.editInfo:
 #
 # Systematics
 #
-from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSystFlat, getSigmaSystHigh
+from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList, getSigmaSystFlat, getSigmaSystHigh, correlations, showSysListRunII, addYearLumiUnc, getBWrew
 
 #
 # Submit subjobs
@@ -101,6 +102,12 @@ normalize   = any(args.tag.count(x) for x in ['sigmaIetaIeta', 'randomConeCheck'
 onlyMC = args.tag.count('onlyMC')
 
 selectPhoton        = args.selection.count('llg') or args.selection.count('lg')
+
+bFragRun = args.tag.count('fragDef')
+
+if bFragRun:
+  systematics['bFragTemplateUp']          = [('_bf_fragCP5BL',       '_bf_fragCP5BLup' )]
+  systematics['bFragTemplateDown']        = [('_bf_fragCP5BL',       '_bf_fragCP5BLdown' )]
 
 
 #
@@ -254,6 +261,7 @@ def makePlotList():
     plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (6, 0, 6),   histModifications=xAxisLabels(['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
     plotList.append(Plot('signalRegionsCap',           'signal region',                         lambda c : createSignalRegionsCap(c),                          (6, 0, 6),   histModifications=xAxisLabels(['0j,0b', '1j,0b', '#geq2j,0b', '1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
     plotList.append(Plot('signalRegionsZoomCap',       'signal region',                         lambda c : createSignalRegionsZoomCap(c),                      (3, 0, 3),   histModifications=xAxisLabels(['1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
+    plotList.append(Plot('totYield',                   'total yield',                           lambda c : 0.5,                                                (1, 0, 1),   histModifications=xAxisLabels([''])))
 
 
     plotList.append(Plot2D('photon_pt_etaA', 'p_{T}(#gamma) [GeV]', lambda c : c.ph_pt , [20., 30., 45., 70., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.131, 1.5, 1.8, 2.5]))
@@ -404,6 +412,13 @@ def makePlotList():
       plotList.append(Plot('photon_mom',                 'photon mom particle',                    lambda c : momDictFunc(c),                                    (len(momList)+1, 0, len(momList)+1), histModifications=[xAxisLabels(nameList), customLabelSize(14)]))
       plotList.append(Plot('photon_pt_ATL',              'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                           [20., 23., 26., 29., 32., 35., 40., 45., 50., 55., 65., 75., 85., 100., 130., 180., 300.]))
       plotList.append(Plot('photon_pt_ATLB',             'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                           [20., 30., 40., 50., 65., 80., 100., 125., 160., 220., 300.]))
+
+    if args.extraPlots.lower().count('topmass'):
+      plotList.append(Plot('lhetop_mass',                    'm lhe top  [GeV]',                  lambda c : c.mlhetop,                                         (20, 147.5, 197.5 )))
+      plotList.append(Plot('lheatop_mass',                   'm lhe anti-top  [GeV]',             lambda c : c.mlheatop,                                        (20, 147.5, 197.5 )))
+
+
+
   # pylint: enable=C0301
 
   if args.filterPlot:
@@ -441,6 +456,7 @@ for year in years:
       for newSample in sum(stack, []):
         if sample.name == newSample.name: plot.histos[newSample] = plot.histos.pop(sample)
   
+  if args.year == 'all' and args.showSys: continue
 
   log.info('Using stackFile ' + stackFile)
   loadedPlots = []
@@ -461,14 +477,12 @@ for year in years:
   #
   # Loop over events (except in case of showSys when the histograms are taken from the results.pkl file)
   #
-  # TODO check if still needed
-  copySyst = False
-  # copySyst = year == '2016' and args.sys in ['hdampUp', 'hdampDown', 'ueUp', 'ueDown', 'erdDown', 'isrUp', 'isrDown', 'fsrUp', 'fsrDown']
-  # copySyst = copySyst or (year == '2018' and args.sys in ['erdUp', 'erdDown', 'ephResDown', 'ephResUp', 'ephScaleDown', 'ephScaleUp'])
+  copySyst = any([args.sys == s for s in ['bFragUp', 'bFragDown']])
   if not args.showSys and not copySyst and plotsToFill:
 
-    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-EFB'
-    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-BLS'
+    # if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-EFB'
+    # if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-BLS'
+    if args.tag.lower().count('phocb'):                                             reduceType = 'phoCB-END'
     # elif args.tag.count('phoCB-ZGorig') or args.tag.count('phoCBfull-ZGorig'):        reduceType = 'phoCB-ZGorig'
     else:                                                                           reduceType = 'pho'
     if args.tag.lower().count('leptonmva'):                                         reduceType = 'leptonmva-' + reduceType
@@ -585,11 +599,31 @@ for year in years:
           zgw = ZgReweight.getWeight(c, channel = channelNumbering(c))
         else: zgw = 1.
 
+
         if sample.isData: eventWeight = estWeight
         elif noWeight:    eventWeight = 1.
         else:             eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw
 
-        # log.info(eventWeight)
+
+        # # NOTE for special frag runs only
+        # if not bFragRun: 
+        #   log.warning('you have the bfrag weight block turned on, fix this, exiting')
+        #   quit()
+        # else:             
+        #   try:
+        #     fragWeight = c._bf_fragCP5BL
+        #   except:
+        #     fragWeight = 1.
+        #   eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw*fragWeight
+
+
+# # TODO remove again, topmass testing
+        # eventWeight = eventWeight* getBWrew(c, 'down', 1.4915)  
+        # eventWeight = eventWeight* getBWrew(c, 172.5-0.4, 1.4915)  
+        # eventWeight = eventWeight* getBWrew(c, 172.5+0.4, 1.4915)  
+
+        # eventWeight = eventWeight* getBWrew(c, 172.5-0.4, 1.479381)
+        # eventWeight = eventWeight* getBWrew(c, 172.5+0.4, 1.503673)
 
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]
@@ -605,10 +639,13 @@ for year in years:
       phoCBfull = origCB
       args.tag = origTag
   if not args.showSys and copySyst:
-    copySystPlots(plots, '2017', year, args.tag, args.channel, args.selection, args.sys)
-  # TODO to to be implemented
-  # if args.sys and any(x in 'args.sys' for x in ['q2','pdf']) and not args.showSys:
-  #  freezeTTGYield(plots, year, args.tag, args.channel, args.selection)
+    if args.sys == 'bFragUp': templateSys = 'bFragTemplateUp'
+    elif args.sys == 'bFragDown': templateSys = 'bFragTemplateDown'
+    else: 
+      log.warning('something wrong in copying bfrag syst, exiting')
+      quit()
+    templateSys
+    copySystPlots(plots, year, year, args.tag, args.channel, args.selection, templateSys)
 
   plots = plotsToFill + loadedPlots
 
@@ -624,9 +661,6 @@ for year in years:
       totalPlots = copy.deepcopy(plots)
     continue #don't draw individual years
 
-  # In case of plots: could consider to treat the rateParameters similar as the linearSystematics
-  # from ttg.plots.systematics import rateParameters
-  # linearSystematics.update({(i+'_norm') : (i, j) for i,j in rateParameters.iteritems()})
 
   #
   # Drawing the plots
@@ -661,10 +695,15 @@ for year in years:
           extraArgs['addMCStat'] = (args.sys == 'stat')
           showSysList            = [args.sys] if args.sys != 'stat' else []
           linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
+          if args.sys.count('-'):
+            showSysList = args.sys.split('-')
+            linearSystematics = {}
+        # this is only to add lumi unc to total syst bands when plotting 1 year
+        if args.showSys and not args.sys and not args.year == 'all':
+          linearSystematics = addYearLumiUnc(linearSystematics, args.year)
         extraArgs['systematics']       = showSysList
         extraArgs['linearSystematics'] = linearSystematics
-        extraArgs['postFitInfo']       = (year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit')) if args.post else None
-        # log.info(extraArgs['postFitInfo'])
+        extraArgs['postFitInfo']       = (args.year + 'srFit') if args.post else None
         extraArgs['resultsDir']        = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
 
 
@@ -688,6 +727,9 @@ for year in years:
       if args.tag.count('compareTTSys'):
         extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}'}
 
+      if args.tag.count('topmass'):
+        extraArgs['ratio']   = {'num': -1, 'texY':'var. / nom.', 'yRange' : (0.6, 1.4)}
+
       if args.tag.count('compareTTGammaSys'):
         extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
@@ -707,11 +749,8 @@ for year in years:
         extraArgs['ratio']   = None
 
       if args.tag.count('forNPclosure'):
-        extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
+        extraArgs['ratio']   = {'yRange' : (0.3, 1.7), 'num': -1, 'texY':'prediction/MC'}
 
-
-      # NOTE TEMPORARY HARDCODE
-      # extraArgs['ratio']   = {'yRange' : (0.95, 1.05), 'texY': 'Data / MC'}
 
       for norm in normalizeToMC:
         if norm: extraArgs['scaling'] = {0:1}
@@ -772,6 +811,21 @@ if not args.year == 'all': exit(0)
 # NOTE doing this in a sepatate code block seems like the better option for now 
 lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018'] 
 
+
+if args.showSys and not args.sys and args.year == 'all':
+  # NOTE assuming anything mentioned in correlations is fully uncorrelated
+  showSysList = showSysListRunII
+
+log.info('Using stackFile ' + stackFile)
+if args.year == 'all' and args.showSys:
+  totalPlots = []
+  for plot in plots:
+    loaded = plot.loadFromCache(os.path.join(plotDir, args.year, args.tag, args.channel, args.selection))
+    if loaded: totalPlots.append(plot)    
+  totalPlots = [Lplot for Lplot in totalPlots if Lplot.name in [plot.name for plot in plots]]
+  log.info('Plots loaded from cache:')
+  log.info([Lplot.name for Lplot in totalPlots])
+
 noWarnings = True
 for plot in totalPlots: # 1D plots
   if isinstance(plot, Plot2D): continue
@@ -790,10 +844,12 @@ for plot in totalPlots: # 1D plots
   # set some extra arguments for the plots
   #
   if not args.sys or args.showSys:
+
+
     extraArgs = {}
     normalizeToMC = [False, True] if (args.channel != 'noData' and not onlyMC) else [False]
     if args.tag.count('onlydata'):
-      extraArgs['resultsDir']  = os.path.join(plotDir, year, args.tag, args.channel, args.selection)
+      extraArgs['resultsDir']  = os.path.join(plotDir, args.year, args.tag, args.channel, args.selection)
       extraArgs['systematics'] = ['sideBandUnc']
     elif args.showSys:
       extraArgs['addMCStat']   = True
@@ -801,10 +857,13 @@ for plot in totalPlots: # 1D plots
         extraArgs['addMCStat'] = (args.sys == 'stat')
         showSysList            = [args.sys] if args.sys != 'stat' else []
         linearSystematics      = {i: j for i, j in linearSystematics.iteritems() if i.count(args.sys)}
+        if args.sys.count('-'):
+          showSysList = args.sys.split('-')
+          linearSystematics = {}
       extraArgs['systematics']       = showSysList
       extraArgs['linearSystematics'] = linearSystematics
       extraArgs['resultsDir']        = os.path.join(plotDir, args.year, args.tag, args.channel, args.selection)
-      # extraArgs['postFitInfo']       = year + ('chgIsoFit_dd_all' if args.tag.count('matchCombined') else 'srFit') if args.post else None
+      extraArgs['postFitInfo']       = (args.year + 'srFit') if args.post else None
 
 
     if args.channel != 'noData':
@@ -828,7 +887,7 @@ for plot in totalPlots: # 1D plots
       extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
     if args.tag.count('forNPclosure'):
-      extraArgs['ratio']   = {'yRange' : (0.4, 1.6), 'num': -1, 'texY':'prediction/MC'}
+      extraArgs['ratio']   = {'yRange' : (0.3, 1.7), 'num': -1, 'texY':'prediction/MC'}
 
 
 

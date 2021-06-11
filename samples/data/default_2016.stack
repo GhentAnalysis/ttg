@@ -30,27 +30,11 @@ ST_tW_ch             Single-t+#gamma_(genuine)              fillStyle     797
 +ST_s_ch_incl
 +ST_t_ch
 +ST_tbar_ch
-
-VVTo2L2Nu             Multiboson+#gamma_(genuine)               fillStyle     kViolet
-+ZZTo4L
-+ZZTo2Q2Nu
-+ZZTo2L2Q
-%+WWToLNuQQ
-+WWTo1L1Nu2Q
-+WZTo1L3Nu
-+WZTo1L1Nu2Q
-+WZTo2L2Q
-+WZTo3LNu
-+WWTo4Q
-+WWW
-+WWZ
-+WZZ
-+ZZZ
++tWll
 
 
 $other
-WGamma              Other+#gamma_(genuine)       fillStyle    kGray
-%+GluGluToH_ZZ
+WGamma              Other+#gamma_(genuine)       fillStyle    kViolet
 +GluGluToZZ_2e2m
 +GluGluToZZ_2e2tau
 +GluGluToZZ_2mu2tau
@@ -58,7 +42,6 @@ WGamma              Other+#gamma_(genuine)       fillStyle    kGray
 +GluGluToZZ_4mu
 +GluGluToZZ_4tau
 +TTZtoLL
-%+TTZtoLL_M1to10
 +TTZtoQQ
 +TTWtoLNu
 +TTWtoQQ
@@ -69,10 +52,22 @@ WGamma              Other+#gamma_(genuine)       fillStyle    kGray
 +TTWZ
 +TTZZ
 +TTTT
-+tWll
-%+tWnunu
 +tHq
 +tHW
++VVTo2L2Nu
++ZZTo4L
++ZZTo2Q2Nu
++ZZTo2L2Q
++WWTo1L1Nu2Q
++WZTo1L3Nu
++WZTo1L1Nu2Q
++WZTo2L2Q
++WZTo3LNu
++WWTo4Q
++WWW
++WWZ
++WZZ
++ZZZ
 
 
 TTGamma_DilPCUT             nonprompt        fillStyle     814                  _ttgEventType>2
@@ -101,12 +96,36 @@ ST_tW_ch             nonprompt        fillStyle     814
 +ST_s_ch_incl
 +ST_t_ch
 +ST_tbar_ch
++tWll
 
-VVTo2L2Nu             nonprompt        fillStyle     814 
+
+
+
+$other
+WGamma                  nonprompt        fillStyle     814 
++GluGluToZZ_2e2m
++GluGluToZZ_2e2tau
++GluGluToZZ_2mu2tau
++GluGluToZZ_4e
++GluGluToZZ_4mu
++GluGluToZZ_4tau
++TTZtoLL
++TTZtoQQ
++TTWtoLNu
++TTWtoQQ
++tZq
++TTH
++TTH_bb
++TTWW
++TTWZ
++TTZZ
++TTTT
++tHq
++tHW
++VVTo2L2Nu
 +ZZTo4L
 +ZZTo2Q2Nu
 +ZZTo2L2Q
-%+WWToLNuQQ
 +WWTo1L1Nu2Q
 +WZTo1L3Nu
 +WZTo1L1Nu2Q
@@ -118,32 +137,6 @@ VVTo2L2Nu             nonprompt        fillStyle     814
 +WZZ
 +ZZZ
 
-
-$other
-WGamma                  nonprompt        fillStyle     814 
-%+GluGluToH_ZZ
-+GluGluToZZ_2e2m
-+GluGluToZZ_2e2tau
-+GluGluToZZ_2mu2tau
-+GluGluToZZ_4e
-+GluGluToZZ_4mu
-+GluGluToZZ_4tau
-+TTZtoLL
-%+TTZtoLL_M1to10
-+TTZtoQQ
-+TTWtoLNu
-+TTWtoQQ
-+tZq
-+TTH
-+TTH_bb
-+TTWW
-+TTWZ
-+TTZZ
-+TTTT
-+tWll
-%+tWnunu
-+tHq
-+tHW
 
 -- Data
 DoubleMuon                 data:mumu,SF,all      errorStyle    kBlack                   isMuMu

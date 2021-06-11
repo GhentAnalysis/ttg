@@ -116,7 +116,7 @@ if __name__ == '__main__':
   # ROOT.gStyle.SetPaintTextFormat("4.4f")
   ROOT.gStyle.SetPaintTextFormat("3.2f")
 
-  tester = npWeight(0.)
+  tester = npWeight(0., 0.)
 
   c1 = ROOT.TCanvas('c', 'c', 900, 800)
   tester.CDHist.SetTitle('')

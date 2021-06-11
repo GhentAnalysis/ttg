@@ -68,6 +68,23 @@ class Sample:                                                                   
     totals = [(t if t > 0 else totals[0]) for t in totals]
     return totals
 
+  def getTotalPSWeights(self):
+    maxVar = None
+    for f in self.listOfFiles:
+      fileName = f
+      f = ROOT.TFile(f)
+      try:
+        if not maxVar:
+          maxVar = f.Get('blackJackAndHookers/psCounter').GetNbinsX()
+          totals = [0 for i in range(maxVar)]
+        for i in range(maxVar):
+          totals[i] += f.Get('blackJackAndHookers/psCounter').GetBinContent(i+1)
+      except:
+        log.warning('problem in getting weights for file, skipping')
+        self.listOfFiles.remove(fileName)
+    totals = [(t if t > 0 else totals[0]) for t in totals]
+    return totals
+
   def getTrueInteractions(self, reduced=False):
     trueInteractions = None
     for f in self.listOfFiles:

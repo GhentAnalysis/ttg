@@ -1,5 +1,7 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
+import pdb
+import math
 
 varWithJetVariations = ['njets', 'ndbjets', 'j1', 'j2', '_jetSmearedPt', 'dbj1', 'dbj2', 'phJetDeltaR', 'phBJetDeltaR']
 
@@ -16,7 +18,6 @@ for i in ('Up', 'Down'):
   systematics['ephRes'+i]       = []
   systematics['pu'+i]         = [('puWeight',      'puWeight'+i)]
   systematics['pf'+i]         = [('_prefireWeight', '_prefireWeight'+i)]
-
   systematics['phSF'+i]       = [('phWeight',      'phWeight'+i)]
   systematics['pvSF'+i]       = [('PVWeight',      'PVWeight'+i)]
   systematics['lSFElSyst'+i]      = [('lWeight',       'lWeightElSyst'+i)]
@@ -40,6 +41,9 @@ for i in ('Up', 'Down'):
   systematics['JER'+i]        = [(v, v+'_JER'+i) for v in varWithJetVariations]
   systematics['NPFlat'+i]         = []
   systematics['NPHigh'+i]         = []
+
+  systematics['bFrag'+i]          = []
+
 
   for jecSys in ['Absolute','BBEC1','EC2','FlavorQCD','HF','RelativeBal','HFUC','AbsoluteUC','BBEC1UC','EC2UC','RelativeSampleUC']:
     systematics[jecSys+i]        = [(v, v+'_' + jecSys +i) for v in varWithJetVariations]
@@ -92,6 +96,17 @@ showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in 
 # showSysList.append('colRec_2')
 # showSysList.append('colRec_3')
 
+showSysListRunII = [i + y for i in showSysList for y in (['_2016', '_2017', '_2018'] if i in correlations.keys() else [''])]
+showSysListRunII.remove('q2')
+showSysListRunII.remove('pdf')
+showSysListRunII.append('2q')
+showSysListRunII.append('fdp')
+showSysListRunII.append('lumi_1718'  )
+showSysListRunII.append('lumi_2016'  )
+showSysListRunII.append('lumi_2017'  )
+showSysListRunII.append('lumi_2018'  )
+showSysListRunII.append('lumi_3Ycorr')
+
 #
 # Defining linear systematics as "name : (sampleList, %)"
 #
@@ -104,6 +119,25 @@ linearSystematics['other_norm']     = ('other',     30)
 linearSystematics['UE']     =         ('TTGamma',   1)
 
 # linearSystematics['lumi'] = (None, 2.5)
+
+def addYearLumiUnc(linSysDict, year):
+  if year == '2016':
+    linSysDict['lumi_2016']   = (None, 0.9)
+    linSysDict['lumi_3Ycorr'] = (None, 0.6)
+    return linSysDict
+    linSysDict['lumi_2017']   = (None, 2.)
+    linSysDict['lumi_3Ycorr'] = (None, 0.9)
+    linSysDict['lumi_1718']   = (None, 0.6)
+  elif year == '2017':
+    return linSysDict
+    linSysDict['lumi_2018']   = (None, 1.5)
+    linSysDict['lumi_3Ycorr'] = (None, 2.)
+    linSysDict['lumi_1718']   = (None, 0.2)
+  elif year == '2018':
+    return linSysDict
+
+  else: log.warning(year + ' not a valid year to add lumi uncertainties to, something is wrong')
+
 
 #
 # Define linear systematics implemented as rate parameters
@@ -140,7 +174,7 @@ def applySysToTree(sample, sys, tree):
 
 def applySysToReduceType(reduceType, sys):
   if sys:
-    if (sys.count('Scale') or sys.count('Res')) and reduceType.count('pho'): reduceType += '-' + sys
+    if sys.count('Scale') or sys.count('Res'): reduceType += '-' + sys
   return reduceType
 
 def getSigmaSystFlat(sys):
@@ -238,3 +272,41 @@ def constructCRSys(allPlots, plotName, stack, force=False):
       log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
       variations = [allPlots[plotName][histName]]
     allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])
+
+
+
+
+def BW(E, mt, wi):
+  gamma =  (mt**2.*(mt**2. + wi**2.))**0.5
+  k = 2.*2**0.5*mt*wi*gamma / ( math.pi * (mt**2. + gamma)**0.5)
+  return k/ ( (E**2. - mt**2.)**2. + mt**2.*wi**2. )
+
+# def getBWrew(c, mvar, wi):
+#   try:
+#     mTop1 = c._lheMass[[i for i in c._lhePdgId].index(6)]
+#     rew1 = BW(mTop1, mvar, wi) / BW(mTop1, 172.5, 1.4915)
+#   except:
+#     rew1 = 1.
+#   try:
+#     mTop2 = c._lheMass[[i for i in c._lhePdgId].index(-6)]
+#     rew2 = BW(mTop2, mvar, wi) / BW(mTop2, 172.5, 1.4915)
+#   except:
+#     rew2 = 1.
+#   return rew1*rew2
+
+def getBWrew(c, mdirec, wi):
+  if mdirec == 'up': 
+    mvar = 172.5+0.4
+    reno = 1. - 0.013
+  elif mdirec == 'down': 
+    mvar = 172.5-0.4
+    reno = 1. + 0.013
+  else: raise SystemExit('invalid top mass direction')
+  try:
+    mTop1 = c._lheMass[[i for i in c._lhePdgId].index(6)]
+    rew1 = BW(mTop1, mvar, wi) / BW(mTop1, 172.5, 1.4915)
+    mTop2 = c._lheMass[[i for i in c._lhePdgId].index(-6)]
+    rew2 = BW(mTop2, mvar, wi) / BW(mTop2, 172.5, 1.4915)
+    return rew1*rew2*reno
+  except: 
+    return 1.

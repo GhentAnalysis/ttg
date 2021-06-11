@@ -1,0 +1,11 @@
+-- Nom
+TT_Dil               t#bar{t}dil_(genuine)              errorStyle     kBlack  _ttgEventType==5
+
+-- Up 
+TT_Dil_mtup               t#bar{t}dil_mtUp(genuine)              errorStyle     kBlue  _ttgEventType==5
+
+-- Down
+TT_Dil_mtdown               t#bar{t}dil_mtDown_(genuine)              errorStyle     kRed  _ttgEventType==5
+
+
+

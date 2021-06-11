@@ -32,23 +32,30 @@ log = getLogger(args.logLevel)
 #
 from ttg.samples.Sample import createSampleList, getSampleFromList
 sampleList = createSampleList(os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/flowtuples_2016.conf'),
-                              os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_2017.conf'),
-                              os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/unftuples_2018.conf'))
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/flowtuples_2017.conf'),
+                              os.path.expandvars('$CMSSW_BASE/src/ttg/unfolding/data/flowtuples_2018.conf')
+                              )
 
 #
 # Submit subjobs:
 #   - each sample is splitted by the splitJobs parameter defined in tuples.conf, if a sample runs too slow raise the splitJobs parameter
 #   - data is additional splitted per run to avoid too heavy chains to be loaded
 #
-if not args.isChild and not args.subJob:
+
+args.subJob = 0
+
+if not args.isChild:
   from ttg.tools.jobSubmitter import submitJobs
   if args.sample: sampleList = [s for s in sampleList if s.name == args.sample]
   if args.year:   sampleList = [s for s in sampleList if s.year == args.year]
 
   jobs = []
   for sample in sampleList:
-    jobs += [(sample.name, sample.year, str(i)) for i in xrange(sample.splitJobs)]
-  submitJobs(__file__, ('sample', 'year', 'subJob'), jobs, argParser, subLog=args.type, jobLabel = "RT")
+    if not sample.splitJobs == 1: 
+      log.warning('Do not split jobs here')
+      continue
+    jobs += [(sample.name, sample.year, 0)]
+  submitJobs(__file__, ('sample', 'year', 'subJob'), jobs, argParser, subLog=args.type + ('_Rec' if args.rec else ''), jobLabel = "CF")
   exit(0)
 
 #
@@ -80,12 +87,12 @@ outputName = os.path.join(reducedTupleDir, sample.productionLabel, args.type, sa
 try:    os.makedirs(os.path.dirname(outputName))
 except: pass
 
-if not args.overwrite and isValidRootFile(outputName):
-  log.info('Finished: valid outputfile already exists')
-  exit(0)
+# if not args.overwrite and isValidRootFile(outputName):
+#   log.info('Finished: valid outputfile already exists')
+#   exit(0)
 
-outputFile = ROOT.TFile(outputName ,"RECREATE")
-outputFile.cd()
+# outputFile = ROOT.TFile(outputName ,"RECREATE")
+# outputFile.cd()
 
 
 #
@@ -214,13 +221,21 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
   if not rec: continue
   else:
     l1, l2, l1_pt, l2_pt   = c.l1, c.l2, c.l1_pt, c.l2_pt
-    c.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
+
+    # c.lWeight        = leptonSF.getSF(c, l1, l1_pt)*leptonSF.getSF(c, l2, l2_pt)
+    
+    sf1, errSyst1, errStat1, errPS1, isMu1, isEl1 = leptonSF.getSF(c, l1, l1_pt)
+    sf2, errSyst2, errStat2, errPS2, isMu2, isEl2 = leptonSF.getSF(c, l2, l2_pt)
+    # newVars.lWeight            = sf1*sf2
+    c.lWeight = sf1*sf2
+
     c.lTrackWeight = leptonTrackingSF.getSF(c, l1, l1_pt)*leptonTrackingSF.getSF(c, l2, l2_pt)
 
     # trigWeight, trigErr        = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
     
     # NOTE temporary fix 
-    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+    # trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1, l2, l1_pt, l2_pt)
+    trigWeight, trigErrStat, trigErrSyst = triggerEff.getSF(c, l1_pt, l2_pt, c.isMuMu, c.isEMu, c.isEE)
     # newVars.triggerWeight          = trigWeight
     # newVars.triggerWeightUp    = trigWeight+trigErrStat
     # newVars.triggerWeightDown  = trigWeight-trigErrStat
@@ -290,7 +305,7 @@ log.info(recoCounter)
 
   # outputTree.Fill()
 # outputTree.AutoSave()
-outputFile.Close()
+# outputFile.Close()
 log.info('Finished')
 
 

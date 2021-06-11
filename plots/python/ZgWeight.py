@@ -43,7 +43,7 @@ class ZgWeight:
   def __init__(self, year, sys = ''):
     # in the on-Zg regions there is no DD NP estimate -> ttbar sample variations have an effect, but don't in SR. 
     # might need to rethink this when ttgamma syst samples are used. although ttgamma is negigible on-Zg
-    if any([s in sys for s in ['erd', 'hdamp', 'ue', 'NP', 'colRec']]): sys = ''
+    if any([s in sys for s in ['erd', 'hdamp', 'ue', 'NP', 'colRec', 'bFrag']]): sys = ''
     data, zg, otherMC = sumHists(sourceHists[year], 'ee', sys = sys)
     data.Add(otherMC, -1.)
     data.Divide(zg)

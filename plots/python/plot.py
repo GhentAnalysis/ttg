@@ -1,5 +1,6 @@
 from ttg.tools.logger import getLogger
 log = getLogger()
+import pdb
 
 
 #
@@ -423,6 +424,7 @@ class Plot:
       summedErrors = histos_summed[None].Clone()
       summedErrors.Reset()
       for sys in [s for s in histos_summed.keys() if s]:
+        # shape systematics
         sysOther = sys.replace('Up', 'Down') if 'Up' in sys else sys.replace('Down', 'Up')
         for i in range(summedErrors.GetNbinsX()+1):
           uncertainty      = histos_summed[sys].GetBinContent(i) - histos_summed[None].GetBinContent(i)
@@ -433,9 +435,10 @@ class Plot:
             summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
       for sampleFilter, unc in linearSystematics.values():
+        # linear systematics 
         for i in range(summedErrors.GetNbinsX()+1):
-          if sampleFilter: uncertainty = unc/100*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if any([s.name.count(f) for f in sampleFilter])])
-          else:            uncertainty = unc/100*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
+          if sampleFilter: uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if s.name.count(sampleFilter)])
+          else:            uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
           if postFitInfo:  uncertainty = applyPostFitConstraint(sys, uncertainty, postFitInfo)
           summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
@@ -589,6 +592,7 @@ class Plot:
       _, sysHistos = self.getSysHistos(self.stack[0], resultsDir, systematics)                     # Get sys variations for each sample
       self.histos = applyPostFitScaling(self.histos, postFitInfo, sysHistos)
 
+
     histDict = {i: h.Clone() for i, h in self.histos.iteritems()}
 
     # Apply style to histograms + normalize bin width + add overflow bin
@@ -608,6 +612,7 @@ class Plot:
 
     drawObjects += self.scaleStacks(histos, scaling)
 
+    # pdb.set_trace()
     # Calculate the systematics on the first stack
     if len(systematics) or len(linearSystematics) or addMCStat:
       histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)
@@ -751,13 +756,18 @@ def addPlots(plotA, plotB):
 def copySystPlots(plots, sourceYear, year, tag, channel, selection, sys):
   toRemove = None
   for i, plot in enumerate(plots):
+    # pdb.set_trace()
     try:
       loaded = plot.loadFromCache(os.path.join(plotDir, year, tag, channel, selection), None)
       for samp, hist in plot.histos.iteritems():
-        sourceHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, '', [samp.nameNoSys+samp.texName])
-        sourceVarHist = getHistFromPkl((sourceYear, tag, channel, selection), plot.name, sys, [samp.nameNoSys+samp.texName])
-        destVarHist = applySysToOtherHist(sourceHist, sourceVarHist, hist)
-        plots[i].histos[samp] = destVarHist
+        try:
+          sourceHist = getHistFromPkl((sourceYear, 'phoCBfull-fragDef-onlyMC-norat', channel, selection), plot.name, '', [samp.nameNoSys+samp.texName])
+          sourceVarHist = getHistFromPkl((sourceYear, 'phoCBfull-fragDef-onlyMC-norat', channel, selection), plot.name, sys, [samp.nameNoSys+samp.texName])
+          destVarHist = applySysToOtherHist(sourceHist, sourceVarHist, hist)
+          plots[i].histos[samp] = destVarHist
+        except: 
+          log.info('no bfrag syst template for ' + samp.nameNoSys+samp.texName)
+          continue
       log.info('systematic variation copied for plot ' + plot.name + ' from ' + sourceYear)
     except Exception as e:
       log.debug(e)

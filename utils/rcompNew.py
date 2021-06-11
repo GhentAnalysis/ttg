@@ -17,22 +17,34 @@ ROOT.TH2.SetDefaultSumw2()
 
 
 sstr = [
-('p_{T}(#gamma)'            , 1.022, 0.0455, 0.028),
-('N_{j}, N_{b}'             , 1.042, 0.0525, 0.0285),
-('|#eta(#gamma)|'           , 1.090, 0.057, 0.0295),
-('#Delta(#gamma,l)'         , 1.010, 0.052, 0.0275),
-('|#Delta#eta(ll)|'         , 0.985, 0.048, 0.0285),
-('#Delta#phi(ll)'           , 1.062, 0.0565, 0.029),
-('p_{T}(ll)'                , 1.053, 0.0495, 0.029),
-# ('p_{T}(l1))'      , 1.113, 0.053, 0.030),
-('#scale[0.8]{p_{T}(l1)+p_{T}(l2)}'      , 1.113, 0.053, 0.030),
-('p_{T}(j1)'                , 1.029, 0.0460, 0.028),
-('#DeltaR(l, j)'            , 1.048, 0.0495, 0.028),
-('#DeltaR(#gamma, b)'       , 1.047, 0.0555, 0.0285),
-('#DeltaR(#gamma, l1)'      , 1.026, 0.0575, 0.028),
-('#DeltaR(#gamma, l2)'      , 1.015, 0.0565, 0.0275),
+('p_{T}(#gamma)'                         , 1.118, 0.049, 0.031),
+('N_{j}, N_{b}'                          , 1.114, 0.051, 0.031),
+('|#eta(#gamma)|'                        , 1.155, 0.059, 0.032),
+('#Delta(#gamma,l)'                      , 1.085, 0.053, 0.030),
+('|#Delta#eta(ll)|'                      , 1.063, 0.054, 0.031),
+('#Delta#phi(ll)'                        , 1.129, 0.058, 0.031),
+('p_{T}(ll)'                             , 1.139, 0.053, 0.031),
+('#scale[0.8]{p_{T}(l1)+p_{T}(l2)}'      , 1.198, 0.059, 0.032),
+('p_{T}(j1)'                             , 1.107, 0.053, 0.030),
+('#DeltaR(l, j)'                         , 1.127, 0.054, 0.030),
+('#DeltaR(#gamma, b)'                    , 1.134, 0.055, 0.031),
+('#DeltaR(#gamma, l1)'                   , 1.095, 0.061, 0.030),
+('#DeltaR(#gamma, l2)'                   , 1.103, 0.062, 0.030),
 ]
 
+# phPtll                    1.118  49 31
+# signalRegionsZoomCapll    1.114  51 31
+# phAbsEtall                1.155  59 32
+# phLepDeltaRll             1.085  53 30
+# ll_absDeltaEtall          1.063  54 31
+# ll_deltaPhill             1.129  58 31
+# Z_ptll                    1.139  53 31
+# l1l2_ptsumll              1.198  59 32
+# jetPtll                   1.107  53 30
+# jetLepDeltaRll            1.127  54 30
+# phBJetDeltaRll            1.134  55 31
+# phLep2DeltaRll            1.095  61 30
+# phLep1DeltaRll            1.103  62 30
 
 nfits = len(sstr)
 # avg = sum([item[1] for item in sstr])/nfits
@@ -45,7 +57,7 @@ for i, ss in enumerate(sstr):
   hist.GetXaxis().SetBinLabel(i+1, ss[0])
   hist.SetBinContent(i+1, ss[1])
   histstat.SetBinContent(i+1, ss[1])
-  hist.SetBinError(i+1,   ss[2])
+  hist.SetBinError(i+1,   (ss[2]**2+ss[3]**2)**0.5)
   histstat.SetBinError(i+1,   ss[3])
   texl = ROOT.TLatex(i+0.3,0.85,'r=' + str(ss[1]))
   texl.SetTextSize(0.03)
@@ -53,7 +65,7 @@ for i, ss in enumerate(sstr):
 
 c = ROOT.TCanvas("c", "c", 1500, 750)
 
-hist.GetYaxis().SetRangeUser(0.7, 1.25)
+hist.GetYaxis().SetRangeUser(0.8, 1.35)
 hist.GetYaxis().SetTitle('Signal strength r')
 hist.GetXaxis().SetTitle('Fitted distribution')
 hist.GetXaxis().SetLabelSize(0.05)
