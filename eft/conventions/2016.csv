@@ -38,7 +38,7 @@ electron_reco,-,0
 L1_Prefiring,pf,1
 top_pt_reweighting,-,0
 photon_ID,phSF,1
-pixelSeed_veto_2016,-,0
+pixelSeed_veto_2016,pvSF_2016,1
 Tune,-,0
 Color,colRec_1,1
 Scale,q2,1
@@ -61,7 +61,6 @@ QCD_normalization,-,0
 TT_normalization,-,0
 fake_photon_DD_normalizatione,-,0
 fake_photon_MC_normalization,-,0
-ZGamma_normalization,-,0
 Gluon_splitting,-,0
 Other_normalization,-,0
 MisID_extrapolation_2016,-,0
@@ -72,7 +71,7 @@ QCD_1b_nJet_dependence,-,0
 WGamma_nJet_dependence,-,0
 DY_normalization,-,0
 -,UE,0
--,ZG_norm,0
+ZGamma_normalization,ZG_norm,0
 -,singleTop_norm,0
 -,other_norm,0
 -,trigStatEE_2016,0
@@ -80,7 +79,6 @@ DY_normalization,-,0
 -,trigStatMM_2016,0
 -,trigSyst_2016,0
 -,NPHigh,0
--,pvSF_2016,0
 -,lSFMuStat_2016,0
 -,NPFlat,0
 -,lTracking,0
