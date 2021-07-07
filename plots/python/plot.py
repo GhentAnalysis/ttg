@@ -14,7 +14,8 @@ from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
 from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
 from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
-from ttg.plots.systematics import constructQ2Sys, constructPdfSys, constructCRSys
+# from ttg.plots.systematics import constructQ2Sys, constructPdfSys, constructCRSys
+from ttg.plots.systematics import constructQ2Sys, constructPdfSys
 from ttg.samples.Sample import getSampleFromStack
 
 ROOT.TH1.SetDefaultSumw2()
@@ -108,7 +109,7 @@ class Plot:
   defaultModTexLeg    = None
 
   @staticmethod
-  def setDefaults(stack = None, texY="Events", overflowBin='upper', modTexLeg=[]):
+  def setDefaults(stack = None, texY="Events / bin", overflowBin='upper', modTexLeg=[]):
     Plot.defaultStack       = stack
     Plot.defaultTexY        = texY
     Plot.defaultOverflowBin = overflowBin
@@ -284,10 +285,13 @@ class Plot:
   #
   def getLegendCoordinates(self, histos, canvas, yMax, columns, logY, legend):
     if legend == "auto":
-      targetHeight  = 0.045*sum(map(len, histos))/ (0.8 + columns/3.)
+      targetHeight  = 0.07*sum(map(len, histos))/ (0.8 + columns/3.)
+      if sum(map(len, histos)) < 3:
+        targetHeight  = 0.12*sum(map(len, histos))/ (0.8 + columns/3.)
       entriesHeight = sum(ROOT.TLatex(0, 0, h.texName).GetYsize() for h in sum(histos, []))
       entriesWidth  = max(ROOT.TLatex(0, 0, h.texName).GetXsize() for h in sum(histos, []))
-      targetWidth   = min(0.65, entriesWidth*(1+ROOT.TLegend().GetMargin())*columns/entriesHeight*targetHeight)
+      # targetWidth   = min(0.4, 1.3 * entriesWidth*(1+ROOT.TLegend().GetMargin())*columns/entriesHeight*targetHeight)
+      targetWidth = 0.3
 
       left           = canvas.topPad.GetLeftMargin() + yMax.GetTickLength('Y') + 0.01
       right          = 1 - canvas.topPad.GetRightMargin() - yMax.GetTickLength('Y') - 0.01
@@ -303,7 +307,7 @@ class Plot:
       for coordinates in tryCoordinates:
         ymax = self.avoidLegendOverlap(canvas.topPad, yMax, coordinates, logY)
         if (not self.ymax) or ymax < self.ymax:
-          self.ymax = ymax
+          self.ymax = ymax*1.03
           legendCoordinates = coordinates
     else:
       legendCoordinates = tryCoordinates[0]
@@ -315,15 +319,20 @@ class Plot:
   #
   def getLegend(self, legend, canvas, histos, yMax, logY):
     if len(legend) == 2: columns, legend = legend[1], legend[0]            # if legend is tuple, first argument is columns
-    else:                columns, legend = 4, legend
+    else:                columns, legend = 1, legend
 
+    # log.info(any(en[0] == 'SYSUNC' for en in self.modTexLeg))
+    # nen = len(sum(histos, [])) + (1 if any(en[0] == 'SYSUNC' for en in self.modTexLeg) else 0)
+    # if nen < 4:
+    #   columns = nen
+    
     coordinates = self.getLegendCoordinates(histos, canvas, yMax, columns, logY, legend)
-
     legend = ROOT.TLegend(*coordinates)
     legend.SetNColumns(columns)
     legend.SetFillStyle(0)
     legend.SetShadowColor(ROOT.kWhite)
     legend.SetBorderSize(0)
+
     sysEntry = False
     for h in sum(histos, []): 
       texLabel = h.texName
@@ -339,9 +348,11 @@ class Plot:
       legend.AddEntry(h, texLabel, h.legendStyle)
     if sysEntry:
       h.SetLineColor(ROOT.kBlack)
+      h.SetLineWidth(1)
       h.SetFillStyle(3005)
       h.SetFillColor(ROOT.kBlack)
       legend.AddEntry(h, 'Syst. uncertainty', 'f')
+    legend.SetColumnSeparation(0.07)
     return legend
 
 
@@ -366,7 +377,7 @@ class Plot:
 
     if 'q2'  in systematics: constructQ2Sys(allPlots, self.name, stackForSys)
     if 'pdf' in systematics: constructPdfSys(allPlots, self.name, stackForSys)
-    if 'colRec' in systematics: constructCRSys(allPlots, self.name, stackForSys)
+    # if 'colRec' in systematics: constructCRSys(allPlots, self.name, stackForSys)
 
     histos_summed = {}
     histos_splitted = {}
@@ -380,14 +391,15 @@ class Plot:
 
       histos_summed[sys] = None
       for histName in [s.name+s.texName for s in stackForSys]:                                                                         # in the 2D cache, the second key is name+texName of the sample
-        if sys and 'NP' in sys and 'compRewContribMC' in resultsDir:                                           # to make uncertainty bands work in closure tests. Hacky, should be illegal
-          estim, estimSys = None, None
-          for d in [d for d in allPlots[self.name] if d.count('estimate')]:                                                          
-            estim    = addHist(estim,    allPlots[self.name][d])                                                                     
-            estimSys = addHist(estimSys, allPlots[self.name+sys][d])                                                                 
-          h = applySysToOtherHist(estim, estimSys, allPlots[plotName][histName].Clone())                                             
-        else:
-          h = allPlots[plotName][histName].Clone()
+        # NOTE don't turn back on, fixed elsewhere in more correct way
+        # if sys and 'NP' in sys and 'compRewContribMC' in resultsDir:                                           # to make uncertainty bands work in closure tests. Hacky, should be illegal
+        #   estim, estimSys = None, None
+        #   for d in [d for d in allPlots[self.name] if d.count('estimate')]:                                                          
+        #     estim    = addHist(estim,    allPlots[self.name][d])                                                                     
+        #     estimSys = addHist(estimSys, allPlots[self.name+sys][d])                                                                 
+        #   h = applySysToOtherHist(estim, estimSys, allPlots[plotName][histName].Clone())                                             
+        # else:
+        h = allPlots[plotName][histName].Clone()
         if sys and 'StatUp' in sys and sys.replace('StatUp', '') in histName:                                                          # MC statistics for plots
           for i in range(0, h.GetNbinsX()+1):
             h.SetBinContent(i, h.GetBinContent(i)+h.GetBinError(i))
@@ -414,7 +426,9 @@ class Plot:
   # addMCStat         --> include MC statistics in the uncertainty band
   #
   def calcSystematics(self, stackForSys, systematics, linearSystematics, resultsDir, postFitInfo=None, addMCStat=True):
-    histos_summed, _ = self.getSysHistos(stackForSys, resultsDir, systematics, postFitInfo, addMCStat)                                 # Get the summed sys histograms, to be added in quadrature below
+    # NOTE DO NOT pass postFitInfo to getSysHistos below
+    # histos_summed, _ = self.getSysHistos(stackForSys, resultsDir, systematics, postFitInfo, addMCStat)                                 # Get the summed sys histograms, to be added in quadrature below
+    histos_summed, _ = self.getSysHistos(stackForSys, resultsDir, systematics, None, addMCStat)                                 # Get the summed sys histograms, to be added in quadrature below
     for h in histos_summed.values():                                                                                                  # Normalize for bin width and add overflow bin
       normalizeBinWidth(h, self.normBinWidth)
       self.addOverFlowBin1D(h, self.overflowBin)
@@ -612,10 +626,14 @@ class Plot:
 
     drawObjects += self.scaleStacks(histos, scaling)
 
-    # pdb.set_trace()
     # Calculate the systematics on the first stack
     if len(systematics) or len(linearSystematics) or addMCStat:
-      histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)
+      # pdb.set_trace()
+      # histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)
+      if resultsDir.count('compRewContribMCTTBAR-forNPclosure'):
+        histos[0][0].sysValues = self.calcSystematics(self.stack[1], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)
+      else:
+        histos[0][0].sysValues = self.calcSystematics(self.stack[0], systematics, linearSystematics, resultsDir, postFitInfo, addMCStat)
 
     # Get minimum and maximum boundaries for the plot, including statistical and systematic errors
     yMax, yMin = histos[0][0].Clone(), histos[0][0].Clone()
@@ -640,7 +658,10 @@ class Plot:
     self.yrmin, self.yrmax = ratio['yRange'] if ratio else (None, None)
 
     # Remove empty bins from the edges (or when they are too small to see)
-    self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/150.)
+    # self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/150.)
+    # self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/100.)
+    # self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/60.)
+    self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/40.)
 
     # If legend specified, add it to the drawObjects
     if legend:
@@ -691,12 +712,13 @@ class Plot:
         h_ratio.Divide(den)
 
         if ratio['style']: ratio['style'](h_ratio)
-        h_ratio.GetXaxis().SetLabelSize(23)
+        h_ratio.GetXaxis().SetLabelSize(26)
+        h_ratio.GetXaxis().SetTitleSize(26)
 
         h_ratio.GetXaxis().SetTitle(self.texX)
         h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
-        h_ratio.GetXaxis().SetTitleOffset(4.5)
+        h_ratio.GetXaxis().SetTitleOffset(3.8)
 
         h_ratio.GetXaxis().SetTickLength( 0.03*2 )
         h_ratio.GetYaxis().SetTickLength( 0.03*2 )

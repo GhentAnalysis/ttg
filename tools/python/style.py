@@ -47,9 +47,9 @@ def ttgGeneralStyle():
 
   ROOT.gStyle.SetPaperSize(20, 26)
   ROOT.gStyle.SetPadTopMargin(0.08)
-  ROOT.gStyle.SetPadRightMargin(0.12)
+  ROOT.gStyle.SetPadRightMargin(0.09)
   ROOT.gStyle.SetPadBottomMargin(0.11)
-  ROOT.gStyle.SetPadLeftMargin(0.12)
+  ROOT.gStyle.SetPadLeftMargin(0.15)
   ROOT.gStyle.SetPadTickX(1)
   ROOT.gStyle.SetPadTickY(1)
 
@@ -118,9 +118,10 @@ def getDefaultCanvas(ratio):
     canvas.bottomPad.SetPad(canvas.bottomPad.GetX1(), canvas.bottomPad.GetY1(), canvas.bottomPad.GetX2(), yBorder)
 
   def ttgRatioDivision(canvas):
-    padRatio   = 0.25
+    padRatio   = 0.3
     padOverlap = 0 # this is much larger for the 1l group, but simply adds a huge blank space for us
-    padGap     = 0.01
+    # padGap     = 0.01
+    padGap     = 0.0
     canvas.Divide(1, 2, 0, 0)
     canvas.topPad = getPad(canvas, 1)
     canvas.topPad.SetPad(canvas.topPad.GetX1(), padRatio-padOverlap, canvas.topPad.GetX2(), canvas.topPad.GetY2())
@@ -148,23 +149,24 @@ def commonStyle(histo):
   histo.GetYaxis().SetTitleFont(43)
   histo.GetXaxis().SetLabelFont(43)
   histo.GetYaxis().SetLabelFont(43)
-  histo.GetXaxis().SetTitleSize(23)
-  histo.GetYaxis().SetTitleSize(23)
-  histo.GetXaxis().SetLabelSize(23)
-  histo.GetYaxis().SetLabelSize(23)
+  histo.GetXaxis().SetTitleSize(26)
+  histo.GetYaxis().SetTitleSize(26)
+  histo.GetXaxis().SetLabelSize(26)
+  histo.GetYaxis().SetLabelSize(26)
   histo.GetYaxis().SetTitleOffset(1.5 if ttgStyle else 2)
+  histo.GetXaxis().SetTitleOffset(0.6 if ttgStyle else 2)
 
-def errorStyle(color, markerStyle = 20, markerSize = 1):
+def errorStyle(color, markerStyle = 20, markerSize = 1.3):
   def func(histo):
     commonStyle(histo)
     histo.SetLineColor(color)
     histo.SetMarkerSize(markerSize)
     histo.SetMarkerStyle(markerStyle)
     histo.SetMarkerColor(color)
-    histo.SetLineWidth(1)
+    histo.SetLineWidth(2)
     histo.SetFillColor(0)
     histo.SetFillStyle(0)
-    histo.drawOption  = "e1"
+    histo.drawOption  = "e"
     histo.legendStyle = 'ep'
     return
   return func
@@ -214,10 +216,11 @@ def drawTex(line, align=11, size=0.045, angle=0):
 #
 def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
   lines = [
-    (11, (ROOT.gStyle.GetPadLeftMargin()+0.02,  1-ROOT.gStyle.GetPadTopMargin()+0.01, 'CMS #bf{#it{Simulation}}' if isOnlySim else 'CMS #bf{#it{Preliminary}}')),
-    (31, (1-ROOT.gStyle.GetPadRightMargin()-0.02, 1-ROOT.gStyle.GetPadTopMargin()+0.01, ('%3.1f fb{}^{-1} (13 TeV)'%lumiScale) + ('Scale %3.2f'%dataMCScale if dataMCScale else '')))
+    (11, (ROOT.gStyle.GetPadLeftMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.01, "CMS #bf{#it{Simulation}}" if isOnlySim else "CMS #bf{#it{Preliminary}}")),
+    (31, (1-ROOT.gStyle.GetPadRightMargin()-0.04, 1-ROOT.gStyle.GetPadTopMargin()+0.01, ("%3.0f fb{}^{-1} (13 TeV)"%lumiScale) + ("Scale %3.2f"%dataMCScale if dataMCScale else '')))
+  #                                                                                     NOTE the #bf here makes this text NOT BOLD, I don't want to talk about it
   ]
-  return [drawTex(l, align) for align, l in lines]
+  return [drawTex(l, align, size=0.06) for align, l in lines]
 
 #
 # Coordinate tranformations between Axis and NDC

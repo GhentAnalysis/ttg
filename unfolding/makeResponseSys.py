@@ -40,7 +40,10 @@ from math import pi
 from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList
 
 
-reduceType = 'unfBLS'
+reduceType = 'unfEND'
+
+if args.sys.count('ephScale') or args.sys.count('ephRes'):
+  reduceType = 'unfBLS'
 # reduceType = 'unfFB'
 
 from ttg.tools.logger import getLogger
@@ -201,7 +204,7 @@ cosBinRec = (16, -1., 1.)
 cosBinGen = (8, -1., 1.)
 
 # absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 3.5, 4.5]
-absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
+absdEtaBinRec = [0., 0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
 absdEtaBinGen = [0., 0.5, 1., 1.5, 2.,  2.5, 3., 4.5]
 
 dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]

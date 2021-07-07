@@ -55,6 +55,18 @@ for f in sorted(glob.glob("../samples/data/*.stack")):
     log.warning('stack file without year label found (' + stackName + '), please remove or label properly')
     exit(0)
 
+
+if args.showSys and not args.sys and args.year == 'all':
+  # NOTE assuming anything mentioned in correlations is fully uncorrelated
+  showSysList = showSysListRunII
+
+#filtering out colRec here
+showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec']])]
+
+if args.showSys and args.tag.count('forZgest'):
+  showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec', 'NPFlat', 'NPHigh', 'bFrag']])]
+
+
 if not args.isChild:
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
@@ -144,16 +156,24 @@ stack = createStack(tuplesFile   = os.path.expandvars(tupleFiles['2016' if args.
 
 # NOTE legend entry tweaks for paper plots
 # modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma'), ('data', 'Data'), ('nonprompt', 'Nonprompt #gamma')] if args.tag.lower().count('earlytest') else []
-modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma'), ('data', 'Data'), ('nonprompt', 'Nonprompt #gamma')] if args.tag.lower().count('nice') else []
 
-if args.tag.lower().count('nice') and args.showSys:
+
+modTexLeg = []
+
+if args.showSys:
+  modTexLeg = [('(genuine)', ''), ('nonprompt-estimate', 'Nonprompt #gamma'), ('data', 'Data'), ('nonprompt', 'Nonprompt #gamma')]
   # modTexLeg.append(('UNCBANDLEGEND', ''))
+  modTexLeg.append(('SYSUNC', ''))
+
+
+if args.sys == 'NPFlat-NPHigh':
+  modTexLeg = [('t#bar{t} (nonprompt)', 'Direct'), ('nonprompt-estimate (MC)', 'From sideband')]
   modTexLeg.append(('SYSUNC', ''))
 
 # if args.showSys:'data'
   # modTexLeg.append(('UNCBANDLEGEND':''))
 
-Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events'), modTexLeg = modTexLeg )
+Plot.setDefaults(stack=stack, texY = ('(1/N) dN/dx' if normalize else 'Events / bin'), modTexLeg = modTexLeg )
 Plot2D.setDefaults(stack=stack)
 
 from ttg.plots.plotHelpers  import *
@@ -167,8 +187,8 @@ def makePlotList():
     plotList.append(Plot('photon_chargedIso_small',    'chargedIso(#gamma) [GeV]',         lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph]),               (80, 0, 20)))
     plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)', lambda c : (c._phChargedIsolation[c.ph] if not c.data else c._phRandomConeChargedIsolation[c.ph])/c.ph_pt, (20, 0, 2)))
   else:
-    plotList.append(Plot('yield',                      'yield',                                 lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
     plotList.append(Plot('nVertex',                    'vertex multiplicity',                   lambda c : c._nVertex,                                         (50, 0, 50)))
+    plotList.append(Plot('yield',                      '',                                      lambda c : channelNumbering(c),                                (3,  0.5, 3.5), histModifications=xAxisLabels(['#mu#mu', 'e#mu', 'ee'])))
     plotList.append(Plot('nTrueInt',                   'nTrueInt',                              lambda c : c._nTrueInt,                                        (50, 0, 50)))
     plotList.append(Plot('nphoton',                    'number of photons',                     lambda c : c.nphotons,                                         (4,  -0.5, 3.5)))
     plotList.append(Plot('photon_pt',                  'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (24, 15, 135)))
@@ -257,11 +277,34 @@ def makePlotList():
       plotList.append(Plot('dbj2_pt',                    'p_{T}(bj_{2}) [GeV]',                   lambda c : c._jetSmearedPt[c.dbj2],                            (30, 30, 330)))
       plotList.append(Plot('dbj1_deepCSV',               'deepCSV(dbj_{1})',                      lambda c : c._jetDeepCsv_b[c.dbj1] + c._jetDeepCsv_bb[c.dbj1], (20, 0, 1)))
       plotList.append(Plot('dbj2_deepCSV',               'deepCSV(dbj_{2})',                      lambda c : c._jetDeepCsv_b[c.dbj2] + c._jetDeepCsv_bb[c.dbj2], (20, 0, 1)))
-    plotList.append(Plot('signalRegions',              'signal region',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
-    plotList.append(Plot('signalRegionsZoom',          'signal region',                         lambda c : createSignalRegionsZoom(c),                         (6, 0, 6),   histModifications=xAxisLabels(['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
-    plotList.append(Plot('signalRegionsCap',           'signal region',                         lambda c : createSignalRegionsCap(c),                          (6, 0, 6),   histModifications=xAxisLabels(['0j,0b', '1j,0b', '#geq2j,0b', '1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
-    plotList.append(Plot('signalRegionsZoomCap',       'signal region',                         lambda c : createSignalRegionsZoomCap(c),                      (3, 0, 3),   histModifications=xAxisLabels(['1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
+    plotList.append(Plot('signalRegions',              '',                         lambda c : createSignalRegions(c),                             (10, 0, 10), histModifications=xAxisLabels(['0j,0b', '1j,0b', '2j,0b', '#geq3j,0b', '1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
+    plotList.append(Plot('signalRegionsZoom',          '',                         lambda c : createSignalRegionsZoom(c),                         (6, 0, 6),   histModifications=xAxisLabels(['1j,1b', '2j,1b', '#geq3j,1b', '2j,2b', '#geq3j,2b', '#geq3j,#geq3b'])))
+    plotList.append(Plot('signalRegionsCap',           '',                         lambda c : createSignalRegionsCap(c),                          (6, 0, 6),   histModifications=xAxisLabels(['0j,0b', '1j,0b', '#geq2j,0b', '1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
+    plotList.append(Plot('signalRegionsZoomCap',       '',                         lambda c : createSignalRegionsZoomCap(c),                      (3, 0, 3),   histModifications=xAxisLabels(['1j,1b', '#geq2j,1b', '#geq2j,#geq2b'])))
     plotList.append(Plot('totYield',                   'total yield',                           lambda c : 0.5,                                                (1, 0, 1),   histModifications=xAxisLabels([''])))
+
+
+    plotList.append(Plot('PBVAphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (30, 20, 120)))
+    plotList.append(Plot('PBVBphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (20, 20, 120)))
+    plotList.append(Plot('PBVCphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (15, 20, 120)))
+    plotList.append(Plot('PBVDphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 85., 100., 115., 130., 147.5, 165., 182.5, 200., 225., 250., 275 , 300.]))
+    plotList.append(Plot('PBVEphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 85., 100.]))
+    plotList.append(Plot('PBVFphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100., 115., 130., 147.5, 165., 182.5, 200., 225., 250., 275 , 300.]))
+    plotList.append(Plot('PBVGphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100.]))
+    plotList.append(Plot('PBVHphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100., 120.]))
+ 
+    plotList.append(Plot('PBVIphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (40, 20, 120)))
+    plotList.append(Plot('PBVJphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (50, 20, 120)))
+    plotList.append(Plot('PBVKphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (80, 20, 120)))
+
+
+    plotList.append(Plot('PBAphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (40, 20, 120)))
+    plotList.append(Plot('PBAdl_mass',              'm(ll) [GeV]',                           lambda c : c.mll,                                              (80, 0, 200)))
+    plotList.append(Plot('PBAdlg_mass',             'm(ll#gamma) [GeV]',                     lambda c : c.mllg,                                             (80, 50, 200)))
+    plotList.append(Plot('PBBphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (60, 20, 120)))
+    plotList.append(Plot('PBBdl_mass',              'm(ll) [GeV]',                           lambda c : c.mll,                                              (120, 0, 200)))
+    plotList.append(Plot('PBBdlg_mass',             'm(ll#gamma) [GeV]',                     lambda c : c.mllg,                                             (120, 50, 200)))
+    plotList.append(Plot('PByield',                      '',                                 lambda c : channelNumberingPB(c),                              (3,  0.5, 3.5), histModifications=xAxisLabels(['e#mu', 'ee', '#mu#mu'])))
 
 
     plotList.append(Plot2D('photon_pt_etaA', 'p_{T}(#gamma) [GeV]', lambda c : c.ph_pt , [20., 30., 45., 70., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.131, 1.5, 1.8, 2.5]))
@@ -309,8 +352,7 @@ def makePlotList():
     cosBinRec = (16, -1., 1.)
     cosBinGen = (8, -1., 1.)
 
-    # absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 3.5, 4.5]
-    absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
+    absdEtaBinRec = [0., 0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
     absdEtaBinGen = [0., 0.5, 1., 1.5, 2.,  2.5, 3., 4.5]
 
     dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]
@@ -428,6 +470,9 @@ def makePlotList():
   # any sideband selection means we can unblind
   isSideband = [args.selection.count('sidebandSigmaIetaIeta'), args.selection.count('failChgIso'), args.selection.count('onZ'), args.selection.count('llgOnZ')]
   doBlind = isSR and not any(isSideband)
+
+  doBlind = False  #unblinding
+
   if not doBlind:
     for p in plotList: p.blindRange = None
   return plotList
@@ -644,7 +689,6 @@ for year in years:
     else: 
       log.warning('something wrong in copying bfrag syst, exiting')
       quit()
-    templateSys
     copySystPlots(plots, year, year, args.tag, args.channel, args.selection, templateSys)
 
   plots = plotsToFill + loadedPlots
@@ -708,10 +752,10 @@ for year in years:
 
 
       if args.channel != 'noData':
-        extraArgs['ratio']   = {'yRange' : (0.38, 1.62), 'texY': 'Data / MC'}
+        extraArgs['ratio']   = {'yRange' : (0.38, 1.62), 'texY': 'Data / pred.'}
 
       if args.channel == 'noData' and args.tag.count('compRewAll'):
-        extraArgs['ratio']   = {'yRange' : (0.2, 1.8), 'texY': 'prediction/MC'}
+        extraArgs['ratio']   = {'yRange' : (0.2, 1.8), 'texY': 'Sb. / direct'}
 
       if any (args.tag.count(sname) for sname in ['chisoHad', 'chisoFake', 'chisoNP']):
         extraArgs['ratio']   = {'yRange' : (0.0, 1.0), 'texY': 'chargedIso pass/fail'}
@@ -749,7 +793,7 @@ for year in years:
         extraArgs['ratio']   = None
 
       if args.tag.count('forNPclosure'):
-        extraArgs['ratio']   = {'yRange' : (0.3, 1.7), 'num': -1, 'texY':'prediction/MC'}
+        extraArgs['ratio']   = {'yRange' : (0.3, 1.7), 'num': -1, 'texY':'Sb. / direct'}
 
 
       for norm in normalizeToMC:
@@ -768,7 +812,7 @@ for year in years:
                     logY              = logY,
                     sorting           = False,
                     yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
-                    drawObjects       = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)),
+                    drawObjects       = drawLumi(None, lumiScalesRounded[year], isOnlySim=(args.channel=='noData' or onlyMC)),
                     # uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
                     # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                     **extraArgs
@@ -787,7 +831,7 @@ for year in years:
           plot.draw(plot_directory = os.path.join(plotDir, year, args.tag, args.channel + ('-log' if logY else ''), args.selection, option),
                     logZ           = False,
                     drawOption     = option,
-                    drawObjects    = drawLumi(None, lumiScales[year], isOnlySim=(args.channel=='noData' or onlyMC)))
+                    drawObjects    = drawLumi(None, lumiScalesRounded[year], isOnlySim=(args.channel=='noData' or onlyMC)))
                     
   if args.dumpArrays: 
     dumpArrays["info"] = " ".join(s for s in [args.year, args.selection, args.channel, args.tag, args.sys] if s) 
@@ -809,12 +853,10 @@ for year in years:
 if not args.year == 'all': exit(0)
 
 # NOTE doing this in a sepatate code block seems like the better option for now 
-lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018'] 
+# lumiScale = lumiScales['2016']+lumiScales['2017']+lumiScales['2018'] 
+lumiScale = lumiScalesRounded['RunII']
 
 
-if args.showSys and not args.sys and args.year == 'all':
-  # NOTE assuming anything mentioned in correlations is fully uncorrelated
-  showSysList = showSysListRunII
 
 log.info('Using stackFile ' + stackFile)
 if args.year == 'all' and args.showSys:
@@ -867,7 +909,7 @@ for plot in totalPlots: # 1D plots
 
 
     if args.channel != 'noData':
-      extraArgs['ratio']   = {'yRange' : (0.38, 1.62), 'texY': 'Data / MC'}
+      extraArgs['ratio']   = {'yRange' : (0.38, 1.62), 'texY': 'Data / pred.'}
 
     if any (args.tag.count(sname) for sname in ['chisoHad', 'chisoFake', 'chisoNP']):
       extraArgs['ratio']   = {'yRange' : (0.0, 1.0), 'texY': 'chargedIso pass/fail'}
@@ -887,7 +929,7 @@ for plot in totalPlots: # 1D plots
       extraArgs['ratio']   = {'num': -1, 'texY':'ratios to t#bar{t}#gamma'}
 
     if args.tag.count('forNPclosure'):
-      extraArgs['ratio']   = {'yRange' : (0.3, 1.7), 'num': -1, 'texY':'prediction/MC'}
+      extraArgs['ratio']   = {'yRange' : (0.3, 1.7), 'num': -1, 'texY':'Sb. / direct'}
 
 
 

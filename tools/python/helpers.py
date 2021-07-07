@@ -19,7 +19,7 @@ lumiScales = {'2016':36.33,
               'RunII':137.56
               }
 
-lumiScalesRounded = {'2016':36.3, '2017':41.5, '2018':59.7, 'RunII':137.6}
+lumiScalesRounded = {'2016':36, '2017':42, '2018':60, 'RunII':138}
 
 #
 # Check if valid ROOT file exists

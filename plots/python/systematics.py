@@ -104,13 +104,11 @@ showSysListRunII.append('lumi_3Ycorr')
 #
 linearSystematics = {}
 
-linearSystematics['ZG_norm']        = ('ZG',        3 )  #we consider 70% of the Zg yield to be constrained by the correction
+linearSystematics['ZG_norm']        = ('ZG',        1.5 )  #we consider 70% of the Zg yield to be constrained by the correction
 linearSystematics['singleTop_norm'] = ('singleTop', 10)
-linearSystematics['VVTo2L2Nu_norm'] = ('VVTo2L2Nu', 30)   #multiboson
 linearSystematics['other_norm']     = ('other',     30)
-linearSystematics['UE']     =         ('TTGamma',   1)
+linearSystematics['UE']     =         ('TTGamma',   0.5)
 
-# linearSystematics['lumi'] = (None, 2.5)
 
 def addYearLumiUnc(linSysDict, year):
   if year == '2016':
@@ -254,16 +252,16 @@ def CRSys(variations, nominal):
     downHist.SetBinContent(i, nominal.GetBinContent(i) - maxdev )
   return upHist, downHist
 
-def constructCRSys(allPlots, plotName, stack, force=False):
-  allPlots[plotName + 'colRecUp'] = {}
-  allPlots[plotName + 'colRecDown'] = {}
-  for histName in [s.name+s.texName for s in stack]:
-    try:
-      variations = [allPlots[plotName + 'colRec_' + i][histName] for i in ('1', '2', '3')]
-    except:
-      log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
-      variations = [allPlots[plotName][histName]]
-    allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])
+# def constructCRSys(allPlots, plotName, stack, force=False):
+#   allPlots[plotName + 'colRecUp'] = {}
+#   allPlots[plotName + 'colRecDown'] = {}
+#   for histName in [s.name+s.texName for s in stack]:
+#     try:
+#       variations = [allPlots[plotName + 'colRec_' + i][histName] for i in ('1', '2', '3')]
+#     except:
+#       log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
+#       variations = [allPlots[plotName][histName]]
+#     allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])
 
 
 

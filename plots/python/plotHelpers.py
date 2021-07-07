@@ -44,6 +44,9 @@ def genLepRawJetNearPhDeltaR(tree):
 def channelNumbering(t):
   return (1 if t.isMuMu else (2 if t.isEMu else 3))
 
+def channelNumberingPB(t):
+  return (1 if t.isEMu else (2 if t.isEE else 3))
+
 def createSignalRegions(t):
   if t.ndbjets == 0:
     if t.njets == 0: return 0
