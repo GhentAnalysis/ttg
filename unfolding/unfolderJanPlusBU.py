@@ -12,7 +12,6 @@ argParser.add_argument('--year',      action='store',      default=None,        
 argParser.add_argument('--unblind',   action='store_true', default=False,  help='unblind 2017 and 2018')
 argParser.add_argument('--LOtheory',  action='store_true', default=False,  help='use LO sample for pdf and q2 uncertainty on the theory prediction')
 argParser.add_argument('--ss',        action='store',      default=1., type=float,     help='scale MC by the specified signal strength')
-argParser.add_argument('--norm',      action='store_true', default=False,  help='produce normalized output')
 args = argParser.parse_args()
 
 
@@ -678,15 +677,10 @@ for dist in distList:
   # unfoldedTotUnc.SetFillColor(ROOT.kOrange)
   # unfoldedTotUnc.GetYaxis().SetRangeUser(0., unfoldedNom.GetMaximum()*0.2)
   unfoldedTotUnc.SetMinimum(0.)
-
-  if args.norm:
-    unfoldedTotUnc.Scale(1/unfoldedTotUnc.Integral())
-    plMCTot.Scale(1/plMCTot.Integral())
-
   if dist in ['unfReco_phAbsEta']:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.4, plMCTot.GetMaximum()*1.4))
+    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, unfoldedNom.GetMaximum()*1.4)
   else:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.2, plMCTot.GetMaximum()*1.2))
+    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, unfoldedNom.GetMaximum()*1.2)
   unfoldedTotUnc.GetXaxis().SetTitle(labels[dist][1])
   # unfoldedTotUnc.GetYaxis().SetTitle('Fiducial cross section (fb)')
   unfoldedTotUnc.GetYaxis().SetTitle('')
@@ -705,12 +699,18 @@ for dist in distList:
 
 
   # stats on this are normally very small, ttgamma samples have great statistics (so not drawing it)
-
+  # plMCTot.SetFillColor(ROOT.kRed)
+  # plMCTot.SetFillColorAlpha(ROOT.kRed, 0.4)
   plMCTot.SetFillColorAlpha(ROOT.kBlack, 0.5)
   plMCTot.SetLineColor(ROOT.kBlack)
+  # plMCTot.SetLineWidth(3)
 
+  # plMCTot.SetFillStyle(1001)
   plMCTot.SetFillStyle(3005)
   plMCTot.Draw('same E2')
+  plMCTot.Scale(args.ss)
+  # log.info(plMCTot.GetBinError(1)/plMCTot.GetBinContent(1))
+
 
   unfoldedMC.SetLineWidth(3)
   # unfoldedMC.Draw('HIST same')
@@ -722,21 +722,16 @@ for dist in distList:
 
 
 
-  plHWpp = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwigppfix/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHWppt#bar{t}#gamma (genuine)']
-  plHW7 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwig7fix/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHW7t#bar{t}#gamma (genuine)']
-  plPy8 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/pythia8fix/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPy8t#bar{t}#gamma (genuine)']
+  plHWpp = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwigpptestOR1/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHWppt#bar{t}#gamma (genuine)']
+  plHW7 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwig7testOR1/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHW7t#bar{t}#gamma (genuine)']
+  plPy8 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwigPythia8testOR1/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPy8t#bar{t}#gamma (genuine)']
   plHWpp.Scale(1./lumiScales['2016'])
   plHW7.Scale(1./lumiScales['2016'])
   plPy8.Scale(1./lumiScales['2016'])
 
-  # plHWpp.Scale(args.ss)
-  # plHW7.Scale(args.ss)
-  # plPy8.Scale(args.ss)
-
-  if args.norm:
-    plHWpp.Scale(1/plHWpp.Integral())
-    plHW7.Scale(1/plHW7.Integral())
-    plPy8.Scale(1/plPy8.Integral())
+  plHWpp.Scale(args.ss)
+  plHW7.Scale(args.ss)
+  plPy8.Scale(args.ss)
 
   plHWpp.Draw('hist same')
   plHW7.Draw('hist same')
@@ -759,8 +754,6 @@ for dist in distList:
   unfoldedNom.SetLineWidth(3)
   unfoldedNom.SetMarkerStyle(8)
   unfoldedNom.SetMarkerSize(2)
-  if args.norm:
-    unfoldedNom.Scale(1/unfoldedNom.Integral())
   unfoldedNom.Draw('same E1 X0')
   # unfoldedNom.Draw('same')
 
@@ -846,10 +839,11 @@ for dist in distList:
   drawTex((1-ROOT.gStyle.GetPadRightMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.04, ('#bf{%3.0f fb^{-1} (13 TeV)}'%lumiScalesRounded[args.year])), 31)
 
 
-  drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  0.55, '#bf{Fiducial cross section [fb]}'), 11, size=0.042, angle=90)
-  drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  0.07,'#bf{Pred. / data}'), 11, size=0.042, angle=90)
+  drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.55, '#bf{Fiducial cross section [fb]}'), 11, size=0.042, angle=90)
+  drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.07,'#bf{Pred. / data}'), 11, size=0.042, angle=90)
 
 
-  cunf.SaveAs('unfolded/'+ args.year + dist + ('_Norm' if args.norm else '') + '.pdf') 
-  cunf.SaveAs('unfolded/'+ args.year + dist + ('_Norm' if args.norm else '') + '.png')
-  cunf.SaveAs('unfolded/'+ args.year + dist + ('_Norm' if args.norm else '') + '.root')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.pdf') 
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.png')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.root')
+  # cunf.Print('unfolded/'+ args.year + dist +'.pdf')

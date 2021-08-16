@@ -9,8 +9,12 @@ ttgStyle = True # Set to False to return back to original style
 #
 def setDefault():
   ROOT.gROOT.SetBatch(True)
-  ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/ttg/tools/scripts/tdrstyle.C")
-  ROOT.setTDRStyle()
+  # loading a macro twice causes a crash in some ROOT versions
+  try:
+    ROOT.setTDRStyle()
+  except:
+    ROOT.gROOT.LoadMacro("$CMSSW_BASE/src/ttg/tools/scripts/tdrstyle.C")
+    ROOT.setTDRStyle()
   ROOT.gROOT.SetStyle('tdrStyle')
   ROOT.gStyle.SetPaintTextFormat("3.2f")
   ROOT.gStyle.SetPadTopMargin(0.07)
@@ -22,8 +26,11 @@ def setDefault():
 def setDefault2D(isColZ=False):
   setDefault()
   if isColZ: ROOT.gStyle.SetPadRightMargin(0.15)
-  ROOT.gStyle.SetTitleX(0.005)
+  # ROOT.gStyle.SetTitleX(0.5)
+  # ROOT.gStyle.SetTitleOffset(0.1, 'X')
   ROOT.gStyle.SetTitleY(0.985)
+  ROOT.gStyle.SetPadBottomMargin(0.11)
+  ROOT.gStyle.SetPadRightMargin(0.15)
   ROOT.gStyle.SetPaintTextFormat("3.2f")
   ROOT.gStyle.SetTextSize(0.07)
   ROOT.gStyle.SetOptStat(0)
@@ -208,6 +215,7 @@ def drawTex(line, align=11, size=0.045, angle=0):
   tex.SetTextSize(size)
   tex.SetTextAlign(align)
   tex.SetTextAngle(angle)
+  tex.SetTextFont(42)
   return tex.DrawLatex(*line)
 
 
@@ -216,11 +224,19 @@ def drawTex(line, align=11, size=0.045, angle=0):
 #
 def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
   lines = [
-    (11, (ROOT.gStyle.GetPadLeftMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.01, "CMS #bf{#it{Simulation}}" if isOnlySim else "CMS #bf{#it{Preliminary}}")),
-    (31, (1-ROOT.gStyle.GetPadRightMargin()-0.04, 1-ROOT.gStyle.GetPadTopMargin()+0.01, ("%3.0f fb{}^{-1} (13 TeV)"%lumiScale) + ("Scale %3.2f"%dataMCScale if dataMCScale else '')))
-  #                                                                                     NOTE the #bf here makes this text NOT BOLD, I don't want to talk about it
+    (11, (ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.01, "#bf{CMS} #it{Simulation}" if isOnlySim else "#bf{CMS} #it{Preliminary}")),
+    (31, (1-ROOT.gStyle.GetPadRightMargin()-0.04, 1-ROOT.gStyle.GetPadTopMargin()+0.01, ("%3.0f fb{}^{#minus 1} (13 TeV)"%lumiScale) + ("Scale %3.2f"%dataMCScale if dataMCScale else '')))
+
   ]
   return [drawTex(l, align, size=0.06) for align, l in lines]
+
+def drawLumi2D(dataMCScale, lumiScale, isOnlySim=False):
+  lines = [
+    (11, (ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.015, "#bf{CMS} #it{Simulation}" if isOnlySim else "#bf{CMS} #it{Preliminary}")),
+    (31, (1-ROOT.gStyle.GetPadRightMargin()-0.04, 1-ROOT.gStyle.GetPadTopMargin()+0.015, ("%3.0f fb{}^{#minus 1} (13 TeV)"%lumiScale) + ("Scale %3.2f"%dataMCScale if dataMCScale else '')))
+
+  ]
+  return [drawTex(l, align, size=0.04) for align, l in lines]
 
 #
 # Coordinate tranformations between Axis and NDC

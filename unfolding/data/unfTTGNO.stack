@@ -1,0 +1,10 @@
+-- MC
+TTGamma_DilPCUT              t#bar{t}#gamma_(genuine)        fillStyle     kOrange
++TTGamma_SemPCUT
++TTGamma_HadPCUT
++TTGamma_DilA
++TTGamma_SemA
++TTGamma_HadA
++TTGamma_DilB
++TTGamma_SemB
++TTGamma_HadB

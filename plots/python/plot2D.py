@@ -202,7 +202,6 @@ class Plot2D(Plot):
     # delete canvas if it exists
     if hasattr("ROOT","c1"): del ROOT.c1 
     c1 = ROOT.TCanvas("ROOT.c1", "drawHistos", 200, 10, default_widths['x_width'], default_widths['y_width'])
-
     c1.SetLogx(logX)
     c1.SetLogy(logY)
     c1.SetLogz(logZ)
@@ -217,6 +216,9 @@ class Plot2D(Plot):
       if clean:
         histo.GetZaxis().SetRangeUser(histo.GetMaximum()*0.0004, histo.GetMaximum()*1.03)
       style.commonStyle(histo)
+      # hacky overrite of commonStyle
+      histo.GetXaxis().SetTitleOffset(1.4)
+      histo.GetZaxis().SetLabelSize(0.035)
       histo.Draw(drawOption+same)
       same = "same"
 

@@ -12,7 +12,6 @@ argParser.add_argument('--year',      action='store',      default=None,        
 argParser.add_argument('--unblind',   action='store_true', default=False,  help='unblind 2017 and 2018')
 argParser.add_argument('--LOtheory',  action='store_true', default=False,  help='use LO sample for pdf and q2 uncertainty on the theory prediction')
 argParser.add_argument('--ss',        action='store',      default=1., type=float,     help='scale MC by the specified signal strength')
-argParser.add_argument('--norm',      action='store_true', default=False,  help='produce normalized output')
 args = argParser.parse_args()
 
 
@@ -32,7 +31,6 @@ ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetPadTickX(1)
 ROOT.gStyle.SetPadTickY(1)
 
-ROOT.gStyle.SetHatchesLineWidth(4)
 
 
 from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPlots, customLabelSize, copySystPlots
@@ -91,34 +89,34 @@ lumiunc['RunII'] = 0.016
 
 
 # labels = {
-#           'unfReco_phPt' :            ('reco p_{T}(#gamma) [GeV]',  'gen p_{T}(#gamma) [GeV]'),
+#           'unfReco_phPt' :            ('reco p_{T}(#gamma) (GeV)',  'gen p_{T}(#gamma) (GeV)'),
 #           'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',   'gen #DeltaR(#gamma, l)'),
 #           'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',       'gen #Delta#phi(ll)'),
 #           'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',        'gen #DeltaR(l, j)'),
-#           'unfReco_jetPt' :           ('reco p_{T}(j1) [GeV]',      'gen p_{T}(j1) [GeV]'),
+#           'unfReco_jetPt' :           ('reco p_{T}(j1) (GeV)',      'gen p_{T}(j1) (GeV)'),
 #           'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',     'gen |#Delta#eta(ll)|'),
 #           'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',   'gen #DeltaR(#gamma, b)'),
 #           'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',       'gen |#eta|(#gamma)'),
 #           'unfReco_phLep1DeltaR' :    ('reco #DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
 #           'unfReco_phLep2DeltaR' :    ('reco #DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
-#           'unfReco_Z_pt' :            ('reco p_{T}(ll) [GeV]',           'gen p_{T}(ll) [GeV]'),
-#           'unfReco_l1l2_ptsum' :      ('reco p_{T}(l1)+p_{T}(l2) [GeV]', 'gen p_{T}(l1)+p_{T}(l2) [GeV]')
+#           'unfReco_Z_pt' :            ('reco p_{T}(ll) (GeV)',           'gen p_{T}(ll) (GeV)'),
+#           'unfReco_l1l2_ptsum' :      ('reco p_{T}(l1)+p_{T}(l2) (GeV)', 'gen p_{T}(l1)+p_{T}(l2) (GeV)')
 #           }
 
 
 labels = {
-          'unfReco_phPt' :            ('p_{T}(#gamma) [GeV]',  'p_{T}(#gamma) [GeV]'),
+          'unfReco_phPt' :            ('p_{T}(#gamma) (GeV)',  'p_{T}(#gamma) (GeV)'),
           'unfReco_phLepDeltaR' :     ('#DeltaR(#gamma, l)',   '#DeltaR(#gamma, l)'),
           'unfReco_ll_deltaPhi' :     ('#Delta#phi(ll)',       '#Delta#phi(ll)'),
           'unfReco_jetLepDeltaR' :    ('#DeltaR(l, j)',        '#DeltaR(l, j)'),
-          'unfReco_jetPt' :           ('p_{T}(j1) [GeV]',      'p_{T}(j1) [GeV]'),
+          'unfReco_jetPt' :           ('p_{T}(j1) (GeV)',      'p_{T}(j1) (GeV)'),
           'unfReco_ll_absDeltaEta' :  ('|#Delta#eta(ll)|',     '|#Delta#eta(ll)|'),
           'unfReco_phBJetDeltaR' :    ('#DeltaR(#gamma, b)',   '#DeltaR(#gamma, b)'),
           'unfReco_phAbsEta' :        ('|#eta|(#gamma)',       '|#eta|(#gamma)'),
           'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       '#DeltaR(#gamma, l1)'),
           'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       '#DeltaR(#gamma, l2)'),
-          'unfReco_Z_pt' :            ('p_{T}(ll) [GeV]',           'p_{T}(ll) [GeV]'),
-          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) [GeV]', 'p_{T}(l1)+p_{T}(l2) [GeV]')
+          'unfReco_Z_pt' :            ('p_{T}(ll) (GeV)',           'p_{T}(ll) (GeV)'),
+          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) (GeV)', 'p_{T}(l1)+p_{T}(l2) (GeV)')
           }
 
 distList = [
@@ -170,7 +168,6 @@ theoVarList = ['']
 theoVarList += [sys + direc for sys in theoSysList for direc in ['Down', 'Up']]
 
 # theoVarList += ['colRec_' + str(i) for i in range(1, 4)]
-# NOTE ColRec implemettation at PL was removed
 
 NLOtheoVarList = []
 
@@ -298,7 +295,7 @@ def drawTauScan(response, data, backgrounds, outMig, outName, title):
   texl.SetTextSize(0.035)
   texl.Draw()
   # tauCanvas.SaveAs('tauScans/' + outName + '.pdf') #creates 2 page pdf for some reason
-  tauCanvas.SaveAs('tauScans/' + outName + '.png',"EmbedFonts") 
+  tauCanvas.SaveAs('tauScans/' + outName + '.png') 
 
 
 def calcChi2(data, models):
@@ -313,11 +310,6 @@ def calcChi2(data, models):
   # chi2 = chi2 / data.GetXaxis().GetNbins()
   return chi2
 
-def invertVar(nomHist, varHist):
-    inverseHist = nomHist.Clone()
-    for i in range(1, nomHist.GetNbinsX()+1):
-      inverseHist.SetBinContent(i, max(2. * nomHist.GetBinContent(i) - varHist.GetBinContent(i), 0.))
-    return inverseHist
 
 # def DrawEMatrix(response, data, backgrounds, outMig, outName, title):
 #   unfold = ROOT.TUnfoldDensity( response, mapping, ROOT.TUnfold.kRegModeCurvature, constraintMode, densityFlags )
@@ -425,28 +417,24 @@ def varyData(data, signalNom, signal):
   return data
 
 def fracSigData(outMC, signal, bkgDict, data): # scale bins of data to (mc/signal) fraction, but with uncertainties of MC (keep rel unc the same). Used for outMig fraction
-  # dataSig = data.Clone()
-  # backgrounds = sumDict(bkgDict)
-  # dataSig.Add(backgrounds, -1.)
-  # outMC = outMC.Clone()
-  # outMC.Scale(dataSig.Integral() / signal.Integral() )
-  # # for i in range(1, dataSig.GetXaxis().GetNbins()+1):
-  # #   if dataSig.GetBinContent(i) < 0:
-  # #     # log.info(dist)
-  # #     log.info(dataSig.GetBinContent(i) )
-  # return outMC
-  
-  dataFrac = data.Clone()
+  dataSig = data.Clone()
   backgrounds = sumDict(bkgDict)
-  dataFrac.Add(backgrounds, -1.)
-  for i in range(1, dataFrac.GetXaxis().GetNbins()+1):
-    if dataFrac.GetBinContent(i) < 0:   #in case data - backgrounds gets negative anywhere
-      dataFrac.SetBinContent(i, outMC.GetBinContent(i))
-      dataFrac.SetBinError(i,   outMC.GetBinError(i))
-    else:
-      dataFrac.SetBinContent(i, dataFrac.GetBinContent(i) * (outMC.GetBinContent(i) / signal.GetBinContent(i)) )
-      dataFrac.SetBinError(i,   dataFrac.GetBinContent(i) * (outMC.GetBinError(i) / outMC.GetBinContent(i)) )
-# NOTE if you take the bin by bin approach need to deal with cases where data-backgrounds < 0 ?
+  dataSig.Add(backgrounds, -1.)
+  outMC = outMC.Clone()
+  outMC.Scale(dataSig.Integral() / signal.Integral() )
+  # for i in range(1, dataSig.GetXaxis().GetNbins()+1):
+  #   if dataSig.GetBinContent(i) < 0:
+  #     # log.info(dist)
+  #     log.info(dataSig.GetBinContent(i) )
+  return outMC
+  
+  # dataFrac = data.Clone()
+  # backgrounds = sumDict(bkgDict)
+  # dataFrac.Add(backgrounds, -1.)
+  # for i in range(1, dataFrac.GetXaxis().GetNbins()+1):
+  #   dataFrac.SetBinContent(i, dataFrac.GetBinContent(i) * (outMC.GetBinContent(i) / signal.GetBinContent(i)) )
+  #   dataFrac.SetBinError(i,   dataFrac.GetBinContent(i) * (outMC.GetBinError(i) / outMC.GetBinContent(i)) )
+# NOTE if you take the bin by bin approach need to deel with cases where data-backgrounds < 0 ?
   return dataFrac
 
 #################### main code ####################
@@ -464,8 +452,8 @@ for dist in distList:
   else:
     histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
 
-  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
+  responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + 'PreJune/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
+  outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + 'PreJune/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
 
   # get nominal unfolded, with the statistics split into data and MC backgrounds
   response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
@@ -486,10 +474,10 @@ for dist in distList:
 
 
   # draw tau scan  (no, we're not regularizing)
-  drawTauScan(response, data, backgroundsNom, outMig, outName = 'tauScan'+dist+args.year, title = labels[dist][0].replace('reco ', '').replace('[GeV]', ''))
+  drawTauScan(response, data, backgroundsNom, outMig, outName = 'tauScan'+dist+args.year, title = labels[dist][0].replace('reco ', '').replace('(GeV)', ''))
 
   # get unfolded results for all systematic variations
-  unfoldedDict, pdfDict, q2Dict = {}, {}, {}
+  unfoldedDict, pdfDict, q2Dict, colRecDict = {}, {}, {}, {}
   
 
   for var in varList:
@@ -518,9 +506,7 @@ for dist in distList:
     unfolded.Scale(1./lumiScales[args.year])
     if var.count('pdf'): pdfDict[var] = unfolded
     elif var.count('q2'): q2Dict[var] = unfolded
-    elif var.count('colRec'): 
-      unfoldedDict[var+'Up'] = unfolded
-      unfoldedDict[var+'Down'] = invertVar(unfoldedNom, unfolded) 
+    elif var.count('colRec'): colRecDict[var] = unfolded
     else: unfoldedDict[var] = unfolded
 
   for direc in [('Down', -1.), ('Up', 1.)]:
@@ -564,12 +550,15 @@ for dist in distList:
 
   pdfDict[''] = unfoldedNom.Clone()
   q2Dict[''] = unfoldedNom.Clone()
+  colRecDict[''] = unfoldedNom.Clone()
   q2Up, q2Down = getEnv(q2Dict)
   pdfrms = getRMS(pdfDict)
+  colRecUp, colRecDown = getEnv(colRecDict)
   # add q2 and pdf to totalUp and totalDown
   for i in range(1, totalUp.GetXaxis().GetNbins()+1):
-    totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
-    totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
+    colRecErr = max(abs(colRecUp.GetBinContent(i)), abs(colRecDown.GetBinContent(i)))
+    totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
 
   unfoldedMC = getUnfolded(response, signal, {}, outMig)
   unfoldedMC.Scale(1./lumiScales[args.year])
@@ -590,24 +579,25 @@ for dist in distList:
 
 # NOTE THIS BLOCK LOADS THE SYSTEMATICS BAND FOR THE THEORY, VERY SIMILAR TO PREUNF CODE
 
-  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
   # plMC = response.ProjectionY("PLMC")
 
 
-  plMCDict, plMCpdfDict, plMCq2Dict = {}, {}, {}
+  plMCDict, plMCpdfDict, plMCq2Dict, plMCcolRecDict = {}, {}, {}, {}
 
   plNLOpdfDict, plNLOq2Dict, plNLOMCDict = {}, {}, {}
 
   for var in theoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + '2016' + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + 'PreJune/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
+    # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + '2016' + '/unfBLSA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plMCpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plMCq2Dict[var] = plMC.Clone()
+    elif var.count('colRec'): plMCcolRecDict[var] = plMC.Clone()
     else: plMCDict[var] = plMC
 
   for var in NLOtheoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + 'PreJune/unfBLSA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plNLOpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plNLOq2Dict[var] = plMC.Clone()
@@ -619,7 +609,9 @@ for dist in distList:
 
   plMCpdfDict[''] = plMCDict[''].Clone()
   plMCq2Dict[''] = plMCDict[''].Clone()
+  plMCcolRecDict[''] =  plMCDict[''].Clone()
   pltotalUp, pltotalDown = getTotalDeviations(plMCDict)
+  plcolRecUp, plcolRecDown = getEnv(plMCcolRecDict)
 
 
   if args.LOtheory:
@@ -653,8 +645,11 @@ for dist in distList:
   
   # add q2 and pdf to pltotalUp and pltotalDown
   for i in range(1, pltotalUp.GetXaxis().GetNbins()+1):
-    pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
-    pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
+    colRecErr = max(abs(plcolRecUp.GetBinContent(i)), abs(plcolRecDown.GetBinContent(i)))
+    pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    # pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + colRecErr**2)**0.5)
+    # pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + + colRecErr**2)**0.5)
 
   plMCTot = plMCDict[''].Clone()
 
@@ -678,25 +673,13 @@ for dist in distList:
   # unfoldedTotUnc.SetFillColor(ROOT.kOrange)
   # unfoldedTotUnc.GetYaxis().SetRangeUser(0., unfoldedNom.GetMaximum()*0.2)
   unfoldedTotUnc.SetMinimum(0.)
-
-  if args.norm:
-    unfoldedTotUnc.Scale(1/unfoldedTotUnc.Integral())
-    plMCTot.Scale(1/plMCTot.Integral())
-
-  if dist in ['unfReco_phAbsEta']:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.4, plMCTot.GetMaximum()*1.4))
-  else:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.2, plMCTot.GetMaximum()*1.2))
+  unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, unfoldedNom.GetMaximum()*1.4)
   unfoldedTotUnc.GetXaxis().SetTitle(labels[dist][1])
   # unfoldedTotUnc.GetYaxis().SetTitle('Fiducial cross section (fb)')
   unfoldedTotUnc.GetYaxis().SetTitle('')
   unfoldedTotUnc.GetYaxis().SetTitleOffset(1.55)
 
   unfoldedTotUnc.SetTitle('')
-  unfoldedTotUnc.GetYaxis().SetTitleSize(0.24)
-  unfoldedTotUnc.GetYaxis().SetTitleOffset(0.3)
-  unfoldedTotUnc.GetYaxis().SetLabelSize(0.05)
-
   unfoldedTotUnc.Draw('E X0')
 
   pickle.dump(unfoldedTotUnc, file('unfoldedHists/data' +  dist + args.year + '.pkl', 'w'))
@@ -705,38 +688,36 @@ for dist in distList:
 
 
   # stats on this are normally very small, ttgamma samples have great statistics (so not drawing it)
+  # plMCTot.SetFillColor(ROOT.kRed)
+  plMCTot.SetFillColorAlpha(ROOT.kRed, 0.4)
+  # plMCTot.SetLineWidth(3)
 
-  plMCTot.SetFillColorAlpha(ROOT.kBlack, 0.5)
-  plMCTot.SetLineColor(ROOT.kBlack)
-
-  plMCTot.SetFillStyle(3005)
+  plMCTot.SetFillStyle(1001)
   plMCTot.Draw('same E2')
+  plMCTot.Scale(args.ss)
+  # log.info(plMCTot.GetBinError(1)/plMCTot.GetBinContent(1))
+
 
   unfoldedMC.SetLineWidth(3)
   # unfoldedMC.Draw('HIST same')
 
   plMCTot2.SetLineWidth(3)
-  plMCTot2.SetLineColor(ROOT.kBlack)
+  plMCTot2.SetLineColor(ROOT.kRed)
   plMCTot2.Scale(args.ss)
   plMCTot2.Draw('same HIST')
 
 
 
-  plHWpp = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwigppfix/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHWppt#bar{t}#gamma (genuine)']
-  plHW7 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwig7fix/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHW7t#bar{t}#gamma (genuine)']
-  plPy8 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/pythia8fix/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPy8t#bar{t}#gamma (genuine)']
+  plHWpp = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwigpptestOR1/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHWppt#bar{t}#gamma (genuine)']
+  plHW7 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwig7testOR1/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilHW7t#bar{t}#gamma (genuine)']
+  plPy8 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/herwigPythia8testOR1/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPy8t#bar{t}#gamma (genuine)']
   plHWpp.Scale(1./lumiScales['2016'])
   plHW7.Scale(1./lumiScales['2016'])
   plPy8.Scale(1./lumiScales['2016'])
 
-  # plHWpp.Scale(args.ss)
-  # plHW7.Scale(args.ss)
-  # plPy8.Scale(args.ss)
-
-  if args.norm:
-    plHWpp.Scale(1/plHWpp.Integral())
-    plHW7.Scale(1/plHW7.Integral())
-    plPy8.Scale(1/plPy8.Integral())
+  plHWpp.Scale(args.ss)
+  plHW7.Scale(args.ss)
+  plPy8.Scale(args.ss)
 
   plHWpp.Draw('hist same')
   plHW7.Draw('hist same')
@@ -746,11 +727,8 @@ for dist in distList:
   plHW7.SetLineWidth(3)
   plPy8.SetLineWidth(3)
 
-  plHWpp.SetLineColor(ROOT.kRed)
-  plHW7.SetLineColor(ROOT.kBlue)
-  plHWpp.SetLineStyle(7)
-  plHW7.SetLineStyle(2)
-
+  plHWpp.SetLineColor(ROOT.kGreen+2)
+  plHW7.SetLineColor(ROOT.kBlue+1)
   plPy8.SetLineColor(ROOT.kMagenta+2)
 
   # DRAW DATA
@@ -758,26 +736,19 @@ for dist in distList:
   ROOT.gStyle.SetEndErrorSize(9)
   unfoldedNom.SetLineWidth(3)
   unfoldedNom.SetMarkerStyle(8)
-  unfoldedNom.SetMarkerSize(2)
-  if args.norm:
-    unfoldedNom.Scale(1/unfoldedNom.Integral())
+  unfoldedNom.SetMarkerSize(1)
   unfoldedNom.Draw('same E1 X0')
   # unfoldedNom.Draw('same')
 
-  if dist in ['unfReco_phBJetDeltaR', 'unfReco_ll_deltaPhi', 'unfReco_phLep1DeltaR']: #legend on the left
-    legend = ROOT.TLegend(1.1-0.92,0.61,1.1-0.62,0.87)
-  else:
-    legend = ROOT.TLegend(0.62,0.61,0.92,0.87)
-  
+  legend = ROOT.TLegend(0.3,0.77,0.87,0.88)
   legend.SetBorderSize(0)
-  legend.SetNColumns(1)
-  legend.AddEntry(unfoldedNom,'Data',"PE")
-  legend.AddEntry(plMCTot2,"MG5+Pythia8","l")
-  legend.AddEntry(plMCTot,"Theory unc.","f")
+  legend.SetNColumns(3)
+  legend.AddEntry(plMCTot2,"Theory","l")
   # legend.AddEntry(unfoldedMC,"Unfolded MC Signal","l")
-  legend.AddEntry(plHWpp,'MG5+Herwig++',"l")
-  legend.AddEntry(plHW7,'MG5+Herwig7',"l")
-  legend.AddEntry(plPy8,'PYTHIA8 ALT',"l")
+  legend.AddEntry(unfoldedNom,'Data',"PE")
+  legend.AddEntry(plHWpp,'Herwig++',"l")
+  legend.AddEntry(plHW7,'Herwig7',"l")
+  legend.AddEntry(plPy8,'Pythia8',"l")
   legend.Draw()
 
   # log.info("chi2 unfolded: " + str(calcChi2(unfoldedNom, [plMCTot])))
@@ -811,25 +782,24 @@ for dist in distList:
 
   unfoldedRat.SetLineColor(ROOT.kBlack)
   unfoldedRat.SetMarkerStyle(ROOT.kFullCircle)
-  unfoldedRat.SetMarkerSize(2)
   theRatBand.GetYaxis().SetRangeUser(0.36, 1.64)
   theRatBand.GetXaxis().SetTitle(labels[dist][1])
   # theRatBand.GetYaxis().SetTitle('Pred. / data')
   theRatBand.GetYaxis().SetTitle('')
   theRatBand.SetTitle('')
-  theRatBand.GetXaxis().SetLabelSize(0.15)
-  theRatBand.GetXaxis().SetTitleSize(0.18)
-  theRatBand.GetXaxis().SetTitleOffset(1)
-  theRatBand.GetYaxis().SetTitleSize(0.21)
+  theRatBand.GetXaxis().SetLabelSize(0.16)
+  theRatBand.GetXaxis().SetTitleSize(0.16)
+  theRatBand.GetXaxis().SetTitleOffset(1.2)
+  theRatBand.GetYaxis().SetTitleSize(0.19)
   theRatBand.GetYaxis().SetTitleOffset(0.3)
   theRatBand.GetYaxis().SetRangeUser(0.38, 1.62)
   theRatBand.GetYaxis().SetNdivisions(3,5,0)
-  theRatBand.GetYaxis().SetLabelSize(0.15)
+  theRatBand.GetYaxis().SetLabelSize(0.16)
 
   theRatBand.Draw('E2')
 
 
-  unfoldedRat.Draw('E X0 same')
+  unfoldedRat.Draw('E1 X0 same')
 
   plHWppRat.Draw('same hist')
   plHW7Rat.Draw('same hist')
@@ -843,13 +813,13 @@ for dist in distList:
 
   cunf.cd()
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.04,'CMS #bf{#it{Preliminary}}'), 11)
-  drawTex((1-ROOT.gStyle.GetPadRightMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.04, ('#bf{%3.0f fb^{-1} (13 TeV)}'%lumiScalesRounded[args.year])), 31)
+  drawTex((1-ROOT.gStyle.GetPadRightMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.04, ('#bf{%3.1f fb^{-1} (13 TeV)}'%lumiScalesRounded[args.year])), 31)
 
 
-  drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  0.55, '#bf{Fiducial cross section [fb]}'), 11, size=0.042, angle=90)
-  drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  0.07,'#bf{Pred. / data}'), 11, size=0.042, angle=90)
+  drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.58, '#bf{Fiducial cross section (fb)}'), 11, size=0.037, angle=90)
+  drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.06,'#bf{Pred. / data}'), 11, size=0.037, angle=90)
 
 
-  cunf.SaveAs('unfolded/'+ args.year + dist + ('_Norm' if args.norm else '') + '.pdf') 
-  cunf.SaveAs('unfolded/'+ args.year + dist + ('_Norm' if args.norm else '') + '.png')
-  cunf.SaveAs('unfolded/'+ args.year + dist + ('_Norm' if args.norm else '') + '.root')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.pdf')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.png')
+  cunf.SaveAs('unfolded/'+ args.year + dist +'.root')

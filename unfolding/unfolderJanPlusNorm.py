@@ -11,18 +11,18 @@ argParser.add_argument('--year',      action='store',      default=None,        
 # argParser.add_argument('--tag',       action='store',      default='unfTest2',           help='Specify type of reducedTuple')
 argParser.add_argument('--unblind',   action='store_true', default=False,  help='unblind 2017 and 2018')
 argParser.add_argument('--LOtheory',  action='store_true', default=False,  help='use LO sample for pdf and q2 uncertainty on the theory prediction')
-argParser.add_argument('--ss',        action='store',      default=1., type=float,     help='scale MC by the specified signal strength')
 argParser.add_argument('--norm',      action='store_true', default=False,  help='produce normalized output')
+argParser.add_argument('--check',     action='store_true', default=False,  help='plot other python8 sample as crosscheck')
+argParser.add_argument('--overview',  action='store_true', default=False,  help='print the average absolute impact of the systematics')
 args = argParser.parse_args()
 
 
 if args.year == '2016': args.unblind = True
 args.unblind = True
 
-# args.year = '2016'
-
 import ROOT
 import pdb
+import pprint
 
 ROOT.gROOT.SetBatch(True)
 ROOT.TH1.SetDefaultSumw2()
@@ -83,42 +83,21 @@ def getRatioCanvas(name):
 #################### Settings and definitons ####################
 
 lumiunc = {'2016':0.012, '2017':0.023, '2018':0.025}
-
-# lumiScales['2016'] = lumiScales['2016']
-# lumiScalesRounded['2016'] = lumiScalesRounded['2016']
-
 lumiunc['RunII'] = 0.016 
 
-
-# labels = {
-#           'unfReco_phPt' :            ('reco p_{T}(#gamma) [GeV]',  'gen p_{T}(#gamma) [GeV]'),
-#           'unfReco_phLepDeltaR' :     ('reco #DeltaR(#gamma, l)',   'gen #DeltaR(#gamma, l)'),
-#           'unfReco_ll_deltaPhi' :     ('reco #Delta#phi(ll)',       'gen #Delta#phi(ll)'),
-#           'unfReco_jetLepDeltaR' :    ('reco #DeltaR(l, j)',        'gen #DeltaR(l, j)'),
-#           'unfReco_jetPt' :           ('reco p_{T}(j1) [GeV]',      'gen p_{T}(j1) [GeV]'),
-#           'unfReco_ll_absDeltaEta' :  ('reco |#Delta#eta(ll)|',     'gen |#Delta#eta(ll)|'),
-#           'unfReco_phBJetDeltaR' :    ('reco #DeltaR(#gamma, b)',   'gen #DeltaR(#gamma, b)'),
-#           'unfReco_phAbsEta' :        ('reco |#eta|(#gamma)',       'gen |#eta|(#gamma)'),
-#           'unfReco_phLep1DeltaR' :    ('reco #DeltaR(#gamma, l1)',       'gen #DeltaR(#gamma, l1)'),
-#           'unfReco_phLep2DeltaR' :    ('reco #DeltaR(#gamma, l2)',       'gen #DeltaR(#gamma, l2)'),
-#           'unfReco_Z_pt' :            ('reco p_{T}(ll) [GeV]',           'gen p_{T}(ll) [GeV]'),
-#           'unfReco_l1l2_ptsum' :      ('reco p_{T}(l1)+p_{T}(l2) [GeV]', 'gen p_{T}(l1)+p_{T}(l2) [GeV]')
-#           }
-
-
 labels = {
-          'unfReco_phPt' :            ('p_{T}(#gamma) [GeV]',  'p_{T}(#gamma) [GeV]'),
-          'unfReco_phLepDeltaR' :     ('#DeltaR(#gamma, l)',   '#DeltaR(#gamma, l)'),
-          'unfReco_ll_deltaPhi' :     ('#Delta#phi(ll)',       '#Delta#phi(ll)'),
-          'unfReco_jetLepDeltaR' :    ('#DeltaR(l, j)',        '#DeltaR(l, j)'),
-          'unfReco_jetPt' :           ('p_{T}(j1) [GeV]',      'p_{T}(j1) [GeV]'),
-          'unfReco_ll_absDeltaEta' :  ('|#Delta#eta(ll)|',     '|#Delta#eta(ll)|'),
-          'unfReco_phBJetDeltaR' :    ('#DeltaR(#gamma, b)',   '#DeltaR(#gamma, b)'),
-          'unfReco_phAbsEta' :        ('|#eta|(#gamma)',       '|#eta|(#gamma)'),
-          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       '#DeltaR(#gamma, l1)'),
-          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       '#DeltaR(#gamma, l2)'),
-          'unfReco_Z_pt' :            ('p_{T}(ll) [GeV]',           'p_{T}(ll) [GeV]'),
-          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) [GeV]', 'p_{T}(l1)+p_{T}(l2) [GeV]')
+          'unfReco_phPt' :            ('p_{T}(#gamma) [GeV]',  'p_{T}(#gamma) [GeV]'            , 'd#sigma / d p_{T}(#gamma) [fb/GeV]'),
+          'unfReco_phLepDeltaR' :     ('#DeltaR(#gamma, l)',   '#DeltaR(#gamma, l)'             , 'd#sigma / d #DeltaR(#gamma, l) [fb]'),
+          'unfReco_ll_deltaPhi' :     ('#Delta#phi(ll)',       '#Delta#phi(ll)'                 , 'd#sigma / d #Delta#phi(ll) [fb]'),
+          'unfReco_jetLepDeltaR' :    ('#DeltaR(l, j)',        '#DeltaR(l, j)'                  , 'd#sigma / d #DeltaR(l, j) [fb]'),
+          'unfReco_jetPt' :           ('p_{T}(j1) [GeV]',      'p_{T}(j1) [GeV]'                , 'd#sigma / d p_{T}(j1) [fb/GeV]'),
+          'unfReco_ll_absDeltaEta' :  ('|#Delta#eta(ll)|',     '|#Delta#eta(ll)|'               , 'd#sigma / d |#Delta#eta(ll)| [fb]'),
+          'unfReco_phBJetDeltaR' :    ('#DeltaR(#gamma, b)',   '#DeltaR(#gamma, b)'             , 'd#sigma / d #DeltaR(#gamma, b) [fb]'),
+          'unfReco_phAbsEta' :        ('|#eta|(#gamma)',       '|#eta|(#gamma)'                 , 'd#sigma / d |#eta|(#gamma) [fb]'),
+          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       '#DeltaR(#gamma, l1)'       , 'd#sigma / d #DeltaR(#gamma, l1) [fb]'),
+          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       '#DeltaR(#gamma, l2)'       , 'd#sigma / d #DeltaR(#gamma, l2) [fb]'),
+          'unfReco_Z_pt' :            ('p_{T}(ll) [GeV]',           'p_{T}(ll) [GeV]'           , 'd#sigma / d p_{T}(ll) [fb/GeV]'),
+          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) [GeV]', 'p_{T}(l1)+p_{T}(l2) [GeV]' , 'd#sigma / d p_{T}(l1)+p_{T}(l2) [fb/GeV]')
           }
 
 distList = [
@@ -160,9 +139,6 @@ varList += ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]
 varList += ['pdf_' + str(i) for i in range(0, 100)]
 varList += ['colRec_' + str(i) for i in range(1, 4)]
 
-# theoSysList = ['isr','fsr','erd']
-
-# theoSysList = ['isr','fsr']
 
 theoSysList = []
 
@@ -191,7 +167,6 @@ else:
 
 
 bkgNorms = [('other_Other+#gamma (genuine)Other+#gamma (genuine)', 0.3),
-            # ('VVTo2L2NuMultiboson+#gamma (genuine)', 0.3),
             ('ZG_Z#gamma (genuine)Z#gamma (genuine)', 0.03),
             ('singleTop_Single-t+#gamma (genuine)Single-t+#gamma (genuine)', 0.1),
             ]
@@ -319,36 +294,6 @@ def invertVar(nomHist, varHist):
       inverseHist.SetBinContent(i, max(2. * nomHist.GetBinContent(i) - varHist.GetBinContent(i), 0.))
     return inverseHist
 
-# def DrawEMatrix(response, data, backgrounds, outMig, outName, title):
-#   unfold = ROOT.TUnfoldDensity( response, mapping, ROOT.TUnfold.kRegModeCurvature, constraintMode, densityFlags )
-
-#   data.SetBinContent(data.GetXaxis().GetNbins()+1, 0.)
-#   data.SetBinContent(0, 0.)
-
-#   unfold.SetInput(data)
-#   for process, hist in backgrounds.items():
-#     hist.SetBinContent(hist.GetXaxis().GetNbins()+1, 0.)
-#     hist.SetBinContent(0, 0.)
-#     unfold.SubtractBackground(hist, process)
-#   outMig.SetBinContent(outMig.GetXaxis().GetNbins()+1, 0.)
-#   outMig.SetBinContent(0, 0.)
-#   unfold.SubtractBackground(outMig, 'outMig')
-
-#   result = ROOT.TSpline3()
-#   iBest = unfold.ScanTau(200,0.000001,0.01, result, ROOT.TUnfoldDensity.kEScanTauRhoAvg)
-#   log.info(unfold.GetTau())
-
-#   tauCanvas = ROOT.TCanvas('c' + str(uuid.uuid4()).replace('-',''), outName, 700, 700)
-#   h= tauCanvas.DrawFrame(-6,0.15,-2,0.9)
-#   h.SetXTitle("log(#tau)")
-#   h.SetYTitle("average correlation coefficient")
-#   h.SetTitle(title)
-#   result.Draw('LP same')
-#   texl = ROOT.TLatex(-5.5,0.8,'#tau = ' + str(round(unfold.GetTau(), 8)))
-#   texl.SetTextSize(0.035)
-#   texl.Draw()
-#   # tauCanvas.SaveAs('tauScans/' + outName + '.pdf') #creates 2 page pdf for some reason
-#   tauCanvas.SaveAs('tauScans/' + outName + '.png') 
 
 def getTotalDeviations(histDict):
 # WARNING this modifies the systematics histograms, be aware if you look at them later in the code
@@ -372,6 +317,20 @@ def getTotalDeviations(histDict):
     totalUp.SetBinContent(i, totalUp.GetBinContent(i)**0.5)
     totalDown.SetBinContent(i, totalDown.GetBinContent(i)**0.5)
   return totalUp, totalDown
+
+def getDeviationOverview(histDict):
+# WARNING this modifies the systematics histograms, be aware if you look at them later in the code
+  nominal = histDict['']
+  sysImpacts = []
+  for name in histDict.keys():
+    vari = histDict[name].Clone()
+    vari.Add(nominal, -1.)
+    vari.Divide(nominal)
+    sysImpacts.append((name, round( sum([abs(vari.GetBinContent(i)) for i in range(1,vari.GetXaxis().GetNbins()+1)])/vari.GetXaxis().GetNbins() * 100., 3)  ))
+    # sysImpacts.append((name, round((histDict[name].Integral()-nominal)/nominal * 100., 3) )) 
+  sysImpacts = sorted(sysImpacts, key=lambda tup: abs(tup[1]), reverse=True)
+  pprint.pprint(sysImpacts)
+  # pdb.set_trace()
 
 
 def getRMS(histDict):
@@ -544,9 +503,6 @@ for dist in distList:
     outMig = fracSigData(outMig, signalNom, backgroundsNom, data)
 
 
-    # for bkg in backgrounds.values():
-    #   bkg.Scale(1. + lumiunc[args.year] * direc[1])
-    # outMig.Scale(1. + lumiunc[args.year] * direc[1])
     # NOTE can just scale data right? needs to be applied to signal too, but not NP, hence the 0.91
     data.Scale(1. + (lumiunc[args.year] * direc[1] * 0.91))
     unfolded = getUnfolded(response, data, backgrounds, outMig)
@@ -558,21 +514,52 @@ for dist in distList:
     unfoldedDict['UE'+direc[0]] = unfoldedNom.Clone()
     unfoldedDict['UE'+direc[0]].Scale(1. + 0.005 * direc[1])
 
-  # pdb.set_trace()
-
-  totalUp, totalDown = getTotalDeviations(unfoldedDict)
-
   pdfDict[''] = unfoldedNom.Clone()
   q2Dict[''] = unfoldedNom.Clone()
+
+  # pdb.set_trace()
+  if args.norm:
+    # replace data and MC statistics | do before unfoldedNom is normalized!
+    dtStatDict = {"": unfoldedNom.Clone()}
+    mcStatDict = {"": unfoldedNom.Clone()}
+    dtStatDict[""].Scale(1./dtStatDict[""].Integral())
+    mcStatDict[""].Scale(1./mcStatDict[""].Integral())
+    for i in range(1, unfoldedNom.GetXaxis().GetNbins()+1):
+      for direction in [(-1., 'Down'), (1.,'Up')]:
+        dtStatVar = unfoldedNom.Clone()
+        dtStatVar.SetBinContent(i, dtStatVar.GetBinContent(i) + direction[0]*dataStat.GetBinContent(i))
+        dtStatVar.Scale(1./dtStatVar.Integral())
+        dtStatDict['stat' + str(i) + direction[1]] = dtStatVar.Clone()
+        mcStatVar = unfoldedNom.Clone()
+        mcStatVar.SetBinContent(i, mcStatVar.GetBinContent(i) + direction[0]*bkgStat.GetBinContent(i))
+        mcStatVar.Scale(1./mcStatVar.Integral())
+        mcStatDict['stat' + str(i) + direction[1]] = mcStatVar.Clone()
+    dataStat, dataStatDown = getTotalDeviations(dtStatDict)
+    bkgStat, bkgStatDown = getTotalDeviations(mcStatDict)
+    # could take the max of up and down, but they are practically the same
+    # for i in range(1, unfoldedNom.GetXaxis().GetNbins()+1):
+    #   dataStat.SetBinContent(max())
+    #   bkgStat.SetBinContent(max())
+
+    # normalize result and variations
+    for his in unfoldedDict.values():
+      his.Scale(1./his.Integral())
+    for his in q2Dict.values():
+      his.Scale(1./his.Integral())
+    for his in pdfDict.values():
+      his.Scale(1./his.Integral())
+    unfoldedNom.Scale(1./unfoldedNom.Integral())
+
+  if args.overview:
+    getDeviationOverview(unfoldedDict)
+  totalUp, totalDown = getTotalDeviations(unfoldedDict)
   q2Up, q2Down = getEnv(q2Dict)
   pdfrms = getRMS(pdfDict)
+
   # add q2 and pdf to totalUp and totalDown
   for i in range(1, totalUp.GetXaxis().GetNbins()+1):
     totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
     totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
-
-  unfoldedMC = getUnfolded(response, signal, {}, outMig)
-  unfoldedMC.Scale(1./lumiScales[args.year])
 
 
   # stick just data statistics onto unfoldedNom
@@ -586,14 +573,13 @@ for dist in distList:
     totalErr = (dataStat.GetBinContent(i)**2+ bkgStat.GetBinContent(i)**2+ max(abs(totalUp.GetBinContent(i)),abs(totalDown.GetBinContent(i)))**2)**0.5
     unfoldedTotUnc.SetBinError(i, totalErr)
 
+  # get the unfolded MC as well, for sanity checks
+  unfoldedMC = getUnfolded(response, signal, {}, outMig)
+  unfoldedMC.Scale(1./lumiScales[args.year])
 
 
-# NOTE THIS BLOCK LOADS THE SYSTEMATICS BAND FOR THE THEORY, VERY SIMILAR TO PREUNF CODE
 
-  # plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)']
-  # plMC = response.ProjectionY("PLMC")
-
-
+# NOTE THIS BLOCK LOADS THE SYSTEMATICS BAND FOR THE THEORY
   plMCDict, plMCpdfDict, plMCq2Dict = {}, {}, {}
 
   plNLOpdfDict, plNLOq2Dict, plNLOMCDict = {}, {}, {}
@@ -607,7 +593,7 @@ for dist in distList:
     else: plMCDict[var] = plMC
 
   for var in NLOtheoVarList:
-    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
+    plMC = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + ('_norm' if args.norm else '') + '.pkl','r'))[dist.replace('unfReco','fid_unfReco')+var]['ttgjetst#bar{t}#gamma NLO (genuine)']
     plMC.Scale(1./lumiScales[args.year])
     if var.count('pdf'): plNLOpdfDict[var] = plMC.Clone()
     elif var.count('q2'): plNLOq2Dict[var] = plMC.Clone()
@@ -674,21 +660,18 @@ for dist in distList:
 
   unfoldedTotUnc.SetLineWidth(3)
   unfoldedTotUnc.SetLineColor(ROOT.kBlack)
-  # unfoldedTotUnc.SetFillStyle(3244)
-  # unfoldedTotUnc.SetFillColor(ROOT.kOrange)
-  # unfoldedTotUnc.GetYaxis().SetRangeUser(0., unfoldedNom.GetMaximum()*0.2)
   unfoldedTotUnc.SetMinimum(0.)
 
   if args.norm:
-    unfoldedTotUnc.Scale(1/unfoldedTotUnc.Integral())
     plMCTot.Scale(1/plMCTot.Integral())
 
   if dist in ['unfReco_phAbsEta']:
     unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.4, plMCTot.GetMaximum()*1.4))
+  elif dist in ['unfReco_phBJetDeltaR']:
+    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.35, plMCTot.GetMaximum()*1.4))
   else:
     unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.2, plMCTot.GetMaximum()*1.2))
   unfoldedTotUnc.GetXaxis().SetTitle(labels[dist][1])
-  # unfoldedTotUnc.GetYaxis().SetTitle('Fiducial cross section (fb)')
   unfoldedTotUnc.GetYaxis().SetTitle('')
   unfoldedTotUnc.GetYaxis().SetTitleOffset(1.55)
 
@@ -713,11 +696,9 @@ for dist in distList:
   plMCTot.Draw('same E2')
 
   unfoldedMC.SetLineWidth(3)
-  # unfoldedMC.Draw('HIST same')
 
   plMCTot2.SetLineWidth(3)
   plMCTot2.SetLineColor(ROOT.kBlack)
-  plMCTot2.Scale(args.ss)
   plMCTot2.Draw('same HIST')
 
 
@@ -729,10 +710,6 @@ for dist in distList:
   plHW7.Scale(1./lumiScales['2016'])
   plPy8.Scale(1./lumiScales['2016'])
 
-  # plHWpp.Scale(args.ss)
-  # plHW7.Scale(args.ss)
-  # plPy8.Scale(args.ss)
-
   if args.norm:
     plHWpp.Scale(1/plHWpp.Integral())
     plHW7.Scale(1/plHW7.Integral())
@@ -740,7 +717,8 @@ for dist in distList:
 
   plHWpp.Draw('hist same')
   plHW7.Draw('hist same')
-  plPy8.Draw('hist same')
+  if args.check:
+    plPy8.Draw('hist same')
 
   plHWpp.SetLineWidth(3)
   plHW7.SetLineWidth(3)
@@ -759,10 +737,7 @@ for dist in distList:
   unfoldedNom.SetLineWidth(3)
   unfoldedNom.SetMarkerStyle(8)
   unfoldedNom.SetMarkerSize(2)
-  if args.norm:
-    unfoldedNom.Scale(1/unfoldedNom.Integral())
   unfoldedNom.Draw('same E1 X0')
-  # unfoldedNom.Draw('same')
 
   if dist in ['unfReco_phBJetDeltaR', 'unfReco_ll_deltaPhi', 'unfReco_phLep1DeltaR']: #legend on the left
     legend = ROOT.TLegend(1.1-0.92,0.61,1.1-0.62,0.87)
@@ -777,10 +752,10 @@ for dist in distList:
   # legend.AddEntry(unfoldedMC,"Unfolded MC Signal","l")
   legend.AddEntry(plHWpp,'MG5+Herwig++',"l")
   legend.AddEntry(plHW7,'MG5+Herwig7',"l")
-  legend.AddEntry(plPy8,'PYTHIA8 ALT',"l")
+  if args.check:
+    legend.AddEntry(plPy8,'PYTHIA8 ALT',"l")
   legend.Draw()
 
-  # log.info("chi2 unfolded: " + str(calcChi2(unfoldedNom, [plMCTot])))
 
 # RATIO PAD
   cunf.bottomPad.cd()
@@ -833,7 +808,8 @@ for dist in distList:
 
   plHWppRat.Draw('same hist')
   plHW7Rat.Draw('same hist')
-  plPy8Rat.Draw('same hist')
+  if args.check:
+    plPy8Rat.Draw('same hist')
 
   theoRat.Draw('same HIST')
 
@@ -845,8 +821,10 @@ for dist in distList:
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.04,'CMS #bf{#it{Preliminary}}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.04, ('#bf{%3.0f fb^{-1} (13 TeV)}'%lumiScalesRounded[args.year])), 31)
 
-
-  drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  0.55, '#bf{Fiducial cross section [fb]}'), 11, size=0.042, angle=90)
+  if args.norm:
+    drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  1-ROOT.gStyle.GetPadTopMargin(), '#bf{' + labels[dist][2] + '}'), 31, size=0.042, angle=90)
+  else:
+    drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  1-ROOT.gStyle.GetPadTopMargin(), '#bf{Fiducial cross section [fb]}'), 31, size=0.042, angle=90)
   drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  0.07,'#bf{Pred. / data}'), 11, size=0.042, angle=90)
 
 

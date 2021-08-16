@@ -83,6 +83,7 @@ for i in range(0, 100):
 for i in ('1', '2', '3'):
   systematics['colRec_' + i] = []
 
+
 # for i in ('1', '2', '3'):
 #   for j in ('Up', 'Down'):
 #     systematics['colRec_' + i + j] = []
@@ -91,6 +92,7 @@ for i in ('1', '2', '3'):
 # Compile list to systematic to show
 #
 showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in systematics.keys()))
+showSysList.remove('colRec')
 # showSysList.remove('colRec')
 # showSysList.append('colRec_1')
 # showSysList.append('colRec_2')
@@ -106,6 +108,10 @@ showSysListRunII.append('lumi_2016'  )
 showSysListRunII.append('lumi_2017'  )
 showSysListRunII.append('lumi_2018'  )
 showSysListRunII.append('lumi_3Ycorr')
+
+for i in ('1', '2', '3'):
+  showSysListRunII.append('colRec_' + i )
+  # for j in ('Up', 'Down'):
 
 #
 # Defining linear systematics as "name : (sampleList, %)"

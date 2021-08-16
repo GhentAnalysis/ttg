@@ -12,7 +12,7 @@ import cPickle as pickle
 from math import sqrt
 from ttg.tools.helpers import copyIndexPHP, copyGitInfo, plotDir, addHist
 from ttg.tools.lock import lock
-from ttg.tools.style import drawTex, getDefaultCanvas, fromAxisToNDC
+from ttg.tools.style import drawTex, getDefaultCanvas, setDefault, ttgGeneralStyle, fromAxisToNDC
 from ttg.plots.postFitInfo import applyPostFitScaling, applyPostFitConstraint
 # from ttg.plots.systematics import constructQ2Sys, constructPdfSys, constructCRSys
 from ttg.plots.systematics import constructQ2Sys, constructPdfSys
@@ -20,6 +20,8 @@ from ttg.samples.Sample import getSampleFromStack
 
 ROOT.TH1.SetDefaultSumw2()
 ROOT.TH2.SetDefaultSumw2()
+
+
 #
 # Apply the relative variation between source and sourceVar to the destination histogram
 #

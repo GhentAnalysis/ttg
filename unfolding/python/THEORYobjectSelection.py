@@ -25,7 +25,7 @@ def getLorentzVector(pt, eta, phi, e):
 
 # LEPTONS
 def PLleptonSelector(tree, index):
-  if tree._pl_lPt[index] < 15:          return False
+  if tree._pl_lPt[index] < 25:          return False
   if abs(tree._pl_lEta[index]) > 2.4:   return False
   else:                                 return True
 
@@ -68,10 +68,10 @@ def PLselectPhotons(t, n):
 # JETS
 def PLisGoodJet(tree, n, index):
   if not abs(tree._pl_jetEta[index]) < 2.4: return False
-  if deltaR(tree._pl_jetEta[index], tree._pl_phEta[n.PLph], tree._pl_jetPhi[index], tree._pl_phPhi[n.PLph]) < 0.1: return False
+  # if deltaR(tree._pl_jetEta[index], tree._pl_phEta[n.PLph], tree._pl_jetPhi[index], tree._pl_phPhi[n.PLph]) < 0.1: return False
   
-  for lep in tree.PLleptons:
-    if deltaR(tree._pl_jetEta[index], tree._pl_lEta[lep], tree._pl_jetPhi[index], tree._pl_lPhi[lep]) < 0.4: return False
+  # for lep in tree.PLleptons:
+  #   if deltaR(tree._pl_jetEta[index], tree._pl_lEta[lep], tree._pl_jetPhi[index], tree._pl_lPhi[lep]) < 0.4: return False
   return True
 
 # just store 1 "jets match" bool?
@@ -82,18 +82,14 @@ def PLgoodJets(t, n):
   setattr(n, 'PLnjets', len(getattr(t, 'PLjets')))
   setattr(n, 'PLj1', getattr(t, 'PLjets')[0] if getattr(n, 'PLnjets') > 0 else -1)
   setattr(n, 'PLj2', getattr(t, 'PLjets')[1] if getattr(n, 'PLnjets') > 1 else -1)
-  # setattr(n, 'PLj3', getattr(t, 'PLjets')[0] if getattr(n, 'PLnjets') > 2 else -1)
-  # setattr(n, 'PLj4', getattr(t, 'PLjets')[1] if getattr(n, 'PLnjets') > 3 else -1)
-  # setattr(n, 'PLj5', getattr(t, 'PLjets')[0] if getattr(n, 'PLnjets') > 4 else -1)
-  # setattr(n, 'PLj6', getattr(t, 'PLjets')[1] if getattr(n, 'PLnjets') > 5 else -1)
+
 
 def PLbJets(t, n):
   setattr(t, 'PLdbjets',  [i for i in getattr(t, 'PLjets') if t._pl_jetHadronFlavor[i] == 5])
   setattr(n, 'PLndbjets', len(getattr(t, 'PLdbjets')))
-  # setattr(n, 'PLdbj1', getattr(t, 'PLdbjets')[0] if getattr(n, 'PLndbjets') > 0 else -1)
-  # setattr(n, 'PLdbj2', getattr(t, 'PLdbjets')[1] if getattr(n, 'PLndbjets') > 1 else -1)
-  # setattr(n, 'PLdbj3', getattr(t, 'PLdbjets')[2] if getattr(n, 'PLndbjets') > 2 else -1)
-  # setattr(n, 'PLdbj4', getattr(t, 'PLdbjets')[3] if getattr(n, 'PLndbjets') > 3 else -1)
+
+  setattr(n, 'PLbj1', getattr(t, 'PLdbjets')[0] if getattr(n, 'PLndbjets') > 0 else -1)
+  setattr(n, 'PLbj2', getattr(t, 'PLdbjets')[1] if getattr(n, 'PLndbjets') > 1 else -1)
 
 def PLmakeInvariantMasses(t, n):
   first  = getLorentzVector(n.PLl1_pt, t._pl_lEta[n.PLl1], t._pl_lPhi[n.PLl1], t._pl_lE[n.PLl1])   if len(t.PLleptons) > 0 else None
@@ -119,13 +115,14 @@ def PLmakeDeltaR(t, n):
     setattr(n, 'PLl2JetDeltaR'+var,  min([deltaR(t._pl_jetEta[j], t._pl_lEta[n.PLl2], t._pl_jetPhi[j], t._pl_lPhi[n.PLl2]) for j in getattr(t, 'PLjets'+var)] + [999])     if len(t.PLleptons) > 1 else -1)
     setattr(n, 'PLjjDeltaR'+var,     min([deltaR(t._pl_jetEta[getattr(n, 'PLj1'+var)], t._pl_jetEta[getattr(n, 'PLj2'+var)], t._pl_jetPhi[getattr(n, 'PLj1'+var)], t._pl_jetPhi[getattr(n, 'PLj2'+var)])]) if getattr(n, 'PLnjets'+var) > 1 else -1) # pylint: disable=C0301
 
+    n.PLllDeltaR   = deltaR(t._pl_lEta[n.PLl1], t._pl_lEta[n.PLl2], t._pl_lPhi[n.PLl1], t._pl_lPhi[n.PLl2]) if len(t.PLleptons) > 1 else -1
+    n.PLbbDeltaR   = deltaR(t._pl_jetEta[n.PLbj1], t._pl_jetEta[n.PLbj2], t._pl_jetPhi[n.PLbj1], t._pl_jetPhi[n.PLbj2]) if n.PLndbjets > 1 else -1
+    l1b1 = deltaR(t._pl_lEta[n.PLl1], t._pl_jetEta[n.PLbj1], t._pl_lPhi[n.PLl1], t._pl_jetPhi[n.PLbj1]) if (n.PLndbjets > 1 and len(t.PLleptons) > 1)  else -1
+    l2b1 = deltaR(t._pl_lEta[n.PLl2], t._pl_jetEta[n.PLbj1], t._pl_lPhi[n.PLl2], t._pl_jetPhi[n.PLbj1]) if (n.PLndbjets > 1 and len(t.PLleptons) > 1)  else -1
+    l1b2 = deltaR(t._pl_lEta[n.PLl1], t._pl_jetEta[n.PLbj2], t._pl_lPhi[n.PLl1], t._pl_jetPhi[n.PLbj2]) if (n.PLndbjets > 1 and len(t.PLleptons) > 1)  else -1
+    l2b2 = deltaR(t._pl_lEta[n.PLl2], t._pl_jetEta[n.PLbj2], t._pl_lPhi[n.PLl2], t._pl_jetPhi[n.PLbj2]) if (n.PLndbjets > 1 and len(t.PLleptons) > 1)  else -1
+    n.PLlbDeltaR = min(l1b1, l2b1, l1b2, l2b2)
 
-def checkPLphMatch(t, n):
-  log.info(deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]))
-  if deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]) > 0.1: 
-    log.info('failed ph match')
-    return False
-  return True
 
 # def checkPLMatches(t, n):
 #   if deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]) > 0.1: 

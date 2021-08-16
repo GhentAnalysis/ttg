@@ -389,3 +389,71 @@ for dist in distList:
   fidNLORunII[distFid + 'fdpDown'][procName].Add(rmspdf18, -1)
 
   pickle.dump(fidNLORunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl', 'w'))
+
+
+
+  # exact same thing, but normalizing the variations the the same integral as nominal 
+
+  fidNLO16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+  fidNLO17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+  fidNLO18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
+
+  fidNLORunII = copy.deepcopy(fidNLO16)
+  distFid = dist.replace('unfReco','fid_unfReco')
+
+  for var in fidNLORunII.keys():
+    for proc in fidNLORunII[var].keys():
+      fidNLORunII[var][proc].Add(fidNLO17[var][proc])
+      fidNLORunII[var][proc].Add(fidNLO18[var][proc])
+
+
+#  absolutely barbaric implementation, I know
+  # we sum the envelopes / rms variations, not the the indiviual variations
+  procName = fidNLORunII[var].keys()[0]
+  q2dict16 =  dict((var, fidNLO16[distFid + var][procName].Clone()) for var in ['']+['q2Sc_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')])
+  pdfdict16 = dict((var, fidNLO16[distFid + var][procName].Clone()) for var in ['']+['pdfSc_' + str(i) for i in range(0, 100)])
+  q2dict17 =  dict((var, fidNLO17[distFid + var][procName].Clone()) for var in ['']+['q2Sc_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')])
+  pdfdict17 = dict((var, fidNLO17[distFid + var][procName].Clone()) for var in ['']+['pdfSc_' + str(i) for i in range(0, 100)])
+  q2dict18 =  dict((var, fidNLO18[distFid + var][procName].Clone()) for var in ['']+['q2Sc_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')])
+  pdfdict18 = dict((var, fidNLO18[distFid + var][procName].Clone()) for var in ['']+['pdfSc_' + str(i) for i in range(0, 100)])
+
+  for dicti in [q2dict16, pdfdict16, q2dict17, pdfdict17, q2dict18, pdfdict18]:
+    for h in dicti.values():
+      h.Scale(dicti[''].Integral() / h.Integral())
+
+  plq2Up16, plq2Down16 =  getEnv(q2dict16)
+  rmspdf16 = getRMS(pdfdict16)
+
+  plq2Up17, plq2Down17 =  getEnv(q2dict17)
+  rmspdf17 = getRMS(pdfdict17)
+
+  plq2Up18, plq2Down18 =  getEnv(q2dict18)
+  rmspdf18 = getRMS(pdfdict18)
+
+  fidNLORunII[distFid + 'fdpUp'] = {}
+  fidNLORunII[distFid + 'fdpDown'] = {}
+  fidNLORunII[distFid + '2qUp'] = {}
+  fidNLORunII[distFid + '2qDown'] = {}
+
+
+  fidNLORunII[distFid + 'fdpUp'][procName] = fidNLORunII[distFid][procName].Clone()
+  fidNLORunII[distFid + 'fdpDown'][procName] = fidNLORunII[distFid][procName].Clone()
+  fidNLORunII[distFid + '2qUp'][procName] = fidNLORunII[distFid][procName].Clone()
+  fidNLORunII[distFid + '2qDown'][procName] = fidNLORunII[distFid][procName].Clone()
+
+  fidNLORunII[distFid + '2qUp'][procName].Add(plq2Up16)
+  fidNLORunII[distFid + '2qDown'][procName].Add(plq2Down16)
+  fidNLORunII[distFid + 'fdpUp'][procName].Add(rmspdf16)
+  fidNLORunII[distFid + 'fdpDown'][procName].Add(rmspdf16, -1)
+
+  fidNLORunII[distFid + '2qUp'][procName].Add(plq2Up17)
+  fidNLORunII[distFid + '2qDown'][procName].Add(plq2Down17)
+  fidNLORunII[distFid + 'fdpUp'][procName].Add(rmspdf17)
+  fidNLORunII[distFid + 'fdpDown'][procName].Add(rmspdf17, -1)
+
+  fidNLORunII[distFid + '2qUp'][procName].Add(plq2Up18)
+  fidNLORunII[distFid + '2qDown'][procName].Add(plq2Down18)
+  fidNLORunII[distFid + 'fdpUp'][procName].Add(rmspdf18)
+  fidNLORunII[distFid + 'fdpDown'][procName].Add(rmspdf18, -1)
+
+  pickle.dump(fidNLORunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfENDA_NLO/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '_norm.pkl', 'w'))

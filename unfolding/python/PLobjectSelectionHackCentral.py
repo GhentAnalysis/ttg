@@ -120,29 +120,22 @@ def PLmakeDeltaR(t, n):
     setattr(n, 'PLjjDeltaR'+var,     min([deltaR(t._pl_jetEta[getattr(n, 'PLj1'+var)], t._pl_jetEta[getattr(n, 'PLj2'+var)], t._pl_jetPhi[getattr(n, 'PLj1'+var)], t._pl_jetPhi[getattr(n, 'PLj2'+var)])]) if getattr(n, 'PLnjets'+var) > 1 else -1) # pylint: disable=C0301
 
 
-def checkPLphMatch(t, n):
-  log.info(deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]))
-  if deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]) > 0.1: 
-    log.info('failed ph match')
-    return False
-  return True
-
 # def checkPLMatches(t, n):
-#   if deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]) > 0.1: 
+#   if deltaR(t.phEta[n.ph], t._pl_phEta[n.PLph], t.phPhi[n.ph], t._pl_phPhi[n.PLph]) > 0.1: 
 #     log.info('failed ph match')
 #     return False
-#   if not any([deltaR(t._lEta[n.l1], t._pl_lEta[i], t._lPhi[n.l1], t._pl_lPhi[i]) > 0.1 for i in [n.PLl1, n.PLl2]]):
+#   if not any([deltaR(t.lEta[n.l1], t._pl_lEta[i], t.lPhi[n.l1], t._pl_lPhi[i]) > 0.1 for i in [n.PLl1, n.PLl2]]):
 #     log.info('failed l1 match')
 #     return False
-#   if not any([deltaR(t._lEta[n.l2], t._pl_lEta[i], t._lPhi[n.l2], t._pl_lPhi[i]) > 0.1 for i in [n.PLl1, n.PLl2]]):
+#   if not any([deltaR(t.lEta[n.l2], t._pl_lEta[i], t.lPhi[n.l2], t._pl_lPhi[i]) > 0.1 for i in [n.PLl1, n.PLl2]]):
 #     log.info('failed l2 match')
 #     return False
 #   # for i in t.dbjets:
-#   #   if not any([deltaR(t._jetEta[i], t._pl_jetEta[j], t._jetPhi[i], t._pl_jetPhi[j]) > 0.1 for j in t.PLdbjets]):
+#   #   if not any([deltaR(t.jetEta[i], t._pl_jetEta[j], t.jetPhi[i], t._pl_jetPhi[j]) > 0.1 for j in t.PLdbjets]):
 #   #     log.info('failed bjet match')
 #   #     return False
 #   # for i in (jet for jet in t.jets if not jet in t.dbjets):
-#   #   if not any([deltaR(t._jetEta[i], t._pl_jetEta[j], t._jetPhi[i], t._pl_jetPhi[j]) > 0.1 for j in (pljet for pljet in t.PLjets if not pljet in t.PLdbjets)]):
+#   #   if not any([deltaR(t.jetEta[i], t._pl_jetEta[j], t.jetPhi[i], t._pl_jetPhi[j]) > 0.1 for j in (pljet for pljet in t.PLjets if not pljet in t.PLdbjets)]):
 #   #     log.info('failed light jet match')
 #   #     return False
 #   return True

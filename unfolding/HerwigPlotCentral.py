@@ -45,7 +45,7 @@ from math import pi
 from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList
 
 
-reduceType = 'unfHE3'
+reduceType = 'unfHECen'
 # reduceType = 'unfFB'
 
 from ttg.tools.logger import getLogger
@@ -111,7 +111,7 @@ stack = createStack(tuplesFile   = os.path.expandvars('$CMSSW_BASE/src/ttg/unfol
 ########## FIDUCIAL REGION ##########
 def checkFid(c):
   if c.failFid:                                                 return False
-  if abs(c.pl_phEta[c.PLph]) > 1.4442:                             return False
+  if abs(c._pl_phEta[c.PLph]) > 1.4442:                             return False
   if not c.PLph_pt > 20:                                            return False
   if not c.PLndbjets>0:                                             return False
   if not c.PLmll > 20:                                              return False
@@ -159,8 +159,8 @@ def angle(theta1, theta2, phi1, phi2):
 
 # same as in plotHelpers but without the undercores in variables
 def plZpt(c):
-  first  = getLorentzVector(c.PLl1_pt, c.pl_lEta[c.PLl1], c.pl_lPhi[c.PLl1], c.pl_lE[c.PLl1])
-  second = getLorentzVector(c.PLl2_pt, c.pl_lEta[c.PLl2], c.pl_lPhi[c.PLl2], c.pl_lE[c.PLl2])
+  first  = getLorentzVector(c.PLl1_pt, c._pl_lEta[c.PLl1], c._pl_lPhi[c.PLl1], c._pl_lE[c.PLl1])
+  second = getLorentzVector(c.PLl2_pt, c._pl_lEta[c.PLl2], c._pl_lPhi[c.PLl2], c._pl_lE[c.PLl2])
   return (first+second).Pt()
 
 
@@ -250,17 +250,18 @@ l1l2ptBinGen = [40., 70., 100., 140., 190., 250., 330., 500.]
 
 # for systematic variations we only want the response matrices
 plotListFid.append(Plot('fid_unfReco_phPt',            'gen p_{T}(#gamma) (GeV)', lambda c : min(       c.PLph_pt                                                                     ,ptBinGen[-1]       -0.001 )   ,ptBinGen     ))
-plotListFid.append(Plot('fid_unfReco_jetPt',           'gen p_{T}(j1) (GeV)',     lambda c : min(       c.pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     ))
+plotListFid.append(Plot('fid_unfReco_jetPt',           'gen p_{T}(j1) (GeV)',     lambda c : min(       c._pl_jetPt[c.PLj1]                                                           ,ptBinJetGen[-1]       -0.001 )   ,ptBinJetGen     ))
 plotListFid.append(Plot('fid_unfReco_jetLepDeltaR',    'gen #DeltaR(l, j)',       lambda c : min(       min(c.PLl1JetDeltaR, c.PLl2JetDeltaR)                                         ,dRBinJetGen[-1]    -0.001 )   ,dRBinJetGen  ))
 plotListFid.append(Plot('fid_unfReco_phLepDeltaR',     'gen #DeltaR(#gamma, l)',  lambda c : min(       min(c.PLphL1DeltaR, c.PLphL2DeltaR)                                           ,dRBinGen[-1]       -0.001 )   ,dRBinGen     ))
 plotListFid.append(Plot('fid_unfReco_phLep1DeltaR',    'gen #DeltaR(#gamm1a, l)', lambda c : min(       c.PLphL1DeltaR                                                                ,dRBinGen[-1]       -0.001 )   ,dRBinGen     ))
 plotListFid.append(Plot('fid_unfReco_phLep2DeltaR',    'gen #DeltaR(#gamm2a, l)', lambda c : min(       c.PLphL2DeltaR                                                                ,dRBinGen[-1]       -0.001 )   ,dRBinGen     ))
 plotListFid.append(Plot('fid_unfReco_phBJetDeltaR',    'gen #DeltaR(#gamma, b)',  lambda c : min(       kickUnder(0., 900., c.PLphBJetDeltaR)                                         ,dRBinJetGen[-1]    -0.001 )   ,dRBinJetGen  ))
-plotListFid.append(Plot('fid_unfReco_ll_absDeltaEta',  'gen |#Delta#eta(ll)|',    lambda c : min(       abs(protectedGet(c.pl_lEta, c.PLl1) - protectedGet(c.pl_lEta, c.PLl2))      ,absdEtaBinGen[-1]  -0.001 )   ,absdEtaBinGen))
-plotListFid.append(Plot('fid_unfReco_ll_deltaPhi',     'gen #Delta#phi(ll)',      lambda c : min(       deltaPhi(protectedGet(c.pl_lPhi, c.PLl1), protectedGet(c.pl_lPhi, c.PLl2))  ,dPhiBinGen[-1]     -0.001 )   ,dPhiBinGen   ))
-plotListFid.append(Plot('fid_unfReco_phAbsEta',        'gen |#eta|(#gamma)',      lambda c : min(       abs(protectedGet(c.pl_phEta, c.PLph))                                        ,absEtaBinGen[-1]   -0.001 )   ,absEtaBinGen ))
+plotListFid.append(Plot('fid_unfReco_ll_absDeltaEta',  'gen |#Delta#eta(ll)|',    lambda c : min(       abs(protectedGet(c._pl_lEta, c.PLl1) - protectedGet(c._pl_lEta, c.PLl2))      ,absdEtaBinGen[-1]  -0.001 )   ,absdEtaBinGen))
+plotListFid.append(Plot('fid_unfReco_ll_deltaPhi',     'gen #Delta#phi(ll)',      lambda c : min(       deltaPhi(protectedGet(c._pl_lPhi, c.PLl1), protectedGet(c._pl_lPhi, c.PLl2))  ,dPhiBinGen[-1]     -0.001 )   ,dPhiBinGen   ))
+plotListFid.append(Plot('fid_unfReco_phAbsEta',        'gen |#eta|(#gamma)',      lambda c : min(       abs(protectedGet(c._pl_phEta, c.PLph))                                        ,absEtaBinGen[-1]   -0.001 )   ,absEtaBinGen ))
 plotListFid.append(Plot('fid_unfReco_Z_pt',            'gen p_{T}(ll) (GeV)', lambda c : min(     plZpt(c)                                                                     ,ZptBinGen[-1]       -0.001 )   ,ZptBinGen     ))
 plotListFid.append(Plot('fid_unfReco_l1l2_ptsum',      'gen p_{T}(l1)+p_{T}(l2) (GeV)', lambda c : min(      c.PLl1_pt+c.PLl2_pt                                             ,l1l2ptBinGen[-1]       -0.001 )   ,l1l2ptBinGen     ))
+
 
 plotListFid.append(Plot('fid_njets',                   'gen number of jets',                        lambda c : c.PLnjets,                                            (8, -.5, 7.5)))
 plotListFid.append(Plot('fid_nbtag',                   'gen number of medium b-tags (deepCSV)',     lambda c : c.PLndbjets,                                          (4, -.5, 3.5)))
@@ -275,12 +276,12 @@ log.info("using reduceType " + reduceType)
 
 def initTreeHack(sample, shortDebug=False, reducedType=None, splitData=None):
   if reducedType:
-    sample.chain        = ROOT.TChain('tree')
+    sample.chain        = ROOT.TChain('blackJackAndHookersTree')
     sample.listOfFiles  = []
     for samp, productionLabel in sample.addSamples:
       sample.listOfFiles += glob.glob(os.path.join(reducedTupleDir, productionLabel, reducedType, samp[4:] if samp[:4] in ['2016', '2017', '2018'] else samp, '*.root'))
   else:
-    sample.chain = ROOT.TChain('maker/tree')
+    sample.chain = ROOT.TChain('blackJackAndHookers/blackJackAndHookersTree')
     sample.listOfFiles = sample.getListOfFiles(splitData)
   if shortDebug: sample.listOfFiles = sample.listOfFiles[:3]
   if not len(sample.listOfFiles): log.error('No tuples to run over for ' + sample.name)

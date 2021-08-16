@@ -31,7 +31,6 @@ import pdb
 log = getLogger(args.logLevel)
 
 if args.noZgCorr: args.tag += '-noZgCorr'
-
 #
 # Check git and edit the info file
 #
@@ -61,7 +60,7 @@ if args.showSys and not args.sys and args.year == 'all':
   showSysList = showSysListRunII
 
 #filtering out colRec here
-showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec']])]
+# showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec']])]
 
 if args.showSys and args.tag.count('forZgest'):
   showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec', 'NPFlat', 'NPHigh', 'bFrag']])]
@@ -205,8 +204,12 @@ def makePlotList():
     plotList.append(Plot('photon_chargedIso_NO',       'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        (20, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     plotList.append(Plot('photon_chargedIso_bins',     'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     plotList.append(Plot('photon_chargedIso_bins_NO',  'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
-    plotList.append(Plot('photon_chargedIso_small',    'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
-    plotList.append(Plot('photon_chargedIso_small_NO', 'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+    # random issues with these plots for colrec
+    if not (args.showSys and args.year == 'all'):
+      plotList.append(Plot('photon_chargedIso_small',    'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
+      plotList.append(Plot('photon_chargedIso_small_NO', 'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        (80, 0, 20), normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
+      plotList.append(Plot('l1_jetDeltaR',               '#DeltaR(l_{1}, j)',                     lambda c : c.l1JetDeltaR,                                      (20, 0, 5)))
+      plotList.append(Plot('l1_phi',                     '#phi(l_{1})',                           lambda c : c._lPhi[c.l1],                                      (10, -pi, pi)))
     # # plotList.append(Plot('photon_chargedIso_wide',     'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
     # # plotList.append(Plot('photon_chargedIso_wide_NO',  'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 5, 10, 20], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV'), overflowBin = None))
     # # plotList.append(Plot('photon_chargedIso_bins2',    'Photon charged-hadron isolation [GeV]', lambda c : c._phChargedIsolation[c.ph],                        [0, 1.141 , 2, 3, 5, 10], normBinWidth = 1, texY = ('(1/N) dN / GeV' if normalize else 'Events / GeV')))
@@ -218,16 +221,11 @@ def makePlotList():
     # plotList.append(Plot('photon_relChargedIso',       'chargedIso(#gamma)/p_{T}(#gamma)',      lambda c : c._phChargedIsolation[c.ph]/c.ph_pt,                (20, 0, 2)))
     # plotList.append(Plot('photon_neutralIso',          'neutralIso(#gamma) [GeV]',              lambda c : c._phNeutralHadronIsolation[c.ph],                  (25, 0, 5)))
     # plotList.append(Plot('photon_photonIso',           'photonIso(#gamma) [GeV]',               lambda c : c._phPhotonIsolation[c.ph],                         (32, 0, 8)))
-    plotList.append(Plot('photon_SigmaIetaIeta',       '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (20, 0, 0.04)))
-    plotList.append(Plot('photon_SigmaIetaIeta_small', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
+    plotList.append(Plot('photon_SigmaIetaIeta',         '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (20, 0, 0.04)))
+    plotList.append(Plot('photon_SigmaIetaIeta_small',   '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (80, 0, 0.04)))
+    plotList.append(Plot('photon_SigmaIetaIeta_smaller', '#sigma_{i#etai#eta}(#gamma)',           lambda c : c._phSigmaIetaIeta[c.ph],                           (160, 0, 0.04)))
     # plotList.append(Plot('photon_hadOverEm',           'hadronicOverEm(#gamma)',                lambda c : c._phHadronicOverEm[c.ph],                          (100, 0, .025)))
     # plotList.append(Plot('photon_phHadTowOverEm',      'hadronicTowerOverEm(#gamma)',           lambda c : c._phHadTowOverEm[c.ph],                            (100, 0, .025)))
-
-
-# l1_relIso
-# l1_Mva
-# l_maxRelIso
-
 
     plotList.append(Plot('phJetDeltaR',                '#DeltaR(#gamma, j)',                    lambda c : c.phJetDeltaR,                                      [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
     plotList.append(Plot('phBJetDeltaR',               '#DeltaR(#gamma, b)',                    lambda c : c.phBJetDeltaR,                                     [0, 0.1, 0.6, 1.1, 1.6, 2.1, 2.6, 3.1, 3.6, 4.1, 4.6]))
@@ -235,9 +233,7 @@ def makePlotList():
     plotList.append(Plot('l1_pt_mvabins',              'p_{T}(l_{1}) [GeV]',                    lambda c : c.l1_pt,                                            [10.,15.,20.,25.,30.,40.,50.,60.,120,150.]))
     plotList.append(Plot('l1_eta',                     '|#eta|(l_{1})',                         lambda c : abs(c._lEta[c.l1]),                                 (15, 0, 2.4)))
     plotList.append(Plot('l1_eta_small',               '|#eta|(l_{1})',                         lambda c : abs(c._lEta[c.l1]),                                 (50, 0, 2.4)))
-    plotList.append(Plot('l1_phi',                     '#phi(l_{1})',                           lambda c : c._lPhi[c.l1],                                      (10, -pi, pi)))
     plotList.append(Plot('l1_relIso',                  'relIso(l_{1})',                         lambda c : c._relIso[c.l1],                                    (16, 0, 0.16)))
-    plotList.append(Plot('l1_jetDeltaR',               '#DeltaR(l_{1}, j)',                     lambda c : c.l1JetDeltaR,                                      (20, 0, 5)))
     plotList.append(Plot('l1_Mva',                     'leptonMva output l1',                   lambda c : c._leptonMvatZq[c.l1],                              (84, -1.05, 1.05)))
     plotList.append(Plot('l2_pt',                      'p_{T}(l_{2}) [GeV]',                    lambda c : c.l2_pt,                                            (20, 15, 215)))
     plotList.append(Plot('l2_pt_mvabins',              'p_{T}(l_{2}) [GeV]',                    lambda c : c.l2_pt,                                            [10.,15.,20.,25.,30.,40.,50.,60.,120,150.]))
@@ -262,8 +258,8 @@ def makePlotList():
     plotList.append(Plot('dlg_mass',                   'm(ll#gamma) [GeV]',                     lambda c : c.mllg,                                             (40, 0, 500)))
     plotList.append(Plot('dlg_mass_zoom',              'm(ll#gamma) [GeV]',                     lambda c : c.mllg,                                             (40, 50, 200)))
     plotList.append(Plot('phLepDeltaR',                '#DeltaR(#gamma, l)',                    lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                    (20, 0, 5)))
-    plotList.append(Plot('njets',                      'number of jets',                        lambda c : c.njets,                                            (8, -.5, 7.5)))
-    plotList.append(Plot('nbtag',                      'number of medium b-tags (deepCSV)',     lambda c : c.ndbjets,                                          (4, -.5, 3.5)))
+    plotList.append(Plot('njets',                      'Number of jets',                        lambda c : c.njets,                                            (8, -.5, 7.5)))
+    plotList.append(Plot('nbtag',                      'Number of b-tagged jets',               lambda c : c.ndbjets,                                          (4, -.5, 3.5)))
     plotList.append(Plot('j1_pt',                      'p_{T}(j_{1}) [GeV]',                    lambda c : c._jetSmearedPt[c.j1],                              (30, 30, 330)))
     plotList.append(Plot('j1_eta',                     '|#eta|(j_{1})',                         lambda c : abs(c._jetEta[c.j1]),                               (15, 0, 2.4)))
     plotList.append(Plot('j1_phi',                     '#phi(j_{1})',                           lambda c : c._jetPhi[c.j1],                                    (10, -pi, pi)))
@@ -341,7 +337,9 @@ def makePlotList():
     ptBinGen = [20., 35., 50., 70., 130., 200., 300.]
 
     dRBinRec = [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4]
-    dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.4]
+    # dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.4]
+    dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.4]
+
 
     absEtaBinRec = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
     absEtaBinGen = [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.45]
@@ -484,7 +482,10 @@ lumiScales['comb'] = lumiScales['2018']
 
 totalPlots = []
 
-from ttg.tools.style import drawLumi
+from ttg.tools.style import drawLumi, setDefault, ttgGeneralStyle
+
+setDefault()
+ttgGeneralStyle()
 
 for year in years:
   plots = makePlotList()
