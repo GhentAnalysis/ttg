@@ -174,8 +174,8 @@ def stitch2D(h6, h7, h8):
 
 #################### main code ####################
 
-if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
-    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
+if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
+    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
 
 if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfENDA/noData/placeholderSelection/'):
     os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfENDA/noData/placeholderSelection/')
@@ -186,17 +186,17 @@ if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/
 for dist in distList:
   log.info('running for '+ dist)
   response16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  reco16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+  reco16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
   out16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
   fid16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
 
   response17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  reco17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+  reco17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
   out17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
   fid17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
 
   response18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
-  reco18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+  reco18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
   out18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
   fid18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl','r'))
 
@@ -299,11 +299,11 @@ for dist in distList:
         fidRunII[var][proc].Add(fid18[var][proc])
 
 
-  pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
+  pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
   pickle.dump(responseRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl', 'w'))
   pickle.dump(outRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl', 'w'))
   pickle.dump(fidRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','fid_unfReco') + '.pkl', 'w'))
-  pickle.dump(recoSumRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist.replace('unfReco','sum_unfReco') + '.pkl', 'w'))
+  pickle.dump(recoSumRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/RunII/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist.replace('unfReco','sum_unfReco') + '.pkl', 'w'))
 
 
   respStichCanv = ROOT.TCanvas('stitchedResp' + dist,'stitchedResp' + dist, 1900, 700)

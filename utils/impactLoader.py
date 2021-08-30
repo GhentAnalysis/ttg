@@ -162,6 +162,8 @@ totalDict = {'2016':{},'2017':{},'2018':{}}
 def getEffect(year):
 
   picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/unfReco_phPt.pkl'
+  if year == 'all':
+    picklePath = picklePath.replace('niceEstimDD', 'niceEstimDD-merged')
   print picklePath.replace('/storage_mnt/storage/user/gmestdac/public_html/ttG/','')
   varHists = pickle.load(open(picklePath))
 
@@ -335,8 +337,7 @@ def getEffect(year):
     rels[bkg[0] + 'Norm'] = (dh, dl, ul, uh)
     totalDict[year][bkg[0] + 'Norm'] = (subUp.Clone('effectUp'), subDown.Clone('effectDown'))
 
-
-  for lumi in [('lumi_2016', 0.009), ('lumi_2017', 0.02), ('lumi_2018', 0.015)]:
+  for lumi in [('lumi_2016', 0.012), ('lumi_2017', 0.023), ('lumi_2018', 0.025)]:
     bkgUp = sumHists(varHists['unfReco_phPt'], [], ['data', 'TTGamma'], ('', 1. + lumi[1]))
     bkgDown = sumHists(varHists['unfReco_phPt'], [], ['data', 'TTGamma'], ('', 1. - lumi[1]))
     subUp = data.Clone()
@@ -436,9 +437,14 @@ def getEffect(year):
 
 
 
+
+
 varYears = {}
 for year in ['2016', '2017', '2018']:
   varYears[year] = getEffect(year)
+
+
+
 print (20*' ') + '2016' + (26*' ') + '2017' +  (26*' ') + '2018'+  (26*' ') + 'overall'
 for sys in varYears['2016'].keys():
   # if not sys.count('lumi'): continue

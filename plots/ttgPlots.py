@@ -97,7 +97,8 @@ else:
   from ttg.plots.npWeight               import npWeight
 
 
-from ttg.plots.ZgWeight               import ZgWeight
+# from ttg.plots.ZgWeight               import ZgWeight
+from ttg.plots.ZgWeightMerged         import ZgWeightTotal
 from math import pi
 import numpy
 
@@ -307,6 +308,14 @@ def makePlotList():
     plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) [GeV]', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
     plotList.append(Plot2D('photon_pt_etaC', 'p_{T}(#gamma) [GeV]', lambda c : min(c.ph_pt, 119.) , [20., 50., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.5, 1.8, 2.5]))
 
+# TODO disbale these again later
+
+    plotList.append(Plot2D('mll_mllg_A', 'm(ll) [GeV]', lambda c : c.mll , (10, 20, 120), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (15, 50, 200)))
+    plotList.append(Plot2D('mll_mllg_B', 'm(ll) [GeV]', lambda c : c.mll , (20, 20, 120), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (30, 50, 200)))
+    # plotList.append(Plot2D('mll_mllg_C', 'm(ll) [GeV]', lambda c : c.mll , (15, 0, 150), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (15, 0, 250)))
+    # plotList.append(Plot2D('mll_mllg_D', 'm(ll) [GeV]', lambda c : c.mll , (15, 0, 150), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (20, 0, 250)))
+    # plotList.append(Plot2D('mll_mllg_E', 'm(ll) [GeV]', lambda c : c.mll , (60, 0, 150), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (60, 0, 250)))
+    # plotList.append(Plot2D('mll_mllg_F', 'm(ll) [GeV]', lambda c : c.mll , (60, 0, 150), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (80, 0, 250)))
 
 
     # plotList.append(Plot('j1_pt25',                    'p_{T}(j_{1}) [GeV]',                    lambda c : c._jetSmearedPt[c.j1],                              [25.0, 30.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 110.0, 120.0, 130.0, 140.0, 150.0, 160.0, 170.0, 180.0, 190.0, 200.0, 210.0, 220.0, 230.0, 240.0, 250.0, 260.0, 270.0, 280.0, 290.0, 300.0, 310.0, 320.0, 330.0]))
@@ -610,7 +619,8 @@ for year in years:
       if not args.noZgCorr:
         try:
           # Zg correction factors are systematic-specific unless specified otherwise
-          ZgReweight = ZgWeight(c.year, sys = '' if args.tag.lower().count('methoda') else args.sys)
+          ZgReweight =  ZgWeightTotal(sys = '' if args.tag.lower().count('methoda') else args.sys)
+          # ZgReweight = ZgWeight(c.year, sys = '' if args.tag.lower().count('methoda') else args.sys)
         except Exception as ex:
           log.debug(ex)
           log.warning('No Zg estimate source plots available, no problem if not used later')
@@ -663,13 +673,6 @@ for year in years:
         #   eventWeight = c.genWeight*c.puWeight*c.lWeight*c.lTrackWeight*c.phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*lumiScale*c.ISRWeight*c.FSRWeight*c.PVWeight*estWeight*zgw*fragWeight
 
 
-# # TODO remove again, topmass testing
-        # eventWeight = eventWeight* getBWrew(c, 'down', 1.4915)  
-        # eventWeight = eventWeight* getBWrew(c, 172.5-0.4, 1.4915)  
-        # eventWeight = eventWeight* getBWrew(c, 172.5+0.4, 1.4915)  
-
-        # eventWeight = eventWeight* getBWrew(c, 172.5-0.4, 1.479381)
-        # eventWeight = eventWeight* getBWrew(c, 172.5+0.4, 1.503673)
 
         if year == "comb": 
           eventWeight *= lumiScales['2018'] / lumiScales[c.year]
@@ -715,12 +718,12 @@ for year in years:
     if isinstance(plot, Plot2D): continue
     if not args.showSys:
       plot.saveToCache(os.path.join(plotDir, year, args.tag, args.channel, args.selection), args.sys)
-    if not plot.blindRange == None and not year == '2016':
-      for sample, histo in plot.histos.iteritems():
-        if sample.isData and not 'estimate' in sample.texName:
-          for bin in range(1, histo.GetNbinsX()+2):
-            if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
-              histo.SetBinContent(bin, 0)
+    # if not plot.blindRange == None and not year == '2016':
+    #   for sample, histo in plot.histos.iteritems():
+    #     if sample.isData and not 'estimate' in sample.texName:
+    #       for bin in range(1, histo.GetNbinsX()+2):
+    #         if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
+    #           histo.SetBinContent(bin, 0)
     if plot.name == "yield":
       log.info("Yields: ")
       for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))
@@ -874,12 +877,12 @@ for plot in totalPlots: # 1D plots
   if isinstance(plot, Plot2D): continue
   if not args.showSys:
     plot.saveToCache(os.path.join(plotDir, 'all', args.tag, args.channel, args.selection), args.sys)
-  if not plot.blindRange == None:
-    for sample, histo in plot.histos.iteritems():
-      if sample.isData and not 'estimate' in sample.texName:
-        for bin in range(1, histo.GetNbinsX()+2):
-          if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
-            histo.SetBinContent(bin, 0)
+  # if not plot.blindRange == None:
+  #   for sample, histo in plot.histos.iteritems():
+  #     if sample.isData and not 'estimate' in sample.texName:
+  #       for bin in range(1, histo.GetNbinsX()+2):
+  #         if any([plot.blindRange[i][0] < histo.GetBinCenter(bin) < plot.blindRange[i][1] for i in range(len(plot.blindRange))]) or len(plot.blindRange) == 0:
+  #           histo.SetBinContent(bin, 0)
   if plot.name == "yield":
     log.info("Yields: ")
     for s, y in plot.getYields().iteritems(): log.info('   ' + (s + ':').ljust(25) + str(y))

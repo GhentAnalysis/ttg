@@ -99,18 +99,18 @@ noYearCor = [i.split('_2016')[0] for i in showSysListRunII if i.count('_2016')]
 
 for channel in ['ee', 'emu', 'mumu', 'all']:
   
-  distList = glob.glob('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/*.pkl')
+  distList = glob.glob('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-RE/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/*.pkl')
   distList = [i.split('/')[-1].split('.pkl')[0] for i in distList]
 
-  if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
-    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
+  if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-RE-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
+    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-RE-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
 
   for dist in distList:
     log.info('running for plot '+ dist + ' in the channel ' + channel)
     try:
-      reco16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-      reco17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-niceEstimDD/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-      reco18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+      reco16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-RE/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+      reco17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-niceEstimDD-RE/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+      reco18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD-RE/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
 
       recoRunII = copy.deepcopy(reco16)
 
@@ -272,7 +272,7 @@ for channel in ['ee', 'emu', 'mumu', 'all']:
   # lumi_2018               lnN                -         -          1.015   
   # lumi_3Ycorr             lnN                1.006     1.009      1.02    
 
-      pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
+      pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-RE-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
     except Exception as e:
       log.info(e)
       log.info('failed for distribution '+ dist)

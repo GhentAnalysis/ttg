@@ -1,14 +1,14 @@
 #!/bin/bash
 
-./ttgPlots.py --year 2016 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
+# ./ttgPlots.py --year 2016 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 # ./ttgPlots.py --year 2016 --channel ee --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 # ./ttgPlots.py --year 2016 --channel mumu --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 
-./ttgPlots.py --year 2017 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
+# ./ttgPlots.py --year 2017 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 # ./ttgPlots.py --year 2017 --channel ee --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 # ./ttgPlots.py --year 2017 --channel mumu --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 
-./ttgPlots.py --year 2018 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
+# ./ttgPlots.py --year 2018 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 # ./ttgPlots.py --year 2018 --channel ee --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 # ./ttgPlots.py --year 2018 --channel mumu --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgest --noZgCorr --runSys
 
@@ -113,3 +113,33 @@
 
 
 
+
+# Aug rerun stuff, zg corr change
+
+./ttgPlots.py --year 2016 --channel all --selection llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20                    --tag phoCB-passChgIso-passSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2016 --channel all --selection llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20                    --tag phoCB-passChgIso-sidebandSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2016 --channel all --selection llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ   --tag phoCB-failChgIso-passSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2016 --channel all --selection llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ   --tag phoCB-failChgIso-sidebandSigmaIetaIeta-forNPestRE
+
+./ttgPlots.py --year 2017 --channel all --selection llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20                    --tag phoCB-passChgIso-passSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2017 --channel all --selection llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20                    --tag phoCB-passChgIso-sidebandSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2017 --channel all --selection llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ   --tag phoCB-failChgIso-passSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2017 --channel all --selection llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ   --tag phoCB-failChgIso-sidebandSigmaIetaIeta-forNPestRE
+
+./ttgPlots.py --year 2018 --channel all --selection llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20                    --tag phoCB-passChgIso-passSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2018 --channel all --selection llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20                    --tag phoCB-passChgIso-sidebandSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2018 --channel all --selection llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ   --tag phoCB-failChgIso-passSigmaIetaIeta-forNPestRE
+./ttgPlots.py --year 2018 --channel all --selection llg-mll20-llgNoZ-photonPt20-chIso0to15-signalRegionEstA-offZ   --tag phoCB-failChgIso-sidebandSigmaIetaIeta-forNPestRE
+
+
+./ttgPlots.py --year 2016 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+./ttgPlots.py --year 2016 --channel ee --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+./ttgPlots.py --year 2016 --channel mumu --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+
+./ttgPlots.py --year 2017 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+./ttgPlots.py --year 2017 --channel ee --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+./ttgPlots.py --year 2017 --channel mumu --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+
+./ttgPlots.py --year 2018 --channel all --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+./ttgPlots.py --year 2018 --channel ee --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE
+./ttgPlots.py --year 2018 --channel mumu --selection llg-mll20-offZ-llgOnZ-photonPt20 --tag phoCBfull-forZgestCheckRE

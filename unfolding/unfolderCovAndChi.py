@@ -64,7 +64,7 @@ def getPad(canvas, number):
   return pad
 
 def getRatioCanvas(name):
-  xWidth, yWidth, yRatioWidth = 1000, 950, 300
+  xWidth, yWidth, yRatioWidth = 1000, 720, 220
   yWidth           += yRatioWidth
   bottomMargin      = yWidth/float(yRatioWidth)*ROOT.gStyle.GetPadBottomMargin()
   yBorder           = yRatioWidth/float(yWidth)
@@ -286,9 +286,9 @@ def calcChi2(data, pred):
   return chi2
 
 
-def calcNewChi2(data, pred, covars):
+def calcNewChi2(data, pred, covars, normalized = False):
   # as described here: https://arxiv.org/abs/1904.05237
-  cov = covars[0]
+  cov = covars[0].Clone()
   for i in covars[1:]:
     cov.Add(i)
 
@@ -306,20 +306,21 @@ def calcNewChi2(data, pred, covars):
   # rhor = rhor.GetSub(0,0,1,nxy)
   # rvert = rvert.GetSub(1,nxy,0,0)
 
-  # chop off under and overflows  + 1 extra bin
+  if normalized:
+    # chop off under and overflows  + 1 extra bin
+    mat = mat.GetSub(1,nxy-1,1,nxy-1)
+    rhor = rhor.GetSub(0,0,1,nxy-1)
+    rvert = rvert.GetSub(1,nxy-1,0,0)
+    mat.Invert()
+    mul1 = ROOT.TMatrixD(1, nxy-1)
+  else:
+    # chop off under and overflows
+    mat = mat.GetSub(1,nxy,1,nxy)
+    rhor = rhor.GetSub(0,0,1,nxy)
+    rvert = rvert.GetSub(1,nxy,0,0)
+    mat.Invert()
+    mul1 = ROOT.TMatrixD(1, nxy)
 
-  mat = mat.GetSub(1,nxy-1,1,nxy-1)
-  rhor = rhor.GetSub(0,0,1,nxy-1)
-  rvert = rvert.GetSub(1,nxy-1,0,0)
-
-  # mat = mat.GetSub(2,nxy,2,nxy)
-  # rhor = rhor.GetSub(0,0,2,nxy)
-  # rvert = rvert.GetSub(2,nxy,0,0)
-
-  # invert covar
-  mat.Invert()
-  
-  mul1 = ROOT.TMatrixD(1, nxy-1)
   mul1.Mult(rhor, mat)
   mul2 = ROOT.TMatrixD(1, 1)
   mul2.Mult(mul1, rvert)
@@ -359,6 +360,30 @@ def getTotalDeviations(inputHists):
     totalUp.SetBinContent(i, totalUp.GetBinContent(i)**0.5)
     totalDown.SetBinContent(i, totalDown.GetBinContent(i)**0.5)
   return totalUp, totalDown
+
+
+def getTotalDeviationsAvg(inputHists):
+# ensures histograms are not modified here, keep them correct for later use
+  histDict  = {key: inputHists[key].Clone() for key in inputHists.keys()}
+
+  nominal = histDict[''].Clone()
+  totSys = nominal.Clone()
+  totSys.Reset('ICES')
+
+  ups = [name for name in histDict.keys() if name.count('Up')]
+  for sys in ups:
+    histDict[sys].Add(nominal, -1.)
+    histDict[sys].Multiply(histDict[sys])
+    dsys = sys.replace('Up','Down')
+    histDict[dsys].Add(nominal, -1.)
+    histDict[dsys].Multiply(histDict[dsys])
+    histDict[sys].Add(histDict[dsys])
+    histDict[sys].Scale(0.5)
+    totSys.Add(histDict[sys])
+
+  for i in range(0, totSys.GetXaxis().GetNbins()+1):
+    totSys.SetBinContent(i, totSys.GetBinContent(i)**0.5)
+  return totSys
 
 def getDeviationOverview(histDict):
 # WARNING this modifies the systematics histograms, be aware if you look at them later in the code
@@ -482,6 +507,19 @@ def getCovarHists(inputHists, template):
   # pdb.set_trace()
   return covarMat
 
+
+
+def getCovarHistsFromDev(inputHists, template):
+  template = template.Clone()
+  template.Reset('ICES')
+  # pass eMat to this funtion to easily get the correct binning
+  covarMat = {}
+  for name, hist in inputHists.iteritems():
+    covarMat[name] = template.Clone(str(uuid.uuid4()).replace('-',''))
+    for i in range(1, hist.GetXaxis().GetNbins()+1):
+      for j in range(1, hist.GetXaxis().GetNbins()+1):
+        covarMat[name].SetBinContent(i, j, hist.GetBinContent(i)*hist.GetBinContent(j))
+  return covarMat
 #################### main code ####################
 
 log.info('for these systematics data is varied instead of the response matrix:')
@@ -493,9 +531,9 @@ for dist in distList:
 
 
   if args.year == 'RunII':
-    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
   else:
-    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+    histDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
 
   responseDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','response_unfReco') + '.pkl','r'))
   outMigDict = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/' + args.year + '/unfENDA/noData/placeholderSelection/' + dist.replace('unfReco','out_unfReco') + '.pkl','r'))
@@ -633,7 +671,8 @@ for dist in distList:
 
   if args.overview:
     getDeviationOverview(unfoldedDict)
-  totalUp, totalDown = getTotalDeviations(unfoldedDict)
+  # totalUp, totalDown = getTotalDeviations(unfoldedDict)
+  totalSys = getTotalDeviationsAvg(unfoldedDict)
   q2Up, q2Down = getEnv(q2Dict)
   pdfrms = getRMS(pdfDict)
   
@@ -677,14 +716,17 @@ for dist in distList:
     eMat = dtStatTot.Clone()
     eMatBkg = bkgStatTot.Clone()
 
+  # pdb.set_trace()
   # add background stats (+resp matrix stats) to syst covar matrix
   covTot.Add(eMatBkg)
 
   # add q2 and pdf to totalUp and totalDown
-  for i in range(1, totalUp.GetXaxis().GetNbins()+1):
-    totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
-    totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
+  # for i in range(1, totalUp.GetXaxis().GetNbins()+1):
+  #   totalUp.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Up.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
+  #   totalDown.SetBinContent(i, (totalUp.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2 + pdfrms.GetBinContent(i)**2)**0.5)
 
+  for i in range(1, totalSys.GetXaxis().GetNbins()+1):
+    totalSys.SetBinContent(i, (totalSys.GetBinContent(i)**2 + (q2Up.GetBinContent(i)**2 + q2Down.GetBinContent(i)**2)/2. + pdfrms.GetBinContent(i)**2)**0.5)
 
   # stick just data statistics onto unfoldedNom
   # NOTE actually uncertainty on unfoldedNom/unfolding output might already be data statistics only
@@ -695,10 +737,14 @@ for dist in distList:
   # pdb.set_trace()
   unfoldedTotUnc = unfoldedNom.Clone()
   for i in range(1, unfoldedTotUnc.GetXaxis().GetNbins()+1):
-    totalErr = (dataStat.GetBinContent(i)**2+ bkgStat.GetBinContent(i)**2+ max(abs(totalUp.GetBinContent(i)),abs(totalDown.GetBinContent(i)))**2)**0.5
+    # totalErr = (dataStat.GetBinContent(i)**2+ bkgStat.GetBinContent(i)**2+ max(abs(totalUp.GetBinContent(i)),abs(totalDown.GetBinContent(i)))**2)**0.5
+    totalErr = (dataStat.GetBinContent(i)**2+ bkgStat.GetBinContent(i)**2+ totalSys.GetBinContent(i)**2)**0.5
+
     unfoldedTotUnc.SetBinError(i, totalErr)
 
-  tabulate(dist, unfoldedTotUnc, dataStat, bkgStat, totalUp, totalDown)
+  # tabulate(dist, unfoldedTotUnc, dataStat, bkgStat, totalUp, totalDown)
+  tabulate(dist, unfoldedTotUnc, dataStat, bkgStat, totalSys, totalSys)
+
 
   # get the unfolded MC as well, for sanity checks
   unfoldedMC = getUnfolded(response, signal, {}, outMig)
@@ -769,6 +815,9 @@ for dist in distList:
     pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
     pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
 
+  theoCovs = getCovarHistsFromDev({'plq2i': plq2Up, 'plpdfi': plpdfrms}, eMat)
+
+
   plMCTot = plMCDict[''].Clone()
 
   # raise SystemExit(0)
@@ -793,9 +842,9 @@ for dist in distList:
     plMCTot.Scale(1/plMCTot.Integral())
 
   if dist in ['unfReco_phAbsEta']:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.4, plMCTot.GetMaximum()*1.4))
+    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.44, plMCTot.GetMaximum()*1.44))
   elif dist in ['unfReco_phBJetDeltaR']:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.35, plMCTot.GetMaximum()*1.4))
+    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.44, plMCTot.GetMaximum()*1.44))
   else:
     unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.2, plMCTot.GetMaximum()*1.2))
   unfoldedTotUnc.GetXaxis().SetTitle(labels[dist][1])
@@ -847,6 +896,7 @@ for dist in distList:
   if args.check:
     plPy8.Draw('hist same')
 
+
   plHWpp.SetLineWidth(3)
   plHW7.SetLineWidth(3)
   plPy8.SetLineWidth(3)
@@ -866,12 +916,29 @@ for dist in distList:
   unfoldedNom.SetMarkerSize(2)
   unfoldedNom.Draw('same E1 X0')
 
+
+  log.info(labels[dist][0] + 'simplistic Chi^2: ' + str(calcChi2(unfoldedNom, plMCTot)))
+
+  chi2 = calcNewChi2(unfoldedNom, plMCTot, [covTot, eMat, theoCovs['plpdfi'], theoCovs['plq2i']], normalized = args.norm)
+  ndof = unfoldedNom.GetXaxis().GetNbins() - (1 if args.norm else 0)
+  log.info(labels[dist][0] + 'Chi^2: ' + str(chi2))
+  log.info('nbins / dof ' + str(ndof))
+
+
   if dist in ['unfReco_phBJetDeltaR', 'unfReco_ll_deltaPhi', 'unfReco_phLep1DeltaR']: #legend on the left
-    legend = ROOT.TLegend(1.1-0.92,0.61,1.1-0.62,0.87)
+    legend = ROOT.TLegend(1.1-0.92,0.63,1.1-0.62,0.87)
+    texchi = ROOT.TLatex(1.1-0.92+0.01,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
   elif dist in ['unfReco_phLep2DeltaR']: #legend in the middle
-    legend = ROOT.TLegend(0.62-0.2,0.61,0.92-0.2,0.87)
+    legend = ROOT.TLegend(0.62-0.2,0.63,0.92-0.2,0.87)
+    texchi = ROOT.TLatex(0.62-0.2+0.01,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
   else:
-    legend = ROOT.TLegend(0.62,0.61,0.92,0.87)
+    legend = ROOT.TLegend(0.62,0.63,0.92,0.87)
+    texchi = ROOT.TLatex(0.63,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
+    
+  texchi.SetTextFont(42)
+  texchi.SetNDC()
+  texchi.SetTextSize(0.038)
+  texchi.Draw()
   
   legend.SetBorderSize(0)
   legend.SetNColumns(1)
@@ -885,10 +952,7 @@ for dist in distList:
     legend.AddEntry(plPy8,'PYTHIA8 ALT',"l")
   legend.Draw()
 
-  log.info(labels[dist][0] + 'simplistic Chi^2: ' + str(calcChi2(unfoldedNom, plMCTot)))
 
-  log.info(labels[dist][0] + 'Chi^2: ' + str(calcNewChi2(unfoldedNom, plMCTot, [covTot, eMat])))
-  log.info('nbins / dof: ' + str(unfoldedNom.GetXaxis().GetNbins()))
 
 # RATIO PAD
   cunf.bottomPad.cd()
@@ -1108,16 +1172,16 @@ for dist in distList:
 
 # NOTE: code to print yield and unc table, don't delete!
 
-# if not args.norm:
-#   maxnbins  = max([len(tabulated[key][0]) for key in tabulated.keys()])
-#   print '\\begin{table}[]  \n  \\centering \n \scriptsize \n  \\begin{tabular}{c' + '|c'*maxnbins + '}'
-#   for key in tabulated.keys():
-#     lextra = maxnbins - len(tabulated[key][0])
-#     label = labels[key][0].replace('#', '\\').replace('DeltaR', 'Delta R')
-#     print '$' + label + '$ & '  + (' & ').join(tabulated[key][0] + [' '] * lextra ) + '\\\\ \\hline'
-#     print 'yield &                     ' + (' & ').join(tabulated[key][1] + [' '] * lextra ) + '\\\\'
-#     print 'data stat. unc. &           ' + (' & ').join(tabulated[key][2] + [' '] * lextra ) + '\\\\'
-#     print 'mc stat. unc. &             ' + (' & ').join(tabulated[key][3] + [' '] * lextra ) + '\\\\'
-#     print 'syst. unc. &                ' + (' & ').join(tabulated[key][4] + [' '] * lextra ) + '\\\\ \\hline'
-#   print '\\end{tabular} \n \\caption{Bin ranges, yields, and uncertainties per bin for the various full Run II differential results.} \n \\label{tab:unfTabulated} \n \\end{table}'
+if not args.norm:
+  maxnbins  = max([len(tabulated[key][0]) for key in tabulated.keys()])
+  print '\\begin{table}[]  \n  \\centering \n \scriptsize \n  \\begin{tabular}{c' + '|c'*maxnbins + '}'
+  for key in tabulated.keys():
+    lextra = maxnbins - len(tabulated[key][0])
+    label = labels[key][0].replace('#', '\\').replace('DeltaR', 'Delta R')
+    print '$' + label + '$ & '  + (' & ').join(tabulated[key][0] + [' '] * lextra ) + '\\\\ \\hline'
+    print 'yield &                     ' + (' & ').join(tabulated[key][1] + [' '] * lextra ) + '\\\\'
+    print 'data stat. unc. &           ' + (' & ').join(tabulated[key][2] + [' '] * lextra ) + '\\\\'
+    print 'mc stat. unc. &             ' + (' & ').join(tabulated[key][3] + [' '] * lextra ) + '\\\\'
+    print 'syst. unc. &                ' + (' & ').join(tabulated[key][4] + [' '] * lextra ) + '\\\\ \\hline'
+  print '\\end{tabular} \n \\caption{Bin ranges, yields, and uncertainties per bin for the various full Run II differential results.} \n \\label{tab:unfTabulated} \n \\end{table}'
     

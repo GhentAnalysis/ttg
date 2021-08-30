@@ -63,7 +63,7 @@ for systs in sysSets:
     if plot == 'total':
       plot = 'yield'
       totalPlot = True
-    path = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + plot + '.pkl'
+    path = '/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + plot + '.pkl'
 
     hists = {}
     MC, data = sumHists(path, plot)
