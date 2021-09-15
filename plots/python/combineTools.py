@@ -2,7 +2,7 @@ from ttg.tools.logger import getLogger, logLevel
 log = getLogger()
 
 from ttg.tools.helpers import plotDir, plotCombineDir
-from ttg.tools.style import commonStyle, setDefault2D
+from ttg.tools.style import commonStyle, setDefault2D, drawTex
 import os, sys, subprocess, glob, shutil, ROOT, socket, json, math
 
 import numpy as np
@@ -155,7 +155,7 @@ def runFitDiagnostics(dataCard, year, trackParameters = None, toys = False, toyR
                 for line in f: log.warning(line.rstrip())
 
     # Main block of runFitDiagnostics
-    extraOptions = ' --rMax=10  --saveShapes --saveWithUncertainties' + ' --expectSignal ' + str(toyR)
+    extraOptions = ' --rMin=0.5 --rMax=1.5  --saveShapes --saveWithUncertainties' + ' --expectSignal ' + str(toyR)
     if toys:            extraOptions += ' -t -1'
     if statOnly:        extraOptions += ' --justFit --profilingMode=none -v 2'
 ##    if statOnly:        extraOptions += ' --justFit --freezeParameters='+ ','.join(trackParameters) + ' -v 2'
@@ -280,8 +280,8 @@ def extractSignalFromJSON(jsonFile):
 # Command to create impacts.json
 #
 def commandForImpactsJSON(dataCard, toys=False, toyR=1):
-  extraArg = (' --rMin 0.9 --rMax 1.3  -t -1 --expectSignal=' + str(toyR)) if toys else (' --rMin 0.9 --rMax 1.3  --expectSignal=' + str(toyR) )
-  # extraArg = ' --robustFit=1 --rMin 0.5 --rMax 1.5 ' + (' -t -1 --expectSignal=' + str(toyR)) if toys else (' --expectSignal=' + str(toyR))
+  extraArg = (' --rMin 0.5 --rMax 1.5  -t -1 --expectSignal=' + str(toyR)) if toys else (' --rMin 0.5 --rMax 1.5  --expectSignal=' + str(toyR) )
+  # extraArg = ' --robustFit=1 --rMin 0.5 --rMax 1.4 ' + (' -t -1 --expectSignal=' + str(toyR)) if toys else (' --expectSignal=' + str(toyR))
   command = 'text2workspace.py ' + dataCard + '.txt -m 125;'
   command += 'mv ' + dataCard + '.root CombineHarvester/CombineTools/scripts;'
   command += 'cd CombineHarvester/CombineTools/scripts;'
@@ -355,7 +355,7 @@ def runImpacts(dataCard, year, perPage=30, toys=False, toyR=1, poi=['r'], doRati
 def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run='combine', group=False):
 
     combineRelease = getCombineRelease()
-    command  = 'combine -M ChannelCompatibilityCheck ' + dataCard + '.txt --saveFitResult --rMin 0.9 --rMax 1.3 '
+    command  = 'combine -M ChannelCompatibilityCheck ' + dataCard + '.txt --saveFitResult --rMin 0.5 --rMax 1.5 '
     command += ' --expectSignal 1 --cminDefaultMinimizerStrategy 0'
     if group: command += ' -g sr_ee -g sr_emu -g sr_mumu'
     if toys:
@@ -414,7 +414,8 @@ def runCompatibility(dataCard, year, perPage=30, toys=False, doRatio=False, run=
 def goodnessOfFit(dataCard, algo='saturated', run='combine'):
     command  = 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ';'
     # command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 100' + (' --toysFreq' if algo=='saturated' else '') + ';'
-    command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 400 --saveToys' + (' --toysFreq' if algo=='saturated' else '') + ' -s 22552;'
+    # NOTE   seed is set here, if you run twice you get the same run twice, so change if needed
+    command += 'combine -M GoodnessOfFit ' + dataCard + '.txt --algo=' + algo + ' -t 400 --saveToys' + (' --toysFreq' if algo=='saturated' else '') + ' -s 77749;'
     log.info('Running goodness of fit')
     handleCombine(dataCard, dataCard + '_gof', command, run=run)
     with open('./' + run + '/' + dataCard + '_gof.log') as f:
@@ -462,6 +463,9 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     if shape == 'sr_mumu':
       if sys.count('lSFEl'): return '-'
 
+    if shape == 'sr_emu':
+      if sys.count('zgcorrstat'): return '-'
+
     if sys.count('trigStat'):
       if shape == 'sr_emu' and not sys.count('trigStatEM'): return '-'
       if shape == 'sr_ee' and not sys.count('trigStatEE'): return '-'
@@ -494,7 +498,10 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
     f.write('-'*400 + '\n')
 
     for sys, info in linearSystematics.iteritems():
-      f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
+      if sys.count('ZG_sigcr'):
+        f.write(tab([sys, 'lnN'] + [(linSys(info, t) if not s.count('sr_emu') else '-' )for s in shapes for t in templates+templatesNoSys]))
+      else:
+        f.write(tab([sys, 'lnN'] + [linSys(info, t) for s in shapes for t in templates+templatesNoSys]))
 
 
     # implementing lumi separately
@@ -506,7 +513,7 @@ def writeCard(cardName, shapes, templates, templatesNoSys, extraLines, systemati
       f.write(tab(['lumi_3Ycorr', 'lnN'] + [linSys((None, 0.9), t) for s in shapes for t in templates+templatesNoSys]))
       f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.6), t) for s in shapes for t in templates+templatesNoSys]))
     if year == '2018':
-      f.write(tab(['lumi_2018', 'lnN'] +   [linSys((None, 1.5), t) for s in shapes for t in templates+templatesNoSys]))
+      f.write(tab(['lumi_2018', 'lnN'] +   [linSys((None, 1.4), t) for s in shapes for t in templates+templatesNoSys]))
       f.write(tab(['lumi_3Ycorr', 'lnN'] + [linSys((None, 2.0), t) for s in shapes for t in templates+templatesNoSys]))
       f.write(tab(['lumi_1718', 'lnN'] +   [linSys((None, 0.2), t) for s in shapes for t in templates+templatesNoSys]))
 
@@ -632,7 +639,7 @@ def plotSys(fileName, regName, chanName, proc=[''], sys=[''], year='2016', yeard
             ax[irow,icol].plot(ar_down, color='blue', label=r'$\sigma_{-}$')
             ax[irow,icol].plot(ar_statUp, color='yellow', label=r'$\sigma_{\mathrm{stat}}$', alpha=1.0)
             ax[irow,icol].plot(ar_statDown, color='yellow', alpha=1.0)
-            ax[irow,icol].set_ylim(ymin=downMin*1.25, ymax=upMax*1.25)
+            ax[irow,icol].set_ylim(ymin=downMin*1.45, ymax=upMax*1.45)
 #            ax[irow,icol].legend(loc='upper right')
             ax[irow,icol].text(0.05, 0.05, sysName, transform = ax[irow,icol].transAxes, fontsize=14, fontstyle='italic', weight='bold')
 #            ax[irow,icol].set_ylabel(r'$\sigma$(A) / A')
@@ -772,6 +779,14 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
         sep.SetLineStyle(2)
         sep.Draw()
 
+    theoryBand = ROOT.TBox(1.- 0.16, 0, 1.+ 0.16, nChann+1)
+    # theoryBand.SetFillStyle(3013)
+    # theoryBand.SetFillColor(ROOT.kRed)
+    # theoryBand.SetOpacity(0.5)
+    theoryBand.SetFillColorAlpha(ROOT.kRed, 0.25)
+    theoryBand.SetLineStyle(1)
+    theoryBand.Draw()
+
     sm = ROOT.TLine(1,c1.GetUymin(),1,c1.GetUymax())
     sm.SetLineColor(ROOT.kGray)
     sm.SetLineWidth(3)
@@ -816,9 +831,366 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
         if chLabel == 'combined': chanName = ''
         
         lab = "\hat{\mu}" + chanName + " = " + v_Str + "^{+" + v_errStatHigh_Str + "}_{-" + v_errStatLow_Str + "}(stat)"
-        lab += "^{+" + v_errSysHigh_Str + "}_{-" + v_errSysLow_Str + "}(sys)"
+        lab += "^{+" + v_errSysHigh_Str + "}_{-" + v_errSysLow_Str + "}(syst)"
         ypos = (frame.GetYaxis().GetBinCenter(i)*0.7+1)/float(nBins)+0.08
         tex.DrawLatexNDC(0.25,ypos,lab)
+
+    figOutput = os.path.join(plotCombineDir, year, run + '/') + dataCard + '_cc_' + mode + '.pdf'
+    
+    c1.Print(figOutput)
+    
+    os.system('convert ' + figOutput + ' ' + figOutput.replace('pdf','png') + ' > /dev/null 2>&1')
+
+
+def plotCCR2split(dataCard, year, poi='r', rMin = 0.1, rMax=1.6, run='combine', mode='exp', addNominal = True):
+
+    currentDir = os.getcwd()
+    
+    c1 = ROOT.TCanvas("c1", "c1", 1300, 1000)
+    c1.SetLeftMargin(0.2)
+    # c1.SetBottomMargin(0.2)
+    c1.SetTopMargin(0.08)
+    c1.SetBottomMargin(0.12)
+#    c1.SetGridx(1)
+
+    statSysFile = ROOT.TFile(currentDir + '/' + run + '/' + dataCard + '_cc_' + mode + '.root')
+    statOnlyFile = ROOT.TFile(currentDir + '/' + run + '/' + dataCard + '_cc_' + mode + '_statOnly.root')
+    
+    fit_nominal = statSysFile.Get("fit_nominal")
+    fit_alternate = statSysFile.Get("fit_alternate")
+
+    fit_nominal_statOnly = statOnlyFile.Get("fit_nominal")
+    fit_alternate_statOnly = statOnlyFile.Get("fit_alternate")
+    
+    rFit = fit_nominal.floatParsFinal().find(poi)
+    rFitStat = fit_nominal_statOnly.floatParsFinal().find(poi)
+    if rFit == 0 or rFitStat == 0:
+        print "Nominal fit does not contain parameter " + poi
+        return
+
+    prefix = "_ChannelCompatibilityCheck_%s_" % (poi)
+
+    nChann = 0
+    nElem = fit_alternate.floatParsFinal().getSize()
+    nElem_nominal = fit_nominal.floatParsFinal().getSize()
+    
+    for i in range(0,nElem):
+        if prefix in fit_alternate.floatParsFinal().at(i).GetName():
+            nChann += 1
+            
+    nBins = nChann
+    if addNominal:
+        nBins += 1
+
+    # frame = ROOT.TH2D("frame", ";Best fit of #sigma^{t#bar{t}#gamma}/#sigma^{t#bar{t}#gamma}_{SM};", 1, max(rFit.getMin(),rMin), min(rFit.getMax(),rMax), nBins, 0, nBins)
+    frame = ROOT.TH2D("frame", ";Best fit of #sigma^{t#bar{t}#gamma}/#sigma^{t#bar{t}#gamma}_{SM};", 1, rMin, rMax, nBins, 0, nBins)
+
+    points = ROOT.TGraphAsymmErrors(nBins)
+    pointsStatOnly = ROOT.TGraphAsymmErrors(nBins)
+    
+    iChann = 0
+    for i in range(0,nElem):
+        
+        if prefix in fit_alternate.floatParsFinal().at(i).GetName():
+            
+            ri = fit_alternate.floatParsFinal().at(i)
+            ri_statOnly = fit_alternate_statOnly.floatParsFinal().at(iChann)
+            
+            channel = ri.GetName().replace(prefix,'')
+            channel = channel.replace('y2016_sr_','2016 ').replace('y2017_sr_','2017 ').replace('y2018_sr_','2018 ').replace('ratio_','').replace('emu',r'e\mu').replace('ee',r'ee').replace('mumu',r'\mu\mu')
+            
+            points.SetPoint(iChann, ri.getVal(), iChann+0.5)
+            points.SetPointError(iChann, -ri.getAsymErrorLo(), ri.getAsymErrorHi(), 0, 0)
+
+            pointsStatOnly.SetPoint(iChann, ri_statOnly.getVal(), iChann+0.5)
+            pointsStatOnly.SetPointError(iChann, -ri_statOnly.getAsymErrorLo(), ri_statOnly.getAsymErrorHi(), 0, 0)
+            
+            iChann += 1
+            frame.GetYaxis().SetBinLabel(iChann, channel)
+    
+    if addNominal:
+            
+        points.SetPoint(iChann, rFit.getVal(), iChann+0.5)
+        points.SetPointError(iChann, -rFit.getAsymErrorLo(), rFit.getAsymErrorHi(), 0, 0)
+        
+        pointsStatOnly.SetPoint(iChann, rFitStat.getVal(), iChann+0.5)
+        pointsStatOnly.SetPointError(iChann, -rFitStat.getAsymErrorLo(), rFitStat.getAsymErrorHi(), 0, 0)
+        
+        channel = 'combined'
+        iChann += 1
+        frame.GetYaxis().SetBinLabel(iChann, channel)
+        
+    points.SetLineColor(ROOT.kRed+1)
+    points.SetLineWidth(3)
+    points.SetMarkerStyle(20)
+
+    pointsStatOnly.SetLineColor(ROOT.kBlue+1)
+    pointsStatOnly.SetLineWidth(10)
+    pointsStatOnly.SetMarkerStyle(20)
+    
+    frame.GetXaxis().SetTitleSize(0.04)
+    frame.GetXaxis().SetLabelSize(0.04)
+    frame.GetYaxis().SetLabelSize(0.05)
+    
+    frame.Draw()
+    
+    ROOT.gStyle.SetOptStat(0)
+
+
+    sep1 = ROOT.TLine(c1.GetUxmin(),3,c1.GetUxmax(),3)
+    sep1.SetLineColor(ROOT.kBlack)
+    sep1.SetLineWidth(1)
+    sep1.SetLineStyle(2)
+    sep1.Draw()
+
+    sep2 = ROOT.TLine(c1.GetUxmin(),6,c1.GetUxmax(),6)
+    sep2.SetLineColor(ROOT.kBlack)
+    sep2.SetLineWidth(1)
+    sep2.SetLineStyle(2)
+    sep2.Draw()
+
+    sep3 = ROOT.TLine(c1.GetUxmin(),9,c1.GetUxmax(),9)
+    sep3.SetLineColor(ROOT.kBlack)
+    sep3.SetLineWidth(1)
+    sep3.SetLineStyle(2)
+    sep3.Draw()
+
+    theoryBand = ROOT.TBox(1.- 0.16, 0, 1.+ 0.16, nChann+1)
+    # theoryBand.SetFillStyle(3013)
+    # theoryBand.SetFillColor(ROOT.kRed)
+    # theoryBand.SetOpacity(0.5)
+    theoryBand.SetFillColorAlpha(ROOT.kRed, 0.25)
+    theoryBand.SetLineStyle(1)
+    theoryBand.Draw()
+    sm = ROOT.TLine(1,c1.GetUymin(),1,c1.GetUymax())
+    sm.SetLineColor(ROOT.kGray)
+    sm.SetLineWidth(3)
+    sm.SetLineStyle(1)
+    sm.Draw()
+        
+    points.Draw("P Z SAME")
+    pointsStatOnly.Draw("P Z SAME")
+    
+    leg = ROOT.TLegend(0.76, 0.65, 0.90, 0.75)
+    leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+    leg.AddEntry(points, 'stat+sys', "l")
+    leg.AddEntry(pointsStatOnly, 'stat', "l")
+    leg.Draw()
+
+    for i in range(0,nBins):
+        
+        tex = ROOT.TLatex()
+        tex.SetTextSize(0.025)
+        
+        v = points.GetX()[i]
+        errLow = points.GetErrorXlow(i)
+        errHigh = points.GetErrorXhigh(i)
+        errStatLow = pointsStatOnly.GetErrorXlow(i)
+        errStatHigh = pointsStatOnly.GetErrorXhigh(i)
+        tempValLow = errLow*errLow-errStatLow*errStatLow
+        errSysLow = (tempValLow/abs(tempValLow)) * math.sqrt(abs(tempValLow))
+        # pdb.set_trace()
+        errSysHigh = math.sqrt(errHigh*errHigh-errStatHigh*errStatHigh)
+
+        v_Str = "%.3f" % v
+        v_errLow_Str = "%.3f" % errLow
+        v_errHigh_Str = "%.3f" % errHigh
+        v_errStatLow_Str = "%.3f" % errStatLow
+        v_errStatHigh_Str = "%.3f" % errStatHigh
+        v_errSysLow_Str = "%.3f" % errSysLow
+        v_errSysHigh_Str = "%.3f" % errSysHigh
+        
+        chLabel = frame.GetYaxis().GetBinLabel(i+1)
+        chanName = "_{" + chLabel + "}"
+        if chLabel == 'combined': chanName = ''
+        
+        lab = "\hat{\mu}" + chanName + " = " + v_Str + "^{+" + v_errStatHigh_Str + "}_{-" + v_errStatLow_Str + "}(stat)"
+        lab += "^{+" + v_errSysHigh_Str + "}_{-" + v_errSysLow_Str + "}(syst)"
+        ypos = (frame.GetYaxis().GetBinCenter(i)*0.78+1)/float(nBins)+0.1
+        tex.DrawLatexNDC(0.25,ypos,lab)
+
+    figOutput = os.path.join(plotCombineDir, year, run + '/') + dataCard + '_cc_' + mode + '.pdf'
+    
+    c1.Print(figOutput)
+    
+    os.system('convert ' + figOutput + ' ' + figOutput.replace('pdf','png') + ' > /dev/null 2>&1')
+
+
+def plotCCRIINice(dataCard, year, poi='r', rMin = 0.58, rMax=1.5, run='combine', mode='exp', addNominal = True):
+
+    currentDir = os.getcwd()
+    
+    c1 = ROOT.TCanvas("c1")
+    c1.SetLeftMargin(0.19)
+    c1.SetRightMargin(0.06)
+    c1.SetBottomMargin(0.17)
+#    c1.SetGridx(1)
+
+    statSysFile = ROOT.TFile(currentDir + '/' + run + '/' + dataCard + '_cc_' + mode + '.root')
+    statOnlyFile = ROOT.TFile(currentDir + '/' + run + '/' + dataCard + '_cc_' + mode + '_statOnly.root')
+    
+    fit_nominal = statSysFile.Get("fit_nominal")
+    fit_alternate = statSysFile.Get("fit_alternate")
+
+    fit_nominal_statOnly = statOnlyFile.Get("fit_nominal")
+    fit_alternate_statOnly = statOnlyFile.Get("fit_alternate")
+    
+    rFit = fit_nominal.floatParsFinal().find(poi)
+    rFitStat = fit_nominal_statOnly.floatParsFinal().find(poi)
+    if rFit == 0 or rFitStat == 0:
+        print "Nominal fit does not contain parameter " + poi
+        return
+
+    prefix = "_ChannelCompatibilityCheck_%s_" % (poi)
+
+    nChann = 0
+    nElem = fit_alternate.floatParsFinal().getSize()
+    nElem_nominal = fit_nominal.floatParsFinal().getSize()
+    
+    for i in range(0,nElem):
+        if prefix in fit_alternate.floatParsFinal().at(i).GetName():
+            nChann += 1
+            
+    nBins = nChann
+    if addNominal:
+        nBins += 1
+
+    frame = ROOT.TH2D("frame", ";#sigma^{t#bar{t}#gamma}/#sigma^{t#bar{t}#gamma}_{SM, NLO};", 1, max(rFit.getMin(),rMin), min(rFit.getMax(),rMax), nBins, 0, nBins)
+
+    points = ROOT.TGraphAsymmErrors(nBins)
+    pointsStatOnly = ROOT.TGraphAsymmErrors(nBins)
+    
+    iChann = 0
+    for i in range(0,nElem):
+        
+        if prefix in fit_alternate.floatParsFinal().at(i).GetName():
+            
+            ri = fit_alternate.floatParsFinal().at(i)
+            ri_statOnly = fit_alternate_statOnly.floatParsFinal().at(iChann)
+            
+            channel = ri.GetName().replace(prefix,'')
+            channel = channel.replace('sr_','').replace('ratio_','').replace('emu',r'e\mu').replace('ee',r'ee').replace('mumu',r'\mu\mu')
+            
+            points.SetPoint(iChann, ri.getVal(), iChann+0.5)
+            points.SetPointError(iChann, -ri.getAsymErrorLo(), ri.getAsymErrorHi(), 0, 0)
+
+            pointsStatOnly.SetPoint(iChann, ri_statOnly.getVal(), iChann+0.5)
+            pointsStatOnly.SetPointError(iChann, -ri_statOnly.getAsymErrorLo(), ri_statOnly.getAsymErrorHi(), 0, 0)
+            
+            iChann += 1
+            frame.GetYaxis().SetBinLabel(iChann, channel)
+    
+    if addNominal:
+            
+        points.SetPoint(iChann, rFit.getVal(), iChann+0.5)
+        points.SetPointError(iChann, -rFit.getAsymErrorLo(), rFit.getAsymErrorHi(), 0, 0)
+        
+        pointsStatOnly.SetPoint(iChann, rFitStat.getVal(), iChann+0.5)
+        pointsStatOnly.SetPointError(iChann, -rFitStat.getAsymErrorLo(), rFitStat.getAsymErrorHi(), 0, 0)
+        
+        channel = 'Combined'
+        iChann += 1
+        frame.GetYaxis().SetBinLabel(iChann, channel)
+        
+    points.SetLineColor(ROOT.kBlack)
+    points.SetLineWidth(3)
+    points.SetMarkerStyle(21)
+    points.SetMarkerSize(1)
+
+    pointsStatOnly.SetLineColor(ROOT.kBlue)
+    pointsStatOnly.SetLineWidth(6)
+    pointsStatOnly.SetMarkerStyle(21)
+    pointsStatOnly.SetMarkerSize(1)
+    
+    frame.GetXaxis().SetTitleSize(0.06)
+    frame.GetXaxis().SetTitleOffset(1.18)
+    frame.GetXaxis().SetLabelSize(0.05)
+    frame.GetYaxis().SetLabelSize(0.09)
+    
+    frame.Draw()
+    
+    ROOT.gStyle.SetOptStat(0)
+
+
+    theoryBand = ROOT.TBox(1.- 0.16, 0, 1.+ 0.16, nChann+1)
+    # theoryBand.SetFillStyle(3013)
+    # theoryBand.SetFillColor(ROOT.kRed)
+    # theoryBand.SetOpacity(0.5)
+    theoryBand.SetFillColorAlpha(ROOT.kGray, 0.7)
+    theoryBand.SetLineStyle(1)
+    theoryBand.SetLineColorAlpha(ROOT.kRed, 0.)
+    theoryBand.Draw()
+
+    sm = ROOT.TLine(1,c1.GetUymin(),1,c1.GetUymax())
+    sm.SetLineColor(14 )
+    sm.SetLineWidth(3)
+    sm.SetLineStyle(1)
+    sm.Draw()
+    
+    if addNominal:
+        sep = ROOT.TLine(c1.GetUxmin(),3,c1.GetUxmax(),3)
+        sep.SetLineColor(ROOT.kBlack)
+        sep.SetLineWidth(1)
+        sep.SetLineStyle(2)
+        sep.Draw()
+        
+    points.Draw("P Z SAME")
+    pointsStatOnly.Draw("P Z SAME")
+    
+    leg = ROOT.TLegend(0.74, 0.59, 0.93, 0.85)
+    leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+    leg.AddEntry(pointsStatOnly, 'Measurement', "p")
+    leg.AddEntry(pointsStatOnly, 'Stat. unc.', "l")
+    leg.AddEntry(points, 'Stat.+syst. unc.', "l")
+    dummy = points.Clone()
+    dummy.SetLineColor(ROOT.kGray+2)
+    leg.AddEntry(dummy, 'MG5+Pythia8', "l")
+    leg.AddEntry(theoryBand, 'Theory unc.', "f")
+    leg.Draw()
+
+    for i in range(0,nBins):
+        
+        tex = ROOT.TLatex()
+        tex.SetTextSize(0.037)
+        
+        v = points.GetX()[i]
+        errLow = points.GetErrorXlow(i)
+        errHigh = points.GetErrorXhigh(i)
+        errStatLow = pointsStatOnly.GetErrorXlow(i)
+        errStatHigh = pointsStatOnly.GetErrorXhigh(i)
+        tempValLow = errLow*errLow-errStatLow*errStatLow
+        errSysLow = (tempValLow/abs(tempValLow)) * math.sqrt(abs(tempValLow))
+        # pdb.set_trace()
+        errSysHigh = math.sqrt(errHigh*errHigh-errStatHigh*errStatHigh)
+
+        v_Str = "%.3f" % v
+        v_errLow_Str = "%.3f" % errLow
+        v_errHigh_Str = "%.3f" % errHigh
+        v_errStatLow_Str = "%.3f" % errStatLow
+        v_errStatHigh_Str = "%.3f" % errStatHigh
+        v_errSysLow_Str = "%.3f" % errSysLow
+        v_errSysHigh_Str = "%.3f" % errSysHigh
+        
+        chLabel = frame.GetYaxis().GetBinLabel(i+1)
+        chanName = "_{" + chLabel + "}"
+        if chLabel == 'Combined': chanName = ''
+        
+        # lab = "\hat{\mu}" + chanName + " = " + v_Str + "^{+" + v_errStatHigh_Str + "}_{-" + v_errStatLow_Str + "}(stat)"
+        lab = v_Str + "^{ +" + v_errStatHigh_Str + "}_{ -" + v_errStatLow_Str + "} (stat)"
+        lab += "^{ +" + v_errSysHigh_Str + "}_{ -" + v_errSysLow_Str + "} (syst)"
+        ypos = (frame.GetYaxis().GetBinCenter(i)*0.73+1)/float(nBins)+0.09
+        tex.DrawLatexNDC(0.22,ypos,lab)
+
+    ROOT.gPad.SetTickx(1)
+    ROOT.gPad.SetTicky(1)
+    drawTex((ROOT.gStyle.GetPadLeftMargin()+0.12,  1-ROOT.gStyle.GetPadTopMargin()+0.03,'CMS #bf{#it{Preliminary}}'), 11)
+    drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.0,  1-ROOT.gStyle.GetPadTopMargin()+0.03, ('#bf{%3.0f fb^{#minus 1} (13 TeV)}'%138)), 31)
+
+
+    # drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.58, '#bf{Fiducial cross section (fb)}'), 11, size=0.037, angle=90)
+    # drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.06,'#bf{Pred. / data}'), 11, size=0.037, angle=90)
 
     figOutput = os.path.join(plotCombineDir, year, run + '/') + dataCard + '_cc_' + mode + '.pdf'
     
@@ -848,3 +1220,193 @@ def plotCC(dataCard, year, poi='r', rMin = 0.5, rMax=1.5, run='combine', mode='e
 #        cb_syst.PrintSysts()
 #        ch.CloneSysts(cb_syst, cb, lambda x: ScaleTo(x, math.sqrt(1. - correlation * correlation), name + postfix_uncorr))
 #        cb_syst.ForEachSyst(lambda x: ScaleTo(x, correlation, name+postfix_corr))
+
+
+
+
+def plotCCRIINiceXsec(dataCard, year, poi='r', rMin = 0.58, rMax=1.52, run='combine', mode='exp', addNominal = True):
+    # ROOT.gStyle.SetPaintTextFormat("2.1f")
+    xsec = 152.98
+
+    currentDir = os.getcwd()
+    
+    c1 = ROOT.TCanvas("c1")
+    c1.SetLeftMargin(0.19)
+    c1.SetRightMargin(0.06)
+    c1.SetBottomMargin(0.17)
+#    c1.SetGridx(1)
+
+    statSysFile = ROOT.TFile(currentDir + '/' + run + '/' + dataCard + '_cc_' + mode + '.root')
+    statOnlyFile = ROOT.TFile(currentDir + '/' + run + '/' + dataCard + '_cc_' + mode + '_statOnly.root')
+    
+    fit_nominal = statSysFile.Get("fit_nominal")
+    fit_alternate = statSysFile.Get("fit_alternate")
+
+    fit_nominal_statOnly = statOnlyFile.Get("fit_nominal")
+    fit_alternate_statOnly = statOnlyFile.Get("fit_alternate")
+    
+    rFit = fit_nominal.floatParsFinal().find(poi)
+    rFitStat = fit_nominal_statOnly.floatParsFinal().find(poi)
+    if rFit == 0 or rFitStat == 0:
+        print "Nominal fit does not contain parameter " + poi
+        return
+
+    # pdb.set_trace()
+
+    prefix = "_ChannelCompatibilityCheck_%s_" % (poi)
+
+    nChann = 0
+    nElem = fit_alternate.floatParsFinal().getSize()
+    nElem_nominal = fit_nominal.floatParsFinal().getSize()
+    
+    for i in range(0,nElem):
+        if prefix in fit_alternate.floatParsFinal().at(i).GetName():
+            nChann += 1
+            
+    nBins = nChann
+    if addNominal:
+        nBins += 1
+
+
+
+    frame = ROOT.TH2D("frame", ";#sigma^{t#bar{t}#gamma}_{fiducial};", 1, max(rFit.getMin()*xsec,rMin*xsec), min(rFit.getMax()*xsec,rMax*xsec), nBins, 0, nBins)
+
+    points = ROOT.TGraphAsymmErrors(nBins)
+    pointsStatOnly = ROOT.TGraphAsymmErrors(nBins)
+    
+    iChann = 0
+    for i in range(0,nElem):
+        
+        if prefix in fit_alternate.floatParsFinal().at(i).GetName():
+            
+            ri = fit_alternate.floatParsFinal().at(i)
+            ri_statOnly = fit_alternate_statOnly.floatParsFinal().at(iChann)
+            
+            channel = ri.GetName().replace(prefix,'')
+            channel = channel.replace('sr_','').replace('ratio_','').replace('emu',r'e\mu').replace('ee',r'ee').replace('mumu',r'\mu\mu')
+            
+            points.SetPoint(iChann, ri.getVal()*xsec, iChann+0.5)
+            points.SetPointError(iChann, -ri.getAsymErrorLo()*xsec, ri.getAsymErrorHi()*xsec, 0, 0)
+
+            pointsStatOnly.SetPoint(iChann, ri_statOnly.getVal()*xsec, iChann+0.5)
+            pointsStatOnly.SetPointError(iChann, -ri_statOnly.getAsymErrorLo()*xsec, ri_statOnly.getAsymErrorHi()*xsec, 0, 0)
+            
+            iChann += 1
+            frame.GetYaxis().SetBinLabel(iChann, channel)
+    
+    if addNominal:
+            
+        points.SetPoint(iChann, rFit.getVal()*xsec, iChann+0.5)
+        points.SetPointError(iChann, -rFit.getAsymErrorLo()*xsec, rFit.getAsymErrorHi()*xsec, 0, 0)
+        
+        pointsStatOnly.SetPoint(iChann, rFitStat.getVal()*xsec, iChann+0.5)
+        pointsStatOnly.SetPointError(iChann, -rFitStat.getAsymErrorLo()*xsec, rFitStat.getAsymErrorHi()*xsec, 0, 0)
+        
+        channel = 'Combined'
+        iChann += 1
+        frame.GetYaxis().SetBinLabel(iChann, channel)
+        
+    points.SetLineColor(ROOT.kBlack)
+    points.SetLineWidth(3)
+    points.SetMarkerStyle(21)
+    points.SetMarkerSize(1)
+
+    pointsStatOnly.SetLineColor(ROOT.kBlue)
+    pointsStatOnly.SetLineWidth(6)
+    pointsStatOnly.SetMarkerStyle(21)
+    pointsStatOnly.SetMarkerSize(1)
+    
+    frame.GetXaxis().SetTitleSize(0.06)
+    frame.GetXaxis().SetTitleOffset(1.18)
+    frame.GetXaxis().SetLabelSize(0.05)
+    frame.GetYaxis().SetLabelSize(0.09)
+    
+    frame.Draw()
+    
+    ROOT.gStyle.SetOptStat(0)
+
+
+    theoryBand = ROOT.TBox((1.- 0.16)*xsec, 0+0.008, (1.+ 0.16)*xsec, nChann+1-0.008)
+    # theoryBand.SetFillStyle(3013)
+    # theoryBand.SetFillColor(ROOT.kRed)
+    # theoryBand.SetOpacity(0.5)
+    theoryBand.SetFillColorAlpha(ROOT.kGray, 0.7)
+    theoryBand.SetLineStyle(1)
+    theoryBand.SetLineColorAlpha(ROOT.kRed, 0.)
+    theoryBand.Draw()
+
+    sm = ROOT.TLine(xsec,c1.GetUymin()+0.008,xsec,c1.GetUymax()-0.008)
+    sm.SetLineColor(14 )
+    sm.SetLineWidth(3)
+    sm.SetLineStyle(1)
+    sm.Draw()
+    
+    if addNominal:
+        sep = ROOT.TLine(c1.GetUxmin(),3,c1.GetUxmax(),3)
+        sep.SetLineColor(ROOT.kBlack)
+        sep.SetLineWidth(1)
+        sep.SetLineStyle(2)
+        sep.Draw()
+        
+    points.Draw("P Z SAME")
+    pointsStatOnly.Draw("P Z SAME")
+    
+    leg = ROOT.TLegend(0.70, 0.615, 0.93, 0.875)
+    leg.SetBorderSize(0)
+    leg.SetFillStyle(0)
+    leg.AddEntry(pointsStatOnly, 'Measurement', "p")
+    leg.AddEntry(pointsStatOnly, 'Stat. unc.', "l")
+    leg.AddEntry(points, 'Stat.+syst. unc.', "l")
+    dummy = points.Clone()
+    dummy.SetLineColor(ROOT.kGray+2)
+    leg.AddEntry(dummy, 'MG5+Pythia8', "l")
+    leg.AddEntry(theoryBand, 'Theory unc.', "f")
+    leg.Draw()
+
+    for i in range(0,nBins):
+        
+        tex = ROOT.TLatex()
+        tex.SetTextSize(0.037)
+        
+        v = points.GetX()[i]
+        errLow = points.GetErrorXlow(i)
+        errHigh = points.GetErrorXhigh(i)
+        errStatLow = pointsStatOnly.GetErrorXlow(i)
+        errStatHigh = pointsStatOnly.GetErrorXhigh(i)
+        tempValLow = errLow*errLow-errStatLow*errStatLow
+        errSysLow = (tempValLow/abs(tempValLow)) * math.sqrt(abs(tempValLow))
+        # pdb.set_trace()
+        errSysHigh = math.sqrt(errHigh*errHigh-errStatHigh*errStatHigh)
+
+        v_Str = "%.1f" % v
+        v_errLow_Str = "%.1f" % errLow
+        v_errHigh_Str = "%.1f" % errHigh
+        v_errStatLow_Str = "%.1f" % errStatLow
+        v_errStatHigh_Str = "%.1f" % errStatHigh
+        v_errSysLow_Str = "%.1f" % errSysLow
+        v_errSysHigh_Str = "%.1f" % errSysHigh
+        
+        chLabel = frame.GetYaxis().GetBinLabel(i+1)
+        chanName = "_{" + chLabel + "}"
+        if chLabel == 'Combined': chanName = ''
+        
+        # lab = "\hat{\mu}" + chanName + " = " + v_Str + "^{+" + v_errStatHigh_Str + "}_{-" + v_errStatLow_Str + "}(stat)"
+        lab = v_Str + "^{ +" + v_errStatHigh_Str + "}_{ -" + v_errStatLow_Str + "} (stat)"
+        lab += "^{ +" + v_errSysHigh_Str + "}_{ -" + v_errSysLow_Str + "} (syst) fb"
+        ypos = (frame.GetYaxis().GetBinCenter(i)*0.73+1)/float(nBins)+0.09
+        tex.DrawLatexNDC(0.212,ypos,lab)
+
+    ROOT.gPad.SetTickx(1)
+    ROOT.gPad.SetTicky(1)
+    drawTex((ROOT.gStyle.GetPadLeftMargin()+0.12,  1-ROOT.gStyle.GetPadTopMargin()+0.03,'CMS #bf{#it{Preliminary}}'), 11)
+    drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.0,  1-ROOT.gStyle.GetPadTopMargin()+0.03, ('#bf{%3.0f fb^{#minus 1} (13 TeV)}'%138)), 31)
+
+
+    # drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.58, '#bf{Fiducial cross section (fb)}'), 11, size=0.037, angle=90)
+    # drawTex((ROOT.gStyle.GetPadLeftMargin()-0.04,  0.06,'#bf{Pred. / data}'), 11, size=0.037, angle=90)
+
+    figOutput = os.path.join(plotCombineDir, year, run + '/') + dataCard + '_cc_xsec_' + mode + '.pdf'
+    
+    c1.Print(figOutput)
+    
+    os.system('convert ' + figOutput + ' ' + figOutput.replace('pdf','png') + ' > /dev/null 2>&1')
