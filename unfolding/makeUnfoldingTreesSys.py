@@ -81,6 +81,11 @@ c.muvar = ([var for var in ['ScaleUp', 'ScaleDown'] if 'mu' + var in args.type] 
 pcut = sample.name.count('PCUT')
 
 lumiWeights  = [(float(sample.xsec)*1000/totalWeight) for totalWeight in sample.getTotalWeights()]
+try:
+  weightsPSRenorm  = [(sample.getTotalPSWeights()[0]/totalWeight) for totalWeight in sample.getTotalPSWeights()]
+except:
+  log.warning('cannot load psweights, isr and fsr uncertainties will not be included')
+  weightsPSRenorm = None
 
 
 #
@@ -286,10 +291,10 @@ for i in sample.eventLoop(totalJobs=sample.splitJobs, subJob=int(args.subJob), s
     try:
       # corresponds to 2 - 1/2 variations, recommended see talk  
       # https://indico.cern.ch/event/848486/contributions/3610537/attachments/1948613/3233682/TopSystematics_2019_11_20.pdf
-      newVars.ISRWeightDown = c._psWeight[6]
-      newVars.FSRWeightDown = c._psWeight[7]
-      newVars.ISRWeightUp   = c._psWeight[8]
-      newVars.FSRWeightUp   = c._psWeight[9]
+      newVars.ISRWeightDown = c._psWeight[6] * weightsPSRenorm[6]
+      newVars.FSRWeightDown = c._psWeight[7] * weightsPSRenorm[7]
+      newVars.ISRWeightUp   = c._psWeight[8] * weightsPSRenorm[8]
+      newVars.FSRWeightUp   = c._psWeight[9] * weightsPSRenorm[9]
     except:
       newVars.ISRWeightDown = 1.
       newVars.FSRWeightDown = 1.

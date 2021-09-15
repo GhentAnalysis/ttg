@@ -68,6 +68,12 @@ lumiUnc = {
 'lumi_3Ycorr': {'16': 0.006 , '17': 0.009 , '18': 0.02  }
 }
 
+def invertVar(nomHist, varHist):
+    inverseHist = nomHist.Clone()
+    for i in range(1, nomHist.GetNbinsX()+1):
+      inverseHist.SetBinContent(i, max(2. * nomHist.GetBinContent(i) - varHist.GetBinContent(i), 0.))
+    return inverseHist
+
 # distList = [
 #   'unfReco_phLepDeltaR',
 #   # 'unfReco_jetLepDeltaR',
@@ -93,18 +99,18 @@ noYearCor = [i.split('_2016')[0] for i in showSysListRunII if i.count('_2016')]
 
 for channel in ['ee', 'emu', 'mumu', 'all']:
   
-  distList = glob.glob('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/*.pkl')
+  distList = glob.glob('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-RE/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/*.pkl')
   distList = [i.split('/')[-1].split('.pkl')[0] for i in distList]
 
-  if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
-    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
+  if not os.path.exists('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-RE-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/'):
+    os.makedirs('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-RE-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/')
 
   for dist in distList:
     log.info('running for plot '+ dist + ' in the channel ' + channel)
     try:
-      reco16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-      reco17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-niceEstimDD/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
-      reco18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+      reco16 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD-RE/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+      reco17 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2017/phoCBfull-niceEstimDD-RE/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
+      reco18 = pickle.load(open('/storage_mnt/storage/user/gmestdac/public_html/ttG/2018/phoCBfull-niceEstimDD-RE/'+ channel +'/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl','r'))
 
       recoRunII = copy.deepcopy(reco16)
 
@@ -116,6 +122,7 @@ for channel in ['ee', 'emu', 'mumu', 'all']:
         elif var.count('Down'):
           var = var.split('Down')[0]
           direc = 'Down'
+
 
         if any(var.count(uncorVar) for uncorVar in noYearCor):
           recoRunII[var + '_2016' + direc] = {}
@@ -146,6 +153,13 @@ for channel in ['ee', 'emu', 'mumu', 'all']:
       recoRunII[dist + '2qUp'] = {}
       recoRunII[dist + '2qDown'] = {}
 
+      recoRunII[dist + 'colRec_1Up'] = {}
+      recoRunII[dist + 'colRec_1Down'] = {}      
+      recoRunII[dist + 'colRec_2Up'] = {}
+      recoRunII[dist + 'colRec_2Down'] = {}
+      recoRunII[dist + 'colRec_3Up'] = {}
+      recoRunII[dist + 'colRec_3Down'] = {}
+      
       for proc in recoRunII[dist].keys():
         q2dict16 =  dict((var, reco16[dist + var][proc].Clone()) for var in ['']+['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')])
         pdfdict16 = dict((var, reco16[dist + var][proc].Clone()) for var in ['']+['pdf_' + str(i) for i in range(0, 100)])
@@ -183,11 +197,38 @@ for channel in ['ee', 'emu', 'mumu', 'all']:
         recoRunII[dist + '2qDown'][proc].Add(plq2Down18)
         recoRunII[dist + 'fdpUp'][proc].Add(rmspdf18)
         recoRunII[dist + 'fdpDown'][proc].Add(rmspdf18, -1)
-      
+
+
+        colrec_1_RII = reco16[dist + 'colRec_1'][proc].Clone()
+        colrec_1_RII.Add(reco17[dist + 'colRec_1'][proc])
+        colrec_1_RII.Add(reco18[dist + 'colRec_1'][proc])
+
+        recoRunII[dist + 'colRec_1Up'][proc] = colrec_1_RII.Clone()
+        recoRunII[dist + 'colRec_1Down'][proc] = invertVar(recoRunII[dist][proc], colrec_1_RII).Clone()
+
+        colrec_2_RII = reco16[dist + 'colRec_2'][proc].Clone()
+        colrec_2_RII.Add(reco17[dist + 'colRec_2'][proc])
+        colrec_2_RII.Add(reco18[dist + 'colRec_2'][proc])
+
+        recoRunII[dist + 'colRec_2Up'][proc] = colrec_2_RII.Clone()
+        recoRunII[dist + 'colRec_2Down'][proc] = invertVar(recoRunII[dist][proc], colrec_2_RII).Clone()
+
+        colrec_3_RII = reco16[dist + 'colRec_3'][proc].Clone()
+        colrec_3_RII.Add(reco17[dist + 'colRec_3'][proc])
+        colrec_3_RII.Add(reco18[dist + 'colRec_3'][proc])
+
+        recoRunII[dist + 'colRec_3Up'][proc] = colrec_3_RII.Clone()
+        recoRunII[dist + 'colRec_3Down'][proc] = invertVar(recoRunII[dist][proc], colrec_3_RII).Clone()
+
+      del recoRunII[dist + 'colRec_1']
+      del recoRunII[dist + 'colRec_2']
+      del recoRunII[dist + 'colRec_3']
       for var in ['q2_' + i for i in ('Ru', 'Fu', 'RFu', 'Rd', 'Fd', 'RFd')]:
         del recoRunII[dist + var]
       for var in ['pdf_' + str(i) for i in range(0, 100)]:
         del recoRunII[dist + var]
+
+
 
       for fac, direc in [(-1., 'Down'), (1., 'Up')]:
         recoRunII[dist + 'lumi_1718'   + direc] = {}
@@ -210,6 +251,10 @@ for channel in ['ee', 'emu', 'mumu', 'all']:
             l17.Scale(1. + factor * lumiUnc[lumunc]['17'])
             l18.Scale(1. + factor * lumiUnc[lumunc]['18'])
 
+            # l16.Scale( (1. + lumiUnc[lumunc]['16'])**factor )
+            # l17.Scale( (1. + lumiUnc[lumunc]['17'])**factor )
+            # l18.Scale( (1. + lumiUnc[lumunc]['18'])**factor )
+
             l16.Add(l17)
             l16.Add(l18)
             recoRunII[dist + lumunc + direc][proc] = l16.Clone()
@@ -227,7 +272,7 @@ for channel in ['ee', 'emu', 'mumu', 'all']:
   # lumi_2018               lnN                -         -          1.015   
   # lumi_3Ycorr             lnN                1.006     1.009      1.02    
 
-      pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
+      pickle.dump(recoRunII, file('/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-RE-merged/' + channel + '/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/' + dist + '.pkl', 'w'))
     except Exception as e:
       log.info(e)
       log.info('failed for distribution '+ dist)

@@ -30,7 +30,7 @@ from ttg.plots.plot                   import Plot, xAxisLabels, fillPlots, addPl
 from ttg.plots.plot2D                 import Plot2D, add2DPlots, normalizeAlong, equalBinning
 from ttg.plots.cutInterpreter         import cutStringAndFunctions
 from ttg.samples.Sample               import createStack
-from ttg.tools.style import drawLumi
+from ttg.tools.style import drawLumi, drawLumi2D, setDefault, ttgGeneralStyle
 from ttg.tools.helpers import editInfo, plotDir, updateGitInfo, deltaPhi, deltaR, lumiScales, lumiScalesRounded
 from ttg.plots.plotHelpers  import *
 from ttg.samples.Sample import createSampleList, getSampleFromList
@@ -39,17 +39,20 @@ import pickle
 from math import pi
 from ttg.plots.systematics import getReplacementsForStack, systematics, linearSystematics, applySysToTree, applySysToString, applySysToReduceType, showSysList
 
+setDefault()
+ttgGeneralStyle()
 
-reduceType = 'unfBLS'
+
+reduceType = 'unfEND'
+
+if args.sys.count('ephScale') or args.sys.count('ephRes'):
+  reduceType = 'unfBLS'
 # reduceType = 'unfFB'
 
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
 args.tag = args.tag + ('_NLO' if args.runNLO else '')
-
-
-#  TODO remove trigger exception when ready 
 
 
 # we just need these for fid level
@@ -70,7 +73,6 @@ if not args.isChild:
   else:                          
     sysList = [None] + (systematics.keys() if args.runSys else [])
     excludeSys = ['NP']
-    # excludeSys = ['trigger'] # NOTE temporary
     if sysList[0]:
       sysList = [entry for entry in sysList if not any([entry.count(exc) for exc in excludeSys])]
   submitJobs(__file__, ('sys'), [[s] for s in sysList], argParser, subLog= args.tag + '/' + args.year, jobLabel = "UF", wallTime="15")
@@ -158,38 +160,12 @@ plotListOut = []
 plotListFid = []
 mList = []
 
-
-# ptBinRec = [20., 35., 50., 65., 80., 100., 120., 140., 160., 180., 200., 230., 260., 290., 320., 380.]
-# ptBinGen = [20., 35., 50., 65., 80., 120., 160., 200., 260., 320., 400.]
-
-# dRBinRec = [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4]
-# dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.4]
-
-# absEtaBinRec = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
-# absEtaBinGen = [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.45]
-
-# dPhiBinRec = (16, 0., 3.2)
-# dPhiBinGen = (8, 0., 3.2)
-
-# NOTE under should be -1. for this distribution, not 0. like all
-# cosBinRec = (16, -1., 1.)
-# cosBinGen = (8, -1., 1.)
-
-# absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
-# absdEtaBinGen = [0., 0.5, 1., 1.5, 2.,  2.5, 3., 4.5]
-
-# dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]
-# dRBinJetGen = [0.4, 0.8, 1.3, 1.9, 2.6, 3.4]
-
-# ptBinJetGen = [30., 60., 100., 150., 250., 400.]
-# ptBinJetRec = [30., 45., 60., 80., 100., 125., 150., 200., 250., 325., 400.]
-
-
 ptBinRec = [20., 35., 50., 70., 100., 130., 165., 200., 250., 300.]
 ptBinGen = [20., 35., 50., 70., 130., 200., 300.]
 
 dRBinRec = [0.4, 0.6, 0.8, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.6, 2.8, 3.0, 3.2, 3.4]
-dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.4]
+# dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.2, 3.4]
+dRBinGen = [0.4, 0.8, 1.2, 1.6, 2.0, 2.4, 2.8, 3.4]
 
 absEtaBinRec = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
 absEtaBinGen = [0, 0.2, 0.4, 0.6, 0.8, 1.0, 1.2, 1.45]
@@ -200,15 +176,11 @@ dPhiBinGen = (8, 0., 3.2)
 cosBinRec = (16, -1., 1.)
 cosBinGen = (8, -1., 1.)
 
-# absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 3.5, 4.5]
-absdEtaBinRec = [0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
+absdEtaBinRec = [0., 0.25, 0.5, 0.75, 1., 1.25, 1.5, 1.75, 2., 2.25, 2.5, 2.75, 3, 3.25, 4.5]
 absdEtaBinGen = [0., 0.5, 1., 1.5, 2.,  2.5, 3., 4.5]
 
 dRBinJetRec = [0.4, 0.6, 0.8, 1.05, 1.3, 1.6, 1.9, 2.25, 2.6, 3., 3.4]
 dRBinJetGen = [0.4, 0.8, 1.3, 1.9, 2.6, 3.4]
-
-# ptBinJetRec = [30., 50., 70., 90., 110., 130., 150., 175., 200., 250., 300., 375., 450.]
-# ptBinJetGen = [30., 70., 110., 150., 200., 300., 450.]
 
 ptBinJetRec = [30., 55., 80., 110., 140., 170., 200., 250., 300., 375., 450.]
 ptBinJetGen = [30., 80., 140., 200., 300., 450.]
@@ -225,14 +197,6 @@ ZptBinGen = [0., 30., 60., 90., 130., 210., 410.]
 l1l2ptBinRec = [40., 55., 70., 85., 100., 120., 140., 165., 190., 220., 250., 290., 330., 400., 500.]
 l1l2ptBinGen = [40., 70., 100., 140., 190., 250., 330., 500.]
 
-# plotList.append(Plot('unfReco_Z_pt',            'p_{T}(ll) (GeV)',                lambda c : Zpt(c),                                            ZptBinRec))
-# plotList.append(Plot('unfReco_l1l2_ptsum',      'p_{T}(l1)+p_{T}(l2) (GeV)',      lambda c : c.l1_pt+c.l2_pt,                                   l1l2ptBinRec))
-
-
-
-
-
-# plotList.append(Plot('unfReco_ll_cosTheta',     '#cos(theta(ll))',                lambda c : numpy.cos(angle(theta(c._lEta[c.l1]), theta(c._lEta[c.l2]), c._lPhi[c.l1], c._lPhi[c.l2]))   ,          cosBinRec    ))
 
 # for systematic variations we only want the response matrices
 plotListOut.append(Plot('out_unfReco_phPt',            'p_{T}(#gamma) (GeV)',    lambda c : min(ifRec(c, c.ph_pt                                                              , 0. ) ,ptBinRec[-1]       -0.001 )   ,ptBinRec     ))
@@ -368,24 +332,18 @@ log.info("using reduceType " + reduceType)
 for sample in sum(stack, []):
   c = sample.initTree(reducedType = reduceType)
   for i in sample.eventLoop():
-    
     c.GetEntry(i)
 
     c.ISRWeight = 1.
     c.FSRWeight = 1.
-    # log.info(c.lWeight)
     if args.sys:
       applySysToTree(sample.name, args.sys, c)
-    # log.info(c.lWeight)
-    # log.info('........................')
     c.fid = checkFid(c)
     c.rec = checkRec(c)
 
     prefireWeight = 1. if args.year == '2018' else c._prefireWeight
 
     phWeight = 1. if c.phWeight == 0. else c.phWeight
-    # generWeights = c.genWeight*lumiScale
-    # recoWeights  = c.puWeight*c.lWeight*c.lTrackWeight*phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*c.ISRWeight*c.FSRWeight*c.PVWeight
 
     generWeights = c.genWeight*lumiScale*c.ISRWeight*c.FSRWeight
     recoWeights  = c.lWeight*c.lTrackWeight*phWeight*c.bTagWeight*c.triggerWeight*prefireWeight*c.PVWeight*c.puWeight
@@ -435,7 +393,7 @@ for plot in plotList:
           err = plot.draw(plot_directory = os.path.join(plotDir, args.year, args.tag, 'noData' + ('-log' if logZ else ''), 'placeholderSelection', option),
                     logZ           = logZ,
                     drawOption     = option,
-                    drawObjects    = drawLumi(None, lumiScales[args.year], isOnlySim=('noData'=='noData')))
+                    drawObjects    = drawLumi2D(None, lumiScales[args.year], isOnlySim=('noData'=='noData')))
   else: ##### 1D plots #####
     extraArgs = {}
     for logY in [False, True]:

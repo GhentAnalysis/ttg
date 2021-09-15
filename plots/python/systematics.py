@@ -91,6 +91,10 @@ for j in ('Up', 'Down'):
   for i in ('5', '6', '7', '8', '9'):
     systematics['zgcorrstat' + i + j] = []
 
+# for i in ('1', '2', '3'):
+#   for j in ('Up', 'Down'):
+#     systematics['colRec_' + i + j] = []
+
 
 # Compile list to systematic to show
 #
@@ -99,6 +103,10 @@ showSysList.remove('colRec')
 showSysList.append('colRec_1')
 showSysList.append('colRec_2')
 showSysList.append('colRec_3')
+# showSysList.remove('colRec')
+# showSysList.append('colRec_1')
+# showSysList.append('colRec_2')
+# showSysList.append('colRec_3')
 
 showSysListRunII = [i + y for i in showSysList for y in (['_2016', '_2017', '_2018'] if i in correlations.keys() else [''])]
 showSysListRunII.remove('q2')
@@ -110,6 +118,10 @@ showSysListRunII.append('lumi_2016'  )
 showSysListRunII.append('lumi_2017'  )
 showSysListRunII.append('lumi_2018'  )
 showSysListRunII.append('lumi_3Ycorr')
+
+for i in ('1', '2', '3'):
+  showSysListRunII.append('colRec_' + i )
+  # for j in ('Up', 'Down'):
 
 #
 # Defining linear systematics as "name : (sampleList, %)"
@@ -123,7 +135,6 @@ linearSystematics['UE']     =         ('TTGamma',   0.5)
 linearSystematics['ZG_sigcr']       = ('ZG',        1.8 )  #for signal in Zg CR: 9.7% signal x 18.5% theory uncertainty on the signal
 
 
-# linearSystematics['lumi'] = (None, 2.5)
 
 def addYearLumiUnc(linSysDict, year):
   if year == '2016':
@@ -267,16 +278,16 @@ def CRSys(variations, nominal):
     downHist.SetBinContent(i, nominal.GetBinContent(i) - maxdev )
   return upHist, downHist
 
-def constructCRSys(allPlots, plotName, stack, force=False):
-  allPlots[plotName + 'colRecUp'] = {}
-  allPlots[plotName + 'colRecDown'] = {}
-  for histName in [s.name+s.texName for s in stack]:
-    try:
-      variations = [allPlots[plotName + 'colRec_' + i][histName] for i in ('1', '2', '3')]
-    except:
-      log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
-      variations = [allPlots[plotName][histName]]
-    allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])
+# def constructCRSys(allPlots, plotName, stack, force=False):
+#   allPlots[plotName + 'colRecUp'] = {}
+#   allPlots[plotName + 'colRecDown'] = {}
+#   for histName in [s.name+s.texName for s in stack]:
+#     try:
+#       variations = [allPlots[plotName + 'colRec_' + i][histName] for i in ('1', '2', '3')]
+#     except:
+#       log.warning('Missing color reconnection variations for ' + plotName + ' ' + histName + '!')
+#       variations = [allPlots[plotName][histName]]
+#     allPlots[plotName + 'colRecUp'][histName], allPlots[plotName + 'colRecDown'][histName] = CRSys(variations, allPlots[plotName][histName])
 
 
 

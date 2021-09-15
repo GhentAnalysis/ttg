@@ -120,6 +120,13 @@ def PLmakeDeltaR(t, n):
     setattr(n, 'PLjjDeltaR'+var,     min([deltaR(t._pl_jetEta[getattr(n, 'PLj1'+var)], t._pl_jetEta[getattr(n, 'PLj2'+var)], t._pl_jetPhi[getattr(n, 'PLj1'+var)], t._pl_jetPhi[getattr(n, 'PLj2'+var)])]) if getattr(n, 'PLnjets'+var) > 1 else -1) # pylint: disable=C0301
 
 
+def checkPLphMatch(t, n):
+  log.info(deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]))
+  if deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]) > 0.1: 
+    log.info('failed ph match')
+    return False
+  return True
+
 # def checkPLMatches(t, n):
 #   if deltaR(t._phEta[n.ph], t._pl_phEta[n.PLph], t._phPhi[n.ph], t._pl_phPhi[n.PLph]) > 0.1: 
 #     log.info('failed ph match')
