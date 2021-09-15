@@ -46,6 +46,15 @@ class ZgWeightTotal:
     # in the on-Zg regions there is no DD NP estimate -> ttbar sample variations have an effect, but don't in SR. 
     # might need to rethink this when ttgamma syst samples are used. although ttgamma is negigible on-Zg
     if any([s in sys for s in ['erd', 'hdamp', 'ue', 'NP', 'colRec', 'bFrag']]): sys = ''
+
+    if sys.count('zgcorrstat'):
+      bin = int(sys[10])
+      direc = (1. if sys.count('Up') else -1.)
+      sys = ''
+    else:
+      bin = 99
+      direc = 0.
+
     data, zg, otherMC = sumHists(sourceHists['2016'], 'ee', sys = sys)
     data17ee, zg17ee, otherMC17ee = sumHists(sourceHists['2017'], 'ee', sys = sys)
     data18ee, zg18ee, otherMC18ee = sumHists(sourceHists['2018'], 'ee', sys = sys)
@@ -93,11 +102,15 @@ class ZgWeightTotal:
     data.SetBinContent(10, 0)
     data.SetBinError(10, 0)
 
-
     for i in range(1, data.GetNbinsX()+1):
       if data.GetBinContent(i) < 0.000001: data.SetBinContent(i, 1.)
+
+
+    data.SetBinContent(bin, data.GetBinContent(bin) + ( direc * data.GetBinError(bin) ))
+
     self.weightMap = data.Clone()
     assert self.weightMap
+
 
 
   def getWeight(self, tree, channel):
@@ -106,3 +119,12 @@ class ZgWeightTotal:
     else: 
       return 1.
 
+  # def getWeightTest(self, bin, channel):
+  #   if channel == 1 or channel == 3:
+  #     return self.weightMap.GetBinContent(min(bin, 9))
+  #   else: 
+  #     return 1.
+
+
+
+# pdb.set_trace()

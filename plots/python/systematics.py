@@ -84,6 +84,10 @@ for i in ('1', '2', '3'):
   systematics['colRec_' + i] = []
 
 
+for j in ('Up', 'Down'):
+  for i in ('5', '6', '7', '8', '9'):
+    systematics['zgcorrstat' + i + j] = []
+
 # for i in ('1', '2', '3'):
 #   for j in ('Up', 'Down'):
 #     systematics['colRec_' + i + j] = []
@@ -119,9 +123,10 @@ for i in ('1', '2', '3'):
 linearSystematics = {}
 
 linearSystematics['ZG_norm']        = ('ZG',        1.5 )  #we consider 70% of the Zg yield to be constrained by the correction
-linearSystematics['singleTop_norm'] = ('singleTop', 10)
-linearSystematics['other_norm']     = ('other',     30)
-linearSystematics['UE']     =         ('TTGamma',   0.5)
+linearSystematics['singleTop_norm'] = ('singleTop', 10 )
+linearSystematics['other_norm']     = ('other',     30 )
+linearSystematics['UE']             = ('TTGamma',   0.5 )
+linearSystematics['ZG_sigcr']       = ('ZG',        1.8 )  #for signal in Zg CR: 9.7% signal x 18.5% theory uncertainty on the signal
 
 
 def addYearLumiUnc(linSysDict, year):

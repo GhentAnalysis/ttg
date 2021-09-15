@@ -64,11 +64,12 @@ def getEnv(histDict):
   maxDown = maxUp.Clone()
 
   for var in histDict.keys(): 
+    if var == '': continue
     histDict[var].Add(nominal, -1.)
 
   for i in range(0, nominal.GetNbinsX()+1):
-    maxUp.SetBinContent(  i, max([hist.GetBinContent(i) for hist in histDict.values()]))
-    maxDown.SetBinContent(i, min([hist.GetBinContent(i) for hist in histDict.values()]))
+    maxUp.SetBinContent(  i, max([histDict[key].GetBinContent(i) for key in histDict.keys() if not key == '']))
+    maxDown.SetBinContent(i, min([histDict[key].GetBinContent(i) for key in histDict.keys() if not key == '']))
 
   return maxUp, maxDown
 

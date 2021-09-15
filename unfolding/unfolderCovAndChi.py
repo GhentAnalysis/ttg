@@ -119,10 +119,10 @@ distList = [
 varList = ['']
 
 
-sysVaryData = ['bFrag', 'ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagbUC','bTagbCO','JER','NPFlat','NPHigh','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst', 'lTracking']
+sysVaryData = ['bFrag', 'ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagbUC','bTagbCO','JER','NPFlat','NPHigh','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst', 'lTracking', 'zgcorrstat5', 'zgcorrstat6', 'zgcorrstat7', 'zgcorrstat8', 'zgcorrstat9']
 
-if args.year == 'RunII': sysList = ['bFrag', 'isr','fsr','ephScale','ephRes','pu','pf','phSF','bTagl','bTagbUC','bTagbCO','JER','NPFlat','NPHigh','lSFMuSyst','lSFElSyst', 'lTracking']
-else: sysList = ['bFrag', 'isr','fsr','ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagbUC','bTagbCO','JER','NPFlat','NPHigh','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst', 'lTracking']
+if args.year == 'RunII': sysList = ['bFrag', 'isr','fsr','ephScale','ephRes','pu','pf','phSF','bTagl','bTagbUC','bTagbCO','JER','NPFlat','NPHigh','lSFMuSyst','lSFElSyst', 'lTracking', 'zgcorrstat5', 'zgcorrstat6', 'zgcorrstat7', 'zgcorrstat8', 'zgcorrstat9']
+else: sysList = ['bFrag', 'isr','fsr','ephScale','ephRes','pu','pf','phSF','pvSF','bTagl','bTagbUC','bTagbCO','JER','NPFlat','NPHigh','lSFMuStat','lSFElStat','lSFMuSyst','lSFElSyst','trigStatMM','trigStatEE','trigStatEM','trigSyst', 'lTracking', 'zgcorrstat5', 'zgcorrstat6', 'zgcorrstat7', 'zgcorrstat8', 'zgcorrstat9']
 
 varList += [sys + direc for sys in sysList for direc in ['Down', 'Up']]
 
@@ -426,11 +426,12 @@ def getEnv(histDict):
   maxDown = maxUp.Clone()
 
   for var in histDict.keys(): 
+    if var == '': continue
     histDict[var].Add(nominal, -1.)
 
   for i in range(0, nominal.GetNbinsX()+1):
-    maxUp.SetBinContent(  i, max([hist.GetBinContent(i) for hist in histDict.values()]))
-    maxDown.SetBinContent(i, min([hist.GetBinContent(i) for hist in histDict.values()]))
+    maxUp.SetBinContent(  i, max([histDict[key].GetBinContent(i) for key in histDict.keys() if not key=='']))
+    maxDown.SetBinContent(i, min([histDict[key].GetBinContent(i) for key in histDict.keys() if not key=='']))
 
   return maxUp, maxDown
 
@@ -613,6 +614,18 @@ for dist in distList:
 
       unfoldedDict[bkgNorm[0]+direc[0]] = unfolded
 
+    # ZG corr flat uncertainty
+    data, signal, backgrounds = getHistos(histDict, dist, '', blind = not args.unblind)
+    response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)'].Clone()
+    outMig = outMigDict[dist.replace('unfReco','out_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)'].Clone()
+    outMig = fracSigData(outMig, signalNom, backgroundsNom, data)
+
+    backgrounds['ZG_Z#gamma (genuine)Z#gamma (genuine)'].Scale(1. + 0.018*direc[1])
+    unfolded = getUnfolded(response, data, backgrounds, outMig)
+    unfolded.Scale(1./lumiScales[args.year])
+
+    unfoldedDict['ZG_sigcr'+direc[0]] = unfolded
+
     # Lumi uncertainty
     data, signal, backgrounds = getHistos(histDict, dist, '', blind = not args.unblind)
     response = responseDict[dist.replace('unfReco','response_unfReco')]['TTGamma_DilPCUTt#bar{t}#gamma (genuine)'].Clone()
@@ -673,6 +686,7 @@ for dist in distList:
     getDeviationOverview(unfoldedDict)
   # totalUp, totalDown = getTotalDeviations(unfoldedDict)
   totalSys = getTotalDeviationsAvg(unfoldedDict)
+
   q2Up, q2Down = getEnv(q2Dict)
   pdfrms = getRMS(pdfDict)
   
@@ -780,6 +794,10 @@ for dist in distList:
   plMCq2Dict[''] = plMCDict[''].Clone()
   pltotalUp, pltotalDown = getTotalDeviations(plMCDict)
 
+  # pickle.dump(plNLOq2Dict,  file('unfoldedHists/theQ2dict' +  dist + args.year + ('_norm' if args.norm else '')  +'.pkl', 'w'))
+  # pickle.dump(plNLOpdfDict, file('unfoldedHists/thePDFdict' +  dist + args.year + ('_norm' if args.norm else '')  +'.pkl', 'w'))
+  # pdb.set_trace()
+
 
   if args.LOtheory:
     plpdfrms = getRMS(plMCpdfDict)
@@ -814,6 +832,8 @@ for dist in distList:
   for i in range(1, pltotalUp.GetXaxis().GetNbins()+1):
     pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
     pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
+
+  # pdb.set_trace()
 
   theoCovs = getCovarHistsFromDev({'plq2i': plq2Up, 'plpdfi': plpdfrms}, eMat)
 
@@ -891,7 +911,7 @@ for dist in distList:
     plHW7.Scale(1/plHW7.Integral())
     plPy8.Scale(1/plPy8.Integral())
 
-  plHWpp.Draw('hist same')
+  # plHWpp.Draw('hist same')
   plHW7.Draw('hist same')
   if args.check:
     plPy8.Draw('hist same')
@@ -926,27 +946,28 @@ for dist in distList:
 
 
   if dist in ['unfReco_phBJetDeltaR', 'unfReco_ll_deltaPhi', 'unfReco_phLep1DeltaR']: #legend on the left
-    legend = ROOT.TLegend(1.1-0.92,0.63,1.1-0.62,0.87)
-    texchi = ROOT.TLatex(1.1-0.92+0.01,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
+    legend = ROOT.TLegend(1.1-0.92,0.60,1.1-0.61,0.87)
+    # texchi = ROOT.TLatex(1.1-0.92+0.01,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
   elif dist in ['unfReco_phLep2DeltaR']: #legend in the middle
-    legend = ROOT.TLegend(0.62-0.2,0.63,0.92-0.2,0.87)
-    texchi = ROOT.TLatex(0.62-0.2+0.01,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
+    legend = ROOT.TLegend(0.61-0.2,0.60,0.92-0.2,0.87)
+    # texchi = ROOT.TLatex(0.62-0.2+0.01,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
   else:
-    legend = ROOT.TLegend(0.62,0.63,0.92,0.87)
-    texchi = ROOT.TLatex(0.63,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
+    legend = ROOT.TLegend(0.61,0.60,0.92,0.87)
+    # texchi = ROOT.TLatex(0.63,0.59,'#chi^{2} / ndof = ' + str(round(chi2, 2)) + ' / ' + str(ndof))
     
-  texchi.SetTextFont(42)
-  texchi.SetNDC()
-  texchi.SetTextSize(0.038)
-  texchi.Draw()
+  # texchi.SetTextFont(42)
+  # texchi.SetNDC()
+  # texchi.SetTextSize(0.038)
+  # texchi.Draw()
   
   legend.SetBorderSize(0)
   legend.SetNColumns(1)
   legend.AddEntry(unfoldedNom,'Data',"PE")
   legend.AddEntry(plMCTot2,"MG5+Pythia8","l")
   legend.AddEntry(plMCTot,"Theory unc.","f")
+  legend.AddEntry(plMCTot,'#chi^{2} / dof = ' + str(round(chi2, 2)) + ' / ' + str(ndof),"")
   # legend.AddEntry(unfoldedMC,"Unfolded MC Signal","l")
-  legend.AddEntry(plHWpp,'MG5+Herwig++',"l")
+  # legend.AddEntry(plHWpp,'MG5+Herwig++',"l")
   legend.AddEntry(plHW7,'MG5+Herwig7',"l")
   if args.check:
     legend.AddEntry(plPy8,'PYTHIA8 ALT',"l")
@@ -994,7 +1015,11 @@ for dist in distList:
   theRatBand.GetXaxis().SetTitleOffset(1)
   theRatBand.GetYaxis().SetTitleSize(0.21)
   theRatBand.GetYaxis().SetTitleOffset(0.3)
-  theRatBand.GetYaxis().SetRangeUser(0.38, 1.62)
+
+  if args.norm and not dist in ['unfReco_jetPt', 'unfReco_Z_pt', 'unfReco_l1l2_ptsum']:
+    theRatBand.GetYaxis().SetRangeUser(0.7, 1.3)
+  else:
+    theRatBand.GetYaxis().SetRangeUser(0.38, 1.62)
   theRatBand.GetYaxis().SetNdivisions(3,5,0)
   theRatBand.GetYaxis().SetLabelSize(0.15)
 
@@ -1003,7 +1028,7 @@ for dist in distList:
 
   unfoldedRat.Draw('E X0 same')
 
-  plHWppRat.Draw('same hist')
+  # plHWppRat.Draw('same hist')
   plHW7Rat.Draw('same hist')
   if args.check:
     plPy8Rat.Draw('same hist')
@@ -1064,8 +1089,9 @@ for dist in distList:
   # ROOT.gPad.RedrawAxis()
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
-  statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.png')
-  statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.pdf')
+  if args.year == 'RunII':
+    statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.png')
+    statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.pdf')
 
 
   systCovCanv = ROOT.TCanvas('systCov' + dist,'systCov' + dist, 1200, 1100)
@@ -1096,8 +1122,9 @@ for dist in distList:
   covTot.Draw('COLZ text')
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
-  systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.png')
-  systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.pdf')
+  if args.year == 'RunII':
+    systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.png')
+    systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.pdf')
 
   for i in range(1, correlStat.GetXaxis().GetNbins()+1):
     for j in range(1, correlStat.GetXaxis().GetNbins()+1):
@@ -1131,8 +1158,9 @@ for dist in distList:
   ROOT.gPad.RedrawAxis()
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
-  correlStatCovCanv.SaveAs('unfolded/' + dist + 'correlStatCov' + ('_norm' if args.norm else '') + '.png')
-  correlStatCovCanv.SaveAs('unfolded/' + dist + 'correlStatCov' + ('_norm' if args.norm else '') + '.pdf')
+  if args.year == 'RunII':
+    correlStatCovCanv.SaveAs('unfolded/' + dist + 'correlStatCov' + ('_norm' if args.norm else '') + '.png')
+    correlStatCovCanv.SaveAs('unfolded/' + dist + 'correlStatCov' + ('_norm' if args.norm else '') + '.pdf')
 
 
   for i in range(1, correlSyst.GetXaxis().GetNbins()+1):
@@ -1166,8 +1194,9 @@ for dist in distList:
   ROOT.gPad.RedrawAxis()
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
-  correlSystCovCanv.SaveAs('unfolded/' + dist + 'correlSystCov' + ('_norm' if args.norm else '') + '.png')
-  correlSystCovCanv.SaveAs('unfolded/' + dist + 'correlSystCov' + ('_norm' if args.norm else '') + '.pdf')
+  if args.year == 'RunII':
+    correlSystCovCanv.SaveAs('unfolded/' + dist + 'correlSystCov' + ('_norm' if args.norm else '') + '.png')
+    correlSystCovCanv.SaveAs('unfolded/' + dist + 'correlSystCov' + ('_norm' if args.norm else '') + '.pdf')
 
 
 # NOTE: code to print yield and unc table, don't delete!

@@ -62,9 +62,9 @@ if args.showSys and not args.sys and args.year == 'all':
 #filtering out colRec here
 # showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec']])]
 
-if args.showSys and args.tag.count('forZgest'):
-  showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec', 'NPFlat', 'NPHigh', 'bFrag']])]
-
+if args.showSys and args.tag.count('forZgest') and not args.runSys:
+  showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec', 'NPFlat', 'NPHigh', 'bFrag', 'zgcorrstat']])]
+  del linearSystematics['ZG_sigcr']
 
 if not args.isChild:
   updateGitInfo()
@@ -281,18 +281,18 @@ def makePlotList():
     plotList.append(Plot('totYield',                   'total yield',                           lambda c : 0.5,                                                (1, 0, 1),   histModifications=xAxisLabels([''])))
 
 
-    plotList.append(Plot('PBVAphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (30, 20, 120)))
-    plotList.append(Plot('PBVBphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (20, 20, 120)))
-    plotList.append(Plot('PBVCphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (15, 20, 120)))
-    plotList.append(Plot('PBVDphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 85., 100., 115., 130., 147.5, 165., 182.5, 200., 225., 250., 275 , 300.]))
-    plotList.append(Plot('PBVEphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 85., 100.]))
-    plotList.append(Plot('PBVFphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100., 115., 130., 147.5, 165., 182.5, 200., 225., 250., 275 , 300.]))
-    plotList.append(Plot('PBVGphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100.]))
-    plotList.append(Plot('PBVHphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100., 120.]))
+    # plotList.append(Plot('PBVAphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (30, 20, 120)))
+    # plotList.append(Plot('PBVBphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (20, 20, 120)))
+    # plotList.append(Plot('PBVCphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (15, 20, 120)))
+    # plotList.append(Plot('PBVDphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 85., 100., 115., 130., 147.5, 165., 182.5, 200., 225., 250., 275 , 300.]))
+    # plotList.append(Plot('PBVEphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 85., 100.]))
+    # plotList.append(Plot('PBVFphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100., 115., 130., 147.5, 165., 182.5, 200., 225., 250., 275 , 300.]))
+    # plotList.append(Plot('PBVGphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100.]))
+    # plotList.append(Plot('PBVHphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 25., 30., 40., 50., 60., 70., 80., 90., 100., 120.]))
  
-    plotList.append(Plot('PBVIphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (40, 20, 120)))
-    plotList.append(Plot('PBVJphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (50, 20, 120)))
-    plotList.append(Plot('PBVKphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (80, 20, 120)))
+    # plotList.append(Plot('PBVIphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (40, 20, 120)))
+    # plotList.append(Plot('PBVJphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (50, 20, 120)))
+    # plotList.append(Plot('PBVKphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (80, 20, 120)))
 
 
     plotList.append(Plot('PBAphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (40, 20, 120)))
@@ -308,10 +308,12 @@ def makePlotList():
     plotList.append(Plot2D('photon_pt_etaB', 'p_{T}(#gamma) [GeV]', lambda c : c.ph_pt , [15., 30., 45., 60., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.3, 0.60, 0.9, 1.5, 1.8, 2.5]))
     plotList.append(Plot2D('photon_pt_etaC', 'p_{T}(#gamma) [GeV]', lambda c : min(c.ph_pt, 119.) , [20., 50., 120.], '|#eta|(#gamma)', lambda c : abs(c._phEta[c.ph]), [0, 0.435, 0.783, 1.5, 1.8, 2.5]))
 
-# TODO disbale these again later
+# TODO disable these again later
 
-    plotList.append(Plot2D('mll_mllg_A', 'm(ll) [GeV]', lambda c : c.mll , (10, 20, 120), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (15, 50, 200)))
-    plotList.append(Plot2D('mll_mllg_B', 'm(ll) [GeV]', lambda c : c.mll , (20, 20, 120), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (30, 50, 200)))
+    # plotList.append(Plot2D('mll_mllg_A', 'm(ll) [GeV]', lambda c : c.mll , (10, 20, 120), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (15, 50, 200)))
+    # plotList.append(Plot2D('mll_mllg_B', 'm(ll) [GeV]', lambda c : c.mll , (20, 20, 120), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (30, 50, 200)))
+
+
     # plotList.append(Plot2D('mll_mllg_C', 'm(ll) [GeV]', lambda c : c.mll , (15, 0, 150), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (15, 0, 250)))
     # plotList.append(Plot2D('mll_mllg_D', 'm(ll) [GeV]', lambda c : c.mll , (15, 0, 150), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (20, 0, 250)))
     # plotList.append(Plot2D('mll_mllg_E', 'm(ll) [GeV]', lambda c : c.mll , (60, 0, 150), 'm(ll#gamma) [GeV]', lambda c : c.mllg, (60, 0, 250)))
