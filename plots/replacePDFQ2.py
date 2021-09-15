@@ -60,12 +60,12 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
 
 
 # folder = 'R2ZatEllModified'
-folder = '18ZatEllModified'
+folder = 'R2ApprTestCllModifiedEFT'
 name = 'srFit'
 nloName = 'unfBLS-r_NLO'
 
-# years = ['2016','2017','2018']
-years = ['2018']
+years = ['2016','2017','2018']
+# years = ['2018']
 
 for year in years:
   fname = folder + '/' + name + '_' + year + '_shapes.root'
@@ -76,7 +76,7 @@ for year in years:
   # tag           = 'phoCBfull-niceEstimDD'
   # dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
-  nloFile = urllib2.urlopen('https://homepage.iihe.ac.be/~gmestdac/ttG/' + year + '/' + nloName + '/noData/placeholderSelection/rec_unfReco_phPt.pkl')
+  nloFile = urllib2.urlopen('https://homepage.iihe.ac.be/~gmestdac/ttG/' + year + 'PreJune/' + nloName + '/noData/placeholderSelection/rec_unfReco_phPt.pkl')
   nloHist = pickle.load(nloFile)
   q2Variations = []
   pdfVariations = []

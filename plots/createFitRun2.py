@@ -95,7 +95,7 @@ def writeHist(rootFile, name, template, histTemp, norm=None, removeBins = [0], s
 try: os.makedirs(args.run + args.chan)
 except: pass
 #  if a template is added for some reason, keep TTGamma first and nonprompt last
-templates = ['TTGamma', 'ZG', 'VVTo2L2Nu', 'singleTop', 'other', 'nonprompt']
+templates = ['TTGamma', 'ZG', 'singleTop', 'other', 'nonprompt']
 from ttg.plots.systematics import correlations
 
 
@@ -106,7 +106,7 @@ def writeRootFile(name, shapes, systematicVariations, year, distName):
     f = ROOT.TFile(fname, 'RECREATE')
 
     baseSelection = 'llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20'
-    tag           = 'phoCBfull-niceEstimDD'
+    tag           = 'phoCBfull-niceEstimDD-RE'
     dataHistName = {'ee':'DoubleEG', 'mumu':'DoubleMuon', 'emu':'MuonEG'}
 
     for shape in shapes:
@@ -123,16 +123,30 @@ def writeRootFile(name, shapes, systematicVariations, year, distName):
           else:
             Selectors     = [[t, '(genuine)']]
           
-          prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), distName, sys, *Selectors)
+          if not sys.count('colRec'):
+            prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), distName, sys, *Selectors)
+
           if sys == '':     nominal = prompt                                                   # Save nominal case to be used for q2/pdf calculations
           if 'pdf' in sys:  pdfVariations += [prompt]                                          # Save all pdfVariations in list
           elif 'q2' in sys: q2Variations += [prompt]                                           # Save all q2Variations in list
-          elif 'colRec' in sys: colRecVariations += [prompt]                                   # Save all colRecVariations in list
+
+
+          # elif 'colRec' in sys: colRecVariations += [prompt]                                   # Save all colRecVariations in list
+
+
+          # else:
+          #   if 'erdDown' in sys:
+          #     sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
+          #     ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), distName, 'erdUp', *sel)
+          #     prompt = invertVar(nominal, ErdUpprompt)
           else:
-            if 'erdDown' in sys:
+            if 'colRec' in sys:
               sel = [['NP', 'nonprompt']] if t == 'nonprompt' else [[t, '(genuine)']]
-              ErdUpprompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), distName, 'erdUp', *sel)
-              prompt = invertVar(nominal, ErdUpprompt)
+              colName = sys.split('Up')[0].split('Down')[0]
+              prompt    = getHistFromPkl((year, tag, shape[3:], baseSelection), distName, colName, *sel)
+              if sys.count('Down'):
+                prompt = invertVar(nominal, prompt)
+          
             prompt = capVar(nominal, prompt)
             writeHist(f, shape+sys, t, prompt, mergeBins = False)    # Write nominal and other systematics   
             if not sys: continue # there's no year correlation stuff for nominal obviously
@@ -293,19 +307,19 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
     if blind == False:
       print colored('##### Run channel compatibility (obs)', 'red')
       runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir)
-      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='obs', addNominal=True)
+      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.5, run=outDir, mode='obs', addNominal=True)
       if year == 'All':
         runCompatibility(cardName, year, perPage, doRatio=doRatio, run=outDir, group=True)
-        plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='grouped_obs', addNominal=True)
+        plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.5, run=outDir, mode='grouped_obs', addNominal=True)
 
       # TODO adjust plotter so it can plot the grouped ones
 
     print colored('##### Run channel compatibility (exp)', 'red')
     runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir)
-    plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='exp', addNominal=True)
+    plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.5, run=outDir, mode='exp', addNominal=True)
     if year == 'All':
       runCompatibility(cardName, year, perPage, toys=True, doRatio=doRatio, run=outDir, group=True)
-      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.3, run=outDir, mode='grouped_exp', addNominal=True)
+      plotCC(cardName, year, poi='r', rMin=0.7, rMax=1.5, run=outDir, mode='grouped_exp', addNominal=True)
 
     
     # # TODO adjust plotter so it can plot the grouped ones
@@ -324,8 +338,8 @@ def doSignalRegionFit(cardName, shapes, perPage=30, doRatio=False, year='2016', 
         os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r' + args.year + '.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName)
       os.system('./makeTable.py --mode=impacts_r --template=./data/impacts_r' + args.year + '.tex --chan=' + args.chan + ' --year=' + args.year + ' --run=' + args.run + ' --card=' + cardName + ' --asimov')
 
-    doLinearityCheck(cardName, year, run=args.run+args.chan)
-    goodnessOfFit(cardName, run=args.run+args.chan)
+    # doLinearityCheck(cardName, year, run=args.run+args.chan)
+    # goodnessOfFit(cardName, run=args.run+args.chan)
 
 doRatio = args.ratio
 fitName = 'srFit'
