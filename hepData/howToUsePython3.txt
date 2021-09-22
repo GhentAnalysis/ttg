@@ -1,0 +1,5 @@
+run
+source /cvmfs/sft.cern.ch/lcg/views/LCG_97python3/x86_64-slc6-gcc8-opt/setup.sh
+
+might not work if you've already cmsenv'ed into a cmssw release
+sometimes randomly doesn't work --> try in a new terminal or sacrifice a small animal

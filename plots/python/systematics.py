@@ -97,10 +97,10 @@ for j in ('Up', 'Down'):
 # Compile list to systematic to show
 #
 showSysList = list(set(s.split('Up')[0].split('Down')[0].split('_')[0] for s in systematics.keys()))
-# showSysList.remove('colRec')
-# showSysList.append('colRec_1')
-# showSysList.append('colRec_2')
-# showSysList.append('colRec_3')
+showSysList.remove('colRec')
+showSysList.append('colRec_1')
+showSysList.append('colRec_2')
+showSysList.append('colRec_3')
 
 showSysListRunII = [i + y for i in showSysList for y in (['_2016', '_2017', '_2018'] if i in correlations.keys() else [''])]
 showSysListRunII.remove('q2')

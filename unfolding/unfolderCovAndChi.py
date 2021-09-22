@@ -1092,6 +1092,7 @@ for dist in distList:
   if args.year == 'RunII':
     statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.png')
     statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.pdf')
+    statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.root')
 
 
   systCovCanv = ROOT.TCanvas('systCov' + dist,'systCov' + dist, 1200, 1100)
@@ -1119,12 +1120,16 @@ for dist in distList:
   covTot.LabelsOption('v','x')
   ROOT.gPad.Update()
   ROOT.gPad.RedrawAxis()
+
+  covTotToSave = covTot.Clone('covarHist')
+  covTotToSave.SaveAs('unfoldedRoots/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.root')
   covTot.Draw('COLZ text')
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
   if args.year == 'RunII':
     systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.png')
     systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.pdf')
+    systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.root')
 
   for i in range(1, correlStat.GetXaxis().GetNbins()+1):
     for j in range(1, correlStat.GetXaxis().GetNbins()+1):
@@ -1161,6 +1166,7 @@ for dist in distList:
   if args.year == 'RunII':
     correlStatCovCanv.SaveAs('unfolded/' + dist + 'correlStatCov' + ('_norm' if args.norm else '') + '.png')
     correlStatCovCanv.SaveAs('unfolded/' + dist + 'correlStatCov' + ('_norm' if args.norm else '') + '.pdf')
+    correlStatCovCanv.SaveAs('unfolded/' + dist + 'correlStatCov' + ('_norm' if args.norm else '') + '.root')
 
 
   for i in range(1, correlSyst.GetXaxis().GetNbins()+1):
@@ -1197,6 +1203,7 @@ for dist in distList:
   if args.year == 'RunII':
     correlSystCovCanv.SaveAs('unfolded/' + dist + 'correlSystCov' + ('_norm' if args.norm else '') + '.png')
     correlSystCovCanv.SaveAs('unfolded/' + dist + 'correlSystCov' + ('_norm' if args.norm else '') + '.pdf')
+    correlSystCovCanv.SaveAs('unfolded/' + dist + 'correlSystCov' + ('_norm' if args.norm else '') + '.root')
 
 
 # NOTE: code to print yield and unc table, don't delete!

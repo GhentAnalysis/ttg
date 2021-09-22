@@ -1,0 +1,33 @@
+if imagemagick is not available where you're running hepdata_lib, you can convert your images elsewhere:
+
+convert -flatten -density 300 -fuzz 1% -trim +repage inputImg.png adj_inputImg.png
+convert -thumbnail 240x179 adj_inputImg.png adj_thumb_inputImg.png
+
+this creates a regualr size adjusted image, and a small thumbnail image, both needed in this form by hepData
+
+add all these images to the output folder, then open the submission yaml file  submission.yaml
+
+for every entry you want to have images add these lines with adjusted image names of course:
+
+additional_resources:
+- description: Image file
+  location: adj_inputImg.png
+- description: Thumbnail image file
+  location: adj_thumb_inputImg.png
+
+add these below "---"  and above "data_file: "
+yes, this is at the start of each, block, no I'm not sure if that's strictly necessary but might as well do it the way the script would
+The "additional_resources:" line is really needed fyi
+The resulting block should look like:
+
+---
+additional_resources:
+- description: Image file
+  location: adj_inputImg.png
+- description: Thumbnail image file
+  location: adj_thumb_inputImg.png
+data_file: title_test.yaml
+description: Example description
+keywords: []
+location: Example location
+name: Title test

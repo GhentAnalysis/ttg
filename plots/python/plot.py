@@ -214,7 +214,7 @@ class Plot:
   #
   # Save the histogram to a results.cache file, useful when you need to do further operations on it later
   #
-  def saveToCache(self, dir, sys):
+  def saveToCache(self, dir, sys, extras = []):
     try:    os.makedirs(os.path.join(dir))
     except: pass
 
@@ -228,6 +228,17 @@ class Plot:
       allPlots = {plotName : histos}
     with lock(resultFile, 'wb', existingLock=True) as f: pickle.dump(allPlots, f)
     log.info("Plot " + plotName + " saved to cache")
+
+    if extras:
+      resultFile = os.path.join(dir, self.name + 'totalSys.pkl')
+      plotName   = self.name+(sys if sys else '')
+      try:
+        with lock(resultFile, 'rb', keepLock=True) as f: allPlots = pickle.load(f)
+        extrasDict.update({plotName : extras})
+      except:
+        extrasDict = {plotName : extras}
+      with lock(resultFile, 'wb', existingLock=True) as f: pickle.dump(extras, f)
+      log.info("Total systematics values " + plotName + " saved to cache")
 
 
   #
@@ -689,9 +700,14 @@ class Plot:
       same = "same"
 
     canvas.topPad.RedrawAxis()
+
+    extras = []
     for h in (s[0] for s in histos):
       if hasattr(h, 'sysValues'):
+        # totalMC.sysValues['Up'] 
+        # totalMC.sysValues['Down']
         drawObjects                     += self.getSystematicBoxes(h)
+        extras += [h.sysValues['Down'], h.sysValues['Up']]
         if ratio: ratio['drawObjects']  += self.getSystematicBoxes(h, ratio=True)
 
     for o in drawObjects:
@@ -764,9 +780,9 @@ class Plot:
     if saveGitInfo: copyGitInfo(os.path.join(plot_directory, self.name + '.gitInfo'))
     log.info('Creating output files for ' + self.name)
     # save postFit to cache only when plotting with all systematics
-    if postFitInfo and len(systematics) > 1 and not plot_directory.count('-log') and not plot_directory.count('-normMC'):
+    if len(systematics) > 1 and not plot_directory.count('-log') and not plot_directory.count('-normMC'):
       log.info('Saving postfit histograms to cache for ' + self.name)
-      self.saveToCache(plot_directory, '')
+      self.saveToCache(plot_directory, '', extras=extras)
     for extension in extensions:
       ofile = os.path.join(plot_directory, "%s.%s"%(self.name, extension))
       log.info(ofile)
