@@ -1,0 +1,5 @@
+<data>
+    <sample id="output" tag="output">
+        <file>/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/test/output.root</file>
+    </sample>
+</data>
