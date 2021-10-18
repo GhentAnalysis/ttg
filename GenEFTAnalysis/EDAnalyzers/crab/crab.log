@@ -1,0 +1,1158 @@
+DEBUG 2020-06-06 08:30:44.885 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-06 08:30:44.885 UTC: 	 Running on: Linux m8.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-06 08:30:44.939 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-06 08:30:44.939 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-06 08:30:44.940 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-06 08:30:44.956 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-06 08:30:44.956 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-06 08:30:44.960 UTC: 	 Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-06 08:30:44.960 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-06 08:30:44.962 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-06 08:30:45.359 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-06 08:30:45.360 UTC: 	 Running on: Linux m8.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-06 08:30:45.379 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-06 08:30:45.379 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-06 08:30:45.379 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-06 08:30:45.380 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-06 08:30:45.380 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-06 08:30:45.384 UTC: 	 Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-06 08:30:45.384 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-06 08:30:45.386 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-06 08:30:45.782 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-06 08:30:45.782 UTC: 	 Running on: Linux m8.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-06 08:30:45.801 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-06 08:30:45.801 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-06 08:30:45.802 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-06 08:30:45.803 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-06 08:30:45.803 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-06 08:30:45.805 UTC: 	 Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-06 08:30:45.805 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-06 08:30:45.807 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-06 08:31:14.871 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-06 08:31:14.871 UTC: 	 Running on: Linux m8.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-06 08:31:14.890 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-06 08:31:14.890 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-06 08:31:14.891 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-06 08:31:14.892 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-06 08:31:14.892 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-06 08:31:14.895 UTC: 	 Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-06 08:31:14.896 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-06 08:31:14.899 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-06 08:31:15.295 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-06 08:31:15.296 UTC: 	 Running on: Linux m8.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-06 08:31:15.315 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-06 08:31:15.315 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-06 08:31:15.315 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-06 08:31:15.317 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-06 08:31:15.317 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-06 08:31:15.320 UTC: 	 Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-06 08:31:15.321 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-06 08:31:15.323 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-06 08:31:15.717 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-06 08:31:15.717 UTC: 	 Running on: Linux m8.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-06 08:31:15.736 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-06 08:31:15.736 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-06 08:31:15.737 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-06 08:31:15.738 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-06 08:31:15.738 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-06 08:31:15.739 UTC: 	 Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-06 08:31:15.740 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter JobType.pluginName has an invalid value ('GenTreeMaker').
+Allowed values are: PRIVATEMC, COPYCAT, ANALYSIS.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-06 08:31:15.741 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-09 10:48:40.796 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-09 10:48:40.800 UTC: 	 Running on: Linux m7.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-09 10:48:40.860 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-09 10:48:40.862 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-09 10:48:40.865 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-09 10:48:40.873 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-09 10:48:40.874 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-09 10:48:40.887 UTC: 	 Invalid CRAB configuration: Parameter Site.whitelist requires a value of type <type 'list'> (while a value of type <type 'str'> was given).
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-09 10:48:40.888 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter Site.whitelist requires a value of type <type 'list'> (while a value of type <type 'str'> was given).
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-09 10:48:40.899 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-09 10:48:42.693 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-09 10:48:42.697 UTC: 	 Running on: Linux m7.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-09 10:48:42.751 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-09 10:48:42.754 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-09 10:48:42.756 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-09 10:48:42.763 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-09 10:48:42.764 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-09 10:48:42.778 UTC: 	 Invalid CRAB configuration: Parameter Site.whitelist requires a value of type <type 'list'> (while a value of type <type 'str'> was given).
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-09 10:48:42.779 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter Site.whitelist requires a value of type <type 'list'> (while a value of type <type 'str'> was given).
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-09 10:48:42.790 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2020-06-09 10:48:44.449 UTC: 	 CRAB Client version: 3.3.2005
+DEBUG 2020-06-09 10:48:44.453 UTC: 	 Running on: Linux m7.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2020-06-09 10:48:44.492 UTC: 	 OpenSSl version: OpenSSL 1.0.1e-fips 11 Feb 2013
+DEBUG 2020-06-09 10:48:44.494 UTC: 	 Executing command: 'submit'
+DEBUG 2020-06-09 10:48:44.496 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2020-06-09 10:48:44.500 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2020-06-09 10:48:44.500 UTC: 	 Loading CRAB configuration file.
+ERROR 2020-06-09 10:48:44.507 UTC: 	 Invalid CRAB configuration: Parameter Site.whitelist requires a value of type <type 'list'> (while a value of type <type 'str'> was given).
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2020-06-09 10:48:44.508 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 165, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/bin/crab", line 150, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/submit.py", line 35, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 319, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/3.3.2005/lib/CRABClient/Commands/SubCommand.py", line 93, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter Site.whitelist requires a value of type <type 'list'> (while a value of type <type 'str'> was given).
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2020-06-09 10:48:44.515 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-16 21:35:26.811 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-16 21:35:26.812 UTC: 	 Running on: Linux m2.iihe.ac.be 3.10.0-1127.19.1.el7.x86_64 #1 SMP Tue Aug 25 17:23:54 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-16 21:35:26.812 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-16 21:35:26.815 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-16 21:35:26.826 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-16 21:35:26.826 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-16 21:35:26.864 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-16 21:35:26.865 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-16 21:35:26.865 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-16 21:35:26.878 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-19 18:43:17.843 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:43:17.843 UTC: 	 Running on: Linux m8.iihe.ac.be 2.6.32-754.17.1.el6.x86_64 #1 SMP Tue Jul 2 08:51:06 CDT 2019 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux release 6.10 (Carbon)
+DEBUG 2021-06-19 18:43:17.844 UTC: 	 Executing command: 'status'
+DEBUG 2021-06-19 18:43:17.844 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+ERROR 2021-06-19 18:43:17.846 UTC: 	 Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1
+ERROR 2021-06-19 18:43:17.846 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/status.py", line 39, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 270, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 650, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 512, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1
+INFO 2021-06-19 18:43:17.848 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/KinFit/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-19 18:56:56.901 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:56:56.902 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:56:56.902 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:56:56.903 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:56:57.485 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:56:57.485 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:56:57.485 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:56:57.486 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:56:58.056 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:56:58.057 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:56:58.057 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:56:58.057 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:57:09.811 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:57:09.812 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:57:09.812 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:57:09.813 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:57:10.269 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:57:10.269 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:57:10.269 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:57:10.270 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:57:23.065 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:57:23.066 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:57:23.066 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:57:23.096 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:58:35.530 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:58:35.530 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:58:35.531 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:58:35.531 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:58:36.083 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:58:36.083 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:58:36.083 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:58:36.084 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:58:36.540 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:58:36.541 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:58:36.541 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:58:36.541 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 18:58:36.956 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 18:58:36.957 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 18:58:36.957 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 18:58:36.957 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+DEBUG 2021-06-19 19:30:28.028 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 19:30:28.029 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 19:30:28.029 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 19:30:28.030 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-19 19:30:28.033 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-19 19:30:28.033 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-06-19 19:30:28.064 UTC: 	 Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_Dilept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-06-19 19:30:28.064 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 90, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_Dilept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-06-19 19:30:28.069 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-19 19:31:13.870 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-19 19:31:13.871 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-19 19:31:13.871 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-19 19:31:13.871 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-19 19:31:13.874 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-19 19:31:13.874 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-06-19 19:31:13.882 UTC: 	 Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_SingleLept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-06-19 19:31:13.882 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 90, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_SingleLept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-06-19 19:31:13.890 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:33:15.599 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:33:15.600 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:33:15.600 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:33:15.601 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:33:15.603 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:33:15.603 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:33:15.610 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:33:15.610 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:33:15.610 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:33:15.618 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:33:16.136 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:33:16.137 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:33:16.137 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:33:16.137 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:33:16.140 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:33:16.140 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:33:16.148 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:33:16.148 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:33:16.148 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:33:16.152 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:33:16.683 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:33:16.684 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:33:16.684 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:33:16.684 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:33:16.686 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:33:16.686 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-06-21 09:33:16.695 UTC: 	 Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_Dilept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-06-21 09:33:16.696 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 90, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_Dilept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-06-21 09:33:16.700 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:33:17.265 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:33:17.266 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:33:17.267 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:33:17.267 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:33:17.268 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:33:17.269 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-06-21 09:33:17.274 UTC: 	 Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_Dilept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-06-21 09:33:17.274 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 90, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_Dilept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-06-21 09:33:17.278 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:33:17.781 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:33:17.782 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:33:17.782 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:33:17.782 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:33:17.784 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:33:17.784 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:33:17.793 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:33:17.794 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwigpp_v2_ttGamma_SingleLept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:33:17.794 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwigpp_v2_ttGamma_SingleLept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:33:17.799 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:33:18.339 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:33:18.340 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:33:18.340 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:33:18.341 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:33:18.342 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:33:18.342 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:33:18.346 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:33:18.347 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwigpp_v2_ttGamma_SingleLept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:33:18.347 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwigpp_v2_ttGamma_SingleLept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:33:18.350 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:07.257 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:07.257 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:07.257 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:07.258 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:07.261 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:07.261 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:07.268 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:07.269 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:07.269 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:07.274 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:07.750 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:07.751 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:07.751 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:07.751 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:07.753 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:07.753 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:07.760 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:07.760 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:07.760 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:07.763 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:08.169 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:08.169 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:08.169 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:08.169 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:08.171 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:08.171 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:08.174 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:08.175 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:08.175 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:08.178 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:08.585 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:08.585 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:08.585 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:08.585 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:08.587 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:08.587 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:08.595 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:08.595 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:08.595 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:08.598 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:09.031 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:09.032 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:09.032 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:09.032 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:09.034 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:09.034 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:09.037 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:09.038 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:09.038 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:09.041 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:09.510 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:09.511 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:09.511 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:09.511 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:09.513 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:09.513 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-06-21 09:34:09.523 UTC: 	 Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_SingleLept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-06-21 09:34:09.523 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 90, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Error while loading CRAB configuration:
+[Errno 2] No such file or directory: 'ttGamma_SingleLept_Pythia8_v2.txt'
+Please refer to https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3CommonErrors#Syntax_error_in_CRAB_configurati
+See the ./crab.log file for more details.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-06-21 09:34:09.526 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:56.427 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:56.427 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:56.427 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:56.428 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:56.431 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:56.431 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:56.438 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:56.438 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:56.438 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:56.442 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:56.865 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:56.866 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:56.866 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:56.866 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:56.868 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:56.868 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:56.876 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:56.876 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:56.876 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:56.879 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:57.303 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:57.304 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:57.304 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:57.304 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:57.306 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:57.306 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:57.310 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:57.310 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:57.310 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:57.314 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:57.731 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:57.731 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:57.731 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:57.731 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:57.733 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:57.733 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:57.741 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:57.742 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:57.742 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:57.745 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:34:58.207 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:34:58.208 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:34:58.208 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:34:58.208 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:34:58.210 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:34:58.210 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:34:58.214 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:34:58.214 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:34:58.214 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:34:58.217 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:38:45.375 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:38:45.375 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:38:45.375 UTC: 	 Executing command: 'status'
+DEBUG 2021-06-21 09:38:45.376 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+ERROR 2021-06-21 09:38:45.380 UTC: 	 Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Pythia8_v2_ttGamma_SingleLept_Pythia8_v2_1
+ERROR 2021-06-21 09:38:45.381 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/status.py", line 39, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 270, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 650, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 512, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Pythia8_v2_ttGamma_SingleLept_Pythia8_v2_1
+INFO 2021-06-21 09:38:45.385 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:39:17.718 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:39:17.719 UTC: 	 Running on: Linux m2.iihe.ac.be 3.10.0-1127.19.1.el7.x86_64 #1 SMP Tue Aug 25 17:23:54 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:39:17.719 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:39:17.721 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:39:17.727 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:39:17.728 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:39:17.759 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:39:17.761 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:39:17.761 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:39:17.771 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:39:19.320 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:39:19.321 UTC: 	 Running on: Linux m2.iihe.ac.be 3.10.0-1127.19.1.el7.x86_64 #1 SMP Tue Aug 25 17:23:54 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:39:19.322 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:39:19.322 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:39:19.327 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:39:19.328 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:39:19.345 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:39:19.346 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:39:19.346 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:39:19.357 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:43:36.752 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:43:36.753 UTC: 	 Running on: Linux m2.iihe.ac.be 3.10.0-1127.19.1.el7.x86_64 #1 SMP Tue Aug 25 17:23:54 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:43:36.753 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:43:36.755 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:43:36.761 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:43:36.761 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:43:36.793 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:43:36.794 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:43:36.795 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwig7_v2_ttGamma_SingleLept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:43:36.807 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-06-21 09:43:38.265 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-06-21 09:43:38.266 UTC: 	 Running on: Linux m2.iihe.ac.be 3.10.0-1127.19.1.el7.x86_64 #1 SMP Tue Aug 25 17:23:54 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-06-21 09:43:38.266 UTC: 	 Executing command: 'submit'
+DEBUG 2021-06-21 09:43:38.267 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-06-21 09:43:38.273 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-06-21 09:43:38.273 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-06-21 09:43:38.310 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-06-21 09:43:38.311 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwigpp_v2_ttGamma_SingleLept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-06-21 09:43:38.311 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_SingleLept_Herwigpp_v2_ttGamma_SingleLept_Herwigpp_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-06-21 09:43:38.322 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-09 14:06:41.107 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-09 14:06:41.107 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-09 14:06:41.107 UTC: 	 Executing command: 'status'
+DEBUG 2021-07-09 14:06:41.108 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+ERROR 2021-07-09 14:06:41.111 UTC: 	 Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1
+ERROR 2021-07-09 14:06:41.111 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/status.py", line 39, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 270, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 650, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 512, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1
+INFO 2021-07-09 14:06:41.114 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-09 16:22:29.837 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-09 16:22:29.838 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-09 16:22:29.838 UTC: 	 Executing command: 'status'
+DEBUG 2021-07-09 16:22:29.838 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+ERROR 2021-07-09 16:22:29.842 UTC: 	 Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1
+ERROR 2021-07-09 16:22:29.842 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/status.py", line 39, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 270, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 650, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 512, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1
+INFO 2021-07-09 16:22:29.846 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 08:15:42.317 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 08:15:42.317 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 08:15:42.317 UTC: 	 Executing command: 'status'
+DEBUG 2021-07-10 08:15:42.318 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+ERROR 2021-07-10 08:15:42.323 UTC: 	 Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1
+ERROR 2021-07-10 08:15:42.323 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/status.py", line 39, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 270, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 650, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 512, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwigpp_v2_ttGamma_Dilept_Herwigpp_v2_1
+INFO 2021-07-10 08:15:42.327 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 09:25:48.578 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 09:25:48.579 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 09:25:48.579 UTC: 	 Executing command: 'submit'
+DEBUG 2021-07-10 09:25:48.580 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-07-10 09:25:48.583 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-07-10 09:25:48.584 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-07-10 09:25:48.592 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-07-10 09:25:48.593 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-07-10 09:25:48.593 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-07-10 09:25:48.598 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 09:25:49.161 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 09:25:49.161 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 09:25:49.161 UTC: 	 Executing command: 'submit'
+DEBUG 2021-07-10 09:25:49.161 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-07-10 09:25:49.164 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-07-10 09:25:49.164 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-07-10 09:25:49.168 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-07-10 09:25:49.168 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-07-10 09:25:49.168 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-07-10 09:25:49.173 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 09:26:21.614 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 09:26:21.615 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 09:26:21.615 UTC: 	 Executing command: 'status'
+DEBUG 2021-07-10 09:26:21.615 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+ERROR 2021-07-10 09:26:21.619 UTC: 	 Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Pythia8_v2_ttGamma_Dilept_Pythia8_v2_1
+ERROR 2021-07-10 09:26:21.620 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/status.py", line 39, in __init__
+    SubCommand.__init__(self, logger, cmdargs)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 270, in __init__
+    SubCommand.validateOptions(self)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 650, in validateOptions
+    self.loadLocalCache()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 512, in loadLocalCache
+    raise ex
+CachefileNotFoundException: Cannot find .requestcache file in CRAB project directory /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Pythia8_v2_ttGamma_Dilept_Pythia8_v2_1
+INFO 2021-07-10 09:26:21.623 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 09:26:25.650 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 09:26:25.650 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 09:26:25.650 UTC: 	 Executing command: 'submit'
+DEBUG 2021-07-10 09:26:25.651 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-07-10 09:26:25.654 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-07-10 09:26:25.654 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-07-10 09:26:25.661 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-07-10 09:26:25.662 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-07-10 09:26:25.662 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-07-10 09:26:25.666 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 09:26:26.138 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 09:26:26.139 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 09:26:26.139 UTC: 	 Executing command: 'submit'
+DEBUG 2021-07-10 09:26:26.139 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-07-10 09:26:26.141 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-07-10 09:26:26.141 UTC: 	 Loading CRAB configuration file.
+DEBUG 2021-07-10 09:26:26.145 UTC: 	 Will use CRAB Analysis plugin (i.e. will run an analysis job type).
+ERROR 2021-07-10 09:26:26.145 UTC: 	 Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+ERROR 2021-07-10 09:26:26.145 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 315, in __init__
+    getattr(self.configuration.General, 'requestName', None))
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/ClientUtilities.py", line 394, in createWorkArea
+    raise ConfigException("Working area '%s' already exists \nPlease change the requestName in the config file" % fullpath)
+ConfigException: Working area '/storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab_ttGamma_Dilept_Herwig7_v2_ttGamma_Dilept_Herwig7_v2_1' already exists 
+Please change the requestName in the config file
+INFO 2021-07-10 09:26:26.149 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 14:27:17.256 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 14:27:17.257 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 14:27:17.257 UTC: 	 Executing command: 'submit'
+DEBUG 2021-07-10 14:27:17.257 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-07-10 14:27:17.345 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-07-10 14:27:17.345 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-07-10 14:27:17.350 UTC: 	 Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-07-10 14:27:17.350 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 95, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-07-10 14:27:17.354 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 14:29:04.243 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 14:29:04.243 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 14:29:04.243 UTC: 	 Executing command: 'submit'
+DEBUG 2021-07-10 14:29:04.244 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-07-10 14:29:04.246 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-07-10 14:29:04.246 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-07-10 14:29:04.251 UTC: 	 Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-07-10 14:29:04.251 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 95, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-07-10 14:29:04.255 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log
+DEBUG 2021-07-10 14:29:36.561 UTC: 	 CRAB Client version: v3.210610
+DEBUG 2021-07-10 14:29:36.562 UTC: 	 Running on: Linux m7.iihe.ac.be 3.10.0-1160.11.1.el7.x86_64 #1 SMP Fri Dec 18 16:34:56 UTC 2020 x86_64 x86_64 x86_64 GNU/Linux - CentOS Linux 7 (Core)
+DEBUG 2021-07-10 14:29:36.562 UTC: 	 Executing command: 'submit'
+DEBUG 2021-07-10 14:29:36.562 UTC: 	 Found CRAB cache file /user/kskovpen/.crab3
+INFO 2021-07-10 14:29:36.563 UTC: 	 Will use CRAB configuration file crabConfig.py
+DEBUG 2021-07-10 14:29:36.564 UTC: 	 Loading CRAB configuration file.
+ERROR 2021-07-10 14:29:36.568 UTC: 	 Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+ERROR 2021-07-10 14:29:36.568 UTC: 	 Caught ClientException exception
+Traceback (most recent call last):
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 151, in <module>
+    client()
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/bin/crab", line 136, in __call__
+    self.cmd = sub_cmd(self.logger, args[1:])
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/submit.py", line 34, in __init__
+    SubCommand.__init__(self, logger, cmdargs, disable_interspersed_args=True)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 311, in __init__
+    self.loadConfig(self.options.config, self.args)
+  File "/cvmfs/cms.cern.ch/share/cms/crab-prod/v3.210610.01/lib/CRABClient/Commands/SubCommand.py", line 95, in loadConfig
+    raise ConfigurationException(configmsg)
+ConfigurationException: Invalid CRAB configuration: Parameter General.requestName should not be longer than 100 characters.
+The documentation about the CRAB configuration file can be found in https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3ConfigurationFile
+INFO 2021-07-10 14:29:36.571 UTC: 	 Log file is /storage_mnt/storage/user/kskovpen/analysis/GenEFT/CMSSW_10_5_0_pre2/src/GenEFTAnalysis/EDAnalyzers/crab/crab.log

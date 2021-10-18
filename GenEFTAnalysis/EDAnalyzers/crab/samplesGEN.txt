@@ -1,0 +1,6 @@
+ttGamma_Dilept_Herwig7_v2
+ttGamma_Dilept_Herwigpp_v2
+ttGamma_Dilept_Pythia8_v2
+ttGamma_SingleLept_Herwig7_v2
+ttGamma_SingleLept_Herwigpp_v2
+ttGamma_SingleLept_Pythia8_v2
