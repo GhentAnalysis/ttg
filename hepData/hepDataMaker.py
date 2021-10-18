@@ -1,8 +1,34 @@
 from hepdata_lib import RootFileReader, Submission, Variable, Table, Uncertainty
 import pdb
+import os
+import glob
+import numpy
 
 
-distList = [
+dataMCList = [
+  # figure 2
+  # 'njets',
+  # 'nbtag',
+  # 'unfReco_phPt',
+  # 'unfReco_phAbsEta',
+  # figure 3
+  # 'unfReco_l1l2_ptsum',
+  # 'unfReco_ll_deltaPhi',
+  # 'unfReco_jetLepDeltaR',
+  # 'unfReco_phLepDeltaR',
+  # figure 4: Zg stuff
+  # 'dlg_mass_zoom',
+  # 'dl_mass_small',
+  # 'photon_pt',
+  # 'signalRegionsZoom',
+  # figure 5: NP
+  # figure 6: ph pt in 3 channels, postfit
+  'unfReco_phPt_mm_post',
+  'unfReco_phPt_em_post',
+  'unfReco_phPt_ee_post',
+  ]
+
+unfdistList = [
   'unfReco_phPt',
   # 'unfReco_phLepDeltaR',
   # 'unfReco_jetLepDeltaR',
@@ -16,6 +42,15 @@ distList = [
   # 'unfReco_Z_pt',
   # 'unfReco_l1l2_ptsum'
   ]
+
+
+
+NPdistList = [
+  # NOTE WARNING we're replacing this plot probably
+  'PBVDphoton_pt',
+  'PByield',
+  ]
+
 
 # processes = { 'data', 'nonp', 'ttg', 'zg', 'ST', 'other'}
 
@@ -31,51 +66,145 @@ labels = {
           'unfReco_phLep1DeltaR' :  '$\Delta R(\gamma, l1)$',
           'unfReco_phLep2DeltaR' :  '$\Delta R(\gamma, l2)$',
           'unfReco_Z_pt' :          '$p_{T}(ll) [GeV]$',
-          'unfReco_l1l2_ptsum' :    '$p_{T}(l1)+p_{T}(l2)$ [GeV]'
+          'unfReco_l1l2_ptsum' :    '$p_{T}(l1)+p_{T}(l2)$ [GeV]',
+          'njets':                  'Number of jets',
+          'nbtag':                  'Number of b-tagged jets',
+          'dlg_mass_zoom':          '$m(ll\gamma)$  [GeV]',
+          'dl_mass_small':          '$m(ll)$  [GeV]',
+          'photon_pt':              '$p_{T}(\gamma)$ [GeV]',
+          'signalRegionsZoom':      '',
+          'PBVDphoton_pt':          '$p_{T}(\gamma)$ [GeV]',
+          'PByield':                '',
+          'unfReco_phPt_mm_post' :  '$p_{T}(\gamma)$ [GeV]',
+          'unfReco_phPt_em_post' :  '$p_{T}(\gamma)$ [GeV]',
+          'unfReco_phPt_ee_post' :  '$p_{T}(\gamma)$ [GeV]'
           }
 
+metadata = {}
 
-# Create a reader for the input file
-reader = RootFileReader("inputUnfolding/unfReco_phPtsystCov.root")
-data = reader.read_hist_2d("covarHist")
+metadata['dataMC' + 'njets'                 ] = ('Figure 2a', 'Data corresponding to figure 2a (upper left)' ,   'Distribution of $N_j$ in the signal region.')
+metadata['dataMC' + 'nbtag'                 ] = ('Figure 2b', 'Data corresponding to figure 2b (upper right)' ,  'Distribution of $N_b$ in the signal region.')
+metadata['dataMC' + 'unfReco_phPt'          ] = ('Figure 2c', 'Data corresponding to figure 2c (lower left)' ,   'Distribution of $p_{T}(\gamma)$ in the signal region.')
+metadata['dataMC' + 'unfReco_phAbsEta'      ] = ('Figure 2d', 'Data corresponding to figure 2d (lower right)' ,  'Distribution of $|\eta |(\gamma)$ in the signal region.')
+metadata['dataMC' + 'unfReco_l1l2_ptsum'    ] = ('Figure 3a', 'Data corresponding to figure 3a (upper left)' ,   'Distribution of $p_{T}(l1)+p_{T}(l2)$ in the signal region.')
+metadata['dataMC' + 'unfReco_ll_deltaPhi'   ] = ('Figure 3b', 'Data corresponding to figure 3b (upper right)' ,  'Distribution of $\Delta \phi(ll)$ in the signal region.')
+metadata['dataMC' + 'unfReco_jetLepDeltaR'  ] = ('Figure 3c', 'Data corresponding to figure 3c (lower left)' ,   'Distribution of $\Delta R(l, j)$ in the signal region.')
+metadata['dataMC' + 'unfReco_phLepDeltaR'   ] = ('Figure 3d', 'Data corresponding to figure 3d (lower right)' ,  'Distribution of $\Delta R(\gamma, l)$ in the signal region.')
+metadata['dataMC' + 'dlg_mass_zoom'         ] = ('Figure 4a', 'Data corresponding to figure 4a (upper left)' ,   'Distribution of $m(ll\gamma)$ in the $Z\gamma$ control region.')
+metadata['dataMC' + 'dl_mass_small'         ] = ('Figure 4b', 'Data corresponding to figure 4b (upper right)' ,  'Distribution of $m(ll)$ in the $Z\gamma$ control region.')
+metadata['dataMC' + 'photon_pt'             ] = ('Figure 4c', 'Data corresponding to figure 4c (lower left)' ,   'Distribution of $p_{T}(\gamma)$ in the $Z\gamma$ control region.')
+metadata['dataMC' + 'signalRegionsZoom'     ] = ('Figure 4d', 'Data corresponding to figure 4d (lower right)' ,  'Distribution of jet multiplicity in the $Z\gamma$ control region.')
+metadata['dataMC' + 'PBVDphoton_pt'         ] = ('Figure 5a', 'Data corresponding to figure 5a (left) ' ,        'Closure test of the nonprompt photon estimation as a function of $p_{T}(\gamma)$.')
+metadata['dataMC' + 'PByield'               ] = ('Figure 5b', 'Data corresponding to figure 5b (right) ' ,       'Closure test of the nonprompt photon estimation as a function of the lepton flavours.')
+metadata['dataMC' + 'unfReco_phPt_mm_post'  ] = ('Figure 6a', 'Data corresponding to figure 6a (upper left) ' ,  'Post-fit distribution of $p_{T}(\gamma)$ in the the $\mu\mu$ channel.')
+metadata['dataMC' + 'unfReco_phPt_em_post'  ] = ('Figure 6b', 'Data corresponding to figure 6b (upper right) ' , 'Post-fit distribution of $p_{T}(\gamma)$ in the the $e\mu$ channel.')
+metadata['dataMC' + 'unfReco_phPt_ee_post'  ] = ('Figure 6c', 'Data corresponding to figure 6c (lower) ' ,       'Post-fit distribution of $p_{T}(\gamma)$ in the the $ee$ channel.')
 
-# Create variable objects
-x = Variable("First Bin", is_independent=True, is_binned=False)
-x.values = data["x"]
 
-y = Variable("Second Bin", is_independent=True, is_binned=False)
-y.values = data["y"]
+metadata['diff' + 'unfReco_phPt'          ]  = ('Figure 8a', 'Data corresponding to figure 8a (upper left)' ,    'Unfolded differential distribution for ' + labels['unfReco_phPt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phAbsEta'      ]  = ('Figure 8b', 'Data corresponding to figure 8b (upper right)' ,   'Unfolded differential distribution for ' + labels['unfReco_phAbsEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLepDeltaR'   ]  = ('Figure 8c', 'Data corresponding to figure 8c (middle left)' ,   'Unfolded differential distribution for ' + labels['unfReco_phLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep1DeltaR'  ]  = ('Figure 8d', 'Data corresponding to figure 8d (middle right)' ,  'Unfolded differential distribution for ' + labels['unfReco_phLep1DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep2DeltaR'  ]  = ('Figure 8e', 'Data corresponding to figure 8e (lower left)' ,    'Unfolded differential distribution for ' + labels['unfReco_phLep2DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phBJetDeltaR'  ]  = ('Figure 8f', 'Data corresponding to figure 8f (lower right)' ,   'Unfolded differential distribution for ' + labels['unfReco_phBJetDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetLepDeltaR'  ]  = ('Figure 9a', 'Data corresponding to figure 9a (upper left)' ,    'Unfolded differential distribution for ' + labels['unfReco_jetLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_absDeltaEta']  = ('Figure 9b', 'Data corresponding to figure 9b (upper right)' ,   'Unfolded differential distribution for ' + labels['unfReco_ll_absDeltaEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_deltaPhi'   ]  = ('Figure 9c', 'Data corresponding to figure 9c (middle left)' ,   'Unfolded differential distribution for ' + labels['unfReco_ll_deltaPhi'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_Z_pt'          ]  = ('Figure 9d', 'Data corresponding to figure 9d (middle right)' ,  'Unfolded differential distribution for ' + labels['unfReco_Z_pt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_l1l2_ptsum'    ]  = ('Figure 9e', 'Data corresponding to figure 9e (lower left)' ,    'Unfolded differential distribution for ' + labels['unfReco_l1l2_ptsum'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetPt'         ]  = ('Figure 9f', 'Data corresponding to figure 9f (lower right)' ,   'Unfolded differential distribution for ' + labels['unfReco_jetPt'].replace('[GeV]','') + '.')
 
-correlation = Variable("Covariance coefficient", is_independent=False, is_binned=False)
-correlation.values = data["z"]
+metadata['diff' + 'unfReco_phPt'           + '_norm']  = ('Figure 10a', 'Data corresponding to figure 10a (upper left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_phPt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phAbsEta'       + '_norm']  = ('Figure 10b', 'Data corresponding to figure 10b (upper right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_phAbsEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLepDeltaR'    + '_norm']  = ('Figure 10c', 'Data corresponding to figure 10c (middle left)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_phLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep1DeltaR'   + '_norm']  = ('Figure 10d', 'Data corresponding to figure 10d (middle right)' ,  'Unfolded normalized differential distribution for ' + labels['unfReco_phLep1DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep2DeltaR'   + '_norm']  = ('Figure 10e', 'Data corresponding to figure 10e (lower left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_phLep2DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phBJetDeltaR'   + '_norm']  = ('Figure 10f', 'Data corresponding to figure 10f (lower right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_phBJetDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetLepDeltaR'   + '_norm']  = ('Figure 11a', 'Data corresponding to figure 11a (upper left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_jetLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_absDeltaEta' + '_norm']  = ('Figure 11b', 'Data corresponding to figure 11b (upper right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_ll_absDeltaEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_deltaPhi'    + '_norm']  = ('Figure 11c', 'Data corresponding to figure 11c (middle left)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_ll_deltaPhi'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_Z_pt'           + '_norm']  = ('Figure 11d', 'Data corresponding to figure 11d (middle right)' ,  'Unfolded normalized differential distribution for ' + labels['unfReco_Z_pt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_l1l2_ptsum'     + '_norm']  = ('Figure 11e', 'Data corresponding to figure 11e (lower left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_l1l2_ptsum'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetPt'          + '_norm']  = ('Figure 11f', 'Data corresponding to figure 11f (lower right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_jetPt'].replace('[GeV]','') + '.')
 
-table = Table("Covariance test")
-for var in [x,y,correlation]:
-  table.add_variable(var)
 
-# Create the submission object and write output
+
+metadata['eft2dDil']  = ('Figure 13', 'Data corresponding to figure 13' , 'Negative log-likelihood ratio with respect to the best fit value as a function of Wilson coefficients $c_{tZ}$ and $c^{I}_{tZ}$ from the interpretation of the dilepton measurement.')
+metadata['eft2dCom']  = ('Figure 15', 'Data corresponding to figure 15' , 'Negative log-likelihood ratio with respect to the best fit value as a function of Wilson coefficients $c_{tZ}$ and $c^{I}_{tZ}$ from the interpretation of the dilepton and lepton+jets measurements combined.')
+
+
+metadata['dilctZ']  =  ('Figure 12a', 'Data corresponding to figure 12a (left)' ,  'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZ}$')
+metadata['dilctZI']  = ('Figure 12b', 'Data corresponding to figure 12b (right)' , 'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZI}$')
+metadata['comctZ']  =  ('Figure 14a', 'Data corresponding to figure 14a (left)' ,  'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZ}$')
+metadata['comctZI']  = ('Figure 14b', 'Data corresponding to figure 14b (right)' , 'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZI}$')
+
+
+
+
+
+
+
+for dist in unfdistList:
+  metadata['systCov' + dist ] = ('Syst. covariance matrix for ' + labels[dist] + ' (non-normalized)',   'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The covariance matrix of the systematic uncertainties and MC statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['statCov' + dist ] = ('Stat. covariance matrix for ' + labels[dist] + ' (non-normalized)',   'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The covariance matrix of the data statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['systCorr' + dist] = ('Syst. correlation matrix for ' + labels[dist] + ' (non-normalized)',  'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The correlation matrix of the systematic uncertainties and MC statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['statCorr' + dist] = ('Stat. correlation matrix for ' + labels[dist] + ' (non-normalized)',  'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The correlation matrix of the data statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+
+  metadata['systCov' + dist  + '_norm'] = ('Syst. covariance matrix for ' + labels[dist] + ' (normalized)',   'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The covariance matrix of the systematic uncertainties and MC statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['statCov' + dist  + '_norm'] = ('Stat. covariance matrix for ' + labels[dist] + ' (normalized)',   'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The covariance matrix of the data statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['systCorr' + dist + '_norm'] = ('Syst. correlation matrix for ' + labels[dist] + ' (normalized)',  'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The correlation matrix of the systematic uncertainties and MC statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['statCorr' + dist + '_norm'] = ('Stat. correlation matrix for ' + labels[dist] + ' (normalized)',  'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The correlation matrix of the data statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+
+
+
+
+
+
+
+
+
+# clear output folder first
+files = glob.glob('output/*')
+for f in files:
+  # print(f)
+  os.remove(f)
+
+
+# round all elements of a list
+def roundList(list, dec):
+  list = [round(i, dec) for i in list]
+  return list
+
+
+
+
 sub = Submission()
-sub.add_table(table)
-sub.create_files("./output/")
 
 
 # TODO 
 # might want to round the stat and syst uncertainties
-# automate for all response matrices as well
 # add proper labeling, titles, etc
 # make for unfolding results
 # adding images is a problem but can always do it manually
 
 
-for dist in distList:
-  dataR = RootFileReader('inputUnfolding/data' + dist + '.root' )
-  nonpR = RootFileReader('inputUnfolding/nonp' + dist + '.root' )
-  ttgR = RootFileReader('inputUnfolding/ttg' + dist + '.root' )
-  zgR = RootFileReader('inputUnfolding/zg' + dist + '.root' )
-  STR = RootFileReader('inputUnfolding/ST' + dist + '.root' )
-  otherR = RootFileReader('inputUnfolding/other' + dist + '.root' )
-  totalMCR = RootFileReader('inputUnfolding/totalMC' + dist + '.root' )
-  systupR = RootFileReader('inputUnfolding/systup' + dist + '.root' )
+
+# for normal data vs mc plots
+
+
+#######################################################
+# DATA - MC PLOTS
+#######################################################
+
+for dist in dataMCList:
+  dataR = RootFileReader('inputNormal/data' + dist + '.root' )
+  nonpR = RootFileReader('inputNormal/nonp' + dist + '.root' )
+  ttgR = RootFileReader('inputNormal/ttg' + dist + '.root' )
+  zgR = RootFileReader('inputNormal/zg' + dist + '.root' )
+  STR = RootFileReader('inputNormal/ST' + dist + '.root' )
+  otherR = RootFileReader('inputNormal/other' + dist + '.root' )
+  totalMCR = RootFileReader('inputNormal/totalMC' + dist + '.root' )
+  systupR = RootFileReader('inputNormal/systup' + dist + '.root' )
   
 
 
@@ -99,12 +228,12 @@ for dist in distList:
   datavar.values = data["y"]
   
   datastat = Uncertainty('stat')
-  datastat.values = data['dy']
+  datastat.values = roundList(data['dy'], 2)
 
   datavar.add_uncertainty(datastat)
 
   nonpvar =     Variable("nonprompt $\gamma$", is_independent=False, is_binned=False)
-  ttgvar =      Variable("$t \bar{t} \gamma$", is_independent=False, is_binned=False)
+  ttgvar =      Variable("$tt \gamma$", is_independent=False, is_binned=False)
   zgvar =       Variable("$Z\gamma$", is_independent=False, is_binned=False)
   STvar =       Variable("Single-t+$\gamma$", is_independent=False, is_binned=False)
   othervar =    Variable("Other+$\gamma$", is_independent=False, is_binned=False)
@@ -118,24 +247,354 @@ for dist in distList:
   totalMCvar.values = totalMC["y"]
 
   systupvar =  Uncertainty('syst')
-  systupvar.values = systup['y']
+  systupvar.values = roundList(systup['y'], 2)
   totalMCvar.add_uncertainty(systupvar)
 
+  datavar.add_qualifier("SQRT(S)" , 13, 'TeV')
+  datavar.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
 
 
 
-  table = Table("Title test")
+  table = Table(metadata['dataMC' + dist][0])
   for var in [x,datavar,totalMCvar, ttgvar, zgvar, STvar, othervar, nonpvar]:
     table.add_variable(var)
 
+  table.location = metadata['dataMC' + dist][1]
+  table.description = metadata['dataMC' + dist][2]
+
+  table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+  table.keywords["cmenergies"] = [13000.0]
+  table.keywords["observables"] = ["N"]
+  table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+
+
   # table.add_image("plots/" + dist + ".png")
 
-  # Create the submission object and write output
-  # sub = Submission()
   sub.add_table(table)
-  sub.create_files("./output/")
 
-# Data = reader_data.read_hist_1d("h_bprimemass_SRlm")
+# for unfolding results NOTE: norm and non-norm
+# can load directly from unfoldedRoots folder
 
-# signal = reader_signal.read_hist_1d("h_bprimemass_SRlm")
 
+#######################################################
+# UNFOLDING PLOTS
+#######################################################
+
+for normCase in ['', '_norm']:
+  for dist in unfdistList:
+    dataR = RootFileReader('../unfolding/unfoldedRoots/' + dist + 'obsTotUnc' + normCase + '.root')
+    HW7R  = RootFileReader('../unfolding/unfoldedRoots/' + dist + 'HW7' + normCase + '.root')
+    statR = RootFileReader('../unfolding/unfoldedRoots/' + dist + 'obsStatUnc' + normCase + '.root')
+    systR = RootFileReader('../unfolding/unfoldedRoots/' + dist + 'obsSystUnc' + normCase + '.root')
+    theoR = RootFileReader('../unfolding/unfoldedRoots/' + dist + 'theo' + normCase + '.root')
+
+    data = dataR.read_hist_1d('dummyName')
+    HW7  = HW7R.read_hist_1d('dummyName')
+    stat = statR.read_hist_1d('dummyName')
+    syst = systR.read_hist_1d('dummyName')
+    theo = theoR.read_hist_1d('dummyName')
+    
+
+    # Create variable objects
+    x = Variable(labels[dist], is_independent=True, is_binned=False)
+    x.values = data["x"]
+
+    datavar = Variable("Observed", is_independent=False, is_binned=False)
+    datavar.values = roundList(data["y"], (4 if normCase else 2))
+    
+    statunc = Uncertainty('stat')
+    statunc.values = roundList(stat['dy'], (4 if normCase else 2))
+    datavar.add_uncertainty(statunc)
+
+    systunc =  Uncertainty('syst')
+    systunc.values = roundList(syst['dy'], (4 if normCase else 2))
+    datavar.add_uncertainty(systunc)
+
+    HW7var = Variable("Theory Herwig", is_independent=False, is_binned=False)
+    HW7var.values = roundList(HW7["y"], (4 if normCase else 2))
+
+    theovar = Variable("Theory Pythia8", is_independent=False, is_binned=False)
+    theovar.values = roundList(theo["y"], (4 if normCase else 2))
+
+    theounc = Uncertainty('theory unc.')
+    theounc.values = roundList(theo['dy'], (4 if normCase else 2))
+    theovar.add_uncertainty(theounc)
+
+    datavar.add_qualifier("SQRT(S)" , 13, 'TeV')
+    datavar.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+    theovar.add_qualifier("SQRT(S)" , 13, 'TeV')
+    theovar.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+    HW7var.add_qualifier("SQRT(S)" , 13, 'TeV')
+    HW7var.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+
+    table = Table(metadata['diff' + dist + normCase][0])
+    for var in [x, datavar, theovar, HW7var]:
+      table.add_variable(var)
+
+    table.location = metadata['diff' + dist + normCase][1]
+    table.description = metadata['diff' + dist + normCase][2]
+
+    table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+    table.keywords["cmenergies"] = [13000.0]
+    table.keywords["observables"] = ["N"]
+    table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+    # table.add_image("plots/" + dist + ".png")
+
+    sub.add_table(table)
+
+
+
+#######################################################
+# COVARIANCE AND RESPONSE MATRICES
+#######################################################
+
+# note done: add stat, correl, and refine/label etc
+
+for normCase in ['', '_norm']:
+  for dist in unfdistList:
+    for plotType in ['systCov', 'statCov', 'systCorr', 'statCorr']:
+      # Create a reader for the input file
+      reader = RootFileReader("../unfolding/unfoldedRoots/" + dist + plotType + normCase + ".root")
+      data = reader.read_hist_2d("dummyName")
+
+      # Create variable objects
+      x = Variable(labels[dist], is_independent=True, is_binned=False)
+      x.values = data["x"]
+
+      y = Variable(labels[dist] + ' ' , is_independent=True, is_binned=False)
+      y.values = data["y"]
+
+      correlation = Variable(("correlation" if plotType.count('Corr') else "covariance"), is_independent=False, is_binned=False, units= ('%' if plotType.count('Corr') else 'fb$^{2}$'))
+      if plotType.count('Corr'):
+        zval = [i * 100. for i in data["z"]] 
+      else:
+        zval = data["z"] 
+      correlation.values = roundList(zval, 2)
+
+      table = Table(metadata[plotType + dist + normCase][0].replace(' [GeV]',''))
+      for var in [x,y,correlation]:
+        table.add_variable(var)
+
+      table.location = metadata[plotType + dist + normCase][1]
+      table.description = metadata[plotType + dist + normCase][2]
+      correlation.add_qualifier("SQRT(S)" , 13, 'TeV')
+      correlation.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+      table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+      table.keywords["cmenergies"] = [13000.0]
+      table.keywords["observables"] = ["N"]
+      table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+
+      sub.add_table(table)
+
+
+# EFT
+
+table = Table(metadata['eft2dDil'][0])
+
+c1 = Variable('$C_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
+c1.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,0]
+
+c2 = Variable('$C^{I}_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
+c2.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,1]
+
+
+nll = Variable("$-2\Delta lnN$", is_independent=False, is_binned=False)
+nll.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,2]
+nll.add_qualifier("SQRT(S)" , 13, 'TeV')
+nll.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+table.add_variable(c1)
+table.add_variable(c2)
+table.add_variable(nll)
+
+
+table.location = metadata['eft2dDil'][1]
+table.description = metadata['eft2dDil'][2]
+
+table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+table.keywords["cmenergies"] = [13000.0]
+table.keywords["observables"] = ["N"]
+table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+sub.add_table(table)
+
+
+
+table = Table(metadata['eft2dCom'][0])
+
+c1 = Variable('$C_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
+c1.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,0]
+
+c2 = Variable('$C^{I}_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
+c2.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,1]
+
+
+nll = Variable("$-2\Delta lnN$", is_independent=False, is_binned=False)
+nll.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,2]
+nll.add_qualifier("SQRT(S)" , 13, 'TeV')
+nll.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+table.add_variable(c1)
+table.add_variable(c2)
+table.add_variable(nll)
+
+
+table.location = metadata['eft2dCom'][1]
+table.description = metadata['eft2dCom'][2]
+
+table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+table.keywords["cmenergies"] = [13000.0]
+table.keywords["observables"] = ["N"]
+table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+sub.add_table(table)
+
+
+
+for plot in ['dilctZ', 'dilctZI', 'comctZ', 'comctZI']:
+
+  table = Table(metadata[plot][0])
+
+  c = Variable('$C_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
+  c.values = numpy.loadtxt( 'inputEFT/' + plot + 'exp.txt')[:,0]
+
+  nllexp = Variable("$-2\Delta lnN$ (expected)", is_independent=False, is_binned=False)
+  nllexp.values = numpy.loadtxt( 'inputEFT/' + plot + 'exp.txt')[:,1]
+
+  nllobs = Variable("$-2\Delta lnN$ (observed)", is_independent=False, is_binned=False)
+  nllobs.values = numpy.loadtxt( 'inputEFT/' + plot + 'obs.txt')[:,1]
+
+
+  nllexp.add_qualifier("SQRT(S)" , 13, 'TeV')
+  nllexp.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+  nllobs.add_qualifier("SQRT(S)" , 13, 'TeV')
+  nllobs.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+
+
+  table.add_variable(c)
+  table.add_variable(nllobs)
+  table.add_variable(nllexp)
+
+
+  table.location = metadata[plot][1]
+  table.description = metadata[plot][2]
+
+  # TODO maybe adjust keywords for combined plots ?
+
+  table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+  table.keywords["cmenergies"] = [13000.0]
+  table.keywords["observables"] = ["CLS", "CL"]
+  table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+  sub.add_table(table)
+
+
+
+# EFT tables (like, actual tables)
+
+table = Table('Table 5')
+
+c = Variable('Wilson coefficient', is_independent=True, is_binned=False)
+# c.values = [
+# '$c_{tZ}$ ($c^{I}_{tZ}$=0, expected)',
+# '$c_{tZ}$ (profiled, expected)',
+# '$c^{I}_{tZ}$ ($c_{tZ}$=0, expected)',
+# '$c^{I}_{tZ}$ (profiled, expected)',
+# '$c_{tZ}$ ($c^{I}_{tZ}$=0, observed)',
+# '$c_{tZ}$ (profiled, observed)',
+# '$c^{I}_{tZ}$ ($c_{tZ}$=0, observed)',
+# '$c^{I}_{tZ}$ (profiled, observed)',
+# ]
+
+c.values = [
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c^{I}_{tZ}$',
+'$c^{I}_{tZ}$ ',
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c^{I}_{tZ}$',
+'$c^{I}_{tZ}$ ',
+]
+
+t = Variable('fit case', is_independent=False, is_binned=False)
+
+t.values = [
+'(expected, $c^{I}_{tZ}$=0)',
+'(expected, profiled)',
+'(expected, $c_{tZ}$=0)',
+'(expected, profiled)',
+'(observed, $c^{I}_{tZ}$=0)',
+'(observed, profiled)',
+'(observed, $c_{tZ}$=0)',
+'(observed, profiled)',
+]
+
+
+
+
+
+CL6 = Variable("68% CL interval", is_independent=False, is_binned=False, units='$(\Lambda/TeV)^2$')
+CL6.values = [
+'[-0.28, 0.35]',
+'[-0.40, 0.01]',
+'[-0.33, 0.31]',
+'[-0.44, 0.36]',
+'[-0.28, 0.35]',
+'[-0.40, 0.21]',
+'[-0.33, 0.31]',
+'[-0.41, 0.32]'
+]
+
+CL9 = Variable("95% CL interval", is_independent=False, is_binned=False, units='$(\Lambda/TeV)^2$')
+CL9.values = [
+'[-0.42, 0.49]',
+'[-0.51, 0.50]',
+'[-0.47, 0.45]',
+'[-0.55, 0.50]',
+'[-0.42, 0.49]',
+'[-0.51, 0.50]',
+'[-0.47, 0.45]',
+'[-0.54, 0.49]'
+]
+
+
+
+t.add_qualifier("CHANNEL" , "dilepton")
+CL9.add_qualifier("CHANNEL" , "dilepton")
+CL6.add_qualifier("CHANNEL" , "dilepton")
+
+t.add_qualifier("SQRT(S)" , 13, 'TeV')
+t.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+CL9.add_qualifier("SQRT(S)" , 13, 'TeV')
+CL9.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+CL6.add_qualifier("SQRT(S)" , 13, 'TeV')
+CL6.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+
+table.add_variable(c)
+table.add_variable(t)
+table.add_variable(CL6)
+table.add_variable(CL9)
+
+
+table.location = 'QQQ placeholder'
+table.description = 'QQQ placeholder'
+
+
+table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+table.keywords["cmenergies"] = [13000.0]
+table.keywords["observables"] = ["N"]
+table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+sub.add_table(table)
+
+
+sub.create_files("./output/")

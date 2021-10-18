@@ -747,6 +747,19 @@ for dist in distList:
   for i in range(1, unfoldedNom.GetXaxis().GetNbins()+1):
     unfoldedNom.SetBinError(i, dataStat.GetBinContent(i))
 
+  unfoldedNomS = unfoldedNom.Clone('dummyName')
+  unfoldedNomS.SaveAs('unfoldedRoots/' + dist + 'obsStatUnc' + ('_norm' if args.norm else '')+  '.root')
+
+  # just so we can save it for hepdata
+  unfoldedSystUnc = unfoldedNom.Clone()
+  for i in range(1, unfoldedSystUnc.GetXaxis().GetNbins()+1):
+    totalErr = (bkgStat.GetBinContent(i)**2+ totalSys.GetBinContent(i)**2)**0.5
+    unfoldedSystUnc.SetBinError(i, totalErr)
+
+  unfoldedSystUncS = unfoldedSystUnc.Clone('dummyName')
+  unfoldedSystUncS.SaveAs('unfoldedRoots/' + dist + 'obsSystUnc' + ('_norm' if args.norm else '')+  '.root')
+
+
   # data stats, MC stats, and systematics onto this one
   # pdb.set_trace()
   unfoldedTotUnc = unfoldedNom.Clone()
@@ -880,6 +893,9 @@ for dist in distList:
 
   pickle.dump(unfoldedTotUnc, file('unfoldedHists/data' +  dist + args.year + '.pkl', 'w'))
 
+  unfoldedTotUncS = unfoldedTotUnc.Clone('dummyName')
+  unfoldedTotUncS.SaveAs('unfoldedRoots/' + dist + 'obsTotUnc' + ('_norm' if args.norm else '')+  '.root')
+
   plMCTot2 = plMCTot.Clone()
 
 
@@ -896,6 +912,9 @@ for dist in distList:
   plMCTot2.SetLineWidth(3)
   plMCTot2.SetLineColor(ROOT.kBlack)
   plMCTot2.Draw('same HIST')
+
+  plMCTotS = plMCTot.Clone('dummyName')
+  plMCTotS.SaveAs('unfoldedRoots/' + dist + 'theo' + ('_norm' if args.norm else '')+  '.root')
 
 
 
@@ -916,6 +935,8 @@ for dist in distList:
   if args.check:
     plPy8.Draw('hist same')
 
+  plHW7S = plHW7.Clone('dummyName')
+  plHW7S.SaveAs('unfoldedRoots/' + dist + 'HW7' + ('_norm' if args.norm else '')+  '.root')
 
   plHWpp.SetLineWidth(3)
   plHW7.SetLineWidth(3)
@@ -1085,6 +1106,10 @@ for dist in distList:
   # pdb.set_trace()
   
   eMat.Draw('COLZ text')
+
+  eMatS = eMat.Clone('dummyName')
+  eMatS.SaveAs('unfoldedRoots/' + dist + 'statCov' + ('_norm' if args.norm else '')+  '.root')
+
   # ROOT.gPad.Update()
   # ROOT.gPad.RedrawAxis()
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
@@ -1121,8 +1146,9 @@ for dist in distList:
   ROOT.gPad.Update()
   ROOT.gPad.RedrawAxis()
 
-  covTotToSave = covTot.Clone('covarHist')
-  covTotToSave.SaveAs('unfoldedRoots/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.root')
+  covTotS = covTot.Clone('dummyName')
+  covTotS.SaveAs('unfoldedRoots/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.root')
+
   covTot.Draw('COLZ text')
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
@@ -1158,6 +1184,9 @@ for dist in distList:
   correlStat.GetYaxis().SetTickLength(0)
   correlStat.LabelsOption('v','x')
   correlStat.Draw('COLZ text')
+
+  correlStatS = correlStat.Clone('dummyName')
+  correlStatS.SaveAs('unfoldedRoots/' + dist + 'statCorr' + ('_norm' if args.norm else '')+  '.root')
 
   ROOT.gPad.Update()
   ROOT.gPad.RedrawAxis()
@@ -1196,6 +1225,10 @@ for dist in distList:
   correlSyst.GetYaxis().SetTickLength(0)
   correlSyst.LabelsOption('v','x')
   correlSyst.Draw('COLZ text')
+
+  correlSystS = correlSyst.Clone('dummyName')
+  correlSystS.SaveAs('unfoldedRoots/' + dist + 'systCorr' + ('_norm' if args.norm else '')+  '.root')
+
   ROOT.gPad.Update()
   ROOT.gPad.RedrawAxis()
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)

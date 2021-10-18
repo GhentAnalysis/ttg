@@ -3,9 +3,9 @@ import pickle
 
 picklePaths = [
   # '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull/all/llg-mll40-offZ-llgNoZ-njet2p-deepbtag1p-photonPt20/yield.pkl',
-  '/storage_mnt/storage/user/gmestdac/public_html/ttG/2016/phoCBfull-niceEstimDD/all//llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/yield.pkl',
+  '/storage_mnt/storage/user/gmestdac/public_html/ttG/all/phoCBfull-niceEstimDD-RE-merged/all//llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/yield.pkl',
               ]
-sumKeys = ['data', 'TTGamma']
+sumKeys = ['data', 'TTGamma', 'estimate']
 antiSumKeys = ['data']
 
 rounding = 2

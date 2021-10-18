@@ -66,6 +66,10 @@ if args.showSys and args.tag.count('forZgest') and not args.runSys:
   showSysList = [entry for entry in showSysList if not any([entry.count(iden) for iden in ['colRec', 'NPFlat', 'NPHigh', 'bFrag', 'zgcorrstat']])]
   del linearSystematics['ZG_sigcr']
 
+
+if args.tag.lower().count('addthunc') and args.showSys:
+  linearSystematics['TTGamma_theory']  = ('TTGamma',        18. )
+
 if not args.isChild:
   updateGitInfo()
   from ttg.tools.jobSubmitter import submitJobs
@@ -293,6 +297,11 @@ def makePlotList():
     # plotList.append(Plot('PBVIphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (40, 20, 120)))
     # plotList.append(Plot('PBVJphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (50, 20, 120)))
     # plotList.append(Plot('PBVKphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (80, 20, 120)))
+
+    plotList.append(Plot('PBNAphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 80, 90, 100]))
+    # plotList.append(Plot('PBNBphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 80, 90, 100, 110, 120]))
+    # plotList.append(Plot('PBNCphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            [20., 27.5, 35., 42.5, 50., 60., 70., 80, 90, 100, 120, 140]))
+
 
 
     plotList.append(Plot('PBAphoton_pt',            'p_{T}(#gamma) [GeV]',                   lambda c : c.ph_pt,                                            (40, 20, 120)))
@@ -955,6 +964,7 @@ for plot in totalPlots: # 1D plots
                   sorting           = False,
                   yRange            = yRange if yRange else (0.003 if logY else 0.0001, "auto"),
                   drawObjects       = drawLumi(None, lumiScale, isOnlySim=(args.channel=='noData' or onlyMC)),
+                  # uncBandRatio = 0.185,
                   # uncBandRatio = 0.15 if args.tag.count('forNPclosure') else None,
                   # fakesFromSideband = ('matchCombined' in args.tag and args.selection=='llg-looseLeptonVeto-mll40-offZ-llgNoZ-signalRegion-photonPt20'),
                   **extraArgs
