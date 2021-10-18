@@ -464,8 +464,14 @@ class Plot:
       for sampleFilter, unc in linearSystematics.values():
         # linear systematics 
         for i in range(summedErrors.GetNbinsX()+1):
-          if sampleFilter: uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if s.name.count(sampleFilter)])
-          else:            uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
+          if sampleFilter: 
+            uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems() if s.name.count(sampleFilter)])
+            if i == summedErrors.GetNbinsX():
+              uncertainty += unc/100.*sum([h.GetBinContent(i+1) for s, h in self.histos.iteritems() if s.name.count(sampleFilter)])
+          else:            
+            uncertainty = unc/100.*sum([h.GetBinContent(i) for s, h in self.histos.iteritems()])
+            if i == summedErrors.GetNbinsX():
+              uncertainty += unc/100.*sum([h.GetBinContent(i+1) for s, h in self.histos.iteritems()])
           if postFitInfo:  uncertainty = applyPostFitConstraint(sys, uncertainty, postFitInfo)
           summedErrors.SetBinContent(i, summedErrors.GetBinContent(i) + uncertainty**2)
 
@@ -499,13 +505,14 @@ class Plot:
         box.SetFillStyle(3005)
         box.SetFillColor(ROOT.kBlack)
         boxes.append(box)
+
     return boxes
 
   def getUncBox(self, unc):
     box = ROOT.TBox(self.xmin, 1-unc, self.xmax, 1+unc)
-    box.SetLineColor(ROOT.kBlack)
-    box.SetFillStyle(3005)
-    box.SetFillColor(ROOT.kBlack)
+    # box.SetLineColor(ROOT.kBlack)
+    box.SetFillStyle(1001)
+    box.SetFillColorAlpha(ROOT.kYellow, 0.5)
     return box
 
   #
@@ -730,13 +737,13 @@ class Plot:
         h_ratio.Divide(den)
 
         if ratio['style']: ratio['style'](h_ratio)
-        h_ratio.GetXaxis().SetLabelSize(26)
-        h_ratio.GetXaxis().SetTitleSize(26)
+        h_ratio.GetXaxis().SetLabelSize(30)
+        h_ratio.GetXaxis().SetTitleSize(30)
 
         h_ratio.GetXaxis().SetTitle(self.texX)
         h_ratio.GetYaxis().SetTitle(ratio['texY'])
 
-        h_ratio.GetXaxis().SetTitleOffset(3.8)
+        h_ratio.GetXaxis().SetTitleOffset(3.3)
 
         h_ratio.GetXaxis().SetTickLength( 0.03*2 )
         h_ratio.GetYaxis().SetTickLength( 0.03*2 )

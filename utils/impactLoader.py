@@ -161,7 +161,7 @@ totalDict = {'2016':{},'2017':{},'2018':{}}
 
 def getEffect(year):
 
-  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-niceEstimDD/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/unfReco_phPt.pkl'
+  picklePath = '/storage_mnt/storage/user/gmestdac/public_html/ttG/' + year + '/phoCBfull-niceEstimDD-RE/all/llg-mll20-deepbtag1p-offZ-llgNoZ-photonPt20/unfReco_phPt.pkl'
   if year == 'all':
     picklePath = picklePath.replace('niceEstimDD', 'niceEstimDD-merged')
   print picklePath.replace('/storage_mnt/storage/user/gmestdac/public_html/ttG/','')

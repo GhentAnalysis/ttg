@@ -1,0 +1,48 @@
+-- MC
+TT_Dil               TTDY_(genuine_photons)        fillStyle     kGreen                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+DY_M50               TTDY_(genuine_photons)        fillStyle     kGreen                     _zgEventType<3
++DY_M10to50
+
+
+
+TT_Dil               TTDY_(hadronic_fakes)        fillStyle     kRed                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+DY_M50               TTDY_(hadronic_fakes)        fillStyle     kRed                     _zgEventType<3
++DY_M10to50
+
+
+
+TT_Dil               TTDY_(hadronic_photons)        fillStyle     kBlue                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+DY_M50               TTDY_(hadronic_photons)        fillStyle     kBlue                     _zgEventType<3
++DY_M10to50
+
+
+
+TT_Dil               TTDY_(magic_photons)        fillStyle     kYellow                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+DY_M50               TTDY_(magic_photons)        fillStyle     kYellow                     _zgEventType<3
++DY_M10to50
+
+
+TT_Dil               TTDY_(misidentified_electrons)        fillStyle     kViolet                      _ttgEventType<3
++TT_Sem
++TT_Had
+
+DY_M50               TTDY_(misidentified_electrons)        fillStyle     kViolet                     _zgEventType<3
++DY_M10to50
+
+ 
+
+
+
+

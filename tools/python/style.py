@@ -20,7 +20,7 @@ def setDefault():
   ROOT.gStyle.SetPadTopMargin(0.07)
   ROOT.gStyle.SetPadLeftMargin(0.15)
   ROOT.gStyle.SetPadRightMargin(0.05)
-  ROOT.gStyle.SetPadBottomMargin(0.13)
+  ROOT.gStyle.SetPadBottomMargin(0.16)
   ROOT.gROOT.ForceStyle()
 
 def setDefault2D(isColZ=False):
@@ -55,7 +55,7 @@ def ttgGeneralStyle():
   ROOT.gStyle.SetPaperSize(20, 26)
   ROOT.gStyle.SetPadTopMargin(0.08)
   ROOT.gStyle.SetPadRightMargin(0.09)
-  ROOT.gStyle.SetPadBottomMargin(0.11)
+  ROOT.gStyle.SetPadBottomMargin(0.12)
   ROOT.gStyle.SetPadLeftMargin(0.15)
   ROOT.gStyle.SetPadTickX(1)
   ROOT.gStyle.SetPadTickY(1)
@@ -156,12 +156,12 @@ def commonStyle(histo):
   histo.GetYaxis().SetTitleFont(43)
   histo.GetXaxis().SetLabelFont(43)
   histo.GetYaxis().SetLabelFont(43)
-  histo.GetXaxis().SetTitleSize(26)
-  histo.GetYaxis().SetTitleSize(26)
-  histo.GetXaxis().SetLabelSize(26)
-  histo.GetYaxis().SetLabelSize(26)
+  histo.GetXaxis().SetTitleSize(30)
+  histo.GetYaxis().SetTitleSize(30)
+  histo.GetXaxis().SetLabelSize(30)
+  histo.GetYaxis().SetLabelSize(30)
   histo.GetYaxis().SetTitleOffset(1.5 if ttgStyle else 2)
-  histo.GetXaxis().SetTitleOffset(0.6 if ttgStyle else 2)
+  histo.GetXaxis().SetTitleOffset(0.7 if ttgStyle else 2)
 
 def errorStyle(color, markerStyle = 20, markerSize = 1.3):
   def func(histo):
@@ -228,7 +228,7 @@ def drawLumi(dataMCScale, lumiScale, isOnlySim=False):
     (31, (1-ROOT.gStyle.GetPadRightMargin()-0.04, 1-ROOT.gStyle.GetPadTopMargin()+0.01, ("%3.0f fb{}^{#minus 1} (13 TeV)"%lumiScale) + ("Scale %3.2f"%dataMCScale if dataMCScale else '')))
 
   ]
-  return [drawTex(l, align, size=0.06) for align, l in lines]
+  return [drawTex(l, align, size=0.07) for align, l in lines]
 
 def drawLumi2D(dataMCScale, lumiScale, isOnlySim=False):
   lines = [
