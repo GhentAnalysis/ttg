@@ -30,19 +30,18 @@ dataMCList = [
 
 unfdistList = [
   'unfReco_phPt',
-  # 'unfReco_phLepDeltaR',
-  # 'unfReco_jetLepDeltaR',
-  # 'unfReco_jetPt',
-  # 'unfReco_ll_absDeltaEta',
-  # 'unfReco_ll_deltaPhi',
-  # 'unfReco_phAbsEta',
-  # 'unfReco_phBJetDeltaR',
-  # 'unfReco_phLep1DeltaR',
-  # 'unfReco_phLep2DeltaR',
-  # 'unfReco_Z_pt',
-  # 'unfReco_l1l2_ptsum'
+  'unfReco_phAbsEta',
+  'unfReco_phLepDeltaR',
+  'unfReco_phLep1DeltaR',
+  'unfReco_phLep2DeltaR',
+  'unfReco_phBJetDeltaR',
+  'unfReco_jetLepDeltaR',
+  'unfReco_ll_absDeltaEta',
+  'unfReco_ll_deltaPhi',
+  'unfReco_Z_pt',
+  'unfReco_l1l2_ptsum',
+  'unfReco_jetPt',
   ]
-
 
 
 NPdistList = [
@@ -96,64 +95,61 @@ metadata['dataMC' + 'photon_pt'             ] = ('Figure 4c', 'Data correspondin
 metadata['dataMC' + 'signalRegionsZoom'     ] = ('Figure 4d', 'Data corresponding to figure 4d (lower right)' ,  'Distribution of jet multiplicity in the $Z\gamma$ control region.')
 metadata['dataMC' + 'PBVDphoton_pt'         ] = ('Figure 5a', 'Data corresponding to figure 5a (left) ' ,        'Closure test of the nonprompt photon estimation as a function of $p_{T}(\gamma)$.')
 metadata['dataMC' + 'PByield'               ] = ('Figure 5b', 'Data corresponding to figure 5b (right) ' ,       'Closure test of the nonprompt photon estimation as a function of the lepton flavours.')
-metadata['dataMC' + 'unfReco_phPt_mm_post'  ] = ('Figure 6a', 'Data corresponding to figure 6a (upper left) ' ,  'Post-fit distribution of $p_{T}(\gamma)$ in the the $\mu\mu$ channel.')
-metadata['dataMC' + 'unfReco_phPt_em_post'  ] = ('Figure 6b', 'Data corresponding to figure 6b (upper right) ' , 'Post-fit distribution of $p_{T}(\gamma)$ in the the $e\mu$ channel.')
-metadata['dataMC' + 'unfReco_phPt_ee_post'  ] = ('Figure 6c', 'Data corresponding to figure 6c (lower) ' ,       'Post-fit distribution of $p_{T}(\gamma)$ in the the $ee$ channel.')
-
-
-metadata['diff' + 'unfReco_phPt'          ]  = ('Figure 8a', 'Data corresponding to figure 8a (upper left)' ,    'Unfolded differential distribution for ' + labels['unfReco_phPt'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phAbsEta'      ]  = ('Figure 8b', 'Data corresponding to figure 8b (upper right)' ,   'Unfolded differential distribution for ' + labels['unfReco_phAbsEta'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phLepDeltaR'   ]  = ('Figure 8c', 'Data corresponding to figure 8c (middle left)' ,   'Unfolded differential distribution for ' + labels['unfReco_phLepDeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phLep1DeltaR'  ]  = ('Figure 8d', 'Data corresponding to figure 8d (middle right)' ,  'Unfolded differential distribution for ' + labels['unfReco_phLep1DeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phLep2DeltaR'  ]  = ('Figure 8e', 'Data corresponding to figure 8e (lower left)' ,    'Unfolded differential distribution for ' + labels['unfReco_phLep2DeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phBJetDeltaR'  ]  = ('Figure 8f', 'Data corresponding to figure 8f (lower right)' ,   'Unfolded differential distribution for ' + labels['unfReco_phBJetDeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_jetLepDeltaR'  ]  = ('Figure 9a', 'Data corresponding to figure 9a (upper left)' ,    'Unfolded differential distribution for ' + labels['unfReco_jetLepDeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_ll_absDeltaEta']  = ('Figure 9b', 'Data corresponding to figure 9b (upper right)' ,   'Unfolded differential distribution for ' + labels['unfReco_ll_absDeltaEta'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_ll_deltaPhi'   ]  = ('Figure 9c', 'Data corresponding to figure 9c (middle left)' ,   'Unfolded differential distribution for ' + labels['unfReco_ll_deltaPhi'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_Z_pt'          ]  = ('Figure 9d', 'Data corresponding to figure 9d (middle right)' ,  'Unfolded differential distribution for ' + labels['unfReco_Z_pt'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_l1l2_ptsum'    ]  = ('Figure 9e', 'Data corresponding to figure 9e (lower left)' ,    'Unfolded differential distribution for ' + labels['unfReco_l1l2_ptsum'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_jetPt'         ]  = ('Figure 9f', 'Data corresponding to figure 9f (lower right)' ,   'Unfolded differential distribution for ' + labels['unfReco_jetPt'].replace('[GeV]','') + '.')
-
-metadata['diff' + 'unfReco_phPt'           + '_norm']  = ('Figure 10a', 'Data corresponding to figure 10a (upper left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_phPt'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phAbsEta'       + '_norm']  = ('Figure 10b', 'Data corresponding to figure 10b (upper right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_phAbsEta'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phLepDeltaR'    + '_norm']  = ('Figure 10c', 'Data corresponding to figure 10c (middle left)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_phLepDeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phLep1DeltaR'   + '_norm']  = ('Figure 10d', 'Data corresponding to figure 10d (middle right)' ,  'Unfolded normalized differential distribution for ' + labels['unfReco_phLep1DeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phLep2DeltaR'   + '_norm']  = ('Figure 10e', 'Data corresponding to figure 10e (lower left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_phLep2DeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_phBJetDeltaR'   + '_norm']  = ('Figure 10f', 'Data corresponding to figure 10f (lower right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_phBJetDeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_jetLepDeltaR'   + '_norm']  = ('Figure 11a', 'Data corresponding to figure 11a (upper left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_jetLepDeltaR'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_ll_absDeltaEta' + '_norm']  = ('Figure 11b', 'Data corresponding to figure 11b (upper right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_ll_absDeltaEta'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_ll_deltaPhi'    + '_norm']  = ('Figure 11c', 'Data corresponding to figure 11c (middle left)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_ll_deltaPhi'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_Z_pt'           + '_norm']  = ('Figure 11d', 'Data corresponding to figure 11d (middle right)' ,  'Unfolded normalized differential distribution for ' + labels['unfReco_Z_pt'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_l1l2_ptsum'     + '_norm']  = ('Figure 11e', 'Data corresponding to figure 11e (lower left)' ,    'Unfolded normalized differential distribution for ' + labels['unfReco_l1l2_ptsum'].replace('[GeV]','') + '.')
-metadata['diff' + 'unfReco_jetPt'          + '_norm']  = ('Figure 11f', 'Data corresponding to figure 11f (lower right)' ,   'Unfolded normalized differential distribution for ' + labels['unfReco_jetPt'].replace('[GeV]','') + '.')
+metadata['dataMC' + 'unfReco_phPt_mm_post'  ] = ('Figure 6a', 'Data corresponding to figure 6a (upper left) ' ,  'Observed and predicted event yields as a function of $p_{T}(\gamma)$ in the $\mu\mu$ channel, after the fit to the data.')
+metadata['dataMC' + 'unfReco_phPt_em_post'  ] = ('Figure 6b', 'Data corresponding to figure 6b (upper right) ' , 'Observed and predicted event yields as a function of $p_{T}(\gamma)$ in the $e\mu$ channel, after the fit to the data.')
+metadata['dataMC' + 'unfReco_phPt_ee_post'  ] = ('Figure 6c', 'Data corresponding to figure 6c (lower) ' ,       'Observed and predicted event yields as a function of $p_{T}(\gamma)$ in the $ee$ channel, after the fit to the data.')
 
 
 
-metadata['eft2dDil']  = ('Figure 13', 'Data corresponding to figure 13' , 'Negative log-likelihood ratio with respect to the best fit value as a function of Wilson coefficients $c_{tZ}$ and $c^{I}_{tZ}$ from the interpretation of the dilepton measurement.')
-metadata['eft2dCom']  = ('Figure 15', 'Data corresponding to figure 15' , 'Negative log-likelihood ratio with respect to the best fit value as a function of Wilson coefficients $c_{tZ}$ and $c^{I}_{tZ}$ from the interpretation of the dilepton and lepton+jets measurements combined.')
+metadata['diff' + 'unfReco_phPt'          ]  = ('Figure 8a', 'Data corresponding to figure 8a (upper left)' ,    'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_phPt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phAbsEta'      ]  = ('Figure 8b', 'Data corresponding to figure 8b (upper right)' ,   'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_phAbsEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLepDeltaR'   ]  = ('Figure 8c', 'Data corresponding to figure 8c (middle left)' ,   'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_phLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep1DeltaR'  ]  = ('Figure 8d', 'Data corresponding to figure 8d (middle right)' ,  'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_phLep1DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep2DeltaR'  ]  = ('Figure 8e', 'Data corresponding to figure 8e (lower left)' ,    'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_phLep2DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phBJetDeltaR'  ]  = ('Figure 8f', 'Data corresponding to figure 8f (lower right)' ,   'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_phBJetDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetLepDeltaR'  ]  = ('Figure 9a', 'Data corresponding to figure 9a (upper left)' ,    'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_jetLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_absDeltaEta']  = ('Figure 9b', 'Data corresponding to figure 9b (upper right)' ,   'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_ll_absDeltaEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_deltaPhi'   ]  = ('Figure 9c', 'Data corresponding to figure 9c (middle left)' ,   'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_ll_deltaPhi'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_Z_pt'          ]  = ('Figure 9d', 'Data corresponding to figure 9d (middle right)' ,  'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_Z_pt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_l1l2_ptsum'    ]  = ('Figure 9e', 'Data corresponding to figure 9e (lower left)' ,    'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_l1l2_ptsum'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetPt'         ]  = ('Figure 9f', 'Data corresponding to figure 9f (lower right)' ,   'Absolute differential $tt\gamma$ production cross section as a function of ' + labels['unfReco_jetPt'].replace('[GeV]','') + '.')
+
+metadata['diff' + 'unfReco_phPt'           + '_norm']  = ('Figure 10a', 'Data corresponding to figure 10a (upper left)' ,    'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_phPt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phAbsEta'       + '_norm']  = ('Figure 10b', 'Data corresponding to figure 10b (upper right)' ,   'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_phAbsEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLepDeltaR'    + '_norm']  = ('Figure 10c', 'Data corresponding to figure 10c (middle left)' ,   'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_phLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep1DeltaR'   + '_norm']  = ('Figure 10d', 'Data corresponding to figure 10d (middle right)' ,  'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_phLep1DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phLep2DeltaR'   + '_norm']  = ('Figure 10e', 'Data corresponding to figure 10e (lower left)' ,    'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_phLep2DeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_phBJetDeltaR'   + '_norm']  = ('Figure 10f', 'Data corresponding to figure 10f (lower right)' ,   'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_phBJetDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetLepDeltaR'   + '_norm']  = ('Figure 11a', 'Data corresponding to figure 11a (upper left)' ,    'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_jetLepDeltaR'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_absDeltaEta' + '_norm']  = ('Figure 11b', 'Data corresponding to figure 11b (upper right)' ,   'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_ll_absDeltaEta'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_ll_deltaPhi'    + '_norm']  = ('Figure 11c', 'Data corresponding to figure 11c (middle left)' ,   'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_ll_deltaPhi'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_Z_pt'           + '_norm']  = ('Figure 11d', 'Data corresponding to figure 11d (middle right)' ,  'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_Z_pt'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_l1l2_ptsum'     + '_norm']  = ('Figure 11e', 'Data corresponding to figure 11e (lower left)' ,    'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_l1l2_ptsum'].replace('[GeV]','') + '.')
+metadata['diff' + 'unfReco_jetPt'          + '_norm']  = ('Figure 11f', 'Data corresponding to figure 11f (lower right)' ,   'Normalized differential $tt\gamma$ production cross section as a function of  ' + labels['unfReco_jetPt'].replace('[GeV]','') + '.')
 
 
-metadata['dilctZ']  =  ('Figure 12a', 'Data corresponding to figure 12a (left)' ,  'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZ}$')
-metadata['dilctZI']  = ('Figure 12b', 'Data corresponding to figure 12b (right)' , 'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZI}$')
-metadata['comctZ']  =  ('Figure 14a', 'Data corresponding to figure 14a (left)' ,  'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZ}$')
-metadata['comctZI']  = ('Figure 14b', 'Data corresponding to figure 14b (right)' , 'Negative log-likelihood ratio values with respect to the best fit value as a function of the Wilson coefficient $c_{tZI}$')
+metadata['dilctZ']  =  ('Figure 12a', 'Data corresponding to figure 12a (upper left)' ,  'Negative log-likelihood difference with respect to the best fit value as a function of the Wilson coefficient $c_{tZ}$, using the photon pT distribution from the dilepton analysis.')
+metadata['comctZ']  =  ('Figure 12b', 'Data corresponding to figure 12b (upper right)' , 'Negative log-likelihood difference with respect to the best fit value as a function of the Wilson coefficient $c_{tZ}$, using the combination of photon pT distributions from the dilepton and lepton+jets analyses.')
+metadata['dilctZI']  = ('Figure 12c', 'Data corresponding to figure 12c (lower left)' ,  'Negative log-likelihood difference with respect to the best fit value as a function of the Wilson coefficient $c^{I}_{tZ}$, using the photon pT distribution from the dilepton analysis.')
+metadata['comctZI']  = ('Figure 12d', 'Data corresponding to figure 12d (lower right)' , 'Negative log-likelihood difference with respect to the best fit value as a function of the Wilson coefficient $c^{I}_{tZ}$, using the combination of photon pT distributions from the dilepton and lepton+jets analyses.')
 
 
-
+metadata['eft2dDil']  = ('Figure 13a', 'Data corresponding to figure 13a (left)' , 'Negative log-likelihood ratio with respect to the best fit value as a function of Wilson coefficients $c_{tZ}$ and $c^{I}_{tZ}$ from the interpretation of the dilepton measurement.')
+metadata['eft2dCom']  = ('Figure 13b', 'Data corresponding to figure 13b (right)' , 'Negative log-likelihood ratio with respect to the best fit value as a function of Wilson coefficients $c_{tZ}$ and $c^{I}_{tZ}$ from the interpretation of the dilepton and lepton+jets measurements combined.')
 
 
 
 
 for dist in unfdistList:
-  metadata['systCov' + dist ] = ('Syst. covariance matrix for ' + labels[dist] + ' (non-normalized)',   'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The covariance matrix of the systematic uncertainties and MC statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
-  metadata['statCov' + dist ] = ('Stat. covariance matrix for ' + labels[dist] + ' (non-normalized)',   'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The covariance matrix of the data statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
-  metadata['systCorr' + dist] = ('Syst. correlation matrix for ' + labels[dist] + ' (non-normalized)',  'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The correlation matrix of the systematic uncertainties and MC statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
-  metadata['statCorr' + dist] = ('Stat. correlation matrix for ' + labels[dist] + ' (non-normalized)',  'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The correlation matrix of the data statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['systCov' + dist ] = ('Syst. covariance for ' + labels[dist] + ' (non-normalized)',   'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The covariance matrix of the systematic uncertainties and MC statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['statCov' + dist ] = ('Stat. covariance for ' + labels[dist] + ' (non-normalized)',   'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'The covariance matrix of the data statistical uncertainties for the differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['systCorr' + dist] = ('Syst. correlation for ' + labels[dist], 'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'Correlation matrix of the systematic uncertainty in the absolute differential cross section as a function of ' + labels[dist].replace('[GeV]', '') + '.')
+  metadata['statCorr' + dist] = ('Stat. correlation for ' + labels[dist], 'Additional material related to ' + metadata['diff' + dist][0].lower() + '.' , 'Correlation matrix of the statistical uncertainty in the absolute differential cross section as a function of ' + labels[dist].replace('[GeV]', '') + '.')
 
-  metadata['systCov' + dist  + '_norm'] = ('Syst. covariance matrix for ' + labels[dist] + ' (normalized)',   'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The covariance matrix of the systematic uncertainties and MC statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
-  metadata['statCov' + dist  + '_norm'] = ('Stat. covariance matrix for ' + labels[dist] + ' (normalized)',   'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The covariance matrix of the data statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
-  metadata['systCorr' + dist + '_norm'] = ('Syst. correlation matrix for ' + labels[dist] + ' (normalized)',  'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The correlation matrix of the systematic uncertainties and MC statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
-  metadata['statCorr' + dist + '_norm'] = ('Stat. correlation matrix for ' + labels[dist] + ' (normalized)',  'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The correlation matrix of the data statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['systCov' + dist  + '_norm'] = ('Syst. covariance for ' + labels[dist] + ' (normalized)',   'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The covariance matrix of the systematic uncertainties and MC statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['statCov' + dist  + '_norm'] = ('Stat. covariance for ' + labels[dist] + ' (normalized)',   'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The covariance matrix of the data statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['systCorr' + dist + '_norm'] = ('Syst. correlation for ' + labels[dist] + ' (normalized)',  'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The correlation matrix of the systematic uncertainties and MC statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
+  metadata['statCorr' + dist + '_norm'] = ('Stat. correlation for ' + labels[dist] + ' (normalized)',  'Additional material related to ' + metadata['diff' + dist + '_norm'][0].lower() + '.' , 'The correlation matrix of the data statistical uncertainties for the normalized differential ' + labels[dist].replace('[GeV]', '') + ' distribution.')
 
 
 
@@ -221,8 +217,10 @@ for dist in dataMCList:
   # pdb.set_trace()
 
   # Create variable objects
-  x = Variable(labels[dist], is_independent=True, is_binned=False)
-  x.values = data["x"]
+  x = Variable(labels[dist], is_independent=True, is_binned=True)
+  x.values = data["x_edges"]
+
+  
 
   datavar = Variable("Observed", is_independent=False, is_binned=False)
   datavar.values = data["y"]
@@ -277,6 +275,81 @@ for dist in dataMCList:
 # can load directly from unfoldedRoots folder
 
 
+
+#######################################################
+# CHANNEL PLOT
+#######################################################
+
+
+
+table = Table('Figure 7')
+
+c = Variable('Channel', is_independent=True, is_binned=False)
+
+
+c.values = [
+'Combined',
+'$ee$',
+'$e\mu$',
+'$\mu\mu$',
+]
+
+t = Variable('Fiducial cross section [fb]', is_independent=False, is_binned=False)
+
+t.values = [
+173.5,
+172.6,
+173.9,
+177.6
+]
+
+ccstat =  Uncertainty('stat')
+ccstat.values = [
+2.5,
+5.6,
+3.1,
+6.3
+]
+
+
+ccsyst =  Uncertainty('syst')
+ccsyst.values = [
+6.3,
+7.8,
+6.3,
+9.7
+]
+
+
+
+t.add_uncertainty(ccstat)
+t.add_uncertainty(ccsyst)
+
+
+t.add_qualifier("SQRT(S)" , 13, 'TeV')
+t.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+table.add_variable(c)
+table.add_variable(t)
+
+table.location = 'Data corresponding to figure 7'
+table.description = 'Fiducial $tt\gamma$ production cross section in the dilepton final state measured for different lepton flavour channels, and the combined result.'
+
+
+table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+table.keywords["cmenergies"] = [13000.0]
+table.keywords["observables"] = ["N"]
+table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+table.keywords["phrases"] += ['lepton+jets']
+
+sub.add_table(table)
+
+
+
+
+
+
+
 #######################################################
 # UNFOLDING PLOTS
 #######################################################
@@ -297,8 +370,8 @@ for normCase in ['', '_norm']:
     
 
     # Create variable objects
-    x = Variable(labels[dist], is_independent=True, is_binned=False)
-    x.values = data["x"]
+    x = Variable(labels[dist], is_independent=True, is_binned=True)
+    x.values = data["x_edges"]
 
     datavar = Variable("Observed", is_independent=False, is_binned=False)
     datavar.values = roundList(data["y"], (4 if normCase else 2))
@@ -353,26 +426,28 @@ for normCase in ['', '_norm']:
 
 # note done: add stat, correl, and refine/label etc
 
-for normCase in ['', '_norm']:
+# for normCase in ['', '_norm']:
+for normCase in ['']:
   for dist in unfdistList:
-    for plotType in ['systCov', 'statCov', 'systCorr', 'statCorr']:
+    # for plotType in ['systCov', 'statCov', 'systCorr', 'statCorr']:
+    for plotType in ['systCorr', 'statCorr']:
       # Create a reader for the input file
       reader = RootFileReader("../unfolding/unfoldedRoots/" + dist + plotType + normCase + ".root")
       data = reader.read_hist_2d("dummyName")
 
       # Create variable objects
-      x = Variable(labels[dist], is_independent=True, is_binned=False)
-      x.values = data["x"]
+      x = Variable(labels[dist], is_independent=True, is_binned=True)
+      x.values = data["x_edges"]
 
-      y = Variable(labels[dist] + ' ' , is_independent=True, is_binned=False)
-      y.values = data["y"]
+      y = Variable(labels[dist] + ' ' , is_independent=True, is_binned=True)
+      y.values = data["y_edges"]
 
       correlation = Variable(("correlation" if plotType.count('Corr') else "covariance"), is_independent=False, is_binned=False, units= ('%' if plotType.count('Corr') else 'fb$^{2}$'))
       if plotType.count('Corr'):
         zval = [i * 100. for i in data["z"]] 
       else:
         zval = data["z"] 
-      correlation.values = roundList(zval, 2)
+      correlation.values = roundList(zval, (7 if (normCase and not plotType.count('Corr')) else 3))
 
       table = Table(metadata[plotType + dist + normCase][0].replace(' [GeV]',''))
       for var in [x,y,correlation]:
@@ -394,73 +469,13 @@ for normCase in ['', '_norm']:
 
 # EFT
 
-table = Table(metadata['eft2dDil'][0])
-
-c1 = Variable('$C_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
-c1.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,0]
-
-c2 = Variable('$C^{I}_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
-c2.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,1]
 
 
-nll = Variable("$-2\Delta lnN$", is_independent=False, is_binned=False)
-nll.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,2]
-nll.add_qualifier("SQRT(S)" , 13, 'TeV')
-nll.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
-
-table.add_variable(c1)
-table.add_variable(c2)
-table.add_variable(nll)
-
-
-table.location = metadata['eft2dDil'][1]
-table.description = metadata['eft2dDil'][2]
-
-table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
-table.keywords["cmenergies"] = [13000.0]
-table.keywords["observables"] = ["N"]
-table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
-
-sub.add_table(table)
-
-
-
-table = Table(metadata['eft2dCom'][0])
-
-c1 = Variable('$C_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
-c1.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,0]
-
-c2 = Variable('$C^{I}_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
-c2.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,1]
-
-
-nll = Variable("$-2\Delta lnN$", is_independent=False, is_binned=False)
-nll.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,2]
-nll.add_qualifier("SQRT(S)" , 13, 'TeV')
-nll.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
-
-table.add_variable(c1)
-table.add_variable(c2)
-table.add_variable(nll)
-
-
-table.location = metadata['eft2dCom'][1]
-table.description = metadata['eft2dCom'][2]
-
-table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
-table.keywords["cmenergies"] = [13000.0]
-table.keywords["observables"] = ["N"]
-table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
-
-sub.add_table(table)
-
-
-
-for plot in ['dilctZ', 'dilctZI', 'comctZ', 'comctZI']:
+for plot in ['dilctZ', 'comctZ', 'dilctZI', 'comctZI']:
 
   table = Table(metadata[plot][0])
 
-  c = Variable('$C_{tZ}/\Lambda^{2}$', is_independent=True, is_binned=False, units='$TeV^2$')
+  c = Variable('$C_{tZ}$', is_independent=True, is_binned=False, units='$(\Lambda/TeV)^{2}$')
   c.values = numpy.loadtxt( 'inputEFT/' + plot + 'exp.txt')[:,0]
 
   nllexp = Variable("$-2\Delta lnN$ (expected)", is_independent=False, is_binned=False)
@@ -492,26 +507,82 @@ for plot in ['dilctZ', 'dilctZI', 'comctZ', 'comctZI']:
   table.keywords["cmenergies"] = [13000.0]
   table.keywords["observables"] = ["CLS", "CL"]
   table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+  if plot.count('com'):
+    table.keywords["phrases"] += ['lepton+jets']
 
   sub.add_table(table)
 
 
 
+table = Table(metadata['eft2dDil'][0])
+
+c1 = Variable('$C_{tZ}$', is_independent=True, is_binned=False, units='$(\Lambda/TeV)^{2}$')
+c1.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,0]
+
+c2 = Variable('$C^{I}_{tZ}$', is_independent=True, is_binned=False, units='$(\Lambda/TeV)^{2}$')
+c2.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,1]
+
+
+nll = Variable("$-2\Delta lnN$", is_independent=False, is_binned=False)
+nll.values = numpy.loadtxt( 'inputEFT/dil2d.txt')[:,2]
+nll.add_qualifier("SQRT(S)" , 13, 'TeV')
+nll.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+table.add_variable(c1)
+table.add_variable(c2)
+table.add_variable(nll)
+
+
+table.location = metadata['eft2dDil'][1]
+table.description = metadata['eft2dDil'][2]
+
+table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+table.keywords["cmenergies"] = [13000.0]
+table.keywords["observables"] = ["N"]
+table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+
+sub.add_table(table)
+
+
+
+table = Table(metadata['eft2dCom'][0])
+
+c1 = Variable('$C_{tZ}$', is_independent=True, is_binned=False, units='$(\Lambda/TeV)^{2}$')
+c1.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,0]
+
+c2 = Variable('$C^{I}_{tZ}$', is_independent=True, is_binned=False, units='$(\Lambda/TeV)^{2}$')
+c2.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,1]
+
+
+nll = Variable("$-2\Delta lnN$", is_independent=False, is_binned=False)
+nll.values = numpy.loadtxt( 'inputEFT/com2d.txt')[:,2]
+nll.add_qualifier("SQRT(S)" , 13, 'TeV')
+nll.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+table.add_variable(c1)
+table.add_variable(c2)
+table.add_variable(nll)
+
+
+table.location = metadata['eft2dCom'][1]
+table.description = metadata['eft2dCom'][2]
+
+table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+table.keywords["cmenergies"] = [13000.0]
+table.keywords["observables"] = ["N"]
+table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+table.keywords["phrases"] += ['lepton+jets']
+sub.add_table(table)
+
+
+
 # EFT tables (like, actual tables)
+
 
 table = Table('Table 5')
 
 c = Variable('Wilson coefficient', is_independent=True, is_binned=False)
-# c.values = [
-# '$c_{tZ}$ ($c^{I}_{tZ}$=0, expected)',
-# '$c_{tZ}$ (profiled, expected)',
-# '$c^{I}_{tZ}$ ($c_{tZ}$=0, expected)',
-# '$c^{I}_{tZ}$ (profiled, expected)',
-# '$c_{tZ}$ ($c^{I}_{tZ}$=0, observed)',
-# '$c_{tZ}$ (profiled, observed)',
-# '$c^{I}_{tZ}$ ($c_{tZ}$=0, observed)',
-# '$c^{I}_{tZ}$ (profiled, observed)',
-# ]
+
 
 c.values = [
 '$c_{tZ}$',
@@ -524,77 +595,242 @@ c.values = [
 '$c^{I}_{tZ}$ ',
 ]
 
-t = Variable('fit case', is_independent=False, is_binned=False)
+t = Variable('fit case', is_independent=True, is_binned=False)
 
 t.values = [
-'(expected, $c^{I}_{tZ}$=0)',
-'(expected, profiled)',
-'(expected, $c_{tZ}$=0)',
-'(expected, profiled)',
-'(observed, $c^{I}_{tZ}$=0)',
-'(observed, profiled)',
-'(observed, $c_{tZ}$=0)',
-'(observed, profiled)',
+'expected, $c^{I}_{tZ}$=0',
+'expected, profiled',
+'expected, $c_{tZ}$=0',
+'expected, profiled',
+'observed, $c^{I}_{tZ}$=0',
+'observed, profiled',
+'observed, $c_{tZ}$=0',
+'observed, profiled',
 ]
-
-
 
 
 
 CL6 = Variable("68% CL interval", is_independent=False, is_binned=False, units='$(\Lambda/TeV)^2$')
 CL6.values = [
-'[-0.28, 0.35]',
-'[-0.40, 0.01]',
-'[-0.33, 0.31]',
-'[-0.44, 0.36]',
-'[-0.28, 0.35]',
-'[-0.40, 0.21]',
-'[-0.33, 0.31]',
-'[-0.41, 0.32]'
+'[-0.28, 0.35]                      ',
+'[-0.28, 0.35]                      ',
+'[-0.33, 0.30]                      ',
+'[-0.33, 0.30]                      ',
+'[-0.43, -0.09]                     ',
+'[-0.43, 0.17]                      ',
+'[-0.47, -0.030] $\cup$ [0.07, 0.38]',
+'[-0.43, 0.33]                      '
 ]
 
 CL9 = Variable("95% CL interval", is_independent=False, is_binned=False, units='$(\Lambda/TeV)^2$')
 CL9.values = [
 '[-0.42, 0.49]',
-'[-0.51, 0.50]',
-'[-0.47, 0.45]',
-'[-0.55, 0.50]',
 '[-0.42, 0.49]',
-'[-0.51, 0.50]',
 '[-0.47, 0.45]',
-'[-0.54, 0.49]'
+'[-0.47, 0.45]',
+'[-0.53, 0.52]',
+'[-0.53, 0.51]',
+'[-0.58, 0.52]',
+'[-0.56, 0.51]'
 ]
 
 
 
-t.add_qualifier("CHANNEL" , "dilepton")
-CL9.add_qualifier("CHANNEL" , "dilepton")
-CL6.add_qualifier("CHANNEL" , "dilepton")
+CL6Comb = Variable("68% CL interval", is_independent=False, is_binned=False, units='$(\Lambda/TeV)^2$')
+CL6Comb.values = [
+'[-0.15, 0.19]                     ',
+'[-0.15, 0.19]                     ',
+'[-0.17, 0.18]                     ',
+'[-0.18, 0.18]                     ',
+'[-0.30, -0.13]                    ',
+'[-0.30, 0.00]                     ',
+'[-0.32, -0.13] $\cup$ [0.16, 0.29]',
+'[-0.28, 0.23]                     '
+]
 
-t.add_qualifier("SQRT(S)" , 13, 'TeV')
-t.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+CL9Comb = Variable("95% CL interval", is_independent=False, is_binned=False, units='$(\Lambda/TeV)^2$')
+CL9Comb.values = [
+'[-0.25, 0.29]',
+'[-0.25, 0.29]',
+'[-0.27, 0.27]',
+'[-0.27, 0.27]',
+'[-0.36, 0.31]',
+'[-0.36, 0.31]',
+'[-0.38, 0.36]',
+'[-0.36, 0.35]'
+]
+
+
+
+
 CL9.add_qualifier("SQRT(S)" , 13, 'TeV')
 CL9.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
 CL6.add_qualifier("SQRT(S)" , 13, 'TeV')
 CL6.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+# t.add_qualifier("CHANNEL" , "dilepton")
+CL9.add_qualifier("CHANNEL" , "dilepton")
+CL6.add_qualifier("CHANNEL" , "dilepton")
+
+CL6Comb.add_qualifier("SQRT(S)" , 13, 'TeV')
+CL9Comb.add_qualifier("SQRT(S)" , 13, 'TeV')
+CL6Comb.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+CL9Comb.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+CL6Comb.add_qualifier("CHANNEL" , "dilepton & l+jets")
+CL9Comb.add_qualifier("CHANNEL" , "dilepton & l+jets")
+
 
 
 table.add_variable(c)
 table.add_variable(t)
 table.add_variable(CL6)
 table.add_variable(CL9)
+table.add_variable(CL6Comb)
+table.add_variable(CL9Comb)
 
+table.location = 'Data corresponding to table 5'
+table.description = 'One-dimensional CL intervals for the Wilson coefficients  $c_{tZ}$ and $c^{I}_{tZ}$, using the photon $p_{T}$ distribution from the dilepton analysis, or the combination of photon pT distributions from the dilepton and lepton+jets analyses.'
 
-table.location = 'QQQ placeholder'
-table.description = 'QQQ placeholder'
 
 
 table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
 table.keywords["cmenergies"] = [13000.0]
 table.keywords["observables"] = ["N"]
 table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+table.keywords["phrases"] += ['lepton+jets']
 
 sub.add_table(table)
+
+
+
+#######################################################
+# COMPARISON PLOT
+#######################################################
+
+
+
+table = Table('Figure 14')
+
+
+
+w = Variable('Wilson coefficient', is_independent=True, is_binned=False)
+w.values = [
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c_{tZ}$',
+'$c^{I}_{tZ}$',
+'$c^{I}_{tZ}$',
+'$c^{I}_{tZ}$',
+'$c^{I}_{tZ}$'
+]
+
+
+c = Variable('Dataset & method', is_independent=False, is_binned=False)
+c.values = [
+'CMS $77.5$ $fb^{-1}$ $ttZ$',
+'CMS $138$ $fb^{-1}$ $ttZ$ & $tZq$ individually',
+'CMS $138$ $fb^{-1}$ $ttZ$ & $tZq$ marginalized',
+'CMS $137$ $fb^{-1}$ $tt\gamma$ (l+jets)',
+'CMS $138$ $fb^{-1}$ $tt\gamma$ (dilepton)',
+'CMS $138$ $fb^{-1}$ $tt\gamma$ (l+jets + dilepton)',
+'Global fit individually',
+'Global fit marginalized',
+'CMS $77.5$ $fb^{-1}$ $ttZ$',
+'CMS $137$ $fb^{-1}$ $tt\gamma$ (l+jets)',
+'CMS $138$ $fb^{-1}$ $tt\gamma$ (dilepton)',
+'CMS $138$ $fb^{-1}$ $tt\gamma$ (l+jets + dilepton)',
+]
+
+ctz = Variable('$95\%$ CL interval', is_independent=False, is_binned=False)
+
+ctz.values = [
+'[-1.1, 1.1]',
+'[-0.76, 0.71',
+'[-0.85, 0.76]',
+'[-0.43, 0.38]',
+'[-0.53, 0.52]',
+'[-0.36, 0.31]',
+'[-0.58, 2.16]',
+'[-1.20, 2.50]',
+'[-1.2, 1.2]',
+'[-0.43, 0.43]',
+'[-0.58, 0.52]',
+'[-0.38, 0.36]'
+]
+
+
+# ctzm = Variable('$c_{tZ}$ marg.', is_independent=False, is_binned=False)
+
+# ctzm.values = [
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]'
+# ]
+
+# ctzi = Variable('$c^{I}_{tZ}$', is_independent=False, is_binned=False)
+
+# ctzi.values = [
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]'
+# ]
+
+
+
+# ctzim = Variable('$c^{I}_{tZ}$ marg.', is_independent=False, is_binned=False)
+
+# ctzim.values = [
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]',
+# '[-99,99]'
+# ]
+
+
+
+# ctz.add_qualifier("SQRT(S)" , 13, 'TeV')
+# ctz.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+# ctzi.add_qualifier("SQRT(S)" , 13, 'TeV')
+# ctzi.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+# ctzm.add_qualifier("SQRT(S)" , 13, 'TeV')
+# ctzm.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+# ctzim.add_qualifier("SQRT(S)" , 13, 'TeV')
+# ctzim.add_qualifier("LUMINOSITY" , 138 ,'fb$^{-1}$')
+
+table.add_variable(w)
+table.add_variable(c)
+table.add_variable(ctz)
+# table.add_variable(ctzi)
+# table.add_variable(ctzm)
+# table.add_variable(ctzim)
+
+table.location = 'Data corresponding to figure 14'
+table.description = 'Comparison of observed $95\%$ CL intervals for the Wilson coefficients $c_{tZ}$ and $c^{I}_{tZ}$. Results are shown from a CMS ttZ measurement [JHEP 03 (2020) 056], from a CMS ttZ & tZq interpretation [arXiv:2107.13896], from a CMS ttG (lepton+jets) measurement [arXiv:2107.01508], from this measurement, and from a global fit by J. Ellis et al. [JHEP 04 (2021) 279].'
+
+
+# table.keywords["reactions"] = ["P P --> TOP TOPBAR X", "P P --> TOP TOPBAR GAMMA"]
+# table.keywords["cmenergies"] = [13000.0]
+# table.keywords["observables"] = ["N"]
+# table.keywords["phrases"] = ["Top", "Quark", "Photon", "dilepton", "dileptonic", "Cross Section", "Proton-Proton Scattering", "Inclusive", "Differential"]
+# table.keywords["phrases"] += ['lepton+jets']
+
+sub.add_table(table)
+
+
 
 
 sub.create_files("./output/")

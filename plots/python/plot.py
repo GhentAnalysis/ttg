@@ -682,6 +682,7 @@ class Plot:
     # self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/100.)
     # self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/60.)
     self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/40.)
+    # self.removeEmptyBins(yMax, self.ymin if (logY or self.ymin < 0) else yMax.GetMaximum()/30.)  # for njet plot
 
     # If legend specified, add it to the drawObjects
     if legend:

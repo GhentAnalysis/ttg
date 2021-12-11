@@ -16,6 +16,27 @@ argParser.add_argument('--overview',  action='store_true', default=False,  help=
 args = argParser.parse_args()
 
 
+
+# NOTE disgusting hardcode, putting it here so you don't forget to update it
+
+chi2norm ={
+'unfReco_phPt'    : 5.22985787237 ,
+'unfReco_phAbsEta'    : 3.284278623 ,
+'unfReco_phLepDeltaR'    : 7.6073797526 ,
+'unfReco_phLep1DeltaR'    : 7.68768846546 ,
+'unfReco_phLep2DeltaR'    : 1.37357808463 ,
+'unfReco_phBJetDeltaR'    : 3.78567329171 ,
+'unfReco_jetLepDeltaR'    : 0.892700237158 ,
+'unfReco_ll_absDeltaEta'    : 11.2529949992 ,
+'unfReco_ll_deltaPhi'    : 7.38162393639 ,
+'unfReco_Z_pt'    : 1.25202000251 ,
+'unfReco_l1l2_ptsum'    : 7.08845986523 ,
+'unfReco_jetPt'    : 6.4579667642 ,
+}
+
+
+
+
 if args.year == '2016': args.unblind = True
 args.unblind = True
 
@@ -49,11 +70,53 @@ import uuid
 from ttg.tools.logger import getLogger
 log = getLogger(args.logLevel)
 
+if args.norm:
+  log.warning('################################################################')
+  log.warning('Chi2 values for norm case are hardcoded, remember to update them')
+  log.warning('################################################################\n\n')
 
 ROOT.gErrorIgnoreLevel = ROOT.kError
 log.info("WARNING  --------------------------------------------------------------------------------------------------------------------------------------------------")
 log.info("WARNING  all system messages lower than Errors are not being shown to prevent hunderds of RuntimeWarnings from being printed, be aware of this when debugging")
 log.info("WARNING  --------------------------------------------------------------------------------------------------------------------------------------------------")
+
+
+
+
+
+
+
+from array import array
+
+
+def correlCol():
+  # red = array('d', [0.933,1.0,0.302])
+  # green = array('d', [0.302,1.0,0.745])
+  # blue = array('d', [0.302,1.0,0.933])
+  # stops = array('d', [0.0,0.166,1.0])
+  # ROOT.TColor.CreateGradientColorTable(3,stops,red,green,blue,25)
+
+  red = array('d', [0.967,1.0,0.302])
+  green = array('d', [0.651,1.0,0.745])
+  blue = array('d', [0.651,1.0,0.933])
+  stops = array('d', [0.0, 0.2, 1.0])
+  ROOT.TColor.CreateGradientColorTable(3,stops,red,green,blue,25)
+
+
+# z-range from -0.2555 to 1.0
+# stops at 
+# red[0] to 
+# green[0] to 
+# blue[0] to 
+
+def covCol():
+  red = array('d', [0.933,1.0,0.302])
+  green = array('d', [0.302,1.0,0.745])
+  blue = array('d', [0.302,1.0,0.933])
+  stops = array('d', [0.0,0.0,1.0])
+  ROOT.TColor.CreateGradientColorTable(3,stops,red,green,blue,25)
+
+
 
 def getPad(canvas, number):
   pad = canvas.cd(number)
@@ -81,39 +144,46 @@ def getRatioCanvas(name):
   return canvas
 
 
+def divByBW(hist):
+  out = hist.Clone()
+  for i in range(1, out.GetXaxis().GetNbins() + 1 ):
+    out.SetBinContent(i, out.GetBinContent(i) / out.GetBinWidth(i))
+    out.SetBinError(i, out.GetBinError(i) / out.GetBinWidth(i))
+  return out
+
 #################### Settings and definitons ####################
 
 lumiunc = {'2016':0.012, '2017':0.023, '2018':0.025}
 lumiunc['RunII'] = 0.016 
 
 labels = {
-          'unfReco_phPt' :            ('p_{T}(#gamma) [GeV]',  'p_{T}(#gamma) [GeV]'            , 'd#sigma / d p_{T}(#gamma) [fb/GeV]'),
-          'unfReco_phLepDeltaR' :     ('#DeltaR(#gamma, l)',   '#DeltaR(#gamma, l)'             , 'd#sigma / d #DeltaR(#gamma, l) [fb]'),
-          'unfReco_ll_deltaPhi' :     ('#Delta#phi(ll)',       '#Delta#phi(ll)'                 , 'd#sigma / d #Delta#phi(ll) [fb]'),
-          'unfReco_jetLepDeltaR' :    ('#DeltaR(l, j)',        '#DeltaR(l, j)'                  , 'd#sigma / d #DeltaR(l, j) [fb]'),
-          'unfReco_jetPt' :           ('p_{T}(j1) [GeV]',      'p_{T}(j1) [GeV]'                , 'd#sigma / d p_{T}(j1) [fb/GeV]'),
-          'unfReco_ll_absDeltaEta' :  ('|#Delta#eta(ll)|',     '|#Delta#eta(ll)|'               , 'd#sigma / d |#Delta#eta(ll)| [fb]'),
-          'unfReco_phBJetDeltaR' :    ('#DeltaR(#gamma, b)',   '#DeltaR(#gamma, b)'             , 'd#sigma / d #DeltaR(#gamma, b) [fb]'),
-          'unfReco_phAbsEta' :        ('|#eta|(#gamma)',       '|#eta|(#gamma)'                 , 'd#sigma / d |#eta|(#gamma) [fb]'),
-          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       '#DeltaR(#gamma, l1)'       , 'd#sigma / d #DeltaR(#gamma, l1) [fb]'),
-          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       '#DeltaR(#gamma, l2)'       , 'd#sigma / d #DeltaR(#gamma, l2) [fb]'),
-          'unfReco_Z_pt' :            ('p_{T}(ll) [GeV]',           'p_{T}(ll) [GeV]'           , 'd#sigma / d p_{T}(ll) [fb/GeV]'),
-          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) [GeV]', 'p_{T}(l1)+p_{T}(l2) [GeV]' , 'd#sigma / d p_{T}(l1)+p_{T}(l2) [fb/GeV]')
+          'unfReco_phPt' :            ('p_{T}(#gamma) [GeV]',       'p_{T}(#gamma) [GeV]'        , 'd#sigma/dp_{T}(#gamma) [fb/GeV]'      , ' 1/#sigma d#sigma/dp_{T}(#gamma) [1/GeV]'         ),
+          'unfReco_phLepDeltaR' :     ('min #DeltaR(#gamma, l)',    'min #DeltaR(#gamma, l)'     , 'd#sigma/d#DeltaR(#gamma, l) [fb]'     , ' 1/#sigma d#sigma/d#DeltaR(#gamma, l)'        ),
+          'unfReco_ll_deltaPhi' :     ('#Delta#phi(ll)',            '#Delta#phi(ll)'             , 'd#sigma/d#Delta#phi(ll) [fb]'         , ' 1/#sigma d#sigma/d#Delta#phi(ll)'            ),
+          'unfReco_jetLepDeltaR' :    ('min #DeltaR(l, j)',         'min #DeltaR(l, j)'          , 'd#sigma/d#DeltaR(l, j) [fb]'          , ' 1/#sigma d#sigma/d#DeltaR(l, j)'             ),
+          'unfReco_jetPt' :           ('p_{T}(j1) [GeV]',           'p_{T}(j1) [GeV]'            , 'd#sigma/dp_{T}(j1) [fb/GeV]'          , ' 1/#sigma d#sigma/dp_{T}(j1) [1/GeV]'             ),
+          'unfReco_ll_absDeltaEta' :  ('|#Delta#eta(ll)|',          '|#Delta#eta(ll)|'           , 'd#sigma/d|#Delta#eta(ll)| [fb]'       , ' 1/#sigma d#sigma/d|#Delta#eta(ll)|'          ),
+          'unfReco_phBJetDeltaR' :    ('min #DeltaR(#gamma, b)',    'min #DeltaR(#gamma, b)'     , 'd#sigma/d#DeltaR(#gamma, b) [fb]'     , ' 1/#sigma d#sigma/d#DeltaR(#gamma, b)'        ),
+          'unfReco_phAbsEta' :        ('|#eta|(#gamma)',            '|#eta|(#gamma)'             , 'd#sigma/d|#eta|(#gamma) [fb]'         , ' 1/#sigma d#sigma/d|#eta|(#gamma)'            ),
+          'unfReco_phLep1DeltaR' :    ('#DeltaR(#gamma, l1)',       '#DeltaR(#gamma, l1)'        , 'd#sigma/d#DeltaR(#gamma, l1) [fb]'    , ' 1/#sigma d#sigma/d#DeltaR(#gamma, l1)'       ),
+          'unfReco_phLep2DeltaR' :    ('#DeltaR(#gamma, l2)',       '#DeltaR(#gamma, l2)'        , 'd#sigma/d#DeltaR(#gamma, l2) [fb]'    , ' 1/#sigma d#sigma/d#DeltaR(#gamma, l2)'       ),
+          'unfReco_Z_pt' :            ('p_{T}(ll) [GeV]',           'p_{T}(ll) [GeV]'            , 'd#sigma/dp_{T}(ll) [fb/GeV]'          , ' 1/#sigma d#sigma/dp_{T}(ll) [1/GeV]'             ),
+          'unfReco_l1l2_ptsum' :      ('p_{T}(l1)+p_{T}(l2) [GeV]', 'p_{T}(l1)+p_{T}(l2) [GeV]'  , 'd#sigma/dp_{T}(l1)+p_{T}(l2) [fb/GeV]', ' 1/#sigma d#sigma/dp_{T}(l1)+p_{T}(l2) [1/GeV]'   )
           }
 
 distList = [
   'unfReco_phPt',
-  'unfReco_phLepDeltaR',
-  'unfReco_jetLepDeltaR',
-  'unfReco_jetPt',
-  'unfReco_ll_absDeltaEta',
-  'unfReco_ll_deltaPhi',
   'unfReco_phAbsEta',
-  'unfReco_phBJetDeltaR',
+  'unfReco_phLepDeltaR',
   'unfReco_phLep1DeltaR',
   'unfReco_phLep2DeltaR',
+  'unfReco_phBJetDeltaR',
+  'unfReco_jetLepDeltaR',
+  'unfReco_ll_absDeltaEta',
+  'unfReco_ll_deltaPhi',
   'unfReco_Z_pt',
-  'unfReco_l1l2_ptsum'
+  'unfReco_l1l2_ptsum',
+  'unfReco_jetPt',
   ]
 
 varList = ['']
@@ -313,6 +383,16 @@ def calcNewChi2(data, pred, covars, normalized = False):
     rvert = rvert.GetSub(1,nxy-1,0,0)
     mat.Invert()
     mul1 = ROOT.TMatrixD(1, nxy-1)
+
+
+    # pdb.set_trace()
+
+    # mat = mat.GetSub(2,nxy,2,nxy)
+    # rhor = rhor.GetSub(0,0,2,nxy)
+    # rvert = rvert.GetSub(2,nxy,0,0)
+    # mat.Invert()
+    # mul1 = ROOT.TMatrixD(1, nxy-1)
+
   else:
     # chop off under and overflows
     mat = mat.GetSub(1,nxy,1,nxy)
@@ -508,6 +588,12 @@ def getCovarHists(inputHists, template):
   # pdb.set_trace()
   return covarMat
 
+def getCovarInt(inputHists):
+  nominal = inputHists[''].Integral()
+  covarTot = 0
+  for name, hist in inputHists.iteritems():
+    covarTot += hist.Integral()-nominal
+  return covarTot
 
 
 def getCovarHistsFromDev(inputHists, template):
@@ -521,6 +607,24 @@ def getCovarHistsFromDev(inputHists, template):
       for j in range(1, hist.GetXaxis().GetNbins()+1):
         covarMat[name].SetBinContent(i, j, hist.GetBinContent(i)*hist.GetBinContent(j))
   return covarMat
+
+def equalBins(hist):
+  nxbins = hist.GetXaxis().GetNbins()
+  nybins = hist.GetYaxis().GetNbins()
+  histeq = ROOT.TH2D(hist.GetName() + 'eq', '', nxbins, numpy.array(range(nxbins+1)).astype(float), nybins, numpy.array(range(nybins+1)).astype(float))
+  for i in range(1, nxbins+1):
+    histeq.GetXaxis().SetBinLabel(i, ( str(int(hist.GetXaxis().GetBinLowEdge(i))) if dist in ['unfReco_phPt', 'unfReco_jetPt', 'unfReco_Z_pt', 'unfReco_l1l2_ptsum'] else str(round(hist.GetXaxis().GetBinLowEdge(i), 2)) ))
+
+  for j in range(1, nybins+1):
+    histeq.GetYaxis().SetBinLabel(j, ( str(int(hist.GetYaxis().GetBinLowEdge(j))) if dist in ['unfReco_phPt', 'unfReco_jetPt', 'unfReco_Z_pt', 'unfReco_l1l2_ptsum'] else str(round(hist.GetYaxis().GetBinLowEdge(j), 2)) ))
+
+  for i in range(1, nxbins+1):
+    for j in range(1, nybins+1):
+      histeq.SetBinContent(i, j, hist.GetBinContent(i, j))
+      
+  return histeq
+    
+
 #################### main code ####################
 
 log.info('for these systematics data is varied instead of the response matrix:')
@@ -707,6 +811,10 @@ for dist in distList:
 
   covars = getCovarHists(covarInput, eMat)
 
+  covInt = getCovarInt(covarInput)
+
+  # pdb.set_trace()
+
   pickle.dump(covars, file('unfoldedHists/covMat' +  dist + args.year + ('_norm' if args.norm else '')  +'.pkl', 'w'))
 
   covTot = covars[''].Clone()
@@ -748,7 +856,8 @@ for dist in distList:
     unfoldedNom.SetBinError(i, dataStat.GetBinContent(i))
 
   unfoldedNomS = unfoldedNom.Clone('dummyName')
-  unfoldedNomS.SaveAs('unfoldedRoots/' + dist + 'obsStatUnc' + ('_norm' if args.norm else '')+  '.root')
+  if args.year == 'RunII':
+    unfoldedNomS.SaveAs('unfoldedRoots/' + dist + 'obsStatUnc' + ('_norm' if args.norm else '')+  '.root')
 
   # just so we can save it for hepdata
   unfoldedSystUnc = unfoldedNom.Clone()
@@ -757,7 +866,8 @@ for dist in distList:
     unfoldedSystUnc.SetBinError(i, totalErr)
 
   unfoldedSystUncS = unfoldedSystUnc.Clone('dummyName')
-  unfoldedSystUncS.SaveAs('unfoldedRoots/' + dist + 'obsSystUnc' + ('_norm' if args.norm else '')+  '.root')
+  if args.year == 'RunII':
+    unfoldedSystUncS.SaveAs('unfoldedRoots/' + dist + 'obsSystUnc' + ('_norm' if args.norm else '')+  '.root')
 
 
   # data stats, MC stats, and systematics onto this one
@@ -846,10 +956,12 @@ for dist in distList:
     pltotalUp.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Up.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
     pltotalDown.SetBinContent(i, (pltotalUp.GetBinContent(i)**2 + plq2Down.GetBinContent(i)**2 + plpdfrms.GetBinContent(i)**2)**0.5)
 
-  # pdb.set_trace()
 
   theoCovs = getCovarHistsFromDev({'plq2i': plq2Up, 'plpdfi': plpdfrms}, eMat)
 
+  covInt += plq2Up.Integral()**2 + plpdfrms.Integral()**2
+
+  # pdb.set_trace()
 
   plMCTot = plMCDict[''].Clone()
 
@@ -874,12 +986,52 @@ for dist in distList:
   if args.norm:
     plMCTot.Scale(1/plMCTot.Integral())
 
-  if dist in ['unfReco_phAbsEta']:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.44, plMCTot.GetMaximum()*1.44))
-  elif dist in ['unfReco_phBJetDeltaR']:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.44, plMCTot.GetMaximum()*1.44))
+  if not args.norm:
+    pickle.dump(unfoldedTotUnc, file('unfoldedHists/data' +  dist + args.year + '.pkl', 'w'))
+
+  unfoldedTotUncS = unfoldedTotUnc.Clone('dummyName')
+  if args.year == 'RunII':
+    unfoldedTotUncS.SaveAs('unfoldedRoots/' + dist + 'obsTotUnc' + ('_norm' if args.norm else '')+  '.root')
+
+  unfoldedTotUnc = divByBW(unfoldedTotUnc)
+  
+  plMCTot2 = plMCTot.Clone()
+
+
+
+  # log.info(labels[dist][0] + 'simplistic Chi^2: ' + str(calcChi2(unfoldedNom, plMCTot)))
+
+  if args.norm:
+    chi2 = chi2norm[dist]
+    ndof = unfoldedNom.GetXaxis().GetNbins() - (1 if args.norm else 0)
   else:
-    unfoldedTotUnc.GetYaxis().SetRangeUser(0.001, max(unfoldedTotUnc.GetMaximum()*1.2, plMCTot.GetMaximum()*1.2))
+    chi2 = calcNewChi2(unfoldedNom, plMCTot, [covTot, eMat, theoCovs['plpdfi'], theoCovs['plq2i']], normalized = args.norm)
+    chi2int = ((unfoldedNom.Integral()-plMCTot.Integral())**2.)/covInt
+    ndof = unfoldedNom.GetXaxis().GetNbins() - (1 if args.norm else 0)
+    log.info(labels[dist][0] + 'Chi^2: ' + str(chi2))
+    log.info('nbins / dof ' + str(ndof))
+    log.info('Chi2 for normalized case: ' + str(chi2-chi2int))
+    # pdb.set_trace()
+
+
+
+  # stats on this are normally very small, ttgamma samples have great statistics (so not drawing it)
+
+  plMCTot.SetFillColorAlpha(ROOT.kBlack, 0.5)
+  plMCTot.SetLineColor(ROOT.kBlack)
+
+  plMCTot.SetFillStyle(3005)
+  plMCTotS = plMCTot.Clone('dummyName')
+  if args.year == 'RunII':
+    plMCTotS.SaveAs('unfoldedRoots/' + dist + 'theo' + ('_norm' if args.norm else '')+  '.root')
+  plMCTot = divByBW(plMCTot)
+
+  if dist in ['unfReco_phAbsEta']:
+    unfoldedTotUnc.GetYaxis().SetRangeUser( 0.0001, max(unfoldedTotUnc.GetMaximum()*1.44, plMCTot.GetMaximum()*1.44))
+  elif dist in ['unfReco_phBJetDeltaR']:
+    unfoldedTotUnc.GetYaxis().SetRangeUser( 0.0001, max(unfoldedTotUnc.GetMaximum()*1.6, plMCTot.GetMaximum()*1.44))
+  else:
+    unfoldedTotUnc.GetYaxis().SetRangeUser( ( 0.00001 if (dist in ['unfReco_l1l2_ptsum', 'unfReco_jetPt', 'unfReco_Z_pt'] and args.norm) else 0.0001), max(unfoldedTotUnc.GetMaximum()*1.2, plMCTot.GetMaximum()*1.2))
   unfoldedTotUnc.GetXaxis().SetTitle(labels[dist][1])
   unfoldedTotUnc.GetYaxis().SetTitle('')
   unfoldedTotUnc.GetYaxis().SetTitleOffset(1.55)
@@ -891,30 +1043,19 @@ for dist in distList:
 
   unfoldedTotUnc.Draw('E X0')
 
-  pickle.dump(unfoldedTotUnc, file('unfoldedHists/data' +  dist + args.year + '.pkl', 'w'))
-
-  unfoldedTotUncS = unfoldedTotUnc.Clone('dummyName')
-  unfoldedTotUncS.SaveAs('unfoldedRoots/' + dist + 'obsTotUnc' + ('_norm' if args.norm else '')+  '.root')
-
-  plMCTot2 = plMCTot.Clone()
 
 
-  # stats on this are normally very small, ttgamma samples have great statistics (so not drawing it)
-
-  plMCTot.SetFillColorAlpha(ROOT.kBlack, 0.5)
-  plMCTot.SetLineColor(ROOT.kBlack)
-
-  plMCTot.SetFillStyle(3005)
   plMCTot.Draw('same E2')
 
   unfoldedMC.SetLineWidth(3)
 
   plMCTot2.SetLineWidth(3)
   plMCTot2.SetLineColor(ROOT.kBlack)
+
+  plMCTot2 = divByBW(plMCTot2)
+
   plMCTot2.Draw('same HIST')
 
-  plMCTotS = plMCTot.Clone('dummyName')
-  plMCTotS.SaveAs('unfoldedRoots/' + dist + 'theo' + ('_norm' if args.norm else '')+  '.root')
 
 
 
@@ -931,12 +1072,16 @@ for dist in distList:
     plPy8.Scale(1/plPy8.Integral())
 
   # plHWpp.Draw('hist same')
-  plHW7.Draw('hist same')
-  if args.check:
-    plPy8.Draw('hist same')
 
   plHW7S = plHW7.Clone('dummyName')
-  plHW7S.SaveAs('unfoldedRoots/' + dist + 'HW7' + ('_norm' if args.norm else '')+  '.root')
+  if args.year == 'RunII':
+    plHW7S.SaveAs('unfoldedRoots/' + dist + 'HW7' + ('_norm' if args.norm else '')+  '.root')
+  plHW7 = divByBW(plHW7)
+  plHW7.Draw('hist same')
+  if args.check:
+    plPy8 = divByBW(plPy8)
+    plPy8.Draw('hist same')
+
 
   plHWpp.SetLineWidth(3)
   plHW7.SetLineWidth(3)
@@ -949,21 +1094,18 @@ for dist in distList:
 
   plPy8.SetLineColor(ROOT.kMagenta+2)
 
+
+
   # DRAW DATA
   unfoldedNom.SetLineColor(ROOT.kBlack)
   ROOT.gStyle.SetEndErrorSize(9)
   unfoldedNom.SetLineWidth(3)
   unfoldedNom.SetMarkerStyle(8)
   unfoldedNom.SetMarkerSize(2)
+  unfoldedNom = divByBW(unfoldedNom)
   unfoldedNom.Draw('same E1 X0')
 
 
-  log.info(labels[dist][0] + 'simplistic Chi^2: ' + str(calcChi2(unfoldedNom, plMCTot)))
-
-  chi2 = calcNewChi2(unfoldedNom, plMCTot, [covTot, eMat, theoCovs['plpdfi'], theoCovs['plq2i']], normalized = args.norm)
-  ndof = unfoldedNom.GetXaxis().GetNbins() - (1 if args.norm else 0)
-  log.info(labels[dist][0] + 'Chi^2: ' + str(chi2))
-  log.info('nbins / dof ' + str(ndof))
 
 
   if dist in ['unfReco_phBJetDeltaR', 'unfReco_ll_deltaPhi', 'unfReco_phLep1DeltaR']: #legend on the left
@@ -986,7 +1128,7 @@ for dist in distList:
   legend.AddEntry(unfoldedNom,'Data',"PE")
   legend.AddEntry(plMCTot2,"MG5+Pythia8","l")
   legend.AddEntry(plMCTot,"Theory unc.","f")
-  legend.AddEntry(plMCTot,'#chi^{2} / dof = ' + str(round(chi2, 2)) + ' / ' + str(ndof),"")
+  legend.AddEntry(plMCTot,'#chi^{2} / dof = ' + str(round(chi2, 1)) + ' / ' + str(ndof),"")
   # legend.AddEntry(unfoldedMC,"Unfolded MC Signal","l")
   # legend.AddEntry(plHWpp,'MG5+Herwig++',"l")
   legend.AddEntry(plHW7,'MG5+Herwig7',"l")
@@ -1065,10 +1207,10 @@ for dist in distList:
   drawTex((1-ROOT.gStyle.GetPadRightMargin()+0.04,  1-ROOT.gStyle.GetPadTopMargin()+0.04, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
 
   if args.norm:
-    drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  1-ROOT.gStyle.GetPadTopMargin(),  labels[dist][2] ), 31, size=0.042, angle=90)
+    drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.06 if args.norm else 0.04),  1-ROOT.gStyle.GetPadTopMargin(), labels[dist][3] ), 31, size=0.042, angle=90)
   else:
-    drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  1-ROOT.gStyle.GetPadTopMargin(), 'Fiducial cross section [fb]'), 31, size=0.042, angle=90)
-  drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.055 if args.norm else 0.04),  0.07,'Pred. / data'), 11, size=0.042, angle=90)
+    drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.06 if args.norm else 0.04),  1-ROOT.gStyle.GetPadTopMargin(), labels[dist][2] ), 31, size=0.042, angle=90)
+  drawTex((ROOT.gStyle.GetPadLeftMargin()- (0.06 if args.norm else 0.04),  0.07,'Pred. / data'), 11, size=0.042, angle=90)
 
 
   cunf.SaveAs('unfolded/'+ args.year + dist + ('_Norm' if args.norm else '') + '.pdf') 
@@ -1079,6 +1221,9 @@ for dist in distList:
   # Cloning here prevents strange root plotting headaches
   correlStat = eMat.Clone()
   correlSyst = covTot.Clone()
+  eMatClone = eMat.Clone() # we need an unchanged eMat later, so we clone it here
+  covTotClone = covTot.Clone() # we need an unchanged eMat later, so we clone it here
+
 
   # Draw covariance matrices
   statCovCanv = ROOT.TCanvas('statCov' + dist,'statCov' + dist, 1200, 1100)
@@ -1087,33 +1232,48 @@ for dist in distList:
   statCovCanv.SetLeftMargin(0.12)
   statCovCanv.SetTopMargin(0.07)
   statCovCanv.SetBottomMargin(0.11)
-  eMat.SetTitle('')
-  eMat.GetXaxis().SetTitle(labels[dist][1])
-  eMat.GetYaxis().SetTitle(labels[dist][1])
-  eMat.GetZaxis().SetTitle("Covariance [fb^{2}]")
-  eMat.GetYaxis().SetTitleOffset(1.3)
-  eMat.GetXaxis().SetTitleOffset(1.1)
-  eMat.GetZaxis().SetTitleOffset(1.1)
-  eMat.GetXaxis().SetTitleSize(0.045)
-  eMat.GetYaxis().SetTitleSize(0.045)
-  eMat.GetZaxis().SetTitleSize(0.045)
-  eMat.GetXaxis().SetLabelSize(0.04)
-  eMat.GetYaxis().SetLabelSize(0.04)
-  eMat.GetXaxis().SetTickLength(0)
-  eMat.GetYaxis().SetTickLength(0)
-  eMat.LabelsOption('v','x')
+
+  eMateq = equalBins(eMat)
+
+  eMateq.SetTitle('')
+  eMateq.GetXaxis().SetTitle(labels[dist][1])
+  eMateq.GetYaxis().SetTitle(labels[dist][1])
+  eMateq.GetZaxis().SetTitle("Covariance [fb^{2}]")
+  eMateq.GetYaxis().SetTitleOffset(1.3)
+  eMateq.GetXaxis().SetTitleOffset(1.1)
+  eMateq.GetZaxis().SetTitleOffset(1.1)
+  eMateq.GetXaxis().SetTitleSize(0.045)
+  eMateq.GetYaxis().SetTitleSize(0.045)
+  eMateq.GetZaxis().SetTitleSize(0.045)
+  eMateq.GetXaxis().SetLabelSize(0.05)
+  eMateq.GetYaxis().SetLabelSize(0.05)
+  # eMateq.GetXaxis().SetTickLength(0)
+  # eMateq.GetYaxis().SetTickLength(0)
+  # eMateq.LabelsOption('v','x')
   
   # pdb.set_trace()
   
-  eMat.Draw('COLZ text')
+  if args.norm:
+    eMateq.Scale(10.**6.)
+
+  eMateq.SetMarkerSize(1.2)
+
+  covCol()
+  eMateq.Draw('COLZ text')
 
   eMatS = eMat.Clone('dummyName')
-  eMatS.SaveAs('unfoldedRoots/' + dist + 'statCov' + ('_norm' if args.norm else '')+  '.root')
+  if args.year == 'RunII':
+    eMatS.SaveAs('unfoldedRoots/' + dist + 'statCov' + ('_norm' if args.norm else '')+  '.root')
+
+
 
   # ROOT.gPad.Update()
   # ROOT.gPad.RedrawAxis()
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
+  if args.norm:
+    drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.02,  1-ROOT.gStyle.GetPadTopMargin()+0.034, '#times10^{#minus6}'), 11,  size=0.035)
+
   if args.year == 'RunII':
     statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.png')
     statCovCanv.SaveAs('unfolded/' + dist + 'statCov' + ('_norm' if args.norm else '') + '.pdf')
@@ -1126,32 +1286,43 @@ for dist in distList:
   systCovCanv.SetLeftMargin(0.12)
   systCovCanv.SetTopMargin(0.07)
   systCovCanv.SetBottomMargin(0.11)
-  covTot.SetTitle('')
 
-  covTot.GetXaxis().SetTitle(labels[dist][1])
-  covTot.GetYaxis().SetTitle(labels[dist][1])
-  covTot.GetZaxis().SetTitle("Covariance [fb^{2}]")
-  covTot.GetYaxis().SetTitleOffset(1.3)
-  covTot.GetXaxis().SetTitleOffset(1.1)
-  covTot.GetZaxis().SetTitleOffset(1.1)
-  covTot.GetXaxis().SetTitleSize(0.045)
-  covTot.GetYaxis().SetTitleSize(0.045)
-  covTot.GetZaxis().SetTitleSize(0.045)
-  covTot.GetXaxis().SetLabelSize(0.04)
-  covTot.GetYaxis().SetLabelSize(0.04)
+  covToteq = equalBins(covTot)
+  covToteq.SetTitle('')
+  covToteq.GetXaxis().SetTitle(labels[dist][1])
+  covToteq.GetYaxis().SetTitle(labels[dist][1])
+  covToteq.GetZaxis().SetTitle("Covariance [fb^{2}]")
+  covToteq.GetYaxis().SetTitleOffset(1.3)
+  covToteq.GetXaxis().SetTitleOffset(1.1)
+  covToteq.GetZaxis().SetTitleOffset(1.1)
+  covToteq.GetXaxis().SetTitleSize(0.045)
+  covToteq.GetYaxis().SetTitleSize(0.045)
+  covToteq.GetZaxis().SetTitleSize(0.045)
+  covToteq.GetXaxis().SetLabelSize(0.05)
+  covToteq.GetYaxis().SetLabelSize(0.05)
 
-  covTot.GetXaxis().SetTickLength(0)
-  covTot.GetYaxis().SetTickLength(0)
-  covTot.LabelsOption('v','x')
+  # covToteq.GetXaxis().SetTickLength(0)
+  # covToteq.GetYaxis().SetTickLength(0)
+  # covToteq.LabelsOption('v','x')
   ROOT.gPad.Update()
   ROOT.gPad.RedrawAxis()
 
   covTotS = covTot.Clone('dummyName')
-  covTotS.SaveAs('unfoldedRoots/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.root')
+  if args.year == 'RunII':
+    covTotS.SaveAs('unfoldedRoots/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.root')
 
-  covTot.Draw('COLZ text')
+  if args.norm:
+    covToteq.Scale(10.**6.)
+
+  covToteq.SetMarkerSize(1.2)
+
+  covCol()
+  covToteq.Draw('COLZ text')
   drawTex((ROOT.gStyle.GetPadLeftMargin()+0.05,  1-ROOT.gStyle.GetPadTopMargin()+0.045,'#bf{CMS} #it{Supplementary}'), 11)
   drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.03,  1-ROOT.gStyle.GetPadTopMargin()+0.045, ('%3.0f fb^{#minus 1} (13 TeV)'%lumiScalesRounded[args.year])), 31)
+  if args.norm:
+    drawTex((1-ROOT.gStyle.GetPadRightMargin()-0.02,  1-ROOT.gStyle.GetPadTopMargin()+0.034, '#times10^{#minus6}'), 11,  size=0.035)
+
   if args.year == 'RunII':
     systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.png')
     systCovCanv.SaveAs('unfolded/' + dist + 'systCov' + ('_norm' if args.norm else '')+  '.pdf')
@@ -1159,34 +1330,42 @@ for dist in distList:
 
   for i in range(1, correlStat.GetXaxis().GetNbins()+1):
     for j in range(1, correlStat.GetXaxis().GetNbins()+1):
-      correlStat.SetBinContent(i, j, correlStat.GetBinContent(i,j)/((eMat.GetBinContent(i,i)*eMat.GetBinContent(j,j))**0.5))
+      correlStat.SetBinContent(i, j, correlStat.GetBinContent(i,j)/((eMatClone.GetBinContent(i,i)*eMatClone.GetBinContent(j,j))**0.5))
   correlStatCovCanv = ROOT.TCanvas('correlStatCov' + dist,'correlStatCov' + dist, 1200, 1100)
   # correlStatCovCanv.SetLogz(True)
   correlStatCovCanv.SetRightMargin(0.17)
   correlStatCovCanv.SetLeftMargin(0.12)
   correlStatCovCanv.SetTopMargin(0.07)
   correlStatCovCanv.SetBottomMargin(0.11)
-  correlStat.SetTitle('')
 
-  correlStat.GetXaxis().SetTitle(labels[dist][1])
-  correlStat.GetYaxis().SetTitle(labels[dist][1])
-  correlStat.GetZaxis().SetTitle("Correlation")
-  correlStat.GetYaxis().SetTitleOffset(1.3)
-  correlStat.GetXaxis().SetTitleOffset(1.1)
-  correlStat.GetZaxis().SetTitleOffset(1.1)
-  correlStat.GetXaxis().SetTitleSize(0.045)
-  correlStat.GetYaxis().SetTitleSize(0.045)
-  correlStat.GetZaxis().SetTitleSize(0.045)
-  correlStat.GetXaxis().SetLabelSize(0.04)
-  correlStat.GetYaxis().SetLabelSize(0.04)
+  correlStateq = equalBins(correlStat)
+  correlStateq.SetTitle('')
+  correlStateq.GetXaxis().SetTitle(labels[dist][1])
+  correlStateq.GetYaxis().SetTitle(labels[dist][1])
+  correlStateq.GetZaxis().SetTitle("Correlation")
+  correlStateq.GetYaxis().SetTitleOffset(1.3)
+  correlStateq.GetXaxis().SetTitleOffset(1.1)
+  correlStateq.GetZaxis().SetTitleOffset(1.1)
+  correlStateq.GetXaxis().SetTitleSize(0.045)
+  correlStateq.GetYaxis().SetTitleSize(0.045)
+  correlStateq.GetZaxis().SetTitleSize(0.045)
+  correlStateq.GetXaxis().SetLabelSize(0.05)
+  correlStateq.GetYaxis().SetLabelSize(0.05)
 
-  correlStat.GetXaxis().SetTickLength(0)
-  correlStat.GetYaxis().SetTickLength(0)
-  correlStat.LabelsOption('v','x')
-  correlStat.Draw('COLZ text')
+  # correlStateq.GetXaxis().SetTickLength(0)
+  # correlStateq.GetYaxis().SetTickLength(0)
+  # correlStateq.LabelsOption('v','x')
+
+  correlStateq.SetMarkerSize(1.2)
+
+  correlStateq.GetZaxis().SetRangeUser(-0.2555, 1.)
+
+  correlCol()
+  correlStateq.Draw('COLZ text')
 
   correlStatS = correlStat.Clone('dummyName')
-  correlStatS.SaveAs('unfoldedRoots/' + dist + 'statCorr' + ('_norm' if args.norm else '')+  '.root')
+  if args.year == 'RunII':
+    correlStatS.SaveAs('unfoldedRoots/' + dist + 'statCorr' + ('_norm' if args.norm else '')+  '.root')
 
   ROOT.gPad.Update()
   ROOT.gPad.RedrawAxis()
@@ -1200,34 +1379,40 @@ for dist in distList:
 
   for i in range(1, correlSyst.GetXaxis().GetNbins()+1):
     for j in range(1, correlSyst.GetXaxis().GetNbins()+1):
-      correlSyst.SetBinContent(i, j, correlSyst.GetBinContent(i,j)/((covTot.GetBinContent(i,i)*covTot.GetBinContent(j,j))**0.5))
+      correlSyst.SetBinContent(i, j, correlSyst.GetBinContent(i,j)/((covTotClone.GetBinContent(i,i)*covTotClone.GetBinContent(j,j))**0.5))
   correlSystCovCanv = ROOT.TCanvas('correlSystCov' + dist,'correlSystCov' + dist, 1200, 1100)
   # correlSystCovCanv.SetLogz(True)
   correlSystCovCanv.SetRightMargin(0.17)
   correlSystCovCanv.SetLeftMargin(0.12)
   correlSystCovCanv.SetTopMargin(0.07)
   correlSystCovCanv.SetBottomMargin(0.11)
-  correlSyst.SetTitle('')
 
-  correlSyst.GetXaxis().SetTitle(labels[dist][1])
-  correlSyst.GetYaxis().SetTitle(labels[dist][1])
-  correlSyst.GetZaxis().SetTitle("Correlation")
-  correlSyst.GetYaxis().SetTitleOffset(1.3)
-  correlSyst.GetXaxis().SetTitleOffset(1.1)
-  correlSyst.GetZaxis().SetTitleOffset(1.1)
-  correlSyst.GetXaxis().SetTitleSize(0.045)
-  correlSyst.GetYaxis().SetTitleSize(0.045)
-  correlSyst.GetZaxis().SetTitleSize(0.045)
-  correlSyst.GetXaxis().SetLabelSize(0.04)
-  correlSyst.GetYaxis().SetLabelSize(0.04)
+  correlSysteq = equalBins(correlSyst)
+  correlSysteq.SetTitle('')
+  correlSysteq.GetXaxis().SetTitle(labels[dist][1])
+  correlSysteq.GetYaxis().SetTitle(labels[dist][1])
+  correlSysteq.GetZaxis().SetTitle("Correlation")
+  correlSysteq.GetYaxis().SetTitleOffset(1.3)
+  correlSysteq.GetXaxis().SetTitleOffset(1.1)
+  correlSysteq.GetZaxis().SetTitleOffset(1.1)
+  correlSysteq.GetXaxis().SetTitleSize(0.045)
+  correlSysteq.GetYaxis().SetTitleSize(0.045)
+  correlSysteq.GetZaxis().SetTitleSize(0.045)
+  correlSysteq.GetXaxis().SetLabelSize(0.05)
+  correlSysteq.GetYaxis().SetLabelSize(0.05)
 
-  correlSyst.GetXaxis().SetTickLength(0)
-  correlSyst.GetYaxis().SetTickLength(0)
-  correlSyst.LabelsOption('v','x')
-  correlSyst.Draw('COLZ text')
+  # correlSysteq.GetXaxis().SetTickLength(0)
+  # correlSysteq.GetYaxis().SetTickLength(0)
+  # correlSyst.LabelsOption('v','x')
+
+  correlSysteq.SetMarkerSize(1.2)
+  correlSysteq.GetZaxis().SetRangeUser(-0.2555, 1.)
+  correlCol()
+  correlSysteq.Draw('COLZ text')
 
   correlSystS = correlSyst.Clone('dummyName')
-  correlSystS.SaveAs('unfoldedRoots/' + dist + 'systCorr' + ('_norm' if args.norm else '')+  '.root')
+  if args.year == 'RunII':
+    correlSystS.SaveAs('unfoldedRoots/' + dist + 'systCorr' + ('_norm' if args.norm else '')+  '.root')
 
   ROOT.gPad.Update()
   ROOT.gPad.RedrawAxis()

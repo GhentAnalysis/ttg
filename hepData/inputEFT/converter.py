@@ -70,14 +70,14 @@ comctZIexpFile = pickle.load(open('ctZIComb.pkl','r'))
 comctZIobsFile = pickle.load(open('ctZI_obsComb.pkl','r'))
 
 plots = [
-('dilctZexp', dilctZexpFile, (-0.8, 0.8)),
-('dilctZobs', dilctZobsFile, (-0.8, 0.8)),
-('dilctZIexp', dilctZIexpFile, (-0.8, 0.8)),
-('dilctZIobs', dilctZIobsFile, (-0.8, 0.8)),
-('comctZexp', comctZexpFile, (-0.5, 0.5)),
-('comctZobs', comctZobsFile, (-0.5, 0.5)),
-('comctZIexp', comctZIexpFile, (-0.5, 0.5)),
-('comctZIobs', comctZIobsFile, (-0.5, 0.5))
+('dilctZexp', dilctZexpFile, (-0.61, 0.61)),
+('dilctZobs', dilctZobsFile, (-0.61, 0.61)),
+('dilctZIexp', dilctZIexpFile, (-0.61, 0.61)),
+('dilctZIobs', dilctZIobsFile, (-0.61, 0.61)),
+('comctZexp', comctZexpFile, (-0.41, 0.41)),
+('comctZobs', comctZobsFile, (-0.41, 0.41)),
+('comctZIexp', comctZIexpFile, (-0.41, 0.41)),
+('comctZIobs', comctZIobsFile, (-0.41, 0.41))
 ]
 
 for plot in plots:

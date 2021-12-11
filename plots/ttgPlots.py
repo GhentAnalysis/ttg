@@ -263,8 +263,8 @@ def makePlotList():
     plotList.append(Plot('dlg_mass',                   'm(ll#gamma) [GeV]',                     lambda c : c.mllg,                                             (40, 0, 500)))
     plotList.append(Plot('dlg_mass_zoom',              'm(ll#gamma) [GeV]',                     lambda c : c.mllg,                                             (40, 50, 200)))
     plotList.append(Plot('phLepDeltaR',                '#DeltaR(#gamma, l)',                    lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                    (20, 0, 5)))
-    plotList.append(Plot('njets',                      'Number of jets',                        lambda c : c.njets,                                            (8, -.5, 7.5)))
-    plotList.append(Plot('nbtag',                      'Number of b-tagged jets',               lambda c : c.ndbjets,                                          (4, -.5, 3.5)))
+    plotList.append(Plot('njets',                      'Number of jets',                        lambda c : c.njets,                                            (8, -.5, 7.5), histModifications=xAxisLabels(['0','1','2','3','4','5','6','7'])))
+    plotList.append(Plot('nbtag',                      'Number of b-tagged jets',               lambda c : c.ndbjets,                                          (4, -.5, 3.5), histModifications=xAxisLabels(['0','1','2','3'])))
     plotList.append(Plot('j1_pt',                      'p_{T}(j_{1}) [GeV]',                    lambda c : c._jetSmearedPt[c.j1],                              (30, 30, 330)))
     plotList.append(Plot('j1_eta',                     '|#eta|(j_{1})',                         lambda c : abs(c._jetEta[c.j1]),                               (15, 0, 2.4)))
     plotList.append(Plot('j1_phi',                     '#phi(j_{1})',                           lambda c : c._jetPhi[c.j1],                                    (10, -pi, pi)))
@@ -399,14 +399,14 @@ def makePlotList():
 # NOTE unfolding related 
     plotList.append(Plot('unfReco_phPt',            'p_{T}(#gamma) [GeV]',            lambda c : c.ph_pt,                                                         ptBinRec     ))
     plotList.append(Plot('unfReco_phAbsEta',        '|#eta|(#gamma)',                 lambda c : abs(c._phEta[c.ph]),                                             absEtaBinRec ))
-    plotList.append(Plot('unfReco_phLepDeltaR',     '#DeltaR(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                 dRBinRec     ))
+    plotList.append(Plot('unfReco_phLepDeltaR',     'min #DeltaR(#gamma, l)',             lambda c : min(c.phL1DeltaR, c.phL2DeltaR),                                 dRBinRec     ))
     plotList.append(Plot('unfReco_phLep1DeltaR',    '#DeltaR(#gamma, l1)',            lambda c : c.phL1DeltaR,                                                    dRBinRec     ))
     plotList.append(Plot('unfReco_phLep2DeltaR',    '#DeltaR(#gamma, l2)',            lambda c : c.phL2DeltaR,                                                    dRBinRec     ))
     plotList.append(Plot('unfReco_ll_deltaPhi',     '#Delta#phi(ll)',                 lambda c : deltaPhi(c._lPhi[c.l1], c._lPhi[c.l2]),                          dPhiBinRec   ))
     plotList.append(Plot('unfReco_ll_cosTheta',     'cos(#Delta#theta(ll))',                lambda c : numpy.cos(angle(theta(c._lEta[c.l1]), theta(c._lEta[c.l2]), c._lPhi[c.l1], c._lPhi[c.l2]))   ,          cosBinRec    ))
     plotList.append(Plot('unfReco_ll_absDeltaEta',  '|#Delta#eta(ll)|',               lambda c : abs(c._lEta[c.l1] - c._lEta[c.l2]),                              absdEtaBinRec))
-    plotList.append(Plot('unfReco_phBJetDeltaR',    '#DeltaR(#gamma, b)',             lambda c : kickUnder(0., 900., c.phBJetDeltaR),                             dRBinJetRec  ))
-    plotList.append(Plot('unfReco_jetLepDeltaR',    '#DeltaR(l, j)',                  lambda c : min(c.l1JetDeltaR, c.l2JetDeltaR),                               dRBinJetRec  ))
+    plotList.append(Plot('unfReco_phBJetDeltaR',    'min #DeltaR(#gamma, b)',             lambda c : kickUnder(0., 900., c.phBJetDeltaR),                             dRBinJetRec  ))
+    plotList.append(Plot('unfReco_jetLepDeltaR',    'min #DeltaR(l, j)',                  lambda c : min(c.l1JetDeltaR, c.l2JetDeltaR),                               dRBinJetRec  ))
     plotList.append(Plot('unfReco_jetPt',           'p_{T}(j1) [GeV]',                lambda c : c.j1_pt,                                                         ptBinJetRec  ))
 
 

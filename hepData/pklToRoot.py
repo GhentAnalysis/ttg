@@ -3,25 +3,37 @@ import pickle
 import pdb
 
 
-def sumHists(names, hists, outName):
+def sumHists(names, hists, outName, addOverflow = True):
   sum = None
   for name in names:
     if not sum:
       sum = hists[name].Clone(outName)
     else:
       sum.Add(hists[name])
+  if addOverflow:
+    nb = sum.GetXaxis().GetNbins()
+    sum.SetBinContent(nb, sum.GetBinContent(nb)+sum.GetBinContent(nb+1))
+    sum.SetBinContent(nb+1, 0.)
+    sum.SetBinError(nb, (sum.GetBinError(nb)**2. + sum.GetBinError(nb+1)**2.)**0.5 )
+    sum.SetBinError(nb+1, 0.)
   return sum
 
 
 sigDistList = [
   'nbtag',
   'njets',
-  'unfReco_jetLepDeltaR',
-  'unfReco_l1l2_ptsum',
-  'unfReco_ll_deltaPhi',
+  'unfReco_phPt',
   'unfReco_phAbsEta',
   'unfReco_phLepDeltaR',
-  'unfReco_phPt'
+  'unfReco_phLep1DeltaR',
+  'unfReco_phLep2DeltaR',
+  'unfReco_phBJetDeltaR',
+  'unfReco_jetLepDeltaR',
+  'unfReco_ll_absDeltaEta',
+  'unfReco_ll_deltaPhi',
+  'unfReco_Z_pt',
+  'unfReco_l1l2_ptsum',
+  'unfReco_jetPt',
   ]
 
 NPdistList = [
@@ -63,7 +75,7 @@ processes = { 'data':     ['DoubleMuondata', 'DoubleEG_datadata', 'MuonEGdata'],
 
 
 
-
+# NOTE TODO overflow bins are not checked/fixed here, but hist summer does it automatically in principle
 
 
 for dist in sigDistList:
@@ -144,6 +156,7 @@ for dist in postDistList:
   hists = pickle.load(open('picklesNormal/' + dist + '.pkl','r'))
   systs = pickle.load(open('picklesNormal/' + dist + 'totalSys.pkl','r'))
 
+
   histspre = pickle.load(open('picklesNormal/' + dist.replace('post','pre') + '.pkl','r'))
   data = sumHists(processes['data'+ dist.split('_')[2]], histspre['unfReco_phPt'], 'data')
   
@@ -153,6 +166,7 @@ for dist in postDistList:
   zg = sumHists(processes['zg'], hists['unfReco_phPt'], 'zg')
   ST = sumHists(processes['ST'], hists['unfReco_phPt'], 'ST')
   other = sumHists(processes['other'], hists['unfReco_phPt'], 'other')
+
 
   totalMC = ttg.Clone('totalMC')
   totalMC.Add(nonp)
@@ -181,24 +195,27 @@ for dist in postDistList:
 
 
 
-for dist in NPdistList:
-  # only had ttbar from MC and ttbar from estimate (and syst unc)
-  hists = pickle.load(open('picklesNormal/' + dist + '.pkl','r'))
-  systs = pickle.load(open('picklesNormal/' + dist + 'totalSys.pkl','r'))
-  ttMC = sumHists(processes['ttMC'], hists[dist], 'ttMC')
-  ttEst = sumHists(processes['ttEst'], hists[dist], 'ttEst')
+# NOTE TODO overflow bins are not checked/fixed here, but hist summer does it automatically in principle
 
-  # pdb.set_trace()
-  systup = ttMC.Clone('systup')
-  systdown = ttMC.Clone('systdown')
-  systup.Multiply(systs[0])
-  systdown.Multiply(systs[1])
 
-  # Note, averaging this for now
+# for dist in NPdistList:
+#   # only had ttbar from MC and ttbar from estimate (and syst unc)
+#   hists = pickle.load(open('picklesNormal/' + dist + '.pkl','r'))
+#   systs = pickle.load(open('picklesNormal/' + dist + 'totalSys.pkl','r'))
+#   ttMC = sumHists(processes['ttMC'], hists[dist], 'ttMC')
+#   ttEst = sumHists(processes['ttEst'], hists[dist], 'ttEst')
 
-  systup.Add(systdown)
-  systup.Scale(0.5)
+#   # pdb.set_trace()
+#   systup = ttMC.Clone('systup')
+#   systdown = ttMC.Clone('systdown')
+#   systup.Multiply(systs[0])
+#   systdown.Multiply(systs[1])
 
-  ttMC.SaveAs('inputNormal/ttMC' + dist + '.root')
-  ttEst.SaveAs('inputNormal/ttEst' + dist + '.root')
-  systup.SaveAs('inputNormal/systup' + dist + '.root')
+#   # Note, averaging this for now
+
+#   systup.Add(systdown)
+#   systup.Scale(0.5)
+
+#   ttMC.SaveAs('inputNormal/ttMC' + dist + '.root')
+#   ttEst.SaveAs('inputNormal/ttEst' + dist + '.root')
+#   systup.SaveAs('inputNormal/systup' + dist + '.root')
